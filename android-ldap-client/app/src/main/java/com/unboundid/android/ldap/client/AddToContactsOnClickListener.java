@@ -22,20 +22,18 @@ package com.unboundid.android.ldap.client;
 
 
 
-import java.util.StringTokenizer;
+import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.net.Uri;
-import android.provider.Contacts;
+import android.provider.ContactsContract;
 import android.view.View;
 import android.view.View.OnClickListener;
 
 import com.unboundid.ldap.sdk.Entry;
 
 import static com.unboundid.android.ldap.client.Logger.*;
-import static com.unboundid.util.StaticUtils.*;
 
 
 
@@ -57,17 +55,25 @@ final class AddToContactsOnClickListener
   private final Activity activity;
 
   // The information about the person to add.
-  private final String fax;
-  private final String homeAddress;
-  private final String homeEMail;
-  private final String homePhone;
-  private final String mobile;
-  private final String name;
-  private final String pager;
-  private final String workAddress;
-  private final String workEMail;
-  private final String workPhone;
 
+  private final String lastName;
+  private final String firstName;
+  private final String fullName;
+  private final String title;
+  private final String department;
+  private final String organization;
+  private final String workNumber;
+  private final String mobileNumber;
+  private final String homeNumber;
+  private final String faxNumber;
+  private final String pagerNumber;
+  private final String address;
+  private final String city;
+  private final String state;
+  private final String postalCode;
+  private final String email;
+  private final String websiteUri;
+  private final String note;
 
 
   /**
@@ -83,16 +89,24 @@ final class AddToContactsOnClickListener
 
     this.activity = activity;
 
-    name        = entry.getAttributeValue(AttributeMapper.ATTR_FULL_NAME);
-    workPhone   = entry.getAttributeValue(AttributeMapper.ATTR_PRIMARY_PHONE);
-    homePhone   = entry.getAttributeValue(AttributeMapper.ATTR_HOME_PHONE);
-    mobile      = entry.getAttributeValue(AttributeMapper.ATTR_MOBILE_PHONE);
-    pager       = entry.getAttributeValue(AttributeMapper.ATTR_PAGER);
-    fax         = entry.getAttributeValue(AttributeMapper.ATTR_FAX);
-    workEMail   = entry.getAttributeValue(AttributeMapper.ATTR_PRIMARY_MAIL);
-    homeEMail   = entry.getAttributeValue(AttributeMapper.ATTR_ALTERNATE_MAIL);
-    workAddress = entry.getAttributeValue(AttributeMapper.ATTR_PRIMARY_ADDRESS);
-    homeAddress = entry.getAttributeValue(AttributeMapper.ATTR_HOME_ADDRESS);
+    lastName = entry.getAttributeValue(AttributeMapper.ATTR_LAST_NAME);
+    firstName = entry.getAttributeValue(AttributeMapper.ATTR_FIRST_NAME);
+    fullName = entry.getAttributeValue(AttributeMapper.ATTR_FULL_NAME);
+    title = entry.getAttributeValue(AttributeMapper.ATTR_TITLE);
+    department = entry.getAttributeValue(AttributeMapper.ATTR_ORGANIZATIONAL_UNIT);
+    organization = entry.getAttributeValue(AttributeMapper.ATTR_ORGANIZATION);
+    workNumber = entry.getAttributeValue(AttributeMapper.ATTR_PRIMARY_PHONE);
+    mobileNumber = entry.getAttributeValue(AttributeMapper.ATTR_MOBILE_PHONE);
+    homeNumber = entry.getAttributeValue(AttributeMapper.ATTR_HOME_PHONE);
+    faxNumber = entry.getAttributeValue(AttributeMapper.ATTR_FACSIMILE);
+    pagerNumber = entry.getAttributeValue(AttributeMapper.ATTR_PAGER);
+    address = entry.getAttributeValue(AttributeMapper.ATTR_STREET_ADDRESS);
+    city = entry.getAttributeValue(AttributeMapper.ATTR_CITY);
+    state = entry.getAttributeValue(AttributeMapper.ATTR_STATE);
+    postalCode = entry.getAttributeValue(AttributeMapper.ATTR_POSTAL_CODE);
+    email = entry.getAttributeValue(AttributeMapper.ATTR_PRIMARY_MAIL);
+    websiteUri = entry.getAttributeValue(AttributeMapper.ATTR_URI);
+    note = entry.getAttributeValue(AttributeMapper.ATTR_NOTE);
   }
 
 
@@ -103,175 +117,151 @@ final class AddToContactsOnClickListener
    *
    * @param  view  The view that was clicked.
    */
+  @Override
   public void onClick(final View view)
   {
     logEnter(LOG_TAG, "onClick", view);
 
-    final ContentValues values = new ContentValues();
-    values.put(Contacts.PeopleColumns.NAME, name);
-    values.put(Contacts.PeopleColumns.STARRED, 0);
+    Intent insertIntent = new Intent(ContactsContract.Intents.Insert.ACTION);
+    insertIntent.setType(ContactsContract.RawContacts.CONTENT_TYPE);
 
-    final Uri contactURI = Contacts.People.createPersonInMyContactsGroup(
-         activity.getContentResolver(), values);
-    if (contactURI == null)
-    {
-      final Intent i = new Intent(activity, PopUp.class);
-      i.putExtra(PopUp.BUNDLE_FIELD_TITLE,
-           activity.getString(R.string.add_to_contacts_popup_title_error));
-      i.putExtra(PopUp.BUNDLE_FIELD_TEXT,
-           activity.getString(R.string.add_to_contacts_popup_text_error, name));
-      activity.startActivity(i);
+    addName(insertIntent, fullName, firstName, lastName);
+    addAddress(insertIntent, address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK);
+
+    if (isNotEmpty(title)) {
+      insertIntent.putExtra(ContactsContract.Intents.Insert.JOB_TITLE, title);
     }
-    else
-    {
-      if (workPhone != null)
-      {
-        addPhoneNumber(workPhone, Contacts.PhonesColumns.TYPE_WORK, contactURI);
-      }
-
-      if (homePhone != null)
-      {
-        addPhoneNumber(homePhone, Contacts.PhonesColumns.TYPE_HOME, contactURI);
-      }
-
-      if (mobile != null)
-      {
-        addPhoneNumber(mobile, Contacts.PhonesColumns.TYPE_MOBILE, contactURI);
-      }
-
-      if (pager != null)
-      {
-        addPhoneNumber(pager, Contacts.PhonesColumns.TYPE_PAGER, contactURI);
-      }
-
-      if (fax != null)
-      {
-        addPhoneNumber(fax, Contacts.PhonesColumns.TYPE_FAX_WORK, contactURI);
-      }
-
-      if (workEMail != null)
-      {
-        addEMailAddress(workEMail,
-             Contacts.ContactMethodsColumns.TYPE_WORK, contactURI);
-      }
-
-      if (homeEMail != null)
-      {
-        addEMailAddress(homeEMail,
-             Contacts.ContactMethodsColumns.TYPE_HOME, contactURI);
-      }
-
-      if (workAddress != null)
-      {
-        addPostalAddress(workAddress,
-             Contacts.ContactMethodsColumns.TYPE_WORK, contactURI);
-      }
-
-      if (homeAddress != null)
-      {
-        addPostalAddress(homeAddress,
-             Contacts.ContactMethodsColumns.TYPE_HOME, contactURI);
-      }
-
-      final Intent i = new Intent(Intent.ACTION_VIEW, contactURI);
-      activity.startActivity(i);
+    if (isNotEmpty(organization)) {
+      insertIntent.putExtra(ContactsContract.Intents.Insert.COMPANY, organization);
     }
-  }
-
-
-
-  /**
-   * Adds the provided phone number to the contact.
-   *
-   * @param  number  The number to add.
-   * @param  type    The type of number to add.
-   * @param  uri     The base URI for the contact.
-   *
-   * @return  {@code true} if the update was successful, or {@code false} if
-   *          not.
-   */
-  private boolean addPhoneNumber(final String number, final int type,
-                                 final Uri uri)
-  {
-    logEnter(LOG_TAG, "addPhoneNumber", number, type, uri);
-
-    final Uri phoneURI = Uri.withAppendedPath(uri,
-         Contacts.People.Phones.CONTENT_DIRECTORY);
-
-    final ContentValues values = new ContentValues();
-    values.put(Contacts.PhonesColumns.TYPE, type);
-    values.put(Contacts.PhonesColumns.NUMBER,  number);
-
-    return logReturn(LOG_TAG, "addPhoneNumber",
-         (activity.getContentResolver().insert(phoneURI, values) != null));
-  }
-
-
-
-  /**
-   * Adds the provided e-mail address to the contact.
-   *
-   * @param  address  The e-mail address to add.
-   * @param  type     The type of address to add.
-   * @param  uri      The base URI for the contact.
-   *
-   * @return  {@code true} if the update was successful, or {@code false} if
-   *          not.
-   */
-  private boolean addEMailAddress(final String address, final int type,
-                                  final Uri uri)
-  {
-    logEnter(LOG_TAG, "addEMailAddress", address, type, uri);
-
-    final Uri emailURI = Uri.withAppendedPath(uri,
-         Contacts.People.ContactMethods.CONTENT_DIRECTORY);
-
-    final ContentValues values = new ContentValues();
-    values.put(Contacts.ContactMethodsColumns.KIND, Contacts.KIND_EMAIL);
-    values.put(Contacts.ContactMethodsColumns.DATA, address);
-    values.put(Contacts.ContactMethodsColumns.TYPE, type);
-
-    return logReturn(LOG_TAG, "addEMailAddress",
-         (activity.getContentResolver().insert(emailURI, values) != null));
-  }
-
-
-
-  /**
-   * Adds the provided postal address to the contact.
-   *
-   * @param  address  The postal address to add.
-   * @param  type     The type of address to add.
-   * @param  uri      The base URI for the contact.
-   *
-   * @return  {@code true} if the update was successful, or {@code false} if
-   *          not.
-   */
-  private boolean addPostalAddress(final String address, final int type,
-                                   final Uri uri)
-  {
-    logEnter(LOG_TAG, "addPostalAddress", address, type, uri);
-
-    final StringBuilder addr = new StringBuilder();
-    final StringTokenizer tokenizer = new StringTokenizer(address, "$");
-    while (tokenizer.hasMoreTokens())
-    {
-      addr.append(tokenizer.nextToken().trim());
-      if (tokenizer.hasMoreTokens())
-      {
-        addr.append(EOL);
-      }
+    if (isNotEmpty(note)) {
+      insertIntent.putExtra(ContactsContract.Intents.Insert.NOTES, note);
     }
 
-    final Uri postalURI = Uri.withAppendedPath(uri,
-         Contacts.People.ContactMethods.CONTENT_DIRECTORY);
+    if (isNotEmpty(email)) {
+      addEmail(insertIntent, email, ContactsContract.CommonDataKinds.Email.TYPE_WORK);
+    }
 
-    final ContentValues values = new ContentValues();
-    values.put(Contacts.ContactMethodsColumns.KIND, Contacts.KIND_POSTAL);
-    values.put(Contacts.ContactMethodsColumns.DATA, addr.toString());
-    values.put(Contacts.ContactMethodsColumns.TYPE, type);
+    ArrayList<ContentValues> contactData = new ArrayList<>();
 
-    return logReturn(LOG_TAG, "addPostalAddress",
-         (activity.getContentResolver().insert(postalURI, values) != null));
+    if (isNotEmpty(workNumber)) {
+      contactData.add(addPhoneNumber(workNumber, ContactsContract.CommonDataKinds.Phone.TYPE_WORK));
+    }
+    if (isNotEmpty(mobileNumber)) {
+      contactData.add(addPhoneNumber(mobileNumber, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE));
+    }
+    if (isNotEmpty(homeNumber)) {
+      contactData.add(addPhoneNumber(homeNumber, ContactsContract.CommonDataKinds.Phone.TYPE_HOME));
+    }
+    if (isNotEmpty(faxNumber)) {
+      contactData.add(addPhoneNumber(faxNumber, ContactsContract.CommonDataKinds.Phone.TYPE_FAX_WORK));
+    }
+    if (isNotEmpty(pagerNumber)) {
+      contactData.add(addPhoneNumber(pagerNumber, ContactsContract.CommonDataKinds.Phone.TYPE_PAGER));
+    }
+
+    if (isNotEmpty(websiteUri)) {
+      contactData.add(
+              createContentRow(ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
+                      ContactsContract.CommonDataKinds.Website.URL, websiteUri));
+    }
+
+    if (!contactData.isEmpty()) {
+      insertIntent.putParcelableArrayListExtra(ContactsContract.Intents.Insert.DATA, contactData);
+    }
+
+    insertIntent.putExtra("finishActivityOnSaveCompleted", true);
+
+    activity.startActivity(insertIntent);
+  }
+
+  private boolean isNotEmpty(final String string) {
+    return null != string && !string.isEmpty();
+  }
+
+  private void appendStringWithSpace(final StringBuilder stringBuilder, final String string) {
+    if (stringBuilder.charAt(stringBuilder.length() - 1) != ' ') {
+      stringBuilder.append(' ');
+    }
+    stringBuilder.append(string);
+  }
+
+  private void addName(final Intent intent,
+                       final String fullName,
+                       final String firstName,
+                       final String lastName) {
+      logEnter(LOG_TAG, "addName", fullName, firstName, lastName);
+
+      if (isNotEmpty(fullName)) {
+          intent.putExtra(ContactsContract.Intents.Insert.NAME, fullName);
+          return;
+      }
+
+      StringBuilder stringBuilder = new StringBuilder();
+
+      if (isNotEmpty(firstName)) {
+          stringBuilder.append(firstName);
+      }
+      if (isNotEmpty(lastName)) {
+          appendStringWithSpace(stringBuilder, lastName);
+      }
+      if (stringBuilder.length() > 0) {
+          intent.putExtra(ContactsContract.Intents.Insert.NAME, stringBuilder.toString());
+      }
+  }
+
+  private void addAddress(final Intent intent,
+                          final String address,
+                          final String city,
+                          final String state,
+                          final String postalCode,
+                          final int type) {
+    logEnter(LOG_TAG, "addAddress", address, type);
+
+    StringBuilder stringBuilder = new StringBuilder();
+
+    if (isNotEmpty(address)) {
+      stringBuilder.append(address);
+    }
+    if (isNotEmpty(city)) {
+      appendStringWithSpace(stringBuilder, city);
+    }
+    if (isNotEmpty(state)) {
+      appendStringWithSpace(stringBuilder, state);
+    }
+    if (isNotEmpty(postalCode)) {
+      appendStringWithSpace(stringBuilder, postalCode);
+    }
+
+    intent.putExtra(ContactsContract.Intents.Insert.POSTAL, stringBuilder.toString());
+    intent.putExtra(ContactsContract.Intents.Insert.POSTAL_TYPE, type);
+  }
+
+  private ContentValues createContentRow(final String mimeType, final String contentKey, final String contentValue) {
+    logEnter(LOG_TAG, "createContentRow", contentKey, contentValue);
+
+    ContentValues contentRow = new ContentValues();
+
+    contentRow.put(ContactsContract.Data.MIMETYPE, mimeType);
+    contentRow.put(contentKey, contentValue);
+
+    return contentRow;
+  }
+
+  private ContentValues addPhoneNumber(final String phoneNumber, final int type) {
+    logEnter(LOG_TAG, "addPhoneNumber", phoneNumber, type);
+
+    ContentValues contentRow = createContentRow(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
+            ContactsContract.CommonDataKinds.Phone.NUMBER, phoneNumber);
+    contentRow.put(ContactsContract.CommonDataKinds.Phone.TYPE, type);
+
+    return contentRow;
+  }
+
+  private void addEmail(final Intent intent, final String emailAddress, final int type) {
+    logEnter(LOG_TAG, "addEmail", emailAddress, type);
+
+    intent.putExtra(ContactsContract.Intents.Insert.EMAIL, emailAddress)
+            .putExtra(ContactsContract.Intents.Insert.EMAIL_TYPE, type);
   }
 }
