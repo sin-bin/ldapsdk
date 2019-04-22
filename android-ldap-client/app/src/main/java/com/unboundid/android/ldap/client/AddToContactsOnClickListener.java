@@ -125,6 +125,8 @@ final class AddToContactsOnClickListener
     Intent insertIntent = new Intent(ContactsContract.Intents.Insert.ACTION);
     insertIntent.setType(ContactsContract.RawContacts.CONTENT_TYPE);
 
+    insertIntent.putExtra("finishActivityOnSaveCompleted", true);
+
     addName(insertIntent, fullName, firstName, lastName);
     addAddress(insertIntent, address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK);
 
@@ -143,6 +145,8 @@ final class AddToContactsOnClickListener
     }
 
     ArrayList<ContentValues> contactData = new ArrayList<>();
+
+//    contactData.add(addAddress(address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK));
 
     if (isNotEmpty(workNumber)) {
       contactData.add(addPhoneNumber(workNumber, ContactsContract.CommonDataKinds.Phone.TYPE_WORK));
@@ -169,8 +173,6 @@ final class AddToContactsOnClickListener
     if (!contactData.isEmpty()) {
       insertIntent.putParcelableArrayListExtra(ContactsContract.Intents.Insert.DATA, contactData);
     }
-
-    insertIntent.putExtra("finishActivityOnSaveCompleted", true);
 
     activity.startActivity(insertIntent);
   }
@@ -237,7 +239,44 @@ final class AddToContactsOnClickListener
     intent.putExtra(ContactsContract.Intents.Insert.POSTAL_TYPE, type);
   }
 
+  private ContentValues addAddress(final String address,
+                                   final String city,
+                                   final String state,
+                                   final String postalCode,
+                                   final int type) {
+    logEnter(LOG_TAG, "addAddress", address, type);
+
+    ContentValues contentRow = createContentRow(ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE,
+            ContactsContract.CommonDataKinds.StructuredPostal.TYPE, type);
+
+    if (isNotEmpty(address)) {
+      contentRow.put(ContactsContract.CommonDataKinds.StructuredPostal.STREET, address);
+    }
+    if (isNotEmpty(city)) {
+      contentRow.put(ContactsContract.CommonDataKinds.StructuredPostal.CITY, city);
+    }
+    if (isNotEmpty(state)) {
+      contentRow.put(ContactsContract.CommonDataKinds.StructuredPostal.REGION, state);
+    }
+    if (isNotEmpty(postalCode)) {
+      contentRow.put(ContactsContract.CommonDataKinds.StructuredPostal.POSTCODE, postalCode);
+    }
+
+    return contentRow;
+  }
+
   private ContentValues createContentRow(final String mimeType, final String contentKey, final String contentValue) {
+    logEnter(LOG_TAG, "createContentRow", contentKey, contentValue);
+
+    ContentValues contentRow = new ContentValues();
+
+    contentRow.put(ContactsContract.Data.MIMETYPE, mimeType);
+    contentRow.put(contentKey, contentValue);
+
+    return contentRow;
+  }
+
+  private ContentValues createContentRow(final String mimeType, final String contentKey, final int contentValue) {
     logEnter(LOG_TAG, "createContentRow", contentKey, contentValue);
 
     ContentValues contentRow = new ContentValues();
