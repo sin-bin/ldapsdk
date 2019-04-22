@@ -128,7 +128,7 @@ final class AddToContactsOnClickListener
     insertIntent.putExtra("finishActivityOnSaveCompleted", true);
 
     addName(insertIntent, fullName, firstName, lastName);
-    addAddress(insertIntent, address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK);
+//    addAddress(insertIntent, address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK);
 
     if (isNotEmpty(title)) {
       insertIntent.putExtra(ContactsContract.Intents.Insert.JOB_TITLE, title);
@@ -146,7 +146,7 @@ final class AddToContactsOnClickListener
 
     ArrayList<ContentValues> contactData = new ArrayList<>();
 
-//    contactData.add(addAddress(address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK));
+    contactData.add(addAddress(address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK));
 
     if (isNotEmpty(workNumber)) {
       contactData.add(addPhoneNumber(workNumber, ContactsContract.CommonDataKinds.Phone.TYPE_WORK));
