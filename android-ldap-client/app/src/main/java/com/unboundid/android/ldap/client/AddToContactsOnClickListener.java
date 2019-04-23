@@ -128,7 +128,7 @@ final class AddToContactsOnClickListener
     insertIntent.putExtra("finishActivityOnSaveCompleted", true);
 
     addName(insertIntent, fullName, firstName, lastName);
-//    addAddress(insertIntent, address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK);
+    addAddress(insertIntent, address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK);
 
     if (isNotEmpty(title)) {
       insertIntent.putExtra(ContactsContract.Intents.Insert.JOB_TITLE, title);
@@ -146,7 +146,7 @@ final class AddToContactsOnClickListener
 
     ArrayList<ContentValues> contactData = new ArrayList<>();
 
-    contactData.add(addAddress(address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK));
+//    contactData.add(addAddress(address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK));
 
     if (isNotEmpty(workNumber)) {
       contactData.add(addPhoneNumber(workNumber, ContactsContract.CommonDataKinds.Phone.TYPE_WORK));
@@ -182,7 +182,9 @@ final class AddToContactsOnClickListener
   }
 
   private void appendStringWithSpace(final StringBuilder stringBuilder, final String string) {
-    if (stringBuilder.charAt(stringBuilder.length() - 1) != ' ') {
+    final int stringLength = stringBuilder.length();
+
+    if (stringLength > 0 && stringBuilder.charAt(stringLength - 1) != ' ') {
       stringBuilder.append(' ');
     }
     stringBuilder.append(string);
@@ -192,24 +194,24 @@ final class AddToContactsOnClickListener
                        final String fullName,
                        final String firstName,
                        final String lastName) {
-      logEnter(LOG_TAG, "addName", fullName, firstName, lastName);
+    logEnter(LOG_TAG, "addName", fullName, firstName, lastName);
 
-      if (isNotEmpty(fullName)) {
-          intent.putExtra(ContactsContract.Intents.Insert.NAME, fullName);
-          return;
-      }
+    if (isNotEmpty(fullName)) {
+        intent.putExtra(ContactsContract.Intents.Insert.NAME, fullName);
+        return;
+    }
 
-      StringBuilder stringBuilder = new StringBuilder();
+    StringBuilder stringBuilder = new StringBuilder();
 
-      if (isNotEmpty(firstName)) {
-          stringBuilder.append(firstName);
-      }
-      if (isNotEmpty(lastName)) {
-          appendStringWithSpace(stringBuilder, lastName);
-      }
-      if (stringBuilder.length() > 0) {
-          intent.putExtra(ContactsContract.Intents.Insert.NAME, stringBuilder.toString());
-      }
+    if (isNotEmpty(firstName)) {
+        stringBuilder.append(firstName);
+    }
+    if (isNotEmpty(lastName)) {
+        appendStringWithSpace(stringBuilder, lastName);
+    }
+    if (stringBuilder.length() > 0) {
+        intent.putExtra(ContactsContract.Intents.Insert.NAME, stringBuilder.toString());
+    }
   }
 
   private void addAddress(final Intent intent,
