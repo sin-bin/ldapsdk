@@ -19,4 +19,5 @@ android {
 
 dependencies {
     implementation 'com.unboundid:unboundid-ldapsdk:4.0.10'
+    implementation 'org.jetbrains:annotations-java5:15.0'
 }

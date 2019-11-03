@@ -33,6 +33,8 @@ import android.view.View.OnClickListener;
 
 import com.unboundid.ldap.sdk.Entry;
 
+import org.jetbrains.annotations.NotNull;
+
 import static com.unboundid.android.ldap.client.Logger.*;
 
 
@@ -164,6 +166,11 @@ final class AddToContactsOnClickListener
       contactData.add(addPhoneNumber(pagerNumber, ContactsContract.CommonDataKinds.Phone.TYPE_PAGER));
     }
 
+    if (isNotEmpty(department)) {
+        contactData.add(
+                createContentRow(ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE,
+                        ContactsContract.CommonDataKinds.Organization.DEPARTMENT, department));
+    }
     if (isNotEmpty(websiteUri)) {
       contactData.add(
               createContentRow(ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE,
@@ -177,11 +184,12 @@ final class AddToContactsOnClickListener
     activity.startActivity(insertIntent);
   }
 
+  @org.jetbrains.annotations.Contract(value = "null -> false", pure = true)
   private boolean isNotEmpty(final String string) {
     return null != string && !string.isEmpty();
   }
 
-  private void appendStringWithSpace(final StringBuilder stringBuilder, final String string) {
+  private void appendStringWithSpace(@NotNull final StringBuilder stringBuilder, final String string) {
     final int stringLength = stringBuilder.length();
 
     if (stringLength > 0 && stringBuilder.charAt(stringLength - 1) != ' ') {
