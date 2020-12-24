@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,13 +41,14 @@ import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.InputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -51,13 +67,13 @@ public final class JSONObjectReader
        implements Closeable
 {
   // The buffer used to hold the bytes of the object currently being read.
-  private final ByteStringBuffer currentObjectBytes;
+  @NotNull private final ByteStringBuffer currentObjectBytes;
 
   // A buffer to use to hold strings being decoded.
-  private final ByteStringBuffer stringBuffer;
+  @NotNull private final ByteStringBuffer stringBuffer;
 
   // The input stream from which JSON objects will be read.
-  private final InputStream inputStream;
+  @NotNull private final InputStream inputStream;
 
 
 
@@ -67,7 +83,7 @@ public final class JSONObjectReader
    *
    * @param  inputStream  The input stream from which the data should be read.
    */
-  public JSONObjectReader(final InputStream inputStream)
+  public JSONObjectReader(@NotNull final InputStream inputStream)
   {
     this(inputStream, true);
   }
@@ -85,7 +101,7 @@ public final class JSONObjectReader
    *                            could be used for any purpose other than reading
    *                            JSON objects after one or more objects are read.
    */
-  public JSONObjectReader(final InputStream inputStream,
+  public JSONObjectReader(@NotNull final InputStream inputStream,
                           final boolean bufferInputStream)
   {
     if (bufferInputStream && (! (inputStream instanceof BufferedInputStream)))
@@ -107,13 +123,14 @@ public final class JSONObjectReader
    * Reads the next JSON object from the input stream.
    *
    * @return  The JSON object that was read, or {@code null} if the end of the
-   *          end of the stream has been reached..
+   *          end of the stream has been reached.
    *
    * @throws  IOException  If a problem is encountered while reading from the
    *                       input stream.
    *
    * @throws  JSONException  If the data read
    */
+  @Nullable()
   public JSONObject readObject()
          throws IOException, JSONException
   {
@@ -191,6 +208,7 @@ public final class JSONObjectReader
    * @throws  JSONException  If a problem was encountered while reading the
    *                         token.
    */
+  @Nullable()
   private Object readToken(final boolean allowEndOfStream)
           throws IOException, JSONException
   {
@@ -390,6 +408,7 @@ public final class JSONObjectReader
    * @throws  JSONException  If the end of the input stream is reached when that
    *                         is not acceptable.
    */
+  @Nullable()
   private Byte readByte(final boolean allowEndOfStream)
           throws IOException, JSONException
   {
@@ -426,6 +445,7 @@ public final class JSONObjectReader
    * @throws  JSONException  If a problem was encountered while reading the JSON
    *                         string.
    */
+  @NotNull()
   private JSONString readString()
           throws IOException, JSONException
   {
@@ -486,7 +506,7 @@ public final class JSONObjectReader
                     "0x" + StaticUtils.toHex(byteRead)));
         }
 
-        stringBuffer.append(new String(charBytes, StandardCharsets.UTF_8));
+        stringBuffer.append(StaticUtils.toUTF8String(charBytes));
         continue;
       }
 
@@ -554,10 +574,9 @@ public final class JSONObjectReader
       {
         // It's an unescaped quote, so it marks the end of the string.
         return new JSONString(stringBuffer.toString(),
-             new String(currentObjectBytes.getBackingArray(),
+             StaticUtils.toUTF8String(currentObjectBytes.getBackingArray(),
                   jsonStringStartPos,
-                  (currentObjectBytes.length() - jsonStringStartPos),
-                  StandardCharsets.UTF_8));
+                  (currentObjectBytes.length() - jsonStringStartPos)));
       }
 
       final int byteReadInt = (byteRead & 0xFF);
@@ -587,6 +606,7 @@ public final class JSONObjectReader
    * @throws  JSONException  If a problem was encountered while reading the JSON
    *                         Boolean.
    */
+  @NotNull()
   private JSONBoolean readBoolean()
           throws IOException, JSONException
   {
@@ -633,6 +653,7 @@ public final class JSONObjectReader
    * @throws  JSONException  If a problem was encountered while reading the JSON
    *                         null.
    */
+  @NotNull()
   private JSONNull readNull()
           throws IOException, JSONException
   {
@@ -664,6 +685,7 @@ public final class JSONObjectReader
    * @throws  JSONException  If a problem was encountered while reading the JSON
    *                         number.
    */
+  @NotNull()
   private JSONNumber readNumber()
           throws IOException, JSONException
   {
@@ -722,6 +744,7 @@ public final class JSONObjectReader
    * @throws  JSONException  If a problem was encountered while reading the JSON
    *                         array.
    */
+  @NotNull()
   private JSONArray readArray()
           throws IOException, JSONException
   {
@@ -799,7 +822,8 @@ public final class JSONObjectReader
    * @throws  JSONException  If a problem was encountered while reading the JSON
    *                         object.
    */
-  private JSONObject readObject(final Map<String,JSONValue> fields)
+  @NotNull()
+  private JSONObject readObject(@NotNull final Map<String,JSONValue> fields)
           throws IOException, JSONException
   {
     boolean firstField = true;
@@ -898,6 +922,7 @@ public final class JSONObjectReader
    *
    * @return  A string representation of the provided byte.
    */
+  @NotNull()
   private static String byteToCharString(final byte b)
   {
     if ((b >= ' ') && (b <= '~'))

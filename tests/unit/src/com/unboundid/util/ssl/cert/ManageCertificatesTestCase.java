@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -625,6 +640,7 @@ public final class ManageCertificatesTestCase
       "sign-certificate-signing-request",
       "delete-certificate",
       "change-certificate-alias",
+      "retrieve-server-certificate",
       "trust-server-certificate",
       "check-certificate-usability",
       "display-certificate-file",
@@ -675,11 +691,9 @@ public final class ManageCertificatesTestCase
          "--display-keytool-command");
 
     // Make sure that we can list the JVM's default cacerts file.
-    final String caCertsPath = JVMDefaultTrustManager.getInstance().
-         getCACertsFile().getAbsolutePath();
     manageCertificates(
          "list-certificates",
-         "--keystore", caCertsPath,
+         "--use-jvm-default-trust-store",
          "--verbose");
 
     // Test the behavior when specifying a keystore path that is neither a JKS
@@ -770,6 +784,38 @@ public final class ManageCertificatesTestCase
          "--display-keytool-command");
     assertTrue(outputFile.exists());
     assertEquals(countPEMEntries(outputFile.getAbsolutePath()), 1);
+
+
+    // Make sure that we can export a certificate from the JVM's default cacerts
+    // file.
+    final JVMDefaultTrustManager jvmDefaultTrustManager =
+         JVMDefaultTrustManager.getInstance();
+    final KeyStore ks = KeyStore.getInstance("JKS");
+    try (FileInputStream inputStream =
+              new FileInputStream(jvmDefaultTrustManager.getCACertsFile()))
+    {
+      ks.load(inputStream, null);
+    }
+    final Enumeration<String> aliases = ks.aliases();
+    while (aliases.hasMoreElements())
+    {
+      final String alias = aliases.nextElement();
+      if (ks.isCertificateEntry(alias))
+      {
+        assertTrue(outputFile.delete());
+        assertFalse(outputFile.exists());
+        manageCertificates(
+             "export-certificate",
+             "--use-jvm-default-trust-store",
+             "--alias", alias,
+             "--output-format", "PEM",
+             "--output-file", outputFile.getAbsolutePath(),
+             "--display-keytool-command");
+        assertTrue(outputFile.exists());
+        assertEquals(countPEMEntries(outputFile.getAbsolutePath()), 1);
+        break;
+      }
+    }
 
 
     // Test exporting a single DER certificate for a JKS keystore with just a
@@ -4777,6 +4823,182 @@ public final class ManageCertificatesTestCase
 
 
   /**
+   * Provides test coverage for the retrieve-server-certificate subcommand.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testRetrieveServerCertificate()
+         throws Exception
+  {
+    // Tests the behavior when retrieving a self-signed certificate when not
+    // using StartTLS, not using only-peer-certificate, not using an output
+    // file, and not using verbose.
+    File ksFile = createTempFile();
+    assertTrue(ksFile.exists());
+    assertTrue(ksFile.delete());
+    assertFalse(ksFile.exists());
+
+    manageCertificates(
+         "generate-self-signed-certificate",
+         "--keystore", ksFile.getAbsolutePath(),
+         "--keystore-password", "password",
+         "--keystore-type", "JKS",
+         "--alias", "server-cert",
+         "--subject-dn", "CN=ldap.example.com,O=Example Corporation,C=US",
+         "--days-valid", "7300",
+         "--key-algorithm", "RSA",
+         "--key-size-bits", "2048",
+         "--signature-algorithm", "SHA256withRSA",
+         "--subject-alternative-name-dns", "ldap.example.com",
+         "--subject-alternative-name-dns", "localhost",
+         "--subject-alternative-name-ip-address", "127.0.0.1",
+         "--subject-alternative-name-ip-address", "::1",
+         "--extended-key-usage", "server-auth",
+         "--extended-key-usage", "client-auth",
+         "--display-keytool-command");
+
+    final InMemoryDirectoryServerConfig cfg =
+         new InMemoryDirectoryServerConfig("dc=example,dc=com");
+
+    SSLUtil serverSSLUtil = new SSLUtil(
+         new KeyStoreKeyManager(ksFile.getAbsolutePath(),
+              "password".toCharArray(), "JKS", "server-cert"),
+         new TrustAllTrustManager());
+    final SSLUtil clientSSLUtil = new SSLUtil(new TrustAllTrustManager());
+
+    cfg.setListenerConfigs(InMemoryListenerConfig.createLDAPSConfig("LDAPS",
+         null, 0, serverSSLUtil.createSSLServerSocketFactory(),
+         clientSSLUtil.createSSLSocketFactory()));
+
+    InMemoryDirectoryServer ds = new InMemoryDirectoryServer(cfg);
+    ds.startListening();
+    String portStr = String.valueOf(ds.getListenPort("LDAPS"));
+
+    ksFile = createTempFile();
+    assertTrue(ksFile.exists());
+    assertTrue(ksFile.delete());
+    assertFalse(ksFile.exists());
+
+    manageCertificates(
+         "retrieve-server-certificate",
+         "--hostname", "localhost",
+         "--port", portStr);
+
+
+    // Tests the above configuration, but when using only-peer-certificate,
+    // verbose mode, and an output file with the PEM format.
+    final File outputFile = createTempFile();
+    assertTrue(outputFile.delete());
+
+    manageCertificates(
+         "retrieve-server-certificate",
+         "--hostname", "localhost",
+         "--port", portStr,
+         "--only-peer-certificate",
+         "--output-file", outputFile.getAbsolutePath(),
+         "--output-format", "PEM",
+         "--verbose");
+
+    assertTrue(outputFile.exists());
+    assertTrue(outputFile.length() > 0L);
+
+    ds.shutDown(true);
+
+
+    // Test with a keystore with a certificate signed by a root certificate.
+    ksFile = createTempFile();
+    assertTrue(ksFile.exists());
+    assertTrue(ksFile.delete());
+    assertFalse(ksFile.exists());
+
+    File csrFile = createTempFile();
+    assertTrue(csrFile.exists());
+    assertTrue(csrFile.delete());
+    assertFalse(csrFile.exists());
+
+    File certFile = createTempFile();
+    assertTrue(certFile.exists());
+    assertTrue(certFile.delete());
+    assertFalse(certFile.exists());
+
+    manageCertificates(
+         "generate-certificate-signing-request",
+         "--output-file", csrFile.getAbsolutePath(),
+         "--keystore", ksFile.getAbsolutePath(),
+         "--keystore-password", "password",
+         "--keystore-type", "JKS",
+         "--alias", "server-cert",
+         "--subject-dn", "CN=ldap.example.com,O=Example Corporation,C=US",
+         "--key-algorithm", "RSA",
+         "--key-size-bits", "2048",
+         "--signature-algorithm", "SHA256withRSA",
+         "--subject-alternative-name-dns", "ldap.example.com",
+         "--subject-alternative-name-dns", "localhost",
+         "--subject-alternative-name-ip-address", "127.0.0.1",
+         "--subject-alternative-name-ip-address", "::1",
+         "--extended-key-usage", "server-auth",
+         "--extended-key-usage", "client-auth",
+         "--display-keytool-command");
+    manageCertificates(
+         "sign-certificate-signing-request",
+         "--request-input-file", csrFile.getAbsolutePath(),
+         "--certificate-output-file", certFile.getAbsolutePath(),
+         "--output-format", "PEM",
+         "--keystore", rootCAKeyStorePath,
+         "--keystore-password", "password",
+         "--signing-certificate-alias", rootCACertificateAlias,
+         "--days-valid", "3650",
+         "--include-requested-extensions",
+         "--no-prompt",
+         "--display-keytool-command");
+    manageCertificates(
+         "import-certificate",
+         "--certificate-file", certFile.getAbsolutePath(),
+         "--certificate-file", rootCACertificatePath,
+         "--keystore", ksFile.getAbsolutePath(),
+         "--keystore-password", "password",
+         "--alias", "server-cert",
+         "--no-prompt",
+         "--display-keytool-command");
+
+    serverSSLUtil = new SSLUtil(
+         new KeyStoreKeyManager(ksFile.getAbsolutePath(),
+              "password".toCharArray(), "JKS", "server-cert"),
+         new TrustAllTrustManager());
+
+    cfg.setListenerConfigs(InMemoryListenerConfig.createLDAPSConfig("LDAPS",
+         null, 0, serverSSLUtil.createSSLServerSocketFactory(),
+         clientSSLUtil.createSSLSocketFactory()));
+
+    ds = new InMemoryDirectoryServer(cfg);
+    ds.startListening();
+    portStr = String.valueOf(ds.getListenPort("LDAPS"));
+
+    ksFile = createTempFile();
+    assertTrue(ksFile.exists());
+    assertTrue(ksFile.delete());
+    assertFalse(ksFile.exists());
+
+    assertTrue(outputFile.delete());
+
+    manageCertificates(
+         "retrieve-server-certificate",
+         "--hostname", "localhost",
+         "--port", portStr,
+         "--output-file", outputFile.getAbsolutePath(),
+         "--output-format", "DER",
+         "--verbose");
+
+    assertTrue(outputFile.exists());
+    assertTrue(outputFile.length() > 0L);
+
+    ds.shutDown(true);
+  }
+
+
+
+  /**
    * Provides test coverage for the trust-server-certificate subcommand.
    *
    * @throws  Exception  If an unexpected problem occurs.
@@ -8083,6 +8305,60 @@ public final class ManageCertificatesTestCase
     assertEquals(
          ManageCertificates.getUserFriendlyKeystoreType("pkcs #12"),
          "PKCS #12");
+  }
+
+
+
+  /**
+   * Tests to ensure that the manage-certificates tool will properly reject
+   * subject alternative name values that are DNS names and IP addresses if they
+   * are not valid IA5 strings.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testSubjectAlternativeNameIA5Validation()
+         throws Exception
+  {
+    // Tests with a minimal set of arguments for a new certificate using a
+    // JKS keystore that doesn't already exist.
+    File ksFile = createTempFile();
+    assertTrue(ksFile.exists());
+    assertTrue(ksFile.delete());
+    assertFalse(ksFile.exists());
+
+    manageCertificates(ResultCode.PARAM_ERROR, null,
+         "generate-self-signed-certificate",
+         "--keystore", ksFile.getAbsolutePath(),
+         "--keystore-password", "password",
+         "--alias", "server-cert",
+         "--subject-dn", "CN=ldap.example.com,O=Example Corporation,C=US",
+         "--subject-alternative-name-dns", "");
+
+    manageCertificates(ResultCode.PARAM_ERROR, null,
+         "generate-self-signed-certificate",
+         "--keystore", ksFile.getAbsolutePath(),
+         "--keystore-password", "password",
+         "--alias", "server-cert",
+         "--subject-dn", "CN=ldap.example.com,O=Example Corporation,C=US",
+         "--subject-alternative-name-email-address", "");
+
+    manageCertificates(ResultCode.PARAM_ERROR, null,
+         "generate-self-signed-certificate",
+         "--keystore", ksFile.getAbsolutePath(),
+         "--keystore-password", "password",
+         "--alias", "server-cert",
+         "--subject-dn", "CN=ldap.example.com,O=Example Corporation,C=US",
+         "--subject-alternative-name-dns", "jalape\u00f1o.example.com");
+
+    manageCertificates(ResultCode.PARAM_ERROR, null,
+         "generate-self-signed-certificate",
+         "--keystore", ksFile.getAbsolutePath(),
+         "--keystore-password", "password",
+         "--alias", "server-cert",
+         "--subject-dn", "CN=ldap.example.com,O=Example Corporation,C=US",
+         "--subject-alternative-name-email-address",
+         "jalape\u00f1o@example.com");
   }
 
 

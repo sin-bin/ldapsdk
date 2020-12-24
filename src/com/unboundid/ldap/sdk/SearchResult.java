@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,8 @@ import java.util.List;
 import com.unboundid.asn1.ASN1StreamReader;
 import com.unboundid.asn1.ASN1StreamReaderSequence;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -75,11 +92,11 @@ public final class SearchResult
 
   // A list that may be used to hold the search result entries returned for
   // this search.
-  private List<SearchResultEntry> searchEntries;
+  @Nullable private List<SearchResultEntry> searchEntries;
 
   // A list that may be used to hold the search result references returned for
   // this search.
-  private List<SearchResultReference> searchReferences;
+  @Nullable private List<SearchResultReference> searchReferences;
 
 
 
@@ -106,10 +123,12 @@ public final class SearchResult
    * @param  responseControls   The set of controls from the search result done
    *                            response, if available.
    */
-  public SearchResult(final int messageID, final ResultCode resultCode,
-                      final String diagnosticMessage, final String matchedDN,
-                      final String[] referralURLs, final int numEntries,
-                      final int numReferences, final Control[] responseControls)
+  public SearchResult(final int messageID, @NotNull final ResultCode resultCode,
+                      @Nullable final String diagnosticMessage,
+                      @Nullable final String matchedDN,
+                      @Nullable final String[] referralURLs,
+                      final int numEntries, final int numReferences,
+                      @Nullable final Control[] responseControls)
   {
     super(messageID, resultCode, diagnosticMessage, matchedDN, referralURLs,
           responseControls);
@@ -156,13 +175,15 @@ public final class SearchResult
    * @param  responseControls   The set of controls from the search result done
    *                            response, if available.
    */
-  public SearchResult(final int messageID, final ResultCode resultCode,
-                      final String diagnosticMessage, final String matchedDN,
-                      final String[] referralURLs,
-                      final List<SearchResultEntry> searchEntries,
-                      final List<SearchResultReference> searchReferences,
-                      final int numEntries, final int numReferences,
-                      final Control[] responseControls)
+  public SearchResult(final int messageID,
+              @NotNull final ResultCode resultCode,
+              @Nullable final String diagnosticMessage,
+              @Nullable final String matchedDN,
+              @Nullable final String[] referralURLs,
+              @Nullable final List<SearchResultEntry> searchEntries,
+              @Nullable final List<SearchResultReference> searchReferences,
+              final int numEntries, final int numReferences,
+              @Nullable final Control[] responseControls)
   {
     super(messageID, resultCode, diagnosticMessage, matchedDN, referralURLs,
           responseControls);
@@ -182,7 +203,7 @@ public final class SearchResult
    * @param  ldapResult  The LDAP result to use to create the contents of this
    *                     search result.
    */
-  public SearchResult(final LDAPResult ldapResult)
+  public SearchResult(@NotNull final LDAPResult ldapResult)
   {
     super(ldapResult);
 
@@ -212,7 +233,7 @@ public final class SearchResult
    * @param  ldapException  The LDAP exception to use to create the contents of
    *                        this search result.
    */
-  public SearchResult(final LDAPException ldapException)
+  public SearchResult(@NotNull final LDAPException ldapException)
   {
     this(ldapException.toLDAPResult());
   }
@@ -235,9 +256,10 @@ public final class SearchResult
    * @throws  LDAPException  If a problem occurs while reading or decoding data
    *                         from the ASN.1 stream reader.
    */
+  @NotNull()
   static SearchResult readSearchResultFrom(final int messageID,
-                           final ASN1StreamReaderSequence messageSequence,
-                           final ASN1StreamReader reader)
+              @NotNull final ASN1StreamReaderSequence messageSequence,
+              @NotNull final ASN1StreamReader reader)
          throws LDAPException
   {
     final LDAPResult r =
@@ -286,6 +308,7 @@ public final class SearchResult
    *          operation, or {@code null} if a {@code SearchResultListener} was
    *          used during the search.
    */
+  @Nullable()
   public List<SearchResultEntry> getSearchEntries()
   {
     if (searchEntries == null)
@@ -313,7 +336,8 @@ public final class SearchResult
    * @throws  LDAPException  If a problem is encountered while attempting to
    *                         parse the provided DN or a search entry DN.
    */
-  public SearchResultEntry getSearchEntry(final String dn)
+  @Nullable()
+  public SearchResultEntry getSearchEntry(@NotNull final String dn)
          throws LDAPException
   {
     if (searchEntries == null)
@@ -346,6 +370,7 @@ public final class SearchResult
    *          operation, or {@code null} if a {@code SearchResultListener} was
    *          used during the search.
    */
+  @Nullable()
   public List<SearchResultReference> getSearchReferences()
   {
     if (searchReferences == null)
@@ -377,9 +402,9 @@ public final class SearchResult
    *                           search.
    */
   void setCounts(final int numEntries,
-                 final List<SearchResultEntry> searchEntries,
+                 @Nullable final List<SearchResultEntry> searchEntries,
                  final int numReferences,
-                 final List<SearchResultReference> searchReferences)
+                 @Nullable final List<SearchResultReference> searchReferences)
   {
     this.numEntries    = numEntries;
     this.numReferences = numReferences;
@@ -412,7 +437,7 @@ public final class SearchResult
    *                 this LDAP result.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("SearchResult(resultCode=");
     buffer.append(getResultCode());

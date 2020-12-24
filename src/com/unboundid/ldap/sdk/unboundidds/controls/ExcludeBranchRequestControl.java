@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,6 +52,7 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -79,7 +95,7 @@ public final class ExcludeBranchRequestControl
   /**
    * The OID (1.3.6.1.4.1.30221.2.5.17) for the exclude branch request control.
    */
-  public static final String EXCLUDE_BRANCH_REQUEST_OID =
+  @NotNull public static final String EXCLUDE_BRANCH_REQUEST_OID =
        "1.3.6.1.4.1.30221.2.5.17";
 
 
@@ -99,7 +115,7 @@ public final class ExcludeBranchRequestControl
 
 
   // The list of base DNs to be excluded from the search results.
-  private final List<String> baseDNs;
+  @NotNull private final List<String> baseDNs;
 
 
 
@@ -110,7 +126,7 @@ public final class ExcludeBranchRequestControl
    * @param  baseDNs  The base DNs for entries to be excluded from search
    *                  results.  It must not be {@code null} or empty.
    */
-  public ExcludeBranchRequestControl(final Collection<String> baseDNs)
+  public ExcludeBranchRequestControl(@NotNull final Collection<String> baseDNs)
   {
     this(true, baseDNs);
   }
@@ -124,7 +140,7 @@ public final class ExcludeBranchRequestControl
    * @param  baseDNs  The base DNs for entries to be excluded from search
    *                  results.  It must not be {@code null} or empty.
    */
-  public ExcludeBranchRequestControl(final String... baseDNs)
+  public ExcludeBranchRequestControl(@NotNull final String... baseDNs)
   {
     this(true, baseDNs);
   }
@@ -140,7 +156,7 @@ public final class ExcludeBranchRequestControl
    *                     results.  It must not be {@code null} or empty.
    */
   public ExcludeBranchRequestControl(final boolean isCritical,
-                                     final String... baseDNs)
+                                     @NotNull final String... baseDNs)
   {
     super(EXCLUDE_BRANCH_REQUEST_OID, isCritical, encodeValue(baseDNs));
 
@@ -158,7 +174,7 @@ public final class ExcludeBranchRequestControl
    *                     results.  It must not be {@code null} or empty.
    */
   public ExcludeBranchRequestControl(final boolean isCritical,
-                                     final Collection<String> baseDNs)
+                                     @NotNull final Collection<String> baseDNs)
   {
     super(EXCLUDE_BRANCH_REQUEST_OID, isCritical, encodeValue(baseDNs));
 
@@ -177,7 +193,7 @@ public final class ExcludeBranchRequestControl
    * @throws  LDAPException  If the provided control cannot be decoded as an
    *                         exclude branch request control.
    */
-  public ExcludeBranchRequestControl(final Control control)
+  public ExcludeBranchRequestControl(@NotNull final Control control)
          throws LDAPException
   {
     super(control);
@@ -246,7 +262,8 @@ public final class ExcludeBranchRequestControl
    *
    * @return  The encoded value for this control.
    */
-  private static ASN1OctetString encodeValue(final String... baseDNs)
+  @NotNull()
+  private static ASN1OctetString encodeValue(@NotNull final String... baseDNs)
   {
     Validator.ensureNotNull(baseDNs);
     return encodeValue(Arrays.asList(baseDNs));
@@ -263,7 +280,9 @@ public final class ExcludeBranchRequestControl
    *
    * @return  The encoded value for this control.
    */
-  private static ASN1OctetString encodeValue(final Collection<String> baseDNs)
+  @NotNull()
+  private static ASN1OctetString encodeValue(
+                      @NotNull final Collection<String> baseDNs)
   {
     Validator.ensureNotNull(baseDNs);
     Validator.ensureFalse(baseDNs.isEmpty());
@@ -289,6 +308,7 @@ public final class ExcludeBranchRequestControl
    * @return  A list of the base DNs for entries to exclude from the search
    *          results.
    */
+  @NotNull()
   public List<String> getBaseDNs()
   {
     return baseDNs;
@@ -300,6 +320,7 @@ public final class ExcludeBranchRequestControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_EXCLUDE_BRANCH.get();
@@ -311,7 +332,7 @@ public final class ExcludeBranchRequestControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ExcludeBranchRequestControl(isCritical=");
     buffer.append(isCritical());

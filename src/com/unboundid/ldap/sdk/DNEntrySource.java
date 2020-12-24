@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,8 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -111,13 +128,13 @@ public final class DNEntrySource
 {
   // The iterator to use to access the DNs.  It will either be across DN or
   // String objects.
-  private final Iterator<?> dnIterator;
+  @NotNull private final Iterator<?> dnIterator;
 
   // The connection to use to communicate with the directory server.
-  private final LDAPInterface connection;
+  @NotNull private final LDAPInterface connection;
 
   // The set of attributes to include in entries that are returned.
-  private final String[] attributes;
+  @NotNull private final String[] attributes;
 
 
 
@@ -132,8 +149,9 @@ public final class DNEntrySource
    *                     returned.  If this is empty or {@code null}, then all
    *                     user attributes will be requested.
    */
-  public DNEntrySource(final LDAPInterface connection, final DN[] dns,
-                       final String... attributes)
+  public DNEntrySource(@NotNull final LDAPInterface connection,
+                       @NotNull final DN[] dns,
+                       @Nullable final String... attributes)
   {
     Validator.ensureNotNull(connection, dns);
 
@@ -163,8 +181,9 @@ public final class DNEntrySource
    *                     returned.  If this is empty or {@code null}, then all
    *                     user attributes will be requested.
    */
-  public DNEntrySource(final LDAPInterface connection, final String[] dns,
-                       final String... attributes)
+  public DNEntrySource(@NotNull final LDAPInterface connection,
+                       @NotNull final String[] dns,
+                       @Nullable final String... attributes)
   {
     this(connection, Arrays.asList(dns), attributes);
   }
@@ -182,8 +201,9 @@ public final class DNEntrySource
    *                     returned.  If this is empty or {@code null}, then all
    *                     user attributes will be requested.
    */
-  public DNEntrySource(final LDAPInterface connection,
-                       final Collection<String> dns, final String... attributes)
+  public DNEntrySource(@NotNull final LDAPInterface connection,
+                       @NotNull final Collection<String> dns,
+                       @Nullable final String... attributes)
   {
     Validator.ensureNotNull(connection, dns);
 
@@ -206,6 +226,7 @@ public final class DNEntrySource
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public Entry nextEntry()
          throws EntrySourceException
   {

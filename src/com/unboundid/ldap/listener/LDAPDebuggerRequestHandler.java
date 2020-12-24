@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -58,6 +73,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldif.LDIFModifyChangeRecord;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -83,19 +100,20 @@ public final class LDAPDebuggerRequestHandler
    * The thread-local buffers that will be used to hold the log messages as they
    * are being generated.
    */
-  private static final ThreadLocal<StringBuilder> BUFFERS = new ThreadLocal<>();
+  @NotNull private static final ThreadLocal<StringBuilder> BUFFERS =
+       new ThreadLocal<>();
 
 
 
   // The log handler that will be used to log the messages.
-  private final Handler logHandler;
+  @NotNull private final Handler logHandler;
 
   // The request handler that actually will be used to process any requests
   // received.
-  private final LDAPListenerRequestHandler requestHandler;
+  @NotNull private final LDAPListenerRequestHandler requestHandler;
 
   // The header string that will be used before each message.
-  private final String headerString;
+  @Nullable private final String headerString;
 
 
 
@@ -115,8 +133,8 @@ public final class LDAPDebuggerRequestHandler
    *                         process any requests received.  It must not be
    *                         {@code null}.
    */
-  public LDAPDebuggerRequestHandler(final Handler logHandler,
-              final LDAPListenerRequestHandler requestHandler)
+  public LDAPDebuggerRequestHandler(@NotNull final Handler logHandler,
+              @NotNull final LDAPListenerRequestHandler requestHandler)
   {
     Validator.ensureNotNull(logHandler, requestHandler);
 
@@ -144,9 +162,9 @@ public final class LDAPDebuggerRequestHandler
    * @param  headerString    The string that should be given as the first line
    *                         of every log message.
    */
-  private LDAPDebuggerRequestHandler(final Handler logHandler,
-               final LDAPListenerRequestHandler requestHandler,
-               final String headerString)
+  private LDAPDebuggerRequestHandler(@NotNull final Handler logHandler,
+               @NotNull final LDAPListenerRequestHandler requestHandler,
+               @NotNull final String headerString)
   {
     Validator.ensureNotNull(logHandler, requestHandler);
 
@@ -161,8 +179,9 @@ public final class LDAPDebuggerRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPDebuggerRequestHandler newInstance(
-              final LDAPListenerClientConnection connection)
+              @NotNull final LDAPListenerClientConnection connection)
          throws LDAPException
   {
     final StringBuilder b = getBuffer();
@@ -190,6 +209,7 @@ public final class LDAPDebuggerRequestHandler
     connection.addSearchReferenceTransformer(h);
 
     logHandler.publish(new LogRecord(Level.INFO, "CONNECT " + header));
+    logHandler.flush();
 
     return h;
   }
@@ -207,6 +227,7 @@ public final class LDAPDebuggerRequestHandler
     b.append(headerString);
 
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     requestHandler.closeInstance();
   }
@@ -218,8 +239,8 @@ public final class LDAPDebuggerRequestHandler
    */
   @Override()
   public void processAbandonRequest(final int messageID,
-                                    final AbandonRequestProtocolOp request,
-                                    final List<Control> controls)
+                   @NotNull final AbandonRequestProtocolOp request,
+                   @NotNull final List<Control> controls)
   {
     final StringBuilder b = getBuffer();
     appendHeader(b, messageID);
@@ -230,6 +251,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, controls);
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     requestHandler.processAbandonRequest(messageID, request, controls);
   }
@@ -240,9 +262,10 @@ public final class LDAPDebuggerRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processAddRequest(final int messageID,
-                                       final AddRequestProtocolOp request,
-                                       final List<Control> controls)
+                          @NotNull final AddRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final StringBuilder b = getBuffer();
     appendHeader(b, messageID);
@@ -258,6 +281,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, controls);
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     final LDAPMessage responseMessage = requestHandler.processAddRequest(
          messageID, request, controls);
@@ -274,6 +298,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, responseMessage.getControls());
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     return responseMessage;
   }
@@ -284,9 +309,10 @@ public final class LDAPDebuggerRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processBindRequest(final int messageID,
-                                        final BindRequestProtocolOp request,
-                                        final List<Control> controls)
+                          @NotNull final BindRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final StringBuilder b = getBuffer();
     appendHeader(b, messageID);
@@ -322,6 +348,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, controls);
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     final LDAPMessage responseMessage = requestHandler.processBindRequest(
          messageID, request, controls);
@@ -347,6 +374,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, responseMessage.getControls());
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     return responseMessage;
   }
@@ -357,9 +385,10 @@ public final class LDAPDebuggerRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processCompareRequest(final int messageID,
-                          final CompareRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final CompareRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final StringBuilder b = getBuffer();
     appendHeader(b, messageID);
@@ -374,6 +403,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, controls);
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     final LDAPMessage responseMessage = requestHandler.processCompareRequest(
          messageID, request, controls);
@@ -390,6 +420,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, responseMessage.getControls());
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     return responseMessage;
   }
@@ -400,9 +431,10 @@ public final class LDAPDebuggerRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processDeleteRequest(final int messageID,
-                                          final DeleteRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final DeleteRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final StringBuilder b = getBuffer();
     appendHeader(b, messageID);
@@ -412,6 +444,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, controls);
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     final LDAPMessage responseMessage = requestHandler.processDeleteRequest(
          messageID, request, controls);
@@ -428,6 +461,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, responseMessage.getControls());
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     return responseMessage;
   }
@@ -438,9 +472,10 @@ public final class LDAPDebuggerRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processExtendedRequest(final int messageID,
-                          final ExtendedRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final ExtendedRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final StringBuilder b = getBuffer();
     appendHeader(b, messageID);
@@ -459,6 +494,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, controls);
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     final LDAPMessage responseMessage = requestHandler.processExtendedRequest(
          messageID, request, controls);
@@ -490,6 +526,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, responseMessage.getControls());
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     return responseMessage;
   }
@@ -500,9 +537,10 @@ public final class LDAPDebuggerRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processModifyRequest(final int messageID,
-                                          final ModifyRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final ModifyRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final StringBuilder b = getBuffer();
     appendHeader(b, messageID);
@@ -520,6 +558,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, controls);
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     final LDAPMessage responseMessage = requestHandler.processModifyRequest(
          messageID, request, controls);
@@ -536,6 +575,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, responseMessage.getControls());
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     return responseMessage;
   }
@@ -546,9 +586,10 @@ public final class LDAPDebuggerRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processModifyDNRequest(final int messageID,
-                          final ModifyDNRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final ModifyDNRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final StringBuilder b = getBuffer();
     appendHeader(b, messageID);
@@ -569,6 +610,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, controls);
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     final LDAPMessage responseMessage = requestHandler.processModifyDNRequest(
          messageID, request, controls);
@@ -585,6 +627,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, responseMessage.getControls());
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     return responseMessage;
   }
@@ -595,9 +638,10 @@ public final class LDAPDebuggerRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processSearchRequest(final int messageID,
-                                          final SearchRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final SearchRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final StringBuilder b = getBuffer();
     appendHeader(b, messageID);
@@ -631,6 +675,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, controls);
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     final LDAPMessage responseMessage = requestHandler.processSearchRequest(
          messageID, request, controls);
@@ -647,6 +692,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, responseMessage.getControls());
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     return responseMessage;
   }
@@ -658,8 +704,8 @@ public final class LDAPDebuggerRequestHandler
    */
   @Override()
   public void processUnbindRequest(final int messageID,
-                                   final UnbindRequestProtocolOp request,
-                                   final List<Control> controls)
+                   @NotNull final UnbindRequestProtocolOp request,
+                   @NotNull final List<Control> controls)
   {
     final StringBuilder b = getBuffer();
     appendHeader(b, messageID);
@@ -668,6 +714,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, controls);
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     requestHandler.processUnbindRequest(messageID, request, controls);
   }
@@ -680,6 +727,7 @@ public final class LDAPDebuggerRequestHandler
    *
    * @return  A {@code StringBuilder} containing the LDAP message header.
    */
+  @NotNull()
   private static StringBuilder getBuffer()
   {
     StringBuilder b = BUFFERS.get();
@@ -704,7 +752,7 @@ public final class LDAPDebuggerRequestHandler
    * @param  b          The buffer to which to write the header.
    * @param  messageID  The message ID for the LDAP message.
    */
-  private void appendHeader(final StringBuilder b, final int messageID)
+  private void appendHeader(@NotNull final StringBuilder b, final int messageID)
   {
     b.append(headerString);
     b.append("LDAP Message:").append(StaticUtils.EOL);
@@ -722,11 +770,11 @@ public final class LDAPDebuggerRequestHandler
    * @param  matchedDN          The matched DN for the response, if any.
    * @param  referralURLs       The referral URLs for the response, if any.
    */
-  private static void appendResponse(final StringBuilder b,
+  private static void appendResponse(@NotNull final StringBuilder b,
                                      final int resultCode,
-                                     final String diagnosticMessage,
-                                     final String matchedDN,
-                                     final List<String> referralURLs)
+                                     @Nullable final String diagnosticMessage,
+                                     @Nullable final String matchedDN,
+                                     @NotNull final List<String> referralURLs)
   {
     b.append("          Result Code:  ").append(ResultCode.valueOf(resultCode)).
          append(StaticUtils.EOL);
@@ -762,8 +810,8 @@ public final class LDAPDebuggerRequestHandler
    * @param  b         The buffer to which to append the control information.
    * @param  controls  The set of controls to be appended to the buffer.
    */
-  private static void appendControls(final StringBuilder b,
-                                     final List<Control> controls)
+  private static void appendControls(@NotNull final StringBuilder b,
+                                     @NotNull final List<Control> controls)
   {
     if (! controls.isEmpty())
     {
@@ -810,8 +858,8 @@ public final class LDAPDebuggerRequestHandler
    * @param  b         The buffer to which to append the control information.
    * @param  controls  The set of controls to be appended to the buffer.
    */
-  private static void appendControls(final StringBuilder b,
-                                     final Control[] controls)
+  private static void appendControls(@NotNull final StringBuilder b,
+                                     @NotNull final Control[] controls)
   {
     appendControls(b, Arrays.asList(controls));
   }
@@ -822,10 +870,11 @@ public final class LDAPDebuggerRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ObjectPair<IntermediateResponseProtocolOp,Control[]>
               transformIntermediateResponse(final int messageID,
-                   final IntermediateResponseProtocolOp response,
-                   final Control[] controls)
+                   @NotNull final IntermediateResponseProtocolOp response,
+                   @NotNull final Control[] controls)
   {
     final StringBuilder b = getBuffer();
     appendHeader(b, messageID);
@@ -848,6 +897,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, controls);
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     return new ObjectPair<>(response, controls);
   }
@@ -858,9 +908,11 @@ public final class LDAPDebuggerRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ObjectPair<SearchResultEntryProtocolOp,Control[]> transformEntry(
-              final int messageID, final SearchResultEntryProtocolOp entry,
-              final Control[] controls)
+              final int messageID,
+              @NotNull final SearchResultEntryProtocolOp entry,
+              @NotNull final Control[] controls)
   {
     final StringBuilder b = getBuffer();
     appendHeader(b, messageID);
@@ -876,6 +928,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, controls);
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     return new ObjectPair<>(entry, controls);
   }
@@ -886,10 +939,11 @@ public final class LDAPDebuggerRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ObjectPair<SearchResultReferenceProtocolOp,Control[]>
               transformReference(final int messageID,
-                   final SearchResultReferenceProtocolOp reference,
-                   final Control[] controls)
+                   @NotNull final SearchResultReferenceProtocolOp reference,
+                   @NotNull final Control[] controls)
   {
     final StringBuilder b = getBuffer();
     appendHeader(b, messageID);
@@ -905,6 +959,7 @@ public final class LDAPDebuggerRequestHandler
 
     appendControls(b, controls);
     logHandler.publish(new LogRecord(Level.INFO, b.toString()));
+    logHandler.flush();
 
     return new ObjectPair<>(reference, controls);
   }

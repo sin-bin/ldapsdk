@@ -1,9 +1,24 @@
 /*
- * Copyright 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2012-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
 
 
 
@@ -51,11 +67,11 @@ final class ParallelPoolConnector
   private final int numThreads;
 
   // The connection pool with which the connections will be associated.
-  private final LDAPConnectionPool pool;
+  @NotNull private final LDAPConnectionPool pool;
 
   // The list that will hold the connections that are established.  It must be
   // threadsafe.
-  private final List<LDAPConnection> connList;
+  @NotNull private final List<LDAPConnection> connList;
 
 
 
@@ -79,8 +95,8 @@ final class ParallelPoolConnector
    *                                but may have fewer than the initial number
    *                                of connections (or possibly no connections).
    */
-  ParallelPoolConnector(final LDAPConnectionPool pool,
-                        final List<LDAPConnection> connList,
+  ParallelPoolConnector(@NotNull final LDAPConnectionPool pool,
+                        @NotNull final List<LDAPConnection> connList,
                         final int numConnections,
                         final int numThreads,
                         final boolean throwOnConnectFailure)

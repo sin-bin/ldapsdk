@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -56,6 +71,8 @@ import com.unboundid.ldif.LDIFDeleteChangeRecord;
 import com.unboundid.ldif.LDIFModifyChangeRecord;
 import com.unboundid.ldif.LDIFModifyDNChangeRecord;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadLocalRandom;
 import com.unboundid.util.ThreadSafety;
@@ -84,7 +101,8 @@ public final class ScrambleAttributeTransformation
   /**
    * The characters in the set of ASCII numeric digits.
    */
-  private static final char[] ASCII_DIGITS = "0123456789".toCharArray();
+  @NotNull private static final char[] ASCII_DIGITS =
+       "0123456789".toCharArray();
 
 
 
@@ -92,7 +110,7 @@ public final class ScrambleAttributeTransformation
    * The set of ASCII symbols, which are printable ASCII characters that are not
    * letters or digits.
    */
-  private static final char[] ASCII_SYMBOLS =
+  @NotNull private static final char[] ASCII_SYMBOLS =
        " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~".toCharArray();
 
 
@@ -100,7 +118,7 @@ public final class ScrambleAttributeTransformation
   /**
    * The characters in the set of lowercase ASCII letters.
    */
-  private static final char[] LOWERCASE_ASCII_LETTERS =
+  @NotNull private static final char[] LOWERCASE_ASCII_LETTERS =
        "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
 
@@ -108,7 +126,7 @@ public final class ScrambleAttributeTransformation
   /**
    * The characters in the set of uppercase ASCII letters.
    */
-  private static final char[] UPPERCASE_ASCII_LETTERS =
+  @NotNull private static final char[] UPPERCASE_ASCII_LETTERS =
        "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
 
@@ -134,16 +152,16 @@ public final class ScrambleAttributeTransformation
   private final long createTime;
 
   // The schema to use when processing.
-  private final Schema schema;
+  @Nullable private final Schema schema;
 
   // The names of the attributes to scramble.
-  private final Map<String,MatchingRule> attributes;
+  @NotNull private final Map<String,MatchingRule> attributes;
 
   // The names of the JSON fields to scramble.
-  private final Set<String> jsonFields;
+  @NotNull private final Set<String> jsonFields;
 
   // A thread-local collection of reusable random number generators.
-  private final ThreadLocal<Random> randoms;
+  @NotNull private final ThreadLocal<Random> randoms;
 
 
 
@@ -156,7 +174,7 @@ public final class ScrambleAttributeTransformation
    *
    * @param  attributes  The names or OIDs of the attributes to scramble.
    */
-  public ScrambleAttributeTransformation(final String... attributes)
+  public ScrambleAttributeTransformation(@NotNull final String... attributes)
   {
     this(null, null, attributes);
   }
@@ -172,7 +190,8 @@ public final class ScrambleAttributeTransformation
    *
    * @param  attributes  The names or OIDs of the attributes to scramble.
    */
-  public ScrambleAttributeTransformation(final Collection<String> attributes)
+  public ScrambleAttributeTransformation(
+              @NotNull final Collection<String> attributes)
   {
     this(null, null, false, attributes, null);
   }
@@ -196,9 +215,9 @@ public final class ScrambleAttributeTransformation
    *                     random seed should be automatically selected.
    * @param  attributes  The names or OIDs of the attributes to scramble.
    */
-  public ScrambleAttributeTransformation(final Schema schema,
-                                         final Long randomSeed,
-                                         final String... attributes)
+  public ScrambleAttributeTransformation(@Nullable final Schema schema,
+                                         @Nullable final Long randomSeed,
+                                         @NotNull final String... attributes)
   {
     this(schema, randomSeed, false, StaticUtils.toList(attributes), null);
   }
@@ -233,11 +252,11 @@ public final class ScrambleAttributeTransformation
    *                           then scrambling will be applied for all values in
    *                           all fields.
    */
-  public ScrambleAttributeTransformation(final Schema schema,
-                                         final Long randomSeed,
-                                         final boolean scrambleEntryDNs,
-                                         final Collection<String> attributes,
-                                         final Collection<String> jsonFields)
+  public ScrambleAttributeTransformation(@Nullable final Schema schema,
+              @Nullable final Long randomSeed,
+              final boolean scrambleEntryDNs,
+              @NotNull final Collection<String> attributes,
+              @Nullable final Collection<String> jsonFields)
   {
     createTime = System.currentTimeMillis();
     randoms = new ThreadLocal<>();
@@ -330,7 +349,8 @@ public final class ScrambleAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry transformEntry(final Entry e)
+  @Nullable()
+  public Entry transformEntry(@NotNull final Entry e)
   {
     if (e == null)
     {
@@ -365,7 +385,9 @@ public final class ScrambleAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public LDIFChangeRecord transformChangeRecord(final LDIFChangeRecord r)
+  @Nullable()
+  public LDIFChangeRecord transformChangeRecord(
+                               @NotNull final LDIFChangeRecord r)
   {
     if (r == null)
     {
@@ -489,7 +511,8 @@ public final class ScrambleAttributeTransformation
    *          scrambling is required or the provided string cannot be parsed as
    *          a valid DN.
    */
-  public String scrambleDN(final String dn)
+  @Nullable()
+  public String scrambleDN(@Nullable() final String dn)
   {
     if (dn == null)
     {
@@ -521,7 +544,8 @@ public final class ScrambleAttributeTransformation
    * @return  A scrambled copy of the provided DN, or the original DN if no
    *          scrambling is required.
    */
-  public DN scrambleDN(final DN dn)
+  @Nullable()
+  public DN scrambleDN(@Nullable final DN dn)
   {
     if ((dn == null) || dn.isNullDN())
     {
@@ -563,7 +587,8 @@ public final class ScrambleAttributeTransformation
    * @return  A scrambled copy of the provided RDN, or the original RDN if no
    *          scrambling is required.
    */
-  public RDN scrambleRDN(final RDN rdn)
+  @NotNull()
+  public RDN scrambleRDN(@NotNull final RDN rdn)
   {
     boolean changeRequired = false;
     final String[] names = rdn.getAttributeNames();
@@ -605,7 +630,8 @@ public final class ScrambleAttributeTransformation
    * @return  A copy of the provided attribute with its values scrambled, or
    *          the original attribute if no scrambling should be performed.
    */
-  public Attribute scrambleAttribute(final Attribute a)
+  @Nullable()
+  public Attribute scrambleAttribute(@NotNull final Attribute a)
   {
     if ((a == null) || (a.size() == 0))
     {
@@ -752,7 +778,8 @@ public final class ScrambleAttributeTransformation
    *
    * @return  The scrambled value.
    */
-  public String scrambleGeneralizedTime(final String s)
+  @Nullable()
+  public String scrambleGeneralizedTime(@Nullable final String s)
   {
     if (s == null)
     {
@@ -871,7 +898,8 @@ public final class ScrambleAttributeTransformation
    *
    * @return  The scrambled value.
    */
-  public String scrambleNumericValue(final String s)
+  @Nullable()
+  public String scrambleNumericValue(@Nullable final String s)
   {
     if (s == null)
     {
@@ -963,7 +991,8 @@ public final class ScrambleAttributeTransformation
    *
    * @return  The scrambled value.
    */
-  public byte[] scrambleBinaryValue(final byte[] value)
+  @Nullable()
+  public byte[] scrambleBinaryValue(@Nullable final byte[] value)
   {
     if (value == null)
     {
@@ -1017,7 +1046,7 @@ public final class ScrambleAttributeTransformation
 
   /**
    * Scrambles the provided encoded password value.  It is expected that it will
-   * either start with a storage scheme name in curly braces (e.g..,
+   * either start with a storage scheme name in curly braces (e.g.,
    * "{SSHA256}XrgyNdl3fid7KYdhd/Ju47KJQ5PYZqlUlyzxQ28f/QXUnNd9fupj9g==") or
    * that it will use the authentication password syntax as described in RFC
    * 3112 in which the scheme name is separated from the rest of the password by
@@ -1030,7 +1059,8 @@ public final class ScrambleAttributeTransformation
    *
    * @return  The scrambled value.
    */
-  public String scrambleEncodedPassword(final String s)
+  @Nullable()
+  public String scrambleEncodedPassword(@Nullable final String s)
   {
     if (s == null)
     {
@@ -1085,7 +1115,8 @@ public final class ScrambleAttributeTransformation
    *
    * @return  The scrambled value.
    */
-  public String scrambleJSONObject(final String s)
+  @Nullable()
+  public String scrambleJSONObject(@Nullable final String s)
   {
     if (s == null)
     {
@@ -1151,7 +1182,8 @@ public final class ScrambleAttributeTransformation
    *
    * @return  The scrambled JSON value.
    */
-  private JSONValue scrambleJSONValue(final JSONValue v,
+  @NotNull()
+  private JSONValue scrambleJSONValue(@NotNull final JSONValue v,
                                       final boolean scrambleAllFields)
   {
     if (v instanceof JSONArray)
@@ -1243,7 +1275,8 @@ public final class ScrambleAttributeTransformation
    *
    * @return  The array with any appropriate scrambling performed.
    */
-  private JSONArray scrambleObjectsInArray(final JSONArray a)
+  @NotNull()
+  private JSONArray scrambleObjectsInArray(@NotNull final JSONArray a)
   {
     final List<JSONValue> originalValues = a.getValues();
     final ArrayList<JSONValue> scrambledValues =
@@ -1294,7 +1327,8 @@ public final class ScrambleAttributeTransformation
    *
    * @return  The scrambled value.
    */
-  public String scrambleString(final String s)
+  @Nullable()
+  public String scrambleString(@Nullable final String s)
   {
     if (s == null)
     {
@@ -1339,7 +1373,8 @@ public final class ScrambleAttributeTransformation
    *
    * @return  A randomly-selected character from the provided character set.
    */
-  private static char randomCharacter(final char[] set, final Random r)
+  private static char randomCharacter(@NotNull final char[] set,
+                                      @NotNull final Random r)
   {
     return set[r.nextInt(set.length)];
   }
@@ -1358,7 +1393,8 @@ public final class ScrambleAttributeTransformation
    * @return  A random number generator to use in the course of generating a
    *          value.
    */
-  private Random getRandom(final String value)
+  @NotNull()
+  private Random getRandom(@NotNull final String value)
   {
     Random r = randoms.get();
     if (r == null)
@@ -1388,7 +1424,8 @@ public final class ScrambleAttributeTransformation
    * @return  A random number generator to use in the course of generating a
    *          value.
    */
-  private Random getRandom(final byte[] value)
+  @NotNull()
+  private Random getRandom(@NotNull final byte[] value)
   {
     Random r = randoms.get();
     if (r == null)
@@ -1410,7 +1447,9 @@ public final class ScrambleAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry translate(final Entry original, final long firstLineNumber)
+  @Nullable()
+  public Entry translate(@NotNull final Entry original,
+                         final long firstLineNumber)
   {
     return transformEntry(original);
   }
@@ -1421,7 +1460,8 @@ public final class ScrambleAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public LDIFChangeRecord translate(final LDIFChangeRecord original,
+  @Nullable()
+  public LDIFChangeRecord translate(@NotNull final LDIFChangeRecord original,
                                     final long firstLineNumber)
   {
     return transformChangeRecord(original);
@@ -1433,7 +1473,8 @@ public final class ScrambleAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry translateEntryToWrite(final Entry original)
+  @Nullable()
+  public Entry translateEntryToWrite(@NotNull final Entry original)
   {
     return transformEntry(original);
   }
@@ -1444,8 +1485,9 @@ public final class ScrambleAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public LDIFChangeRecord translateChangeRecordToWrite(
-                               final LDIFChangeRecord original)
+                               @NotNull final LDIFChangeRecord original)
   {
     return transformChangeRecord(original);
   }

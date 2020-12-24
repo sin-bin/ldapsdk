@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,7 @@ import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -78,7 +94,7 @@ public final class AuthorizationIdentityRequestControl
    * The OID (2.16.840.1.113730.3.4.16) for the authorization identity request
    * control.
    */
-  public static final String AUTHORIZATION_IDENTITY_REQUEST_OID =
+  @NotNull public static final String AUTHORIZATION_IDENTITY_REQUEST_OID =
        "2.16.840.1.113730.3.4.16";
 
 
@@ -124,7 +140,7 @@ public final class AuthorizationIdentityRequestControl
    * @throws  LDAPException  If the provided control cannot be decoded as an
    *                         authorization identity request control.
    */
-  public AuthorizationIdentityRequestControl(final Control control)
+  public AuthorizationIdentityRequestControl(@NotNull final Control control)
          throws LDAPException
   {
     super(control);
@@ -142,6 +158,7 @@ public final class AuthorizationIdentityRequestControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_AUTHZID_REQUEST.get();
@@ -153,7 +170,7 @@ public final class AuthorizationIdentityRequestControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("AuthorizationIdentityRequestControl(isCritical=");
     buffer.append(isCritical());

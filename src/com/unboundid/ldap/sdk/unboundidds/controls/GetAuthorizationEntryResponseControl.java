@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -39,6 +54,8 @@ import com.unboundid.ldap.sdk.ReadOnlyEntry;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -90,7 +107,7 @@ public final class GetAuthorizationEntryResponseControl
    * The OID (1.3.6.1.4.1.30221.2.5.6) for the get authorization entry response
    * control.
    */
-  public static final String GET_AUTHORIZATION_ENTRY_RESPONSE_OID =
+  @NotNull public static final String GET_AUTHORIZATION_ENTRY_RESPONSE_OID =
        "1.3.6.1.4.1.30221.2.5.6";
 
 
@@ -159,16 +176,16 @@ public final class GetAuthorizationEntryResponseControl
   private final boolean isAuthenticated;
 
   // The entry for the authentication identity, if available.
-  private final ReadOnlyEntry authNEntry;
+  @Nullable private final ReadOnlyEntry authNEntry;
 
   // The entry for the authorization identity, if available.
-  private final ReadOnlyEntry authZEntry;
+  @Nullable private final ReadOnlyEntry authZEntry;
 
   // The authID for the authentication identity, if available.
-  private final String authNID;
+  @Nullable private final String authNID;
 
   // The authID for the authorization identity, if available.
-  private final String authZID;
+  @Nullable private final String authZID;
 
 
 
@@ -216,9 +233,10 @@ public final class GetAuthorizationEntryResponseControl
    *                          are the same.
    */
   public GetAuthorizationEntryResponseControl(final boolean isAuthenticated,
-              final boolean identitiesMatch, final String authNID,
-              final ReadOnlyEntry authNEntry, final String authZID,
-              final ReadOnlyEntry authZEntry)
+              final boolean identitiesMatch, @Nullable final String authNID,
+              @Nullable final ReadOnlyEntry authNEntry,
+              @Nullable final String authZID,
+              @Nullable final ReadOnlyEntry authZEntry)
   {
     super(GET_AUTHORIZATION_ENTRY_RESPONSE_OID, false,
           encodeValue(isAuthenticated, identitiesMatch, authNID, authNEntry,
@@ -247,9 +265,9 @@ public final class GetAuthorizationEntryResponseControl
    * @throws  LDAPException  If the provided control cannot be decoded as a get
    *                         authorization entry response control.
    */
-  public GetAuthorizationEntryResponseControl(final String oid,
-                                              final boolean isCritical,
-                                              final ASN1OctetString value)
+  public GetAuthorizationEntryResponseControl(@NotNull final String oid,
+              final boolean isCritical,
+              @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     super(oid, isCritical,  value);
@@ -321,9 +339,11 @@ public final class GetAuthorizationEntryResponseControl
    * {@inheritDoc}
    */
   @Override()
-  public GetAuthorizationEntryResponseControl decodeControl(final String oid,
-                                                   final boolean isCritical,
-                                                   final ASN1OctetString value)
+  @NotNull()
+  public GetAuthorizationEntryResponseControl decodeControl(
+              @NotNull final String oid,
+              final boolean isCritical,
+              @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     return new GetAuthorizationEntryResponseControl(oid, isCritical, value);
@@ -346,8 +366,9 @@ public final class GetAuthorizationEntryResponseControl
    *                         decode the get authorization entry response control
    *                         contained in the provided result.
    */
-  public static GetAuthorizationEntryResponseControl
-                     get(final BindResult result)
+  @Nullable()
+  public static GetAuthorizationEntryResponseControl get(
+                     @NotNull final BindResult result)
          throws LDAPException
   {
     final Control c =
@@ -399,12 +420,13 @@ public final class GetAuthorizationEntryResponseControl
    *
    * @return  The ASN.1 octet string suitable for use as the control value.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(final boolean isAuthenticated,
-                                             final boolean identitiesMatch,
-                                             final String authNID,
-                                             final ReadOnlyEntry authNEntry,
-                                             final String authZID,
-                                             final ReadOnlyEntry authZEntry)
+                      final boolean identitiesMatch,
+                      @Nullable final String authNID,
+                      @Nullable final ReadOnlyEntry authNEntry,
+                      @Nullable final String authZID,
+                      @Nullable final ReadOnlyEntry authZEntry)
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(4);
     elements.add(new ASN1Boolean(TYPE_IS_AUTHENTICATED, isAuthenticated));
@@ -434,9 +456,10 @@ public final class GetAuthorizationEntryResponseControl
    *
    * @return  The ASN.1 sequence containing the encoded auth entry.
    */
+  @NotNull()
   private static ASN1Sequence encodeAuthEntry(final byte type,
-                                              final String authID,
-                                              final ReadOnlyEntry authEntry)
+                      @Nullable final String authID,
+                      @NotNull final ReadOnlyEntry authEntry)
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(3);
 
@@ -474,7 +497,8 @@ public final class GetAuthorizationEntryResponseControl
    *
    * @throws  LDAPException  If a problem occurs while performing LDAP parsing.
    */
-  private static Object[] decodeAuthEntry(final ASN1Element element)
+  @NotNull()
+  private static Object[] decodeAuthEntry(@NotNull final ASN1Element element)
           throws ASN1Exception, LDAPException
   {
     String authID = null;
@@ -547,6 +571,7 @@ public final class GetAuthorizationEntryResponseControl
    *          identity in the directory server, or {@code null} if it is not
    *          available.
    */
+  @Nullable()
   public String getAuthNID()
   {
     if ((authNID == null) && identitiesMatch)
@@ -566,6 +591,7 @@ public final class GetAuthorizationEntryResponseControl
    * @return  The entry for the user specified as the authentication identity,
    *          or {@code null} if it is not available.
    */
+  @Nullable()
   public ReadOnlyEntry getAuthNEntry()
   {
     if ((authNEntry == null) && identitiesMatch)
@@ -586,6 +612,7 @@ public final class GetAuthorizationEntryResponseControl
    *          identity in the directory server, or {@code null} if it is not
    *          available.
    */
+  @Nullable()
   public String getAuthZID()
   {
     if ((authZID == null) && identitiesMatch)
@@ -605,6 +632,7 @@ public final class GetAuthorizationEntryResponseControl
    * @return  The entry for the user specified as the authorization identity,
    *          or {@code null} if it is not available.
    */
+  @Nullable()
   public ReadOnlyEntry getAuthZEntry()
   {
     if ((authZEntry == null) && identitiesMatch)
@@ -621,6 +649,7 @@ public final class GetAuthorizationEntryResponseControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_GET_AUTHORIZATION_ENTRY_RESPONSE.get();
@@ -632,7 +661,7 @@ public final class GetAuthorizationEntryResponseControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("GetAuthorizationEntryResponseControl(identitiesMatch=");
     buffer.append(identitiesMatch);

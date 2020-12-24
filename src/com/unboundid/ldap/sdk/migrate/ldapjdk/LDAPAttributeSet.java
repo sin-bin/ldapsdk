@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,8 @@ import java.util.Iterator;
 
 import com.unboundid.util.Mutable;
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -60,7 +77,7 @@ public class LDAPAttributeSet
 
 
   // The list of LDAPAttribute objects.
-  private final ArrayList<LDAPAttribute> attributes;
+  @NotNull private final ArrayList<LDAPAttribute> attributes;
 
 
 
@@ -79,7 +96,7 @@ public class LDAPAttributeSet
    *
    * @param  attrs  The set of attributes to include in the set.
    */
-  public LDAPAttributeSet(final LDAPAttribute[] attrs)
+  public LDAPAttributeSet(@NotNull final LDAPAttribute[] attrs)
   {
     attributes = new ArrayList<>(Arrays.asList(attrs));
   }
@@ -91,7 +108,7 @@ public class LDAPAttributeSet
    *
    * @param  attrs  The set of attributes to include in the set.
    */
-  private LDAPAttributeSet(final ArrayList<LDAPAttribute> attrs)
+  private LDAPAttributeSet(@NotNull final ArrayList<LDAPAttribute> attrs)
   {
     attributes = new ArrayList<>(attrs);
   }
@@ -103,6 +120,7 @@ public class LDAPAttributeSet
    *
    * @return  An enumeration of the attributes in this set.
    */
+  @NotNull()
   public Enumeration<LDAPAttribute> getAttributes()
   {
     return new IterableEnumeration<>(attributes);
@@ -119,7 +137,8 @@ public class LDAPAttributeSet
    * @return  A new attribute set with all attributes from this set containing
    *          the specified subtype.
    */
-  public LDAPAttributeSet getSubset(final String subtype)
+  @NotNull()
+  public LDAPAttributeSet getSubset(@NotNull final String subtype)
   {
     final ArrayList<LDAPAttribute> subset = new ArrayList<>(attributes.size());
 
@@ -145,7 +164,8 @@ public class LDAPAttributeSet
    * @return  The requested attribute, or {@code null} if there is no such
    *          attribute in this set.
    */
-  public LDAPAttribute getAttribute(final String attrName)
+  @Nullable()
+  public LDAPAttribute getAttribute(@NotNull final String attrName)
   {
     for (final LDAPAttribute a : attributes)
     {
@@ -171,7 +191,9 @@ public class LDAPAttributeSet
    * @return  The attribute with the specified base name and language subtype,
    *          or {@code null} if there is no such attribute.
    */
-  public LDAPAttribute getAttribute(final String attrName, final String lang)
+  @Nullable()
+  public LDAPAttribute getAttribute(@NotNull final String attrName,
+                                    @Nullable final String lang)
   {
     if (lang == null)
     {
@@ -214,6 +236,7 @@ public class LDAPAttributeSet
    *
    * @throws  IndexOutOfBoundsException  If the provided index invalid.
    */
+  @NotNull()
   public LDAPAttribute elementAt(final int index)
          throws IndexOutOfBoundsException
   {
@@ -227,7 +250,7 @@ public class LDAPAttributeSet
    *
    * @param  attr  The attribute to be added to this set.
    */
-  public void add(final LDAPAttribute attr)
+  public void add(@NotNull final LDAPAttribute attr)
   {
     for (final LDAPAttribute a : attributes)
     {
@@ -251,7 +274,7 @@ public class LDAPAttributeSet
    *
    * @param  name  The name of the attribute to remove.
    */
-  public void remove(final String name)
+  public void remove(@NotNull final String name)
   {
     final Iterator<LDAPAttribute> iterator = attributes.iterator();
     while (iterator.hasNext())
@@ -299,6 +322,7 @@ public class LDAPAttributeSet
    *
    * @return  A duplicate of this attribute set.
    */
+  @NotNull()
   public LDAPAttributeSet duplicate()
   {
     return new LDAPAttributeSet(attributes);
@@ -312,6 +336,7 @@ public class LDAPAttributeSet
    * @return  A string representation of this attribute set.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return attributes.toString();

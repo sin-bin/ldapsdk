@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,8 @@ import com.unboundid.ldap.sdk.DeleteRequest;
 import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.ldap.sdk.ReadOnlyDeleteRequest;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -47,10 +64,10 @@ final class InterceptedDeleteOperation
                  InMemoryInterceptedDeleteResult
 {
   // The delete request for this operation.
-  private DeleteRequest deleteRequest;
+  @NotNull private DeleteRequest deleteRequest;
 
   // The delete result for this operation.
-  private LDAPResult deleteResult;
+  @Nullable private LDAPResult deleteResult;
 
 
 
@@ -67,9 +84,9 @@ final class InterceptedDeleteOperation
    *                           client.
    */
   InterceptedDeleteOperation(
-       final LDAPListenerClientConnection clientConnection, final int messageID,
-       final DeleteRequestProtocolOp requestOp,
-       final Control... requestControls)
+       @NotNull final LDAPListenerClientConnection clientConnection,
+       final int messageID, @NotNull final DeleteRequestProtocolOp requestOp,
+       @Nullable final Control... requestControls)
   {
     super(clientConnection, messageID);
 
@@ -83,6 +100,7 @@ final class InterceptedDeleteOperation
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ReadOnlyDeleteRequest getRequest()
   {
     return deleteRequest;
@@ -94,7 +112,7 @@ final class InterceptedDeleteOperation
    * {@inheritDoc}
    */
   @Override()
-  public void setRequest(final DeleteRequest deleteRequest)
+  public void setRequest(@NotNull final DeleteRequest deleteRequest)
   {
     this.deleteRequest = deleteRequest;
   }
@@ -105,6 +123,7 @@ final class InterceptedDeleteOperation
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public LDAPResult getResult()
   {
     return deleteResult;
@@ -116,7 +135,7 @@ final class InterceptedDeleteOperation
    * {@inheritDoc}
    */
   @Override()
-  public void setResult(final LDAPResult deleteResult)
+  public void setResult(@NotNull final LDAPResult deleteResult)
   {
     this.deleteResult = deleteResult;
   }
@@ -127,7 +146,7 @@ final class InterceptedDeleteOperation
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("InterceptedDeleteOperation(");
     appendCommonToString(buffer);

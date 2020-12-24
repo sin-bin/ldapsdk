@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,7 @@ import java.nio.ByteBuffer;
 
 import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -44,7 +60,7 @@ public final class ASN1Writer
   /**
    * The thread-local buffers that will be used for encoding the elements.
    */
-  private static final ThreadLocal<ByteStringBuffer> buffers =
+  @NotNull private static final ThreadLocal<ByteStringBuffer> BUFFERS =
        new ThreadLocal<>();
 
 
@@ -76,17 +92,17 @@ public final class ASN1Writer
    *
    * @throws  IOException  If a problem occurs while writing the element.
    */
-  public static void writeElement(final ASN1Element element,
-                                  final OutputStream outputStream)
+  public static void writeElement(@NotNull final ASN1Element element,
+                                  @NotNull final OutputStream outputStream)
          throws IOException
   {
     Debug.debugASN1Write(element);
 
-    ByteStringBuffer buffer = buffers.get();
+    ByteStringBuffer buffer = BUFFERS.get();
     if (buffer == null)
     {
       buffer = new ByteStringBuffer();
-      buffers.set(buffer);
+      BUFFERS.set(buffer);
     }
 
     element.encodeTo(buffer);
@@ -119,17 +135,17 @@ public final class ASN1Writer
    *                                   enough space between the position and
    *                                   the limit to hold the encoded element.
    */
-  public static void writeElement(final ASN1Element element,
-                                  final ByteBuffer buffer)
+  public static void writeElement(@NotNull final ASN1Element element,
+                                  @NotNull final ByteBuffer buffer)
          throws BufferOverflowException
   {
     Debug.debugASN1Write(element);
 
-    ByteStringBuffer b = buffers.get();
+    ByteStringBuffer b = BUFFERS.get();
     if (b == null)
     {
       b = new ByteStringBuffer();
-      buffers.set(b);
+      BUFFERS.set(b);
     }
 
     element.encodeTo(b);

@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,9 +48,9 @@ import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.controls.AuthorizationIdentityRequestControl;
 import com.unboundid.ldap.sdk.controls.DontUseCopyRequestControl;
+import com.unboundid.ldap.sdk.controls.DraftLDUPSubentriesRequestControl;
 import com.unboundid.ldap.sdk.controls.ManageDsaITRequestControl;
 import com.unboundid.ldap.sdk.controls.PermissiveModifyRequestControl;
-import com.unboundid.ldap.sdk.controls.SubentriesRequestControl;
 import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
 import com.unboundid.ldap.sdk.experimental.
             DraftBeheraLDAPPasswordPolicy10RequestControl;
@@ -44,6 +59,8 @@ import com.unboundid.ldap.sdk.experimental.
 import com.unboundid.util.Base64;
 import com.unboundid.util.Debug;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -90,7 +107,7 @@ public final class ControlArgument
   /**
    * A map of human-readable names to the corresponding numeric OIDs.
    */
-  private static final Map<String,String> OIDS_BY_NAME;
+  @NotNull private static final Map<String,String> OIDS_BY_NAME;
   static
   {
     final HashMap<String,String> oidsByName =
@@ -127,13 +144,26 @@ public final class ControlArgument
     oidsByName.put("no-operation",
          DraftZeilengaLDAPNoOp12RequestControl.NO_OP_REQUEST_OID);
 
-    // The LDAP subentries request control.
+    // The LDAP subentries request control as described in
+    // draft-ietf-ldup-subentry.
     oidsByName.put("subentries",
-         SubentriesRequestControl.SUBENTRIES_REQUEST_OID);
+         DraftLDUPSubentriesRequestControl.SUBENTRIES_REQUEST_OID);
     oidsByName.put("ldapsubentries",
-         SubentriesRequestControl.SUBENTRIES_REQUEST_OID);
+         DraftLDUPSubentriesRequestControl.SUBENTRIES_REQUEST_OID);
     oidsByName.put("ldap-subentries",
-         SubentriesRequestControl.SUBENTRIES_REQUEST_OID);
+         DraftLDUPSubentriesRequestControl.SUBENTRIES_REQUEST_OID);
+    oidsByName.put("ldupsubentries",
+         DraftLDUPSubentriesRequestControl.SUBENTRIES_REQUEST_OID);
+    oidsByName.put("ldup-subentries",
+         DraftLDUPSubentriesRequestControl.SUBENTRIES_REQUEST_OID);
+    oidsByName.put("draftldupsubentries",
+         DraftLDUPSubentriesRequestControl.SUBENTRIES_REQUEST_OID);
+    oidsByName.put("draft-ldup-subentries",
+         DraftLDUPSubentriesRequestControl.SUBENTRIES_REQUEST_OID);
+    oidsByName.put("draftietfldupsubentries",
+         DraftLDUPSubentriesRequestControl.SUBENTRIES_REQUEST_OID);
+    oidsByName.put("draft-ietf-ldup-subentries",
+         DraftLDUPSubentriesRequestControl.SUBENTRIES_REQUEST_OID);
 
     // The manage DSA IT request control.
     oidsByName.put("managedsait",
@@ -177,6 +207,12 @@ public final class ControlArgument
     oidsByName.put("account-usable", "1.3.6.1.4.1.42.2.27.9.5.8");
     oidsByName.put("account-usability", "1.3.6.1.4.1.42.2.27.9.5.8");
 
+    // The generate password request control.
+    oidsByName.put("generatepassword", "1.3.6.1.4.1.30221.2.5.58");
+    oidsByName.put("generate-password", "1.3.6.1.4.1.30221.2.5.58");
+    oidsByName.put("generatepw", "1.3.6.1.4.1.30221.2.5.58");
+    oidsByName.put("generate-pw", "1.3.6.1.4.1.30221.2.5.58");
+
     // The get backend set ID request control.
     oidsByName.put("backendsetid", "1.3.6.1.4.1.30221.2.5.33");
     oidsByName.put("getbackendsetid", "1.3.6.1.4.1.30221.2.5.33");
@@ -201,6 +237,14 @@ public final class ControlArgument
     oidsByName.put("password-policy-state-issues", "1.3.6.1.4.1.30221.2.5.46");
     oidsByName.put("get-password-policy-state-issues",
          "1.3.6.1.4.1.30221.2.5.46");
+
+    // The get recent login history request control.
+    oidsByName.put("loginhistory", "1.3.6.1.4.1.30221.2.5.61");
+    oidsByName.put("recentloginhistory", "1.3.6.1.4.1.30221.2.5.61");
+    oidsByName.put("getrecentloginhistory", "1.3.6.1.4.1.30221.2.5.61");
+    oidsByName.put("login-history", "1.3.6.1.4.1.30221.2.5.61");
+    oidsByName.put("recent-login-history", "1.3.6.1.4.1.30221.2.5.61");
+    oidsByName.put("get-recent-login-history", "1.3.6.1.4.1.30221.2.5.61");
 
     // The get server ID request control.
     oidsByName.put("serverid", "1.3.6.1.4.1.30221.2.5.14");
@@ -295,13 +339,13 @@ public final class ControlArgument
 
 
   // The argument value validators that have been registered for this argument.
-  private final List<ArgumentValueValidator> validators;
+  @NotNull private final List<ArgumentValueValidator> validators;
 
   // The list of default values for this argument.
-  private final List<Control> defaultValues;
+  @Nullable private final List<Control> defaultValues;
 
   // The set of values assigned to this argument.
-  private final List<Control> values;
+  @NotNull private final List<Control> values;
 
 
 
@@ -322,8 +366,9 @@ public final class ControlArgument
    * @throws  ArgumentException  If there is a problem with the definition of
    *                             this argument.
    */
-  public ControlArgument(final Character shortIdentifier,
-                         final String longIdentifier, final String description)
+  public ControlArgument(@Nullable final Character shortIdentifier,
+                         @Nullable final String longIdentifier,
+                         @NotNull final String description)
          throws ArgumentException
   {
     this(shortIdentifier, longIdentifier, false, 0, null, description);
@@ -357,11 +402,12 @@ public final class ControlArgument
    * @throws  ArgumentException  If there is a problem with the definition of
    *                             this argument.
    */
-  public ControlArgument(final Character shortIdentifier,
-                         final String longIdentifier, final boolean isRequired,
+  public ControlArgument(@Nullable final Character shortIdentifier,
+                         @Nullable final String longIdentifier,
+                         final boolean isRequired,
                          final int maxOccurrences,
-                         final String valuePlaceholder,
-                         final String description)
+                         @Nullable final String valuePlaceholder,
+                         @NotNull final String description)
          throws ArgumentException
   {
     this(shortIdentifier, longIdentifier, isRequired,  maxOccurrences,
@@ -398,11 +444,13 @@ public final class ControlArgument
    * @throws  ArgumentException  If there is a problem with the definition of
    *                             this argument.
    */
-  public ControlArgument(final Character shortIdentifier,
-                         final String longIdentifier, final boolean isRequired,
+  public ControlArgument(@Nullable final Character shortIdentifier,
+                         @Nullable final String longIdentifier,
+                         final boolean isRequired,
                          final int maxOccurrences,
-                         final String valuePlaceholder,
-                         final String description, final Control defaultValue)
+                         @Nullable final String valuePlaceholder,
+                         @NotNull final String description,
+                         @Nullable final Control defaultValue)
          throws ArgumentException
   {
     this(shortIdentifier, longIdentifier, isRequired, maxOccurrences,
@@ -441,12 +489,13 @@ public final class ControlArgument
    * @throws  ArgumentException  If there is a problem with the definition of
    *                             this argument.
    */
-  public ControlArgument(final Character shortIdentifier,
-                         final String longIdentifier, final boolean isRequired,
+  public ControlArgument(@Nullable final Character shortIdentifier,
+                         @Nullable final String longIdentifier,
+                         final boolean isRequired,
                          final int maxOccurrences,
-                         final String valuePlaceholder,
-                         final String description,
-                         final List<Control> defaultValues)
+                         @Nullable final String valuePlaceholder,
+                         @NotNull final String description,
+                         @Nullable final List<Control> defaultValues)
          throws ArgumentException
   {
     super(shortIdentifier, longIdentifier, isRequired,  maxOccurrences,
@@ -476,7 +525,7 @@ public final class ControlArgument
    *
    * @param  source  The source argument to use for this argument.
    */
-  private ControlArgument(final ControlArgument source)
+  private ControlArgument(@NotNull final ControlArgument source)
   {
     super(source);
 
@@ -494,6 +543,7 @@ public final class ControlArgument
    * @return   The list of default values for this argument, or {@code null} if
    *           there are no default values.
    */
+  @Nullable()
   public List<Control> getDefaultValues()
   {
     return defaultValues;
@@ -509,7 +559,7 @@ public final class ControlArgument
    * @param  validator  The argument value validator to be invoked.  It must not
    *                    be {@code null}.
    */
-  public void addValueValidator(final ArgumentValueValidator validator)
+  public void addValueValidator(@NotNull final ArgumentValueValidator validator)
   {
     validators.add(validator);
   }
@@ -520,7 +570,7 @@ public final class ControlArgument
    * {@inheritDoc}
    */
   @Override()
-  protected void addValue(final String valueString)
+  protected void addValue(@NotNull final String valueString)
             throws ArgumentException
   {
     String oid = null;
@@ -632,6 +682,7 @@ public final class ControlArgument
    *          provided, or {@code null} if there is no value and no default
    *          value.
    */
+  @Nullable()
   public Control getValue()
   {
     if (values.isEmpty())
@@ -660,6 +711,7 @@ public final class ControlArgument
    * @return  The set of values for this argument, or the default values if none
    *          were provided.
    */
+  @NotNull()
   public List<Control> getValues()
   {
     if (values.isEmpty() && (defaultValues != null))
@@ -676,6 +728,7 @@ public final class ControlArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<String> getValueStringRepresentations(final boolean useDefault)
   {
     final List<Control> controls;
@@ -747,6 +800,7 @@ public final class ControlArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getDataTypeName()
   {
     return INFO_CONTROL_TYPE_NAME.get();
@@ -758,6 +812,7 @@ public final class ControlArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getValueConstraints()
   {
     return INFO_CONTROL_CONSTRAINTS.get();
@@ -781,6 +836,7 @@ public final class ControlArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ControlArgument getCleanCopy()
   {
     return new ControlArgument(this);
@@ -792,43 +848,40 @@ public final class ControlArgument
    * {@inheritDoc}
    */
   @Override()
-  protected void addToCommandLine(final List<String> argStrings)
+  protected void addToCommandLine(@NotNull final List<String> argStrings)
   {
-    if (values != null)
+    final StringBuilder buffer = new StringBuilder();
+    for (final Control c : values)
     {
-      final StringBuilder buffer = new StringBuilder();
-      for (final Control c : values)
+      argStrings.add(getIdentifierString());
+
+      if (isSensitive())
       {
-        argStrings.add(getIdentifierString());
-
-        if (isSensitive())
-        {
-          argStrings.add("***REDACTED***");
-          continue;
-        }
-
-        buffer.setLength(0);
-        buffer.append(c.getOID());
-        buffer.append(':');
-        buffer.append(c.isCritical());
-
-        if (c.hasValue())
-        {
-          final byte[] valueBytes = c.getValue().getValue();
-          if (StaticUtils.isPrintableString(valueBytes))
-          {
-            buffer.append(':');
-            buffer.append(c.getValue().stringValue());
-          }
-          else
-          {
-            buffer.append("::");
-            Base64.encode(valueBytes, buffer);
-          }
-        }
-
-        argStrings.add(buffer.toString());
+        argStrings.add("***REDACTED***");
+        continue;
       }
+
+      buffer.setLength(0);
+      buffer.append(c.getOID());
+      buffer.append(':');
+      buffer.append(c.isCritical());
+
+      if (c.hasValue())
+      {
+        final byte[] valueBytes = c.getValue().getValue();
+        if (StaticUtils.isPrintableString(valueBytes))
+        {
+          buffer.append(':');
+          buffer.append(c.getValue().stringValue());
+        }
+        else
+        {
+          buffer.append("::");
+          Base64.encode(valueBytes, buffer);
+        }
+      }
+
+      argStrings.add(buffer.toString());
     }
   }
 
@@ -838,7 +891,7 @@ public final class ControlArgument
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ControlArgument(");
     appendBasicToStringInfo(buffer);

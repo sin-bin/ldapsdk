@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -41,6 +56,8 @@ import com.unboundid.ldap.protocol.LDAPMessage;
 import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.InternalUseOnly;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 
 import static com.unboundid.ldap.sdk.LDAPMessages.*;
@@ -57,27 +74,28 @@ final class LDAPConnectionInternals
   /**
    * A count of the number of active connections.
    */
-  private static final AtomicLong ACTIVE_CONNECTION_COUNT = new AtomicLong(0L);
+  @NotNull private static final AtomicLong ACTIVE_CONNECTION_COUNT =
+       new AtomicLong(0L);
 
 
 
   /**
    * A set of thread-local ASN.1 buffers used to prepare messages to be written.
    */
-  private static final AtomicReference<ThreadLocal<ASN1Buffer>> ASN1_BUFFERS =
-       new AtomicReference<>(new ThreadLocal<ASN1Buffer>());
+  @NotNull private static final AtomicReference<ThreadLocal<ASN1Buffer>>
+       ASN1_BUFFERS = new AtomicReference<>(new ThreadLocal<ASN1Buffer>());
 
 
 
   // The counter that will be used to obtain the next message ID to use when
   // sending requests to the server.
-  private final AtomicInteger nextMessageID;
+  @NotNull private final AtomicInteger nextMessageID;
 
   // Indicates whether to operate in synchronous mode.
   private final boolean synchronousMode;
 
   // The inet address to which the connection is established.
-  private final InetAddress inetAddress;
+  @NotNull private final InetAddress inetAddress;
 
   // The port of the server to which the connection is established.
   private final int port;
@@ -86,23 +104,26 @@ final class LDAPConnectionInternals
   private final long connectTime;
 
   // The LDAP connection with which this connection internals is associated.
-  private final LDAPConnection connection;
+  @NotNull private final LDAPConnection connection;
 
   // The LDAP connection reader with which this connection internals is
   // associated.
-  private final LDAPConnectionReader connectionReader;
+  @Nullable private final LDAPConnectionReader connectionReader;
 
   // The output stream used to send requests to the server.
-  private volatile OutputStream outputStream;
+  @Nullable private volatile OutputStream outputStream;
 
   // The SASL client used to provide communication security via QoP.
-  private volatile SaslClient saslClient;
+  @Nullable private volatile SaslClient saslClient;
 
   // The socket used to communicate with the directory server.
-  private volatile Socket socket;
+  @Nullable private volatile Socket socket;
 
   // The address of the server to which the connection is established.
-  private final String host;
+  @NotNull private final String host;
+
+  // The write timeout handler for this connection.
+  @NotNull private final WriteTimeoutHandler writeTimeoutHandler;
 
 
 
@@ -129,11 +150,12 @@ final class LDAPConnectionInternals
    * @throws  IOException  If a problem occurs while establishing the
    *                       connection.
    */
-  LDAPConnectionInternals(final LDAPConnection connection,
-                          final LDAPConnectionOptions options,
-                          final SocketFactory socketFactory, final String host,
-                          final InetAddress inetAddress, final int port,
-                          final int timeout)
+  LDAPConnectionInternals(@NotNull final LDAPConnection connection,
+                          @NotNull final LDAPConnectionOptions options,
+                          @NotNull final SocketFactory socketFactory,
+                          @NotNull final String host,
+                          @NotNull final InetAddress inetAddress,
+                          final int port, final int timeout)
        throws IOException
 
   {
@@ -152,6 +174,8 @@ final class LDAPConnectionInternals
     synchronousMode = options.useSynchronousMode();
     saslClient      = null;
     socket          = null;
+
+    writeTimeoutHandler = new WriteTimeoutHandler(connection);
 
     try
     {
@@ -175,11 +199,20 @@ final class LDAPConnectionInternals
         socket.close();
       }
 
+      writeTimeoutHandler.destroy();
+
       throw new IOException(le);
     }
+
     try
     {
       Debug.debugConnect(host, port, connection);
+
+      final LDAPConnectionLogger logger = options.getConnectionLogger();
+      if (logger != null)
+      {
+        logger.logConnect(connection, host, inetAddress, port);
+      }
 
       if (options.getReceiveBufferSize() > 0)
       {
@@ -219,6 +252,8 @@ final class LDAPConnectionInternals
         Debug.debugException(e);
       }
 
+      writeTimeoutHandler.destroy();
+
       throw ioe;
     }
 
@@ -248,6 +283,7 @@ final class LDAPConnectionInternals
    * @return  The LDAP connection with which this connection internals object is
    *          associated.
    */
+  @NotNull()
   LDAPConnection getConnection()
   {
     return connection;
@@ -263,6 +299,7 @@ final class LDAPConnectionInternals
    *          or {@code null} if the connection is operating in synchronous mode
    *          and is not using a connection reader.
    */
+  @Nullable()
   LDAPConnectionReader getConnectionReader()
   {
     return connectionReader;
@@ -275,6 +312,7 @@ final class LDAPConnectionInternals
    *
    * @return  The inet address to which this connection is established.
    */
+  @NotNull()
   InetAddress getInetAddress()
   {
     return inetAddress;
@@ -288,6 +326,7 @@ final class LDAPConnectionInternals
    *
    * @return  The address of the server to which this connection is established.
    */
+  @NotNull()
   String getHost()
   {
     return host;
@@ -312,6 +351,7 @@ final class LDAPConnectionInternals
    *
    * @return  The socket used to communicate with the directory server.
    */
+  @Nullable()
   Socket getSocket()
   {
     return socket;
@@ -326,7 +366,7 @@ final class LDAPConnectionInternals
    *
    * @param  socket  The socket used to communicate with the directory server.
    */
-  void setSocket(final Socket socket)
+  void setSocket(@NotNull final Socket socket)
   {
     this.socket = socket;
   }
@@ -338,6 +378,7 @@ final class LDAPConnectionInternals
    *
    * @return  The output stream used to send requests to the server.
    */
+  @Nullable()
   OutputStream getOutputStream()
   {
     return outputStream;
@@ -353,7 +394,7 @@ final class LDAPConnectionInternals
    */
   boolean isConnected()
   {
-    return socket.isConnected();
+    return ((socket != null) && socket.isConnected());
   }
 
 
@@ -384,7 +425,7 @@ final class LDAPConnectionInternals
    * @throws  LDAPException  If a problem occurs while converting this
    *                         connection to use TLS.
    */
-  void convertToTLS(final SSLSocketFactory sslSocketFactory)
+  void convertToTLS(@NotNull final SSLSocketFactory sslSocketFactory)
        throws LDAPException
   {
     outputStream = connectionReader.doStartTLS(sslSocketFactory);
@@ -400,9 +441,9 @@ final class LDAPConnectionInternals
    *                     communication.
    *
    * @throws  LDAPException  If a problem occurs while attempting to convert the
-   *                         connection to use SASL QoP.
+   *                         connection to use a SASL security layer.
    */
-  void applySASLQoP(final SaslClient saslClient)
+  void applySASLQoP(@NotNull final SaslClient saslClient)
        throws LDAPException
   {
     this.saslClient = saslClient;
@@ -454,7 +495,7 @@ final class LDAPConnectionInternals
    *                         with the provided message ID.
    */
   void registerResponseAcceptor(final int messageID,
-                                final ResponseAcceptor responseAcceptor)
+            @NotNull final ResponseAcceptor responseAcceptor)
        throws LDAPException
   {
     if (! isConnected())
@@ -507,8 +548,8 @@ final class LDAPConnectionInternals
    *
    * @throws  LDAPException  If a problem occurs while sending the message.
    */
-  void sendMessage(final LDAPMessage message, final long sendTimeoutMillis,
-                   final boolean allowRetry)
+  void sendMessage(@NotNull final LDAPMessage message,
+                   final long sendTimeoutMillis, final boolean allowRetry)
        throws LDAPException
   {
     if (! isConnected())
@@ -552,6 +593,16 @@ final class LDAPConnectionInternals
       Debug.debugException(e);
     }
 
+
+    final Long writeID;
+    if (sendTimeoutMillis > 0)
+    {
+      writeID = writeTimeoutHandler.beginWrite(sendTimeoutMillis);
+    }
+    else
+    {
+      writeID = null;
+    }
 
     try
     {
@@ -622,6 +673,11 @@ final class LDAPConnectionInternals
     }
     finally
     {
+      if (writeID != null)
+      {
+        writeTimeoutHandler.writeCompleted(writeID);
+      }
+
       if (buffer.zeroBufferOnClear())
       {
         buffer.clear();
@@ -646,35 +702,54 @@ final class LDAPConnectionInternals
     // Determine if this connection was closed by a finalizer.
     final boolean closedByFinalizer =
          ((disconnectInfo.getType() == DisconnectType.CLOSED_BY_FINALIZER) &&
-          socket.isConnected());
+              (socket != null) && socket.isConnected());
 
+    writeTimeoutHandler.destroy();
 
-    // Make sure that the connection reader is no longer running.
-    try
+    final boolean alreadyClosed;
+    if (socket == null)
     {
-      connectionReader.close(false);
+      alreadyClosed = true;
     }
-    catch (final Exception e)
+    else
     {
-      Debug.debugException(e);
-    }
+      alreadyClosed = false;
 
-    try
-    {
-      outputStream.close();
-    }
-    catch (final Exception e)
-    {
-      Debug.debugException(e);
-    }
+      try
+      {
+        try
+        {
+          outputStream.close();
+        }
+        catch (final Exception e)
+        {
+          Debug.debugException(e);
+        }
 
-    try
-    {
-      socket.close();
-    }
-    catch (final Exception e)
-    {
-      Debug.debugException(e);
+        try
+        {
+          socket.close();
+        }
+        catch (final Exception e)
+        {
+          Debug.debugException(e);
+        }
+      }
+      finally
+      {
+        outputStream = null;
+        socket = null;
+      }
+
+      // Make sure that the connection reader is no longer running.
+      try
+      {
+        connectionReader.close(false);
+      }
+      catch (final Exception e)
+      {
+        Debug.debugException(e);
+      }
     }
 
     if (saslClient != null)
@@ -693,14 +768,27 @@ final class LDAPConnectionInternals
       }
     }
 
-    Debug.debugDisconnect(host, port, connection, disconnectInfo.getType(),
-         disconnectInfo.getMessage(), disconnectInfo.getCause());
+    if (! alreadyClosed)
+    {
+      Debug.debugDisconnect(host, port, connection, disconnectInfo.getType(),
+           disconnectInfo.getMessage(), disconnectInfo.getCause());
+
+      final LDAPConnectionLogger logger =
+           connection.getConnectionOptions().getConnectionLogger();
+      if (logger != null)
+      {
+        logger.logDisconnect(connection, host, port, disconnectInfo.getType(),
+             disconnectInfo.getMessage(), disconnectInfo.getCause());
+      }
+    }
+
     if (closedByFinalizer && Debug.debugEnabled(DebugType.LDAP))
     {
       Debug.debug(Level.WARNING, DebugType.LDAP,
            "Connection closed by LDAP SDK finalizer:  " + toString());
     }
     disconnectInfo.notifyDisconnectHandler();
+    connection.setServerSet(null);
 
     final long remainingActiveConnections =
          ACTIVE_CONNECTION_COUNT.decrementAndGet();
@@ -757,6 +845,7 @@ final class LDAPConnectionInternals
    * @return  A string representation of this connection internals object.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -772,14 +861,14 @@ final class LDAPConnectionInternals
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("LDAPConnectionInternals(host='");
     buffer.append(host);
     buffer.append("', port=");
     buffer.append(port);
     buffer.append(", connected=");
-    buffer.append(socket.isConnected());
+    buffer.append((socket != null) && socket.isConnected());
     buffer.append(", nextMessageID=");
     buffer.append(nextMessageID.get());
     buffer.append(')');

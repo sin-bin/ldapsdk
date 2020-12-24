@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -50,6 +65,8 @@ import com.unboundid.ldap.sdk.OperationType;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -73,7 +90,7 @@ public final class ConcurrentRequestLimiterRequestHandler
 {
   // The downstream request handler that will be used to process the requests
   // after any appropriate concurrent request limiting has been performed.
-  private final LDAPListenerRequestHandler downstreamRequestHandler;
+  @NotNull private final LDAPListenerRequestHandler downstreamRequestHandler;
 
   // A timeout value (expressed in milliseconds) that will cause the operation
   // to be rejected rather than processed if the associated semaphore cannot be
@@ -81,15 +98,15 @@ public final class ConcurrentRequestLimiterRequestHandler
   private final long rejectTimeoutMillis;
 
   // The semaphores that will be used for each type of operation.
-  private final Semaphore abandonSemaphore;
-  private final Semaphore addSemaphore;
-  private final Semaphore bindSemaphore;
-  private final Semaphore compareSemaphore;
-  private final Semaphore deleteSemaphore;
-  private final Semaphore extendedSemaphore;
-  private final Semaphore modifySemaphore;
-  private final Semaphore modifyDNSemaphore;
-  private final Semaphore searchSemaphore;
+  @Nullable private final          Semaphore abandonSemaphore;
+  @Nullable private final Semaphore addSemaphore;
+  @Nullable private final Semaphore bindSemaphore;
+  @Nullable private final Semaphore compareSemaphore;
+  @Nullable private final Semaphore deleteSemaphore;
+  @Nullable private final Semaphore extendedSemaphore;
+  @Nullable private final Semaphore modifySemaphore;
+  @Nullable private final Semaphore modifyDNSemaphore;
+  @Nullable private final Semaphore searchSemaphore;
 
 
 
@@ -124,8 +141,8 @@ public final class ConcurrentRequestLimiterRequestHandler
    *                                   processed.
    */
   public ConcurrentRequestLimiterRequestHandler(
-              final LDAPListenerRequestHandler downstreamRequestHandler,
-              final int maxConcurrentRequests, final long rejectTimeoutMillis)
+       @NotNull final LDAPListenerRequestHandler downstreamRequestHandler,
+       final int maxConcurrentRequests, final long rejectTimeoutMillis)
   {
     this(downstreamRequestHandler, new Semaphore(maxConcurrentRequests),
          rejectTimeoutMillis);
@@ -163,8 +180,8 @@ public final class ConcurrentRequestLimiterRequestHandler
    *                                   processed.
    */
   public ConcurrentRequestLimiterRequestHandler(
-              final LDAPListenerRequestHandler downstreamRequestHandler,
-              final Semaphore semaphore, final long rejectTimeoutMillis)
+       @NotNull final LDAPListenerRequestHandler downstreamRequestHandler,
+       @NotNull final Semaphore semaphore, final long rejectTimeoutMillis)
   {
     this(downstreamRequestHandler, null, semaphore, semaphore, semaphore,
          semaphore, semaphore, semaphore, semaphore, semaphore,
@@ -249,17 +266,17 @@ public final class ConcurrentRequestLimiterRequestHandler
    *                                   processed.
    */
   public ConcurrentRequestLimiterRequestHandler(
-              final LDAPListenerRequestHandler downstreamRequestHandler,
-              final Semaphore abandonSemaphore,
-              final Semaphore addSemaphore,
-              final Semaphore bindSemaphore,
-              final Semaphore compareSemaphore,
-              final Semaphore deleteSemaphore,
-              final Semaphore extendedSemaphore,
-              final Semaphore modifySemaphore,
-              final Semaphore modifyDNSemaphore,
-              final Semaphore searchSemaphore,
-              final long rejectTimeoutMillis)
+       @NotNull final LDAPListenerRequestHandler downstreamRequestHandler,
+       @Nullable final Semaphore abandonSemaphore,
+       @Nullable final Semaphore addSemaphore,
+       @Nullable final Semaphore bindSemaphore,
+       @Nullable final Semaphore compareSemaphore,
+       @Nullable final Semaphore deleteSemaphore,
+       @Nullable final Semaphore extendedSemaphore,
+       @Nullable final Semaphore modifySemaphore,
+       @Nullable final Semaphore modifyDNSemaphore,
+       @Nullable final Semaphore searchSemaphore,
+       final long rejectTimeoutMillis)
   {
     Validator.ensureNotNull(downstreamRequestHandler);
 
@@ -290,8 +307,9 @@ public final class ConcurrentRequestLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ConcurrentRequestLimiterRequestHandler newInstance(
-              final LDAPListenerClientConnection connection)
+              @NotNull final LDAPListenerClientConnection connection)
          throws LDAPException
   {
     return new ConcurrentRequestLimiterRequestHandler(
@@ -308,8 +326,8 @@ public final class ConcurrentRequestLimiterRequestHandler
    */
   @Override()
   public void processAbandonRequest(final int messageID,
-                                    final AbandonRequestProtocolOp request,
-                                    final List<Control> controls)
+                   @NotNull final AbandonRequestProtocolOp request,
+                   @NotNull final List<Control> controls)
   {
     try
     {
@@ -338,9 +356,10 @@ public final class ConcurrentRequestLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processAddRequest(final int messageID,
-                                       final AddRequestProtocolOp request,
-                                       final List<Control> controls)
+                          @NotNull final AddRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     try
     {
@@ -370,9 +389,10 @@ public final class ConcurrentRequestLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processBindRequest(final int messageID,
-                                        final BindRequestProtocolOp request,
-                                        final List<Control> controls)
+                          @NotNull final BindRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     try
     {
@@ -402,9 +422,10 @@ public final class ConcurrentRequestLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processCompareRequest(final int messageID,
-                          final CompareRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final CompareRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     try
     {
@@ -434,9 +455,10 @@ public final class ConcurrentRequestLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processDeleteRequest(final int messageID,
-                                          final DeleteRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final DeleteRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     try
     {
@@ -466,9 +488,10 @@ public final class ConcurrentRequestLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processExtendedRequest(final int messageID,
-                          final ExtendedRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final ExtendedRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     try
     {
@@ -498,9 +521,10 @@ public final class ConcurrentRequestLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processModifyRequest(final int messageID,
-                                          final ModifyRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final ModifyRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     try
     {
@@ -530,9 +554,10 @@ public final class ConcurrentRequestLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processModifyDNRequest(final int messageID,
-                          final ModifyDNRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final ModifyDNRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     try
     {
@@ -562,9 +587,10 @@ public final class ConcurrentRequestLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processSearchRequest(final int messageID,
-                                          final SearchRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final SearchRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     try
     {
@@ -601,8 +627,8 @@ public final class ConcurrentRequestLimiterRequestHandler
    * @throws  LDAPException  If it was not possible to acquire a permit from the
    *                         provided semaphore.
    */
-  private void acquirePermit(final Semaphore semaphore,
-                             final OperationType operationType)
+  private void acquirePermit(@NotNull final Semaphore semaphore,
+                             @NotNull final OperationType operationType)
           throws LDAPException
   {
     if (semaphore == null)
@@ -654,7 +680,7 @@ public final class ConcurrentRequestLimiterRequestHandler
    *                    It may be {@code null} if no semaphore is needed for the
    *                    associated operation type.
    */
-  private static void releasePermit(final Semaphore semaphore)
+  private static void releasePermit(@NotNull final Semaphore semaphore)
   {
     if (semaphore != null)
     {

@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -109,7 +126,7 @@ public final class ANDJSONObjectFilter
    * The value that should be used for the filterType element of the JSON object
    * that represents an "AND" filter.
    */
-  public static final String FILTER_TYPE = "and";
+  @NotNull public static final String FILTER_TYPE = "and";
 
 
 
@@ -117,14 +134,14 @@ public final class ANDJSONObjectFilter
    * The name of the JSON field that is used to specify the set of filters to
    * include in this AND filter.
    */
-  public static final String FIELD_AND_FILTERS = "andFilters";
+  @NotNull public static final String FIELD_AND_FILTERS = "andFilters";
 
 
 
   /**
    * The pre-allocated set of required field names.
    */
-  private static final Set<String> REQUIRED_FIELD_NAMES =
+  @NotNull private static final Set<String> REQUIRED_FIELD_NAMES =
        Collections.unmodifiableSet(new HashSet<>(
             Collections.singletonList(FIELD_AND_FILTERS)));
 
@@ -133,7 +150,7 @@ public final class ANDJSONObjectFilter
   /**
    * The pre-allocated set of optional field names.
    */
-  private static final Set<String> OPTIONAL_FIELD_NAMES =
+  @NotNull private static final Set<String> OPTIONAL_FIELD_NAMES =
        Collections.emptySet();
 
 
@@ -146,7 +163,7 @@ public final class ANDJSONObjectFilter
 
 
   // The set of embedded filters for this AND filter.
-  private volatile List<JSONObjectFilter> andFilters;
+  @NotNull private volatile List<JSONObjectFilter> andFilters;
 
 
 
@@ -158,7 +175,7 @@ public final class ANDJSONObjectFilter
    *                     {@code null} or empty, then this AND filter will match
    *                     any JSON object.
    */
-  public ANDJSONObjectFilter(final JSONObjectFilter... andFilters)
+  public ANDJSONObjectFilter(@Nullable final JSONObjectFilter... andFilters)
   {
     this(StaticUtils.toList(andFilters));
   }
@@ -173,7 +190,8 @@ public final class ANDJSONObjectFilter
    *                     {@code null} or empty, then this AND filter will match
    *                     any JSON object.
    */
-  public ANDJSONObjectFilter(final Collection<JSONObjectFilter> andFilters)
+  public ANDJSONObjectFilter(
+              @Nullable final Collection<JSONObjectFilter> andFilters)
   {
     setANDFilters(andFilters);
   }
@@ -188,6 +206,7 @@ public final class ANDJSONObjectFilter
    *          this AND filter to match, or an empty list if this AND filter
    *          should match any JSON object.
    */
+  @NotNull()
   public List<JSONObjectFilter> getANDFilters()
   {
     return andFilters;
@@ -204,7 +223,7 @@ public final class ANDJSONObjectFilter
    *                     {@code null} or empty, then this AND filter will match
    *                     any JSON object.
    */
-  public void setANDFilters(final JSONObjectFilter... andFilters)
+  public void setANDFilters(@Nullable final JSONObjectFilter... andFilters)
   {
     setANDFilters(StaticUtils.toList(andFilters));
   }
@@ -220,7 +239,8 @@ public final class ANDJSONObjectFilter
    *                     {@code null} or empty, then this AND filter will match
    *                     any JSON object.
    */
-  public void setANDFilters(final Collection<JSONObjectFilter> andFilters)
+  public void setANDFilters(
+                   @Nullable final Collection<JSONObjectFilter> andFilters)
   {
     if ((andFilters == null) || andFilters.isEmpty())
     {
@@ -239,6 +259,7 @@ public final class ANDJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getFilterType()
   {
     return FILTER_TYPE;
@@ -250,6 +271,7 @@ public final class ANDJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected Set<String> getRequiredFieldNames()
   {
     return REQUIRED_FIELD_NAMES;
@@ -261,6 +283,7 @@ public final class ANDJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected Set<String> getOptionalFieldNames()
   {
     return OPTIONAL_FIELD_NAMES;
@@ -272,7 +295,7 @@ public final class ANDJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
-  public boolean matchesJSONObject(final JSONObject o)
+  public boolean matchesJSONObject(@NotNull final JSONObject o)
   {
     for (final JSONObjectFilter f : andFilters)
     {
@@ -291,6 +314,7 @@ public final class ANDJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public JSONObject toJSONObject()
   {
     final LinkedHashMap<String,JSONValue> fields =
@@ -315,7 +339,9 @@ public final class ANDJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
-  protected ANDJSONObjectFilter decodeFilter(final JSONObject filterObject)
+  @NotNull()
+  protected ANDJSONObjectFilter decodeFilter(
+                                     @NotNull final JSONObject filterObject)
             throws JSONException
   {
     return new ANDJSONObjectFilter(getFilters(filterObject, FIELD_AND_FILTERS));

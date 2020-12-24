@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,6 +49,8 @@ import com.unboundid.ldif.LDIFDeleteChangeRecord;
 import com.unboundid.ldif.LDIFException;
 import com.unboundid.ldif.LDIFReader;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -69,14 +86,14 @@ public final class AddAuditLogMessage
 
   // Indicates whether the add operation represents an undelete of a
   // soft-deleted entry.
-  private final Boolean isUndelete;
+  @Nullable private final Boolean isUndelete;
 
   // An LDIF change record that encapsulates the change represented by this add
   // audit log message.
-  private final LDIFAddChangeRecord addChangeRecord;
+  @NotNull private final LDIFAddChangeRecord addChangeRecord;
 
   // The entry included in the undelete request.
-  private final ReadOnlyEntry undeleteRequestEntry;
+  @Nullable private final ReadOnlyEntry undeleteRequestEntry;
 
 
 
@@ -94,7 +111,7 @@ public final class AddAuditLogMessage
    * @throws  AuditLogException  If a problem is encountered while processing
    *                             the provided list of log message lines.
    */
-  public AddAuditLogMessage(final String... logMessageLines)
+  public AddAuditLogMessage(@NotNull final String... logMessageLines)
          throws AuditLogException
   {
     this(StaticUtils.toList(logMessageLines), logMessageLines);
@@ -116,7 +133,7 @@ public final class AddAuditLogMessage
    * @throws  AuditLogException  If a problem is encountered while processing
    *                             the provided list of log message lines.
    */
-  public AddAuditLogMessage(final List<String> logMessageLines)
+  public AddAuditLogMessage(@NotNull final List<String> logMessageLines)
          throws AuditLogException
   {
     this(logMessageLines, StaticUtils.toArray(logMessageLines, String.class));
@@ -135,8 +152,8 @@ public final class AddAuditLogMessage
    * @throws  AuditLogException  If a problem is encountered while processing
    *                             the provided list of log message lines.
    */
-  private AddAuditLogMessage(final List<String> logMessageLineList,
-                             final String[] logMessageLineArray)
+  private AddAuditLogMessage(@NotNull final List<String> logMessageLineList,
+                             @NotNull final String[] logMessageLineArray)
           throws AuditLogException
   {
     super(logMessageLineList);
@@ -187,8 +204,8 @@ public final class AddAuditLogMessage
    * @throws  AuditLogException  If a problem is encountered while processing
    *                             the provided list of log message lines.
    */
-  AddAuditLogMessage(final List<String> logMessageLines,
-                     final LDIFAddChangeRecord addChangeRecord)
+  AddAuditLogMessage(@NotNull final List<String> logMessageLines,
+                     @NotNull final LDIFAddChangeRecord addChangeRecord)
        throws AuditLogException
   {
     super(logMessageLines);
@@ -206,6 +223,7 @@ public final class AddAuditLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getDN()
   {
     return addChangeRecord.getDN();
@@ -218,6 +236,7 @@ public final class AddAuditLogMessage
    *
    * @return  A read-only representation of the entry that was added.
    */
+  @NotNull()
   public ReadOnlyEntry getEntry()
   {
     return new ReadOnlyEntry(addChangeRecord.getEntryToAdd());
@@ -233,6 +252,7 @@ public final class AddAuditLogMessage
    * @return  The value of the "isUndelete" flag from this log message, or
    *          {@code null} if it is not available.
    */
+  @Nullable()
   public Boolean getIsUndelete()
   {
     return isUndelete;
@@ -246,6 +266,7 @@ public final class AddAuditLogMessage
    * @return  The entry that comprised the undelete request, or {@code null} if
    *          it is not available.
    */
+  @Nullable()
   public ReadOnlyEntry getUndeleteRequestEntry()
   {
     return undeleteRequestEntry;
@@ -257,6 +278,7 @@ public final class AddAuditLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ChangeType getChangeType()
   {
     return ChangeType.ADD;
@@ -268,6 +290,7 @@ public final class AddAuditLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDIFAddChangeRecord getChangeRecord()
   {
     return addChangeRecord;
@@ -291,6 +314,7 @@ public final class AddAuditLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<LDIFChangeRecord> getRevertChangeRecords()
   {
     if ((isUndelete != null) && isUndelete)
@@ -313,7 +337,7 @@ public final class AddAuditLogMessage
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append(getUncommentedHeaderLine());
     buffer.append("; changeType=add; dn=\"");

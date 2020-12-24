@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,8 @@ import java.util.Map;
 
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -95,7 +112,7 @@ public final class SystemInfoMonitorEntry
   /**
    * The structural object class used in system info monitor entries.
    */
-  static final String SYSTEM_INFO_MONITOR_OC =
+  @NotNull static final String SYSTEM_INFO_MONITOR_OC =
        "ds-system-info-monitor-entry";
 
 
@@ -104,14 +121,14 @@ public final class SystemInfoMonitorEntry
    * The name of the attribute that provides the number of CPUs available to the
    * JVM.
    */
-  private static final String ATTR_AVAILABLE_CPUS = "availableCPUs";
+  @NotNull private static final String ATTR_AVAILABLE_CPUS = "availableCPUs";
 
 
 
   /**
    * The name of the attribute that provides the server Java classpath.
    */
-  private static final String ATTR_CLASSPATH = "classPath";
+  @NotNull private static final String ATTR_CLASSPATH = "classPath";
 
 
 
@@ -119,7 +136,8 @@ public final class SystemInfoMonitorEntry
    * The name of the attribute that provides the environment variables defined
    * for the server process.
    */
-  private static final String ATTR_ENVIRONMENT_VARIABLE = "environmentVariable";
+  @NotNull private static final String ATTR_ENVIRONMENT_VARIABLE =
+       "environmentVariable";
 
 
 
@@ -127,42 +145,42 @@ public final class SystemInfoMonitorEntry
    * The name of the attribute that provides the amount of free memory within
    * the JVM.
    */
-  private static final String ATTR_FREE_MEMORY = "freeUsedMemory";
+  @NotNull private static final String ATTR_FREE_MEMORY = "freeUsedMemory";
 
 
 
   /**
    * The name of the attribute that provides the system hostname.
    */
-  private static final String ATTR_HOSTNAME = "systemName";
+  @NotNull private static final String ATTR_HOSTNAME = "systemName";
 
 
 
   /**
    * The name of the attribute that provides the server instance root.
    */
-  private static final String ATTR_INSTANCE_ROOT = "instanceRoot";
+  @NotNull private static final String ATTR_INSTANCE_ROOT = "instanceRoot";
 
 
 
   /**
    * The name of the attribute that provides the server Java home.
    */
-  private static final String ATTR_JAVA_HOME = "javaHome";
+  @NotNull private static final String ATTR_JAVA_HOME = "javaHome";
 
 
 
   /**
    * The name of the attribute that provides the server Java vendor.
    */
-  private static final String ATTR_JAVA_VENDOR = "javaVendor";
+  @NotNull private static final String ATTR_JAVA_VENDOR = "javaVendor";
 
 
 
   /**
    * The name of the attribute that provides the server Java version.
    */
-  private static final String ATTR_JAVA_VERSION = "javaVersion";
+  @NotNull private static final String ATTR_JAVA_VERSION = "javaVersion";
 
 
 
@@ -170,7 +188,8 @@ public final class SystemInfoMonitorEntry
    * The name of the attribute that provides the server JVM architecture (e.g.,
    * 32-bit / 64-bit).
    */
-  private static final String ATTR_JVM_ARCHITECTURE = "jvmArchitecture";
+  @NotNull private static final String ATTR_JVM_ARCHITECTURE =
+       "jvmArchitecture";
 
 
 
@@ -178,7 +197,7 @@ public final class SystemInfoMonitorEntry
    * The name of the attribute that provides the set of arguments provided when
    * starting the JVM.
    */
-  private static final String ATTR_JVM_ARGUMENTS = "jvmArguments";
+  @NotNull private static final String ATTR_JVM_ARGUMENTS = "jvmArguments";
 
 
 
@@ -186,21 +205,21 @@ public final class SystemInfoMonitorEntry
    * The name of the attribute that provides the process ID of the JVM in which
    * the server is running.
    */
-  private static final String ATTR_JVM_PID = "jvmPID";
+  @NotNull private static final String ATTR_JVM_PID = "jvmPID";
 
 
 
   /**
    * The name of the attribute that provides the server JVM vendor.
    */
-  private static final String ATTR_JVM_VENDOR = "jvmVendor";
+  @NotNull private static final String ATTR_JVM_VENDOR = "jvmVendor";
 
 
 
   /**
    * The name of the attribute that provides the server JVM version.
    */
-  private static final String ATTR_JVM_VERSION = "jvmVersion";
+  @NotNull private static final String ATTR_JVM_VERSION = "jvmVersion";
 
 
 
@@ -208,7 +227,7 @@ public final class SystemInfoMonitorEntry
    * The name of the attribute that provides the maximum amount of memory
    * available to the JVM.
    */
-  private static final String ATTR_MAX_MEMORY = "maxMemory";
+  @NotNull private static final String ATTR_MAX_MEMORY = "maxMemory";
 
 
 
@@ -216,7 +235,8 @@ public final class SystemInfoMonitorEntry
    * The name of the attribute that provides information about the server's
    * operating system.
    */
-  private static final String ATTR_OPERATING_SYSTEM = "operatingSystem";
+  @NotNull private static final String ATTR_OPERATING_SYSTEM =
+       "operatingSystem";
 
 
 
@@ -224,7 +244,8 @@ public final class SystemInfoMonitorEntry
    * The name of the attribute that provides the name of the default SSL context
    * protocol that has been selected by the server.
    */
-  private static final String ATTR_SSL_CONTEXT_PROTOCOL = "sslContextProtocol";
+  @NotNull private static final String ATTR_SSL_CONTEXT_PROTOCOL =
+       "sslContextProtocol";
 
 
 
@@ -232,7 +253,7 @@ public final class SystemInfoMonitorEntry
    * The name of the attribute that provides the set of system properties
    * defined in the JVM.
    */
-  private static final String ATTR_SYSTEM_PROPERTY = "systemProperty";
+  @NotNull private static final String ATTR_SYSTEM_PROPERTY = "systemProperty";
 
 
 
@@ -240,7 +261,7 @@ public final class SystemInfoMonitorEntry
    * The name of the attribute that provides the amount of memory currently used
    * by the JVM.
    */
-  private static final String ATTR_USED_MEMORY = "usedMemory";
+  @NotNull private static final String ATTR_USED_MEMORY = "usedMemory";
 
 
 
@@ -248,14 +269,15 @@ public final class SystemInfoMonitorEntry
    * The name of the attribute that provides the name of the user as whom the
    * server is running.
    */
-  private static final String ATTR_USER_NAME = "userName";
+  @NotNull private static final String ATTR_USER_NAME = "userName";
 
 
 
   /**
    * The name of the attribute that provides the server working directory.
    */
-  private static final String ATTR_WORKING_DIRECTORY = "workingDirectory";
+  @NotNull private static final String ATTR_WORKING_DIRECTORY =
+       "workingDirectory";
 
 
 
@@ -267,68 +289,68 @@ public final class SystemInfoMonitorEntry
 
 
   // The number of available CPUs.
-  private final Long availableCPUs;
+  @Nullable private final Long availableCPUs;
 
   // The amount of free memory held by the JVM.
-  private final Long freeMemory;
+  @Nullable private final Long freeMemory;
 
   // The PID of the JVM in which the server is running.
-  private final Long jvmPID;
+  @Nullable private final Long jvmPID;
 
   // The maximum amount of memory the JVM can use.
-  private final Long maxMemory;
+  @Nullable private final Long maxMemory;
 
   // The amount of memory currently held by the JVM.
-  private final Long usedMemory;
+  @Nullable private final Long usedMemory;
 
   // The set of environment variables defined in the server process.
-  private final Map<String,String> environmentVariables;
+  @NotNull private final Map<String,String> environmentVariables;
 
   // The set of system properties defined in the JVM.
-  private final Map<String,String> systemProperties;
+  @NotNull private final Map<String,String> systemProperties;
 
   // The server's classpath.
-  private final String classpath;
+  @Nullable private final String classpath;
 
   // The server's hostname.
-  private final String hostname;
+  @Nullable private final String hostname;
 
   // The path to the server instance root.
-  private final String instanceRoot;
+  @Nullable private final String instanceRoot;
 
   // The server's Java home.
-  private final String javaHome;
+  @Nullable private final String javaHome;
 
   // The server's Java vendor string.
-  private final String javaVendor;
+  @Nullable private final String javaVendor;
 
   // The server's Java version string.
-  private final String javaVersion;
+  @Nullable private final String javaVersion;
 
   // The server's JVM architecture.
-  private final String jvmArchitecture;
+  @Nullable private final String jvmArchitecture;
 
   // The set of arguments provided to the JVM.
-  private final String jvmArguments;
+  @Nullable private final String jvmArguments;
 
   // The server's JVM vendor string.
-  private final String jvmVendor;
+  @Nullable private final String jvmVendor;
 
   // The server's JVM version string.
-  private final String jvmVersion;
+  @Nullable private final String jvmVersion;
 
   // The name of the operating system on which the server is running.
-  private final String operatingSystem;
+  @Nullable private final String operatingSystem;
 
   // The name of the default SSL context protocol that has been selected by the
   // server.
-  private final String sslContextProtocol;
+  @Nullable private final String sslContextProtocol;
 
   // The name of the user as whom the server is running.
-  private final String userName;
+  @Nullable private final String userName;
 
   // The path to the server's current working directory.
-  private final String workingDirectory;
+  @Nullable private final String workingDirectory;
 
 
 
@@ -338,7 +360,7 @@ public final class SystemInfoMonitorEntry
    * @param  entry  The entry to be parsed as a system info monitor entry.  It
    *                must not be {@code null}.
    */
-  public SystemInfoMonitorEntry(final Entry entry)
+  public SystemInfoMonitorEntry(@NotNull final Entry entry)
   {
     super(entry);
 
@@ -405,6 +427,7 @@ public final class SystemInfoMonitorEntry
    * @return  The number of CPUs available to the JVM, or {@code null} if it was
    *          not included in the monitor entry.
    */
+  @Nullable()
   public Long getAvailableCPUs()
   {
     return availableCPUs;
@@ -418,6 +441,7 @@ public final class SystemInfoMonitorEntry
    * @return  The server's Java classpath, or {@code null} if it was not
    *          included in the monitor entry.
    */
+  @Nullable()
   public String getClassPath()
   {
     return classpath;
@@ -432,6 +456,7 @@ public final class SystemInfoMonitorEntry
    * @return  The environment variables available to the server process, or an
    *          empty map if it was not included in the monitor entry.
    */
+  @NotNull()
   public Map<String,String> getEnvironmentVariables()
   {
     return environmentVariables;
@@ -447,6 +472,7 @@ public final class SystemInfoMonitorEntry
    *          marked as free, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getFreeMemory()
   {
     return freeMemory;
@@ -460,6 +486,7 @@ public final class SystemInfoMonitorEntry
    * @return  The server's hostname, or {@code null} if it was not included in
    *          the monitor entry.
    */
+  @Nullable()
   public String getHostname()
   {
     return hostname;
@@ -475,6 +502,7 @@ public final class SystemInfoMonitorEntry
    *          installed, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public String getInstanceRoot()
   {
     return instanceRoot;
@@ -488,6 +516,7 @@ public final class SystemInfoMonitorEntry
    * @return  The path to the Java installation used by the server, or
    *          {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public String getJavaHome()
   {
     return javaHome;
@@ -501,6 +530,7 @@ public final class SystemInfoMonitorEntry
    * @return  The server's Java vendor string, or {@code null} if it was not
    *          included in the monitor entry.
    */
+  @Nullable()
   public String getJavaVendor()
   {
     return javaVendor;
@@ -514,6 +544,7 @@ public final class SystemInfoMonitorEntry
    * @return  The server's Java version string, or {@code null} if it was not
    *          included in the monitor entry.
    */
+  @Nullable()
   public String getJavaVersion()
   {
     return javaVersion;
@@ -528,6 +559,7 @@ public final class SystemInfoMonitorEntry
    * @return  The server's JVM architecture data model, or {@code null} if it
    *          was not included in the monitor entry.
    */
+  @Nullable()
   public String getJVMArchitectureDataModel()
   {
     return jvmArchitecture;
@@ -543,6 +575,7 @@ public final class SystemInfoMonitorEntry
    *          started, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public String getJVMArguments()
   {
     return jvmArguments;
@@ -556,6 +589,7 @@ public final class SystemInfoMonitorEntry
    * @return  The process ID of the JVM in which the server is running, or
    *          {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public Long getJVMPID()
   {
     return jvmPID;
@@ -569,6 +603,7 @@ public final class SystemInfoMonitorEntry
    * @return  The server's JVM vendor string, or {@code null} if it was not
    *          included in the monitor entry.
    */
+  @Nullable()
   public String getJVMVendor()
   {
     return jvmVendor;
@@ -582,6 +617,7 @@ public final class SystemInfoMonitorEntry
    * @return  The server's JVM version string, or {@code null} if it was not
    *          included in the monitor entry.
    */
+  @Nullable()
   public String getJVMVersion()
   {
     return jvmVersion;
@@ -597,6 +633,7 @@ public final class SystemInfoMonitorEntry
    *          to use, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getMaxMemory()
   {
     return maxMemory;
@@ -612,6 +649,7 @@ public final class SystemInfoMonitorEntry
    *          running, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public String getOperatingSystem()
   {
     return operatingSystem;
@@ -626,6 +664,7 @@ public final class SystemInfoMonitorEntry
    * @return  The name of the default SSL context protocol that has been
    *          selected by the server.
    */
+  @Nullable()
   public String getSSLContextProtocol()
   {
     return sslContextProtocol;
@@ -640,6 +679,7 @@ public final class SystemInfoMonitorEntry
    * @return  The system properties defined in the server JVM, or an empty map
    *          if it was not included in the monitor entry.
    */
+  @NotNull()
   public Map<String,String> getSystemProperties()
   {
     return systemProperties;
@@ -655,6 +695,7 @@ public final class SystemInfoMonitorEntry
    *          run the server, or {@code null} if it was not included in the
    *          monitor entry
    */
+  @Nullable()
   public Long getUsedMemory()
   {
     return usedMemory;
@@ -668,6 +709,7 @@ public final class SystemInfoMonitorEntry
    * @return  The name of the user as whom the server is running, or
    *          {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public String getUserName()
   {
     return userName;
@@ -682,6 +724,7 @@ public final class SystemInfoMonitorEntry
    * @return  The path to the server's current working directory, or
    *          {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public String getWorkingDirectory()
   {
     return workingDirectory;
@@ -693,6 +736,7 @@ public final class SystemInfoMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDisplayName()
   {
     return INFO_SYSTEM_INFO_MONITOR_DISPNAME.get();
@@ -704,6 +748,7 @@ public final class SystemInfoMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDescription()
   {
     return INFO_SYSTEM_INFO_MONITOR_DESC.get();
@@ -715,6 +760,7 @@ public final class SystemInfoMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<String,MonitorAttribute> getMonitorAttributes()
   {
     final LinkedHashMap<String,MonitorAttribute> attrs =

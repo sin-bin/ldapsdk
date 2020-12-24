@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -234,7 +249,7 @@ public final class PassphraseEncryptedStreamsTestCase
               new FileOutputStream(encryptedFile);
          PassphraseEncryptedOutputStream passphraseEncryptedOutputStream =
               new PassphraseEncryptedOutputStream("passphrase",
-                   fileOutputStream, "key-identifier", true, true);
+                   fileOutputStream, "key-identifier", true, 4_096, true);
          PrintStream printStream =
               new PrintStream(passphraseEncryptedOutputStream))
     {
@@ -242,7 +257,7 @@ public final class PassphraseEncryptedStreamsTestCase
       assertEquals(
            passphraseEncryptedOutputStream.getEncryptionHeader().
                 getKeyFactoryIterationCount(),
-           131_072);
+           4_096);
 
       for (final String line : linesToEncrypt)
       {
@@ -257,7 +272,7 @@ public final class PassphraseEncryptedStreamsTestCase
               new FileOutputStream(encryptedFile);
          PassphraseEncryptedOutputStream passphraseEncryptedOutputStream =
               new PassphraseEncryptedOutputStream("passphrase",
-                   fileOutputStream, "key-identifier", true, true);
+                   fileOutputStream, "key-identifier", true, 4_096, true);
          PrintStream printStream =
               new PrintStream(passphraseEncryptedOutputStream))
     {
@@ -265,7 +280,7 @@ public final class PassphraseEncryptedStreamsTestCase
       assertEquals(
            passphraseEncryptedOutputStream.getEncryptionHeader().
                 getKeyFactoryIterationCount(),
-           131_072);
+           4_096);
 
       for (final String line : linesToEncrypt)
       {
@@ -848,5 +863,256 @@ public final class PassphraseEncryptedStreamsTestCase
          headerBytes, 0, PassphraseEncryptedStreamHeader.MAGIC_BYTES.length);
     PassphraseEncryptedStreamHeader.decode(headerBytes,
          "passphrase".toCharArray());
+  }
+
+
+
+  /**
+   * Tests the behavior when explicitly using 128-bit AES encryption.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testExplicit128BitAES()
+         throws Exception
+  {
+    // Define the data to be encrypted.
+    final List<String> linesToEncrypt = Arrays.asList(
+         "This is some data that will be encrypted.",
+         "So is this.",
+         "And this.");
+
+
+    // Get the path to a file to which encrypted data will be written.
+    final File encryptedFile = createTempFile();
+    assertTrue(encryptedFile.delete());
+
+
+    // Create the properties that will be used for the encryption.
+    final PassphraseEncryptedOutputStreamProperties properties =
+         new PassphraseEncryptedOutputStreamProperties(
+              PassphraseEncryptionCipherType.AES_128);
+    properties.setKeyIdentifier("key-id");
+
+
+    // Write the data to an encrypted file.
+    try (FileOutputStream fileOutputStream =
+              new FileOutputStream(encryptedFile);
+         PassphraseEncryptedOutputStream passphraseEncryptedOutputStream =
+              new PassphraseEncryptedOutputStream("passphrase",
+                   fileOutputStream, properties);
+         PrintStream printStream =
+              new PrintStream(passphraseEncryptedOutputStream))
+    {
+      assertNotNull(passphraseEncryptedOutputStream.getEncryptionHeader());
+
+      for (final String line : linesToEncrypt)
+      {
+        printStream.println(line);
+      }
+    }
+
+
+    // Read the data back from the encrypted file.
+    final ArrayList<String> decryptedLines = new ArrayList<>(10);
+    try (FileInputStream fileInputStream =
+              new FileInputStream(encryptedFile);
+         PassphraseEncryptedInputStream passphraseEncryptedInputStream =
+              new PassphraseEncryptedInputStream("passphrase",
+                   fileInputStream);
+         InputStreamReader inputStreamReader =
+              new InputStreamReader(passphraseEncryptedInputStream);
+         BufferedReader bufferedReader = new BufferedReader(inputStreamReader))
+    {
+      assertNotNull(passphraseEncryptedInputStream.getEncryptionHeader());
+
+      while (true)
+      {
+        final String line = bufferedReader.readLine();
+        if (line == null)
+        {
+          break;
+        }
+
+        decryptedLines.add(line);
+      }
+    }
+
+
+    // Make sure that the decrypted data matches the data we originally wrote.
+    assertEquals(decryptedLines, linesToEncrypt);
+
+
+    // Read the encryption header to ensure that it's using all of the expected
+    // properties.
+    final PassphraseEncryptedStreamHeader header;
+    try (FileInputStream inputStream = new FileInputStream(encryptedFile))
+    {
+      header = PassphraseEncryptedStreamHeader.readFrom(inputStream, null);
+    }
+
+    assertNotNull(header);
+
+    assertNotNull(header.getKeyFactoryAlgorithm());
+    assertEquals(header.getKeyFactoryAlgorithm(),
+         PassphraseEncryptionCipherType.AES_128.getKeyFactoryAlgorithm());
+
+    assertNotNull(header.getKeyFactoryIterationCount());
+    assertEquals(header.getKeyFactoryIterationCount(),
+         PassphraseEncryptionCipherType.AES_128.getKeyFactoryIterationCount());
+
+    assertNotNull(header.getKeyFactorySalt());
+    assertEquals(header.getKeyFactorySalt().length,
+         PassphraseEncryptionCipherType.AES_128.getKeyFactorySaltLengthBytes());
+
+    assertNotNull(header.getKeyFactoryKeyLengthBits());
+    assertEquals(header.getKeyFactoryKeyLengthBits(),
+         PassphraseEncryptionCipherType.AES_128.getKeyLengthBits());
+
+    assertNotNull(header.getCipherTransformation());
+    assertEquals(header.getCipherTransformation(),
+         PassphraseEncryptionCipherType.AES_128.getCipherTransformation());
+
+    assertNotNull(header.getCipherInitializationVector());
+    assertEquals(header.getCipherInitializationVector().length,
+         PassphraseEncryptionCipherType.AES_128.
+              getInitializationVectorLengthBytes());
+
+    assertNotNull(header.getKeyIdentifier());
+    assertEquals(header.getKeyIdentifier(), "key-id");
+  }
+
+
+
+  /**
+   * Tests the behavior when explicitly using 256-bit AES encryption.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testExplicit256BitAES()
+         throws Exception
+  {
+    // Define the data to be encrypted.
+    final List<String> linesToEncrypt = Arrays.asList(
+         "This is some data that will be encrypted.",
+         "So is this.",
+         "And this.");
+
+
+    // Get the path to a file to which encrypted data will be written.
+    final File encryptedFile = createTempFile();
+    assertTrue(encryptedFile.delete());
+
+
+    // Create the properties that will be used for the encryption.
+    final PassphraseEncryptedOutputStreamProperties properties =
+         new PassphraseEncryptedOutputStreamProperties(
+              PassphraseEncryptionCipherType.AES_256);
+    properties.setKeyIdentifier("different-key-id");
+
+
+    // Figure out whether the JVM supports 256-bit AES.  If not, then expect
+    // the encryption attempt to fail.
+    final PassphraseEncryptionCipherType strongCipherType =
+         PassphraseEncryptionCipherType.getStrongestAvailableCipherType();
+
+
+    // Try to write the data to an encrypted file.  This should fail if the JVM
+    // doesn't support 256-bit AES.  It should not fail if the JVM does support
+    // 256-bit AES.
+    try (FileOutputStream fileOutputStream =
+              new FileOutputStream(encryptedFile);
+         PassphraseEncryptedOutputStream passphraseEncryptedOutputStream =
+              new PassphraseEncryptedOutputStream("passphrase",
+                   fileOutputStream, properties);
+         PrintStream printStream =
+              new PrintStream(passphraseEncryptedOutputStream))
+    {
+      assertNotNull(passphraseEncryptedOutputStream.getEncryptionHeader());
+
+      for (final String line : linesToEncrypt)
+      {
+        printStream.println(line);
+      }
+
+      assertEquals(strongCipherType, PassphraseEncryptionCipherType.AES_256);
+    }
+    catch (final Exception e)
+    {
+      // Make sure that we expected this.  If so, then there's no need to test
+      // any more.
+      assertEquals(strongCipherType, PassphraseEncryptionCipherType.AES_128);
+      return;
+    }
+
+
+    // Read the data back from the encrypted file.
+    final ArrayList<String> decryptedLines = new ArrayList<>(10);
+    try (FileInputStream fileInputStream =
+              new FileInputStream(encryptedFile);
+         PassphraseEncryptedInputStream passphraseEncryptedInputStream =
+              new PassphraseEncryptedInputStream("passphrase",
+                   fileInputStream);
+         InputStreamReader inputStreamReader =
+              new InputStreamReader(passphraseEncryptedInputStream);
+         BufferedReader bufferedReader = new BufferedReader(inputStreamReader))
+    {
+      assertNotNull(passphraseEncryptedInputStream.getEncryptionHeader());
+
+      while (true)
+      {
+        final String line = bufferedReader.readLine();
+        if (line == null)
+        {
+          break;
+        }
+
+        decryptedLines.add(line);
+      }
+    }
+
+
+    // Make sure that the decrypted data matches the data we originally wrote.
+    assertEquals(decryptedLines, linesToEncrypt);
+
+
+    // Read the encryption header to ensure that it's using all of the expected
+    // properties.
+    final PassphraseEncryptedStreamHeader header;
+    try (FileInputStream inputStream = new FileInputStream(encryptedFile))
+    {
+      header = PassphraseEncryptedStreamHeader.readFrom(inputStream, null);
+    }
+
+    assertNotNull(header);
+
+    assertNotNull(header.getKeyFactoryAlgorithm());
+    assertEquals(header.getKeyFactoryAlgorithm(),
+         PassphraseEncryptionCipherType.AES_256.getKeyFactoryAlgorithm());
+
+    assertNotNull(header.getKeyFactoryIterationCount());
+    assertEquals(header.getKeyFactoryIterationCount(),
+         PassphraseEncryptionCipherType.AES_256.getKeyFactoryIterationCount());
+
+    assertNotNull(header.getKeyFactorySalt());
+    assertEquals(header.getKeyFactorySalt().length,
+         PassphraseEncryptionCipherType.AES_256.getKeyFactorySaltLengthBytes());
+
+    assertNotNull(header.getKeyFactoryKeyLengthBits());
+    assertEquals(header.getKeyFactoryKeyLengthBits(),
+         PassphraseEncryptionCipherType.AES_256.getKeyLengthBits());
+
+    assertNotNull(header.getCipherTransformation());
+    assertEquals(header.getCipherTransformation(),
+         PassphraseEncryptionCipherType.AES_256.getCipherTransformation());
+
+    assertNotNull(header.getCipherInitializationVector());
+    assertEquals(header.getCipherInitializationVector().length,
+         PassphraseEncryptionCipherType.AES_256.
+              getInitializationVectorLengthBytes());
+
+    assertNotNull(header.getKeyIdentifier());
+    assertEquals(header.getKeyIdentifier(), "different-key-id");
   }
 }

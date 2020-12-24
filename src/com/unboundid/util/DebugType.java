@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -62,6 +77,14 @@ public enum DebugType
 
 
   /**
+   * The debug type that will be used for information about connection pool
+   * interaction.
+   */
+  CONNECTION_POOL("connection-pool"),
+
+
+
+  /**
    * The debug type that will be used for debugging information about LDIF
    * entries or change records read or written.
    */
@@ -94,7 +117,7 @@ public enum DebugType
 
 
   // The name for this debug type.
-  private final String name;
+  @NotNull private final String name;
 
 
 
@@ -104,7 +127,7 @@ public enum DebugType
    * @param  name  The name for this debug type.  It should be in all lowercase
    *               characters.
    */
-  DebugType(final String name)
+  DebugType(@NotNull final String name)
   {
     this.name = name;
   }
@@ -116,6 +139,7 @@ public enum DebugType
    *
    * @return  The name for this debug type.
    */
+  @NotNull()
   public String getName()
   {
     return name;
@@ -132,7 +156,8 @@ public enum DebugType
    * @return  The requested debug type, or {@code null} if there is no such
    *          debug type.
    */
-  public static DebugType forName(final String name)
+  @Nullable()
+  public static DebugType forName(@NotNull final String name)
   {
     switch (StaticUtils.toLowerCase(name))
     {
@@ -144,6 +169,11 @@ public enum DebugType
         return EXCEPTION;
       case "ldap":
         return LDAP;
+      case "pool":
+      case "connectionpool":
+      case "connection-pool":
+      case "connection_pool":
+        return CONNECTION_POOL;
       case "ldif":
         return LDIF;
       case "monitor":
@@ -166,6 +196,7 @@ public enum DebugType
    *
    * @return  A comma-delimited list of the defined debug type names.
    */
+  @NotNull()
   public static String getTypeNameList()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -192,6 +223,7 @@ public enum DebugType
    * @return  A string representation of this debug type.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return name;

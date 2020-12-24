@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,8 @@ package com.unboundid.util.json;
 import java.io.Serializable;
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -49,10 +66,10 @@ public final class JSONField
 
 
   // The value for this field.
-  private final JSONValue value;
+  @NotNull private final JSONValue value;
 
   // The name for this field.
-  private final String name;
+  @NotNull private final String name;
 
 
 
@@ -63,7 +80,7 @@ public final class JSONField
    * @param value The value for this field.  It must not be {@code null}
    *              (although it may be a {@link JSONNull} instance).
    */
-  public JSONField(final String name, final JSONValue value)
+  public JSONField(@NotNull final String name, @NotNull final JSONValue value)
   {
     Validator.ensureNotNull(name);
     Validator.ensureNotNull(value);
@@ -81,7 +98,7 @@ public final class JSONField
    * @param name  The name for this field.  It must not be {@code null}.
    * @param value The value for this field.  It must not be {@code null}.
    */
-  public JSONField(final String name, final boolean value)
+  public JSONField(@NotNull final String name, final boolean value)
   {
     this(name, (value ? JSONBoolean.TRUE : JSONBoolean.FALSE));
   }
@@ -95,7 +112,7 @@ public final class JSONField
    * @param name  The name for this field.  It must not be {@code null}.
    * @param value The value for this field.  It must not be {@code null}.
    */
-  public JSONField(final String name, final long value)
+  public JSONField(@NotNull final String name, final long value)
   {
     this(name, new JSONNumber(value));
   }
@@ -109,7 +126,7 @@ public final class JSONField
    * @param name  The name for this field.  It must not be {@code null}.
    * @param value The value for this field.  It must not be {@code null}.
    */
-  public JSONField(final String name, final double value)
+  public JSONField(@NotNull final String name, final double value)
   {
     this(name, new JSONNumber(value));
   }
@@ -123,7 +140,7 @@ public final class JSONField
    * @param name  The name for this field.  It must not be {@code null}.
    * @param value The value for this field.  It must not be {@code null}.
    */
-  public JSONField(final String name, final String value)
+  public JSONField(@NotNull final String name, @NotNull final String value)
   {
     this(name, new JSONString(value));
   }
@@ -135,6 +152,7 @@ public final class JSONField
    *
    * @return  The name for this field.
    */
+  @NotNull()
   public String getName()
   {
     return name;
@@ -147,6 +165,7 @@ public final class JSONField
    *
    * @return  The value for this field.
    */
+  @NotNull()
   public JSONValue getValue()
   {
     return value;
@@ -177,7 +196,7 @@ public final class JSONField
    *          name and an equivalent value, or {@code false} if not.
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == this)
     {
@@ -201,6 +220,7 @@ public final class JSONField
    * @return  A string representation of this field.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -215,7 +235,7 @@ public final class JSONField
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     JSONString.encodeString(name, buffer);
     buffer.append(':');

@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,8 @@ import java.util.Map;
 
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -79,8 +96,9 @@ public final class PerApplicationProcessingTimeHistogramMonitorEntry
    * The structural object class used in processing time histogram monitor
    * entries.
    */
-  static final String PER_APPLICATION_PROCESSING_TIME_HISTOGRAM_MONITOR_OC =
-       "ds-per-application-processing-time-histogram-monitor-entry";
+  @NotNull static final String
+       PER_APPLICATION_PROCESSING_TIME_HISTOGRAM_MONITOR_OC =
+            "ds-per-application-processing-time-histogram-monitor-entry";
 
 
 
@@ -88,12 +106,13 @@ public final class PerApplicationProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the name of the application to
    * which this monitor entry applies.
    */
-  private static final String ATTR_APPLICATION_NAME = "applicationName";
+  @NotNull private static final String ATTR_APPLICATION_NAME =
+       "applicationName";
 
 
 
   // The name of the application to which this monitor entry applies.
-  private final String applicationName;
+  @Nullable private final String applicationName;
 
 
   /**
@@ -103,7 +122,8 @@ public final class PerApplicationProcessingTimeHistogramMonitorEntry
    * @param  entry  The entry to be parsed as a processing time histogram
    *                monitor entry.  It must not be {@code null}.
    */
-  public PerApplicationProcessingTimeHistogramMonitorEntry(final Entry entry)
+  public PerApplicationProcessingTimeHistogramMonitorEntry(
+              @NotNull final Entry entry)
   {
     super(entry);
 
@@ -118,6 +138,7 @@ public final class PerApplicationProcessingTimeHistogramMonitorEntry
    * @return  The name of the application to which this monitor entry applies,
    *          or {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public String getApplicationName()
   {
     return applicationName;
@@ -129,6 +150,7 @@ public final class PerApplicationProcessingTimeHistogramMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDisplayName()
   {
     return INFO_PER_APP_PROCESSING_TIME_MONITOR_DISPNAME.get();
@@ -140,6 +162,7 @@ public final class PerApplicationProcessingTimeHistogramMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDescription()
   {
     return INFO_PER_APP_PROCESSING_TIME_MONITOR_DESC.get();
@@ -151,6 +174,7 @@ public final class PerApplicationProcessingTimeHistogramMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<String,MonitorAttribute> getMonitorAttributes()
   {
     final Map<String,MonitorAttribute> superAttrs =

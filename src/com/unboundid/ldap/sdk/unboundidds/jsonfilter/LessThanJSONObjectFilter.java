@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -131,7 +147,7 @@ public final class LessThanJSONObjectFilter
    * The value that should be used for the filterType element of the JSON object
    * that represents a "less than" filter.
    */
-  public static final String FILTER_TYPE = "lessThan";
+  @NotNull public static final String FILTER_TYPE = "lessThan";
 
 
 
@@ -139,7 +155,7 @@ public final class LessThanJSONObjectFilter
    * The name of the JSON field that is used to specify the field in the target
    * JSON object for which to make the determination.
    */
-  public static final String FIELD_FIELD_PATH = "field";
+  @NotNull public static final String FIELD_FIELD_PATH = "field";
 
 
 
@@ -147,7 +163,7 @@ public final class LessThanJSONObjectFilter
    * The name of the JSON field that is used to specify the value to use for
    * the matching.
    */
-  public static final String FIELD_VALUE = "value";
+  @NotNull public static final String FIELD_VALUE = "value";
 
 
 
@@ -155,7 +171,7 @@ public final class LessThanJSONObjectFilter
    * The name of the JSON field that is used to indicate whether to match JSON
    * objects with a value that is considered equal to the provided value.
    */
-  public static final String FIELD_ALLOW_EQUALS = "allowEquals";
+  @NotNull public static final String FIELD_ALLOW_EQUALS = "allowEquals";
 
 
 
@@ -163,7 +179,8 @@ public final class LessThanJSONObjectFilter
    * The name of the JSON field that is used to indicate whether to match all
    * elements of an array rather than just one or more.
    */
-  public static final String FIELD_MATCH_ALL_ELEMENTS = "matchAllElements";
+  @NotNull public static final String FIELD_MATCH_ALL_ELEMENTS =
+       "matchAllElements";
 
 
 
@@ -171,14 +188,14 @@ public final class LessThanJSONObjectFilter
    * The name of the JSON field that is used to indicate whether string matching
    * should be case-sensitive.
    */
-  public static final String FIELD_CASE_SENSITIVE = "caseSensitive";
+  @NotNull public static final String FIELD_CASE_SENSITIVE = "caseSensitive";
 
 
 
   /**
    * The pre-allocated set of required field names.
    */
-  private static final Set<String> REQUIRED_FIELD_NAMES =
+  @NotNull private static final Set<String> REQUIRED_FIELD_NAMES =
        Collections.unmodifiableSet(new HashSet<>(
             Arrays.asList(FIELD_FIELD_PATH, FIELD_VALUE)));
 
@@ -187,7 +204,7 @@ public final class LessThanJSONObjectFilter
   /**
    * The pre-allocated set of optional field names.
    */
-  private static final Set<String> OPTIONAL_FIELD_NAMES =
+  @NotNull private static final Set<String> OPTIONAL_FIELD_NAMES =
        Collections.unmodifiableSet(new HashSet<>(
             Arrays.asList(FIELD_ALLOW_EQUALS, FIELD_MATCH_ALL_ELEMENTS,
                  FIELD_CASE_SENSITIVE)));
@@ -213,10 +230,10 @@ public final class LessThanJSONObjectFilter
   private volatile boolean matchAllElements;
 
   // The expected value for the target field.
-  private volatile JSONValue value;
+  @NotNull private volatile JSONValue value;
 
   // The field path specifier for the target field.
-  private volatile List<String> field;
+  @NotNull private volatile List<String> field;
 
 
 
@@ -251,8 +268,8 @@ public final class LessThanJSONObjectFilter
    * @param  caseSensitive     Indicates whether string matching should be
    *                           case sensitive.
    */
-  private LessThanJSONObjectFilter(final List<String> field,
-                                   final JSONValue value,
+  private LessThanJSONObjectFilter(@NotNull final List<String> field,
+                                   @NotNull final JSONValue value,
                                    final boolean allowEquals,
                                    final boolean matchAllElements,
                                    final boolean caseSensitive)
@@ -275,7 +292,7 @@ public final class LessThanJSONObjectFilter
    *                information about field path specifiers.
    * @param  value  The target value for this filter.
    */
-  public LessThanJSONObjectFilter(final String field, final long value)
+  public LessThanJSONObjectFilter(@NotNull final String field, final long value)
   {
     this(Collections.singletonList(field), new JSONNumber(value));
   }
@@ -291,7 +308,8 @@ public final class LessThanJSONObjectFilter
    *                information about field path specifiers.
    * @param  value  The target value for this filter.
    */
-  public LessThanJSONObjectFilter(final String field, final double value)
+  public LessThanJSONObjectFilter(@NotNull final String field,
+                                  final double value)
   {
     this(Collections.singletonList(field), new JSONNumber(value));
   }
@@ -308,7 +326,8 @@ public final class LessThanJSONObjectFilter
    * @param  value  The target value for this filter.  It must not be
    *                {@code null}.
    */
-  public LessThanJSONObjectFilter(final String field, final String value)
+  public LessThanJSONObjectFilter(@NotNull final String field,
+                                  @NotNull final String value)
   {
     this(Collections.singletonList(field), new JSONString(value));
   }
@@ -326,7 +345,8 @@ public final class LessThanJSONObjectFilter
    *                {@code null}, and it must be either a {@link JSONNumber} or
    *                a {@link JSONString}.
    */
-  public LessThanJSONObjectFilter(final String field, final JSONValue value)
+  public LessThanJSONObjectFilter(@NotNull final String field,
+                                  @NotNull final JSONValue value)
   {
     this(Collections.singletonList(field), value);
   }
@@ -344,8 +364,8 @@ public final class LessThanJSONObjectFilter
    *                {@code null}, and it must be either a {@link JSONNumber} or
    *                a {@link JSONString}.
    */
-  public LessThanJSONObjectFilter(final List<String> field,
-                                  final JSONValue value)
+  public LessThanJSONObjectFilter(@NotNull final List<String> field,
+                                  @NotNull final JSONValue value)
   {
     Validator.ensureNotNull(field);
     Validator.ensureFalse(field.isEmpty());
@@ -369,6 +389,7 @@ public final class LessThanJSONObjectFilter
    *
    * @return  The field path specifier for this filter.
    */
+  @NotNull()
   public List<String> getField()
   {
     return field;
@@ -384,7 +405,7 @@ public final class LessThanJSONObjectFilter
    *                for the {@link JSONObjectFilter} class for information about
    *                field path specifiers.
    */
-  public void setField(final String... field)
+  public void setField(@NotNull final String... field)
   {
     setField(StaticUtils.toList(field));
   }
@@ -399,7 +420,7 @@ public final class LessThanJSONObjectFilter
    *                for the {@link JSONObjectFilter} class for information about
    *                field path specifiers.
    */
-  public void setField(final List<String> field)
+  public void setField(@NotNull final List<String> field)
   {
     Validator.ensureNotNull(field);
     Validator.ensureFalse(field.isEmpty());
@@ -414,6 +435,7 @@ public final class LessThanJSONObjectFilter
    *
    * @return  The target value for this filter.
    */
+  @NotNull()
   public JSONValue getValue()
   {
     return value;
@@ -451,7 +473,7 @@ public final class LessThanJSONObjectFilter
    * @param  value  The target value for this filter.  It must not be
    *                {@code null}.
    */
-  public void setValue(final String value)
+  public void setValue(@NotNull final String value)
   {
     Validator.ensureNotNull(value);
 
@@ -467,7 +489,7 @@ public final class LessThanJSONObjectFilter
    *                {@code null}, and it must be either a {@link JSONNumber} or
    *                a {@link JSONString}.
    */
-  public void setValue(final JSONValue value)
+  public void setValue(@NotNull final JSONValue value)
   {
     Validator.ensureNotNull(value);
     Validator.ensureTrue((value instanceof JSONNumber) ||
@@ -577,6 +599,7 @@ public final class LessThanJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getFilterType()
   {
     return FILTER_TYPE;
@@ -588,6 +611,7 @@ public final class LessThanJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected Set<String> getRequiredFieldNames()
   {
     return REQUIRED_FIELD_NAMES;
@@ -599,6 +623,7 @@ public final class LessThanJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected Set<String> getOptionalFieldNames()
   {
     return OPTIONAL_FIELD_NAMES;
@@ -610,7 +635,7 @@ public final class LessThanJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
-  public boolean matchesJSONObject(final JSONObject o)
+  public boolean matchesJSONObject(@NotNull final JSONObject o)
   {
     final List<JSONValue> candidates = getValues(o, field);
     if (candidates.isEmpty())
@@ -668,7 +693,7 @@ public final class LessThanJSONObjectFilter
    * @return  {@code true} if the provided value matches the criteria of this
    *          filter, or {@code false} if not.
    */
-  private boolean matches(final JSONValue v)
+  private boolean matches(@NotNull final JSONValue v)
   {
     if ((v instanceof JSONNumber) && (value instanceof JSONNumber))
     {
@@ -722,6 +747,7 @@ public final class LessThanJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public JSONObject toJSONObject()
   {
     final LinkedHashMap<String,JSONValue> fields =
@@ -770,7 +796,9 @@ public final class LessThanJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
-  protected LessThanJSONObjectFilter decodeFilter(final JSONObject filterObject)
+  @NotNull()
+  protected LessThanJSONObjectFilter decodeFilter(
+                 @NotNull final JSONObject filterObject)
             throws JSONException
   {
     final List<String> fieldPath =

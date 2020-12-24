@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -42,11 +57,11 @@ import com.unboundid.asn1.InternalASN1Helper;
 import com.unboundid.ldap.protocol.LDAPMessage;
 import com.unboundid.ldap.protocol.LDAPResponse;
 import com.unboundid.ldap.sdk.extensions.NoticeOfDisconnectionExtendedResult;
-import com.unboundid.ldap.sdk.unboundidds.extensions.
-            InteractiveTransactionAbortedExtendedResult;
 import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.InternalUseOnly;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.WakeableSleeper;
 
@@ -71,42 +86,43 @@ final class LDAPConnectionReader
 
 
   // The ASN.1 stream reader used to read LDAP messages from the server.
-  private volatile ASN1StreamReader asn1StreamReader;
+  @NotNull private volatile ASN1StreamReader asn1StreamReader;
 
   // Indicates whether a request has been made to close the associated socket.
   private volatile boolean closeRequested;
 
   // The map that will be used to associate message IDs with the corresponding
   // response acceptors.
-  private final ConcurrentHashMap<Integer,ResponseAcceptor> acceptorMap;
+  @NotNull private final ConcurrentHashMap<Integer,ResponseAcceptor>
+       acceptorMap;
 
   // The exception encountered during StartTLS processing.
-  private volatile Exception startTLSException;
+  @Nullable private volatile Exception startTLSException;
 
   // The input stream used to read data from the socket.
-  private volatile InputStream inputStream;
+  @Nullable private volatile InputStream inputStream;
 
   // The SSL-enabled output stream resulting from StartTLS negotiation.  It will
   // be non-null only immediately after StartTLS negotiation has completed and
   // this output stream is ready to be handed back to the connection.
-  private volatile OutputStream startTLSOutputStream;
+  @Nullable private volatile OutputStream startTLSOutputStream;
 
   // The LDAP connection with which this reader is associated.
-  private final LDAPConnection connection;
+  @NotNull private final LDAPConnection connection;
 
   // The socket with which this reader is associated.
-  private volatile Socket socket;
+  @NotNull private volatile Socket socket;
 
   // The SSL socket factory to use to convert an insecure connection to a secure
   // one when performing StartTLS processing.  It will be null unless there is
   // an outstanding StartTLS request.
-  private volatile SSLSocketFactory sslSocketFactory;
+  @Nullable private volatile SSLSocketFactory sslSocketFactory;
 
   // The thread that is used to read data from the client.
-  private volatile Thread thread;
+  @Nullable private volatile Thread thread;
 
   // The wakeable sleeper that will be used during StartTLS processing.
-  private final WakeableSleeper startTLSSleeper;
+  @NotNull private final WakeableSleeper startTLSSleeper;
 
 
 
@@ -122,8 +138,8 @@ final class LDAPConnectionReader
    * @throws  IOException  If a problem occurs while preparing to read data from
    *                       the provided socket.
    */
-  LDAPConnectionReader(final LDAPConnection connection,
-                       final LDAPConnectionInternals connectionInternals)
+  LDAPConnectionReader(@NotNull final LDAPConnection connection,
+       @NotNull final LDAPConnectionInternals connectionInternals)
        throws IOException
   {
     this.connection = connection;
@@ -159,7 +175,7 @@ final class LDAPConnectionReader
    *                         provided message ID.
    */
   void registerResponseAcceptor(final int messageID,
-                                final ResponseAcceptor acceptor)
+                                @NotNull final ResponseAcceptor acceptor)
        throws LDAPException
   {
     final ResponseAcceptor existingAcceptor =
@@ -209,6 +225,7 @@ final class LDAPConnectionReader
    * responses, and associating them with their corresponding requests.
    */
   @Override()
+  @SuppressWarnings("deprecation")
   public void run()
   {
     boolean reconnect  = false;
@@ -406,8 +423,9 @@ final class LDAPConnectionReader
           }
         }
 
-        Debug.debugLDAPResult(response, connection);
         connection.setLastCommunicationTime();
+        Debug.debugLDAPResult(response, connection);
+        logResponse(response);
 
         final ResponseAcceptor responseAcceptor;
         if ((response instanceof SearchResultEntry) ||
@@ -475,12 +493,13 @@ final class LDAPConnectionReader
                    DisconnectType.SERVER_CLOSED_WITH_NOTICE,
                    extendedResult.getDiagnosticMessage(), null);
             }
-            else if (InteractiveTransactionAbortedExtendedResult.
-                          INTERACTIVE_TRANSACTION_ABORTED_RESULT_OID.equals(
-                               oid))
+            else if (com.unboundid.ldap.sdk.unboundidds.extensions.
+                 InteractiveTransactionAbortedExtendedResult.
+                      INTERACTIVE_TRANSACTION_ABORTED_RESULT_OID.equals(oid))
             {
-              extendedResult = new InteractiveTransactionAbortedExtendedResult(
-                                        extendedResult);
+              extendedResult = new com.unboundid.ldap.sdk.unboundidds.
+                   extensions.InteractiveTransactionAbortedExtendedResult(
+                        extendedResult);
             }
 
             final UnsolicitedNotificationHandler handler =
@@ -620,6 +639,8 @@ final class LDAPConnectionReader
    *
    * @throws  LDAPException  If a problem occurs while reading the response.
    */
+  @NotNull()
+  @SuppressWarnings("deprecation")
   LDAPResponse readResponse(final int messageID)
                throws LDAPException
   {
@@ -657,11 +678,12 @@ final class LDAPConnectionReader
                  DisconnectType.SERVER_CLOSED_WITH_NOTICE,
                  extendedResult.getDiagnosticMessage(), null);
           }
-          else if (InteractiveTransactionAbortedExtendedResult.
-                        INTERACTIVE_TRANSACTION_ABORTED_RESULT_OID.equals(oid))
+          else if (com.unboundid.ldap.sdk.unboundidds.extensions.
+               InteractiveTransactionAbortedExtendedResult.
+                    INTERACTIVE_TRANSACTION_ABORTED_RESULT_OID.equals(oid))
           {
-            extendedResult = new InteractiveTransactionAbortedExtendedResult(
-                                      extendedResult);
+            extendedResult = new com.unboundid.ldap.sdk.unboundidds.extensions.
+                 InteractiveTransactionAbortedExtendedResult(extendedResult);
           }
 
           final UnsolicitedNotificationHandler handler =
@@ -797,6 +819,80 @@ final class LDAPConnectionReader
 
 
   /**
+   * Logs the provided response, if appropriate.
+   *
+   * @param  response  The response to be logged.  It must not be {@code null}.
+   */
+  void logResponse(@NotNull final LDAPResponse response)
+  {
+    final LDAPConnectionLogger logger =
+         connection.getConnectionOptions().getConnectionLogger();
+    if (logger == null)
+    {
+      return;
+    }
+
+    final int messageID = response.getMessageID();
+
+    if (response instanceof BindResult)
+    {
+      logger.logBindResult(connection, messageID, (BindResult) response);
+    }
+    else if (response instanceof ExtendedResult)
+    {
+      logger.logExtendedResult(connection, messageID,
+           (ExtendedResult) response);
+    }
+    else if (response instanceof SearchResult)
+    {
+      logger.logSearchResult(connection, messageID, (SearchResult) response);
+    }
+    else if (response instanceof LDAPResult)
+    {
+      final LDAPResult ldapResult = (LDAPResult) response;
+      final OperationType operationType = ldapResult.getOperationType();
+      if (operationType != null)
+      {
+        switch (operationType)
+        {
+          case ADD:
+            logger.logAddResult(connection, messageID, ldapResult);
+            break;
+          case COMPARE:
+            logger.logCompareResult(connection, messageID, ldapResult);
+            break;
+          case DELETE:
+            logger.logDeleteResult(connection, messageID, ldapResult);
+            break;
+          case MODIFY:
+            logger.logModifyResult(connection, messageID, ldapResult);
+            break;
+          case MODIFY_DN:
+            logger.logModifyDNResult(connection, messageID, ldapResult);
+            break;
+        }
+      }
+    }
+    else if (response instanceof SearchResultEntry)
+    {
+      logger.logSearchEntry(connection, messageID,
+           (SearchResultEntry) response);
+    }
+    else if (response instanceof SearchResultReference)
+    {
+      logger.logSearchReference(connection, messageID,
+           (SearchResultReference) response);
+    }
+    else if (response instanceof IntermediateResponse)
+    {
+      logger.logIntermediateResponse(connection, messageID,
+           (IntermediateResponse) response);
+    }
+  }
+
+
+
+  /**
    * Converts this clear-text connection to one that uses TLS.
    *
    * @param  sslSocketFactory  The SSL socket factory to use to convert an
@@ -809,7 +905,8 @@ final class LDAPConnectionReader
    * @throws  LDAPException  If a problem occurs while attempting to convert the
    *                         connection to use TLS security.
    */
-  OutputStream doStartTLS(final SSLSocketFactory sslSocketFactory)
+  @NotNull()
+  OutputStream doStartTLS(@NotNull final SSLSocketFactory sslSocketFactory)
        throws LDAPException
   {
     final LDAPConnectionOptions connectionOptions =
@@ -922,7 +1019,7 @@ final class LDAPConnectionReader
    * @param  saslClient  The SASL client to use to decode data read over this
    *                     connection.
    */
-  void applySASLQoP(final SaslClient saslClient)
+  void applySASLQoP(@NotNull final SaslClient saslClient)
   {
     InternalASN1Helper.setSASLClient(asn1StreamReader, saslClient);
   }
@@ -980,7 +1077,7 @@ final class LDAPConnectionReader
     *                           reason for the closure, if available.
     */
    private void closeInternal(final boolean notifyConnection,
-                              final String message)
+                              @Nullable final String message)
    {
      final InputStream is = inputStream;
      inputStream = null;
@@ -1049,6 +1146,7 @@ final class LDAPConnectionReader
    * @return  The handle to the thread used to read data from the server, or
    *          {@code null} if it is not available.
    */
+  @Nullable()
   Thread getReaderThread()
   {
     return thread;
@@ -1090,8 +1188,9 @@ final class LDAPConnectionReader
    * @return  The name that should be used for the reader thread based on
    *          information about the associated client connection.
    */
+  @NotNull()
   private String constructThreadName(
-                      final LDAPConnectionInternals connectionInternals)
+       @Nullable final LDAPConnectionInternals connectionInternals)
   {
     final StringBuilder buffer = new StringBuilder();
     buffer.append("Connection reader for connection ");

@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -36,6 +51,8 @@ import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -62,7 +79,8 @@ public final class ContentSyncDoneControl
   /**
    * The OID (1.3.6.1.4.1.4203.1.9.1.3) for the sync done control.
    */
-  public static final String SYNC_DONE_OID = "1.3.6.1.4.1.4203.1.9.1.3";
+  @NotNull public static final String SYNC_DONE_OID =
+       "1.3.6.1.4.1.4203.1.9.1.3";
 
 
 
@@ -74,7 +92,7 @@ public final class ContentSyncDoneControl
 
 
   // The synchronization state cookie.
-  private final ASN1OctetString cookie;
+  @Nullable private final ASN1OctetString cookie;
 
   // Indicates whether to refresh information about deleted entries.
   private final boolean refreshDeletes;
@@ -103,7 +121,7 @@ public final class ContentSyncDoneControl
    * @param  refreshDeletes  Indicates whether the synchronization processing
    *                         has completed a delete phase.
    */
-  public ContentSyncDoneControl(final ASN1OctetString cookie,
+  public ContentSyncDoneControl(@Nullable final ASN1OctetString cookie,
                                 final boolean refreshDeletes)
   {
     super(SYNC_DONE_OID, false, encodeValue(cookie, refreshDeletes));
@@ -125,8 +143,9 @@ public final class ContentSyncDoneControl
    * @throws  LDAPException  If the provided control cannot be decoded as a
    *                         content synchronization done control.
    */
-  public ContentSyncDoneControl(final String oid, final boolean isCritical,
-                                final ASN1OctetString value)
+  public ContentSyncDoneControl(@NotNull final String oid,
+                                final boolean isCritical,
+                                @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     super(oid, isCritical, value);
@@ -217,8 +236,10 @@ public final class ContentSyncDoneControl
    *
    * @return  An ASN.1 octet string containing the encoded control value.
    */
-  private static ASN1OctetString encodeValue(final ASN1OctetString cookie,
-                                             final boolean refreshDeletes)
+  @NotNull()
+  private static ASN1OctetString encodeValue(
+                                      @Nullable final ASN1OctetString cookie,
+                                      final boolean refreshDeletes)
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(2);
 
@@ -241,9 +262,10 @@ public final class ContentSyncDoneControl
    * {@inheritDoc}
    */
   @Override()
-  public ContentSyncDoneControl decodeControl(final String oid,
-                                              final boolean isCritical,
-                                              final ASN1OctetString value)
+  @NotNull()
+  public ContentSyncDoneControl decodeControl(@NotNull final String oid,
+                                     final boolean isCritical,
+                                     @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     return new ContentSyncDoneControl(oid, isCritical, value);
@@ -265,7 +287,8 @@ public final class ContentSyncDoneControl
    *                         decode the content synchronization done control
    *                         contained in the provided result.
    */
-  public static ContentSyncDoneControl get(final LDAPResult result)
+  @Nullable()
+  public static ContentSyncDoneControl get(@NotNull final LDAPResult result)
          throws LDAPException
   {
     final Control c =
@@ -296,6 +319,7 @@ public final class ContentSyncDoneControl
    *          synchronization session, or {@code null} if none was included in
    *          the control.
    */
+  @Nullable()
   public ASN1OctetString getCookie()
   {
     return cookie;
@@ -321,6 +345,7 @@ public final class ContentSyncDoneControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_CONTENT_SYNC_DONE.get();
@@ -332,7 +357,7 @@ public final class ContentSyncDoneControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ContentSyncDoneControl(");
 

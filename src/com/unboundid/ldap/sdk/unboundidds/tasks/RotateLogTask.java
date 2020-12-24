@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,6 +49,8 @@ import java.util.Map;
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -73,7 +90,7 @@ public final class RotateLogTask
    * The fully-qualified name of the Java class that is used for the rotate log
    * task.
    */
-  static final String ROTATE_LOG_TASK_CLASS =
+  @NotNull static final String ROTATE_LOG_TASK_CLASS =
        "com.unboundid.directory.server.tasks.RotateLogTask";
 
 
@@ -81,22 +98,23 @@ public final class RotateLogTask
   /**
    * The name of the attribute used to specify the path to a log file to rotate.
    */
-  private static final String ATTR_PATH = "ds-task-rotate-log-path";
+  @NotNull private static final String ATTR_PATH = "ds-task-rotate-log-path";
 
 
 
   /**
    * The name of the object class used in rotate log task entries.
    */
-  private static final String OC_ROTATE_LOG_TASK = "ds-task-rotate-log";
+  @NotNull private static final String OC_ROTATE_LOG_TASK =
+       "ds-task-rotate-log";
 
 
 
   /**
    * The task property that will be used for the log file path.
    */
-  private static final TaskProperty PROPERTY_PATH = new TaskProperty(ATTR_PATH,
-       INFO_ROTATE_LOG_DISPLAY_NAME_PATH.get(),
+  @NotNull private static final TaskProperty PROPERTY_PATH = new TaskProperty(
+       ATTR_PATH, INFO_ROTATE_LOG_DISPLAY_NAME_PATH.get(),
        INFO_ROTATE_LOG_DESCRIPTION_PATH.get(), String.class, false, true,
        false);
 
@@ -110,7 +128,7 @@ public final class RotateLogTask
 
 
   // The paths of the log files to rotate.
-  private final List<String> paths;
+  @NotNull private final List<String> paths;
 
 
 
@@ -137,7 +155,8 @@ public final class RotateLogTask
    *                 the server root.  This may be {@code null} or empty if the
    *                 server should rotate all appropriate log files.
    */
-  public RotateLogTask(final String taskID, final String... paths)
+  public RotateLogTask(@Nullable final String taskID,
+                       @Nullable final String... paths)
   {
     this(taskID, null, null, null, null, null, paths);
   }
@@ -154,7 +173,8 @@ public final class RotateLogTask
    *                 the server root.  This may be {@code null} or empty if the
    *                 server should rotate all appropriate log files.
    */
-  public RotateLogTask(final String taskID, final Collection<String> paths)
+  public RotateLogTask(@Nullable final String taskID,
+                       @Nullable final Collection<String> paths)
   {
     this(taskID, null, null, null, null, null, paths);
   }
@@ -188,12 +208,13 @@ public final class RotateLogTask
    *                                 the server should rotate all appropriate
    *                                 log files.
    */
-  public RotateLogTask(final String taskID, final Date scheduledStartTime,
-                       final List<String> dependencyIDs,
-                       final FailedDependencyAction failedDependencyAction,
-                       final List<String> notifyOnCompletion,
-                       final List<String> notifyOnError,
-                       final String... paths)
+  public RotateLogTask(@Nullable final String taskID,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnError,
+              @Nullable final String... paths)
   {
     this(taskID, scheduledStartTime, dependencyIDs, failedDependencyAction,
          notifyOnCompletion, notifyOnError, StaticUtils.toList(paths));
@@ -228,12 +249,13 @@ public final class RotateLogTask
    *                                 the server should rotate all appropriate
    *                                 log files.
    */
-  public RotateLogTask(final String taskID, final Date scheduledStartTime,
-                       final List<String> dependencyIDs,
-                       final FailedDependencyAction failedDependencyAction,
-                       final List<String> notifyOnCompletion,
-                       final List<String> notifyOnError,
-                       final Collection<String> paths)
+  public RotateLogTask(@Nullable final String taskID,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnError,
+              @Nullable final Collection<String> paths)
   {
     this(taskID, scheduledStartTime, dependencyIDs, failedDependencyAction,
          null, notifyOnCompletion, null, notifyOnError, null, null, null,
@@ -283,16 +305,18 @@ public final class RotateLogTask
    *                                 the server should rotate all appropriate
    *                                 log files.
    */
-  public RotateLogTask(final String taskID, final Date scheduledStartTime,
-                       final List<String> dependencyIDs,
-                       final FailedDependencyAction failedDependencyAction,
-                       final List<String> notifyOnStart,
-                       final List<String> notifyOnCompletion,
-                       final List<String> notifyOnSuccess,
-                       final List<String> notifyOnError,
-                       final Boolean alertOnStart, final Boolean alertOnSuccess,
-                       final Boolean alertOnError,
-                      final Collection<String> paths)
+  public RotateLogTask(@Nullable final String taskID,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnStart,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnSuccess,
+              @Nullable final List<String> notifyOnError,
+              @Nullable final Boolean alertOnStart,
+              @Nullable final Boolean alertOnSuccess,
+              @Nullable final Boolean alertOnError,
+              @Nullable final Collection<String> paths)
   {
     super(taskID, ROTATE_LOG_TASK_CLASS, scheduledStartTime, dependencyIDs,
          failedDependencyAction, notifyOnStart, notifyOnCompletion,
@@ -319,7 +343,7 @@ public final class RotateLogTask
    * @throws  TaskException  If the provided entry cannot be parsed as a rotate
    *                         log task entry.
    */
-  public RotateLogTask(final Entry entry)
+  public RotateLogTask(@NotNull final Entry entry)
          throws TaskException
   {
     super(entry);
@@ -349,7 +373,7 @@ public final class RotateLogTask
    * @throws  TaskException  If the provided set of properties cannot be used to
    *                         create a valid rotate log task.
    */
-  public RotateLogTask(final Map<TaskProperty,List<Object>> properties)
+  public RotateLogTask(@NotNull final Map<TaskProperty,List<Object>> properties)
          throws TaskException
   {
     super(ROTATE_LOG_TASK_CLASS, properties);
@@ -377,6 +401,7 @@ public final class RotateLogTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskName()
   {
     return INFO_TASK_NAME_ROTATE_LOG.get();
@@ -388,6 +413,7 @@ public final class RotateLogTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskDescription()
   {
     return INFO_TASK_DESCRIPTION_ROTATE_LOG.get();
@@ -403,6 +429,7 @@ public final class RotateLogTask
    *          paths were specified and the server should rotate the log files
    *          for all applicable loggers.
    */
+  @NotNull()
   public List<String> getPaths()
   {
     return paths;
@@ -414,6 +441,7 @@ public final class RotateLogTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<String> getAdditionalObjectClasses()
   {
     return Collections.singletonList(OC_ROTATE_LOG_TASK);
@@ -425,6 +453,7 @@ public final class RotateLogTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<Attribute> getAdditionalAttributes()
   {
     if (paths.isEmpty())
@@ -443,6 +472,7 @@ public final class RotateLogTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<TaskProperty> getTaskSpecificProperties()
   {
     return Collections.singletonList(PROPERTY_PATH);
@@ -454,6 +484,7 @@ public final class RotateLogTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<TaskProperty,List<Object>> getTaskPropertyValues()
   {
     final LinkedHashMap<TaskProperty,List<Object>> props =

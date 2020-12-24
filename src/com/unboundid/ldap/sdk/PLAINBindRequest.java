@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,8 @@ import java.util.List;
 
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -87,7 +104,7 @@ public final class PLAINBindRequest
   /**
    * The name for the PLAIN SASL mechanism.
    */
-  public static final String PLAIN_MECHANISM_NAME = "PLAIN";
+  @NotNull public static final String PLAIN_MECHANISM_NAME = "PLAIN";
 
 
 
@@ -99,13 +116,13 @@ public final class PLAINBindRequest
 
 
   // The password for this bind request.
-  private final ASN1OctetString password;
+  @NotNull private final ASN1OctetString password;
 
   // The authentication ID string for this bind request.
-  private final String authenticationID;
+  @NotNull private final String authenticationID;
 
   // The authorization ID string for this bind request, if available.
-  private final String authorizationID;
+  @Nullable private final String authorizationID;
 
 
 
@@ -118,7 +135,8 @@ public final class PLAINBindRequest
    * @param  password          The password for this bind request.  It must not
    *                           be {@code null}.
    */
-  public PLAINBindRequest(final String authenticationID, final String password)
+  public PLAINBindRequest(@NotNull final String authenticationID,
+                          @NotNull final String password)
   {
     this(authenticationID, null, new ASN1OctetString(password), NO_CONTROLS);
 
@@ -136,7 +154,8 @@ public final class PLAINBindRequest
    * @param  password          The password for this bind request.  It must not
    *                           be {@code null}.
    */
-  public PLAINBindRequest(final String authenticationID, final byte[] password)
+  public PLAINBindRequest(@NotNull final String authenticationID,
+                          @NotNull final byte[] password)
   {
     this(authenticationID, null, new ASN1OctetString(password), NO_CONTROLS);
 
@@ -154,8 +173,8 @@ public final class PLAINBindRequest
    * @param  password          The password for this bind request.  It must not
    *                           be {@code null}.
    */
-  public PLAINBindRequest(final String authenticationID,
-                          final ASN1OctetString password)
+  public PLAINBindRequest(@NotNull final String authenticationID,
+                          @NotNull final ASN1OctetString password)
   {
     this(authenticationID, null, password, NO_CONTROLS);
   }
@@ -174,8 +193,9 @@ public final class PLAINBindRequest
    * @param  password          The password for this bind request.  It must not
    *                           be {@code null}.
    */
-  public PLAINBindRequest(final String authenticationID,
-                          final String authorizationID, final String password)
+  public PLAINBindRequest(@NotNull final String authenticationID,
+                          @Nullable final String authorizationID,
+                          @NotNull final String password)
   {
     this(authenticationID, authorizationID, new ASN1OctetString(password),
          NO_CONTROLS);
@@ -197,8 +217,9 @@ public final class PLAINBindRequest
    * @param  password          The password for this bind request.  It must not
    *                           be {@code null}.
    */
-  public PLAINBindRequest(final String authenticationID,
-                          final String authorizationID, final byte[] password)
+  public PLAINBindRequest(@NotNull final String authenticationID,
+                          @Nullable final String authorizationID,
+                          @NotNull final byte[] password)
   {
     this(authenticationID, authorizationID, new ASN1OctetString(password),
          NO_CONTROLS);
@@ -220,9 +241,9 @@ public final class PLAINBindRequest
    * @param  password          The password for this bind request.  It must not
    *                           be {@code null}.
    */
-  public PLAINBindRequest(final String authenticationID,
-                          final String authorizationID,
-                          final ASN1OctetString password)
+  public PLAINBindRequest(@NotNull final String authenticationID,
+                          @Nullable final String authorizationID,
+                          @NotNull final ASN1OctetString password)
   {
     this(authenticationID, authorizationID, password, NO_CONTROLS);
   }
@@ -239,8 +260,9 @@ public final class PLAINBindRequest
    *                           be {@code null}.
    * @param  controls          The set of controls to include
    */
-  public PLAINBindRequest(final String authenticationID, final String password,
-                          final Control... controls)
+  public PLAINBindRequest(@NotNull final String authenticationID,
+                          @NotNull final String password,
+                          @Nullable final Control... controls)
   {
     this(authenticationID, null, new ASN1OctetString(password), controls);
 
@@ -259,8 +281,9 @@ public final class PLAINBindRequest
    *                           be {@code null}.
    * @param  controls          The set of controls to include
    */
-  public PLAINBindRequest(final String authenticationID, final byte[] password,
-                          final Control... controls)
+  public PLAINBindRequest(@NotNull final String authenticationID,
+                          @NotNull final byte[] password,
+                          @Nullable final Control... controls)
   {
     this(authenticationID, null, new ASN1OctetString(password), controls);
 
@@ -279,9 +302,9 @@ public final class PLAINBindRequest
    *                           be {@code null}.
    * @param  controls          The set of controls to include
    */
-  public PLAINBindRequest(final String authenticationID,
-                          final ASN1OctetString password,
-                          final Control... controls)
+  public PLAINBindRequest(@NotNull final String authenticationID,
+                          @NotNull final ASN1OctetString password,
+                          @Nullable final Control... controls)
   {
     this(authenticationID, null, password, controls);
   }
@@ -300,9 +323,10 @@ public final class PLAINBindRequest
    *                           be {@code null}.
    * @param  controls          The set of controls to include
    */
-  public PLAINBindRequest(final String authenticationID,
-                          final String authorizationID, final String password,
-                          final Control... controls)
+  public PLAINBindRequest(@NotNull final String authenticationID,
+                          @Nullable final String authorizationID,
+                          @NotNull final String password,
+                          @Nullable final Control... controls)
   {
     this(authenticationID, authorizationID, new ASN1OctetString(password),
          controls);
@@ -324,9 +348,10 @@ public final class PLAINBindRequest
    *                           be {@code null}.
    * @param  controls          The set of controls to include
    */
-  public PLAINBindRequest(final String authenticationID,
-                          final String authorizationID, final byte[] password,
-                          final Control... controls)
+  public PLAINBindRequest(@NotNull final String authenticationID,
+                          @Nullable final String authorizationID,
+                          @NotNull final byte[] password,
+                          @Nullable final Control... controls)
   {
     this(authenticationID, authorizationID, new ASN1OctetString(password),
          controls);
@@ -348,10 +373,10 @@ public final class PLAINBindRequest
    *                           be {@code null}.
    * @param  controls          The set of controls to include
    */
-  public PLAINBindRequest(final String authenticationID,
-                          final String authorizationID,
-                          final ASN1OctetString password,
-                          final Control... controls)
+  public PLAINBindRequest(@NotNull final String authenticationID,
+                          @Nullable final String authorizationID,
+                          @NotNull final ASN1OctetString password,
+                          @Nullable final Control... controls)
   {
     super(controls);
 
@@ -368,6 +393,7 @@ public final class PLAINBindRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getSASLMechanismName()
   {
     return PLAIN_MECHANISM_NAME;
@@ -380,6 +406,7 @@ public final class PLAINBindRequest
    *
    * @return  The authentication ID for this bind request.
    */
+  @NotNull()
   public String getAuthenticationID()
   {
     return authenticationID;
@@ -393,6 +420,7 @@ public final class PLAINBindRequest
    * @return  The authorization ID for this bind request, or {@code null} if
    *          there is no authorization ID.
    */
+  @Nullable()
   public String getAuthorizationID()
   {
     return authorizationID;
@@ -405,6 +433,7 @@ public final class PLAINBindRequest
    *
    * @return  The string representation of the password for this bind request.
    */
+  @NotNull()
   public String getPasswordString()
   {
     return password.stringValue();
@@ -417,6 +446,7 @@ public final class PLAINBindRequest
    *
    * @return  The bytes that comprise the password for this bind request.
    */
+  @NotNull()
   public byte[] getPasswordBytes()
   {
     return password.getValue();
@@ -440,7 +470,9 @@ public final class PLAINBindRequest
    *                         reading the response.
    */
   @Override()
-  protected BindResult process(final LDAPConnection connection, final int depth)
+  @NotNull()
+  protected BindResult process(@NotNull final LDAPConnection connection,
+                               final int depth)
             throws LDAPException
   {
     // Create the byte array that should comprise the credentials.
@@ -468,7 +500,9 @@ public final class PLAINBindRequest
    * {@inheritDoc}
    */
   @Override()
-  public PLAINBindRequest getRebindRequest(final String host, final int port)
+  @NotNull()
+  public PLAINBindRequest getRebindRequest(@NotNull final String host,
+                                           final int port)
   {
     return new PLAINBindRequest(authenticationID, authorizationID, password,
                                 getControls());
@@ -480,6 +514,7 @@ public final class PLAINBindRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public PLAINBindRequest duplicate()
   {
     return duplicate(getControls());
@@ -491,7 +526,8 @@ public final class PLAINBindRequest
    * {@inheritDoc}
    */
   @Override()
-  public PLAINBindRequest duplicate(final Control[] controls)
+  @NotNull()
+  public PLAINBindRequest duplicate(@Nullable final Control[] controls)
   {
     final PLAINBindRequest bindRequest = new PLAINBindRequest(authenticationID,
          authorizationID, password, controls);
@@ -505,7 +541,7 @@ public final class PLAINBindRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("PLAINBindRequest(authenticationID='");
     buffer.append(authenticationID);
@@ -543,7 +579,8 @@ public final class PLAINBindRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toCode(final List<String> lineList, final String requestID,
+  public void toCode(@NotNull final List<String> lineList,
+                     @NotNull final String requestID,
                      final int indentSpaces, final boolean includeProcessing)
   {
     // Create the request variable.

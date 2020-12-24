@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -78,22 +95,22 @@ public final class AsyncRequestID
 
 
   // The queue used to receive the result for the associated operation.
-  private final ArrayBlockingQueue<LDAPResult> resultQueue;
+  @NotNull private final ArrayBlockingQueue<LDAPResult> resultQueue;
 
   // A flag indicating whether a request has been made to cancel the operation.
-  private final AtomicBoolean cancelRequested;
+  @NotNull private final AtomicBoolean cancelRequested;
 
   // The result for the associated operation.
-  private final AtomicReference<LDAPResult> result;
+  @NotNull private final AtomicReference<LDAPResult> result;
 
   // The message ID for the request message.
   private final int messageID;
 
   // The connection used to process the asynchronous operation.
-  private final LDAPConnection connection;
+  @NotNull private final LDAPConnection connection;
 
   // The timer task that will allow the associated request to be cancelled.
-  private volatile AsyncTimeoutTimerTask timerTask;
+  @Nullable private volatile AsyncTimeoutTimerTask timerTask;
 
 
 
@@ -104,7 +121,7 @@ public final class AsyncRequestID
    * @param  connection  The connection used to process the asynchronous
    *                     operation.
    */
-  AsyncRequestID(final int messageID, final LDAPConnection connection)
+  AsyncRequestID(final int messageID, @NotNull final LDAPConnection connection)
   {
     this.messageID  = messageID;
     this.connection = connection;
@@ -247,6 +264,7 @@ public final class AsyncRequestID
    *                                interrupted before a result was received.
    */
   @Override()
+  @NotNull()
   public LDAPResult get()
          throws InterruptedException
   {
@@ -285,7 +303,8 @@ public final class AsyncRequestID
    *                            could be obtained.
    */
   @Override()
-  public LDAPResult get(final long timeout, final TimeUnit timeUnit)
+  @NotNull()
+  public LDAPResult get(final long timeout, @NotNull final TimeUnit timeUnit)
          throws InterruptedException, TimeoutException
   {
     final LDAPResult newResult = resultQueue.poll();
@@ -325,7 +344,7 @@ public final class AsyncRequestID
    *                    after a period of time.  It may be {@code null} if no
    *                    timer task should be used.
    */
-  void setTimerTask(final AsyncTimeoutTimerTask timerTask)
+  void setTimerTask(@Nullable final AsyncTimeoutTimerTask timerTask)
   {
     this.timerTask = timerTask;
   }
@@ -338,7 +357,7 @@ public final class AsyncRequestID
    * @param  result  The result for the associated operation.  It must not be
    *                 {@code null}.
    */
-  void setResult(final LDAPResult result)
+  void setResult(@NotNull final LDAPResult result)
   {
     resultQueue.offer(result);
 
@@ -375,7 +394,7 @@ public final class AsyncRequestID
    *          ID, or {@code false} if not.
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == null)
     {
@@ -405,6 +424,7 @@ public final class AsyncRequestID
    * @return  A string representation of this async request ID.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return "AsyncRequestID(messageID=" + messageID + ')';

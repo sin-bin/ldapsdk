@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,9 +37,10 @@ package com.unboundid.util;
 
 
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -42,24 +58,27 @@ import java.util.concurrent.atomic.AtomicReference;
 final class StreamFileValuePatternReaderThread
       extends Thread
 {
-  // A value that tracks the position at which the next line of data should be
-  // read from the file.
-  private final AtomicLong nextReadPosition;
+  // The number of lines that have been read from the file so far.
+  @NotNull private final AtomicLong nextLineNumber;
+
+  // A reference to the reader used to read lines from the file.
+  @NotNull private final AtomicReference<BufferedReader> fileReader;
 
   // A reference that holds this thread and makes it available to the associated
   // StreamFileValuePatternComponent.
-  private final AtomicReference<StreamFileValuePatternReaderThread> threadRef;
+  @NotNull private final AtomicReference<StreamFileValuePatternReaderThread>
+       threadRef;
+
+  // The file from which the data is to be read.
+  @NotNull private final File file;
 
   // The queue that will be used to hold the lines of data read from the file.
-  private final LinkedBlockingQueue<String> lineQueue;
+  @NotNull private final LinkedBlockingQueue<String> lineQueue;
 
   // The maximum length of time in milliseconds that an attempt to offer a
   // string to the queue will be allowed to block before the associated reader
   // thread will exit.
   private final long maxOfferBlockTimeMillis;
-
-  // The random-access file from which the data will be read.
-  private final RandomAccessFile randomAccessFile;
 
 
 
@@ -78,9 +97,9 @@ final class StreamFileValuePatternReaderThread
    *                                  queue will be allowed to block before the
    *                                  associated reader thread will exit.  It
    *                                  must be greater than zero.
-   * @param  nextReadPosition         A value that tracks the position at which
-   *                                  the next line of data should be read from
-   *                                  the file.  It must not be {@code null}.
+   * @param  nextLineNumber           The line number for the next line to read
+   *                                  from the file.  It must not be
+   *                                  {@code null}.
    * @param  threadRef                An object that will be used to hold a
    *                                  reference to this thread from within the
    *                                  associated
@@ -92,24 +111,36 @@ final class StreamFileValuePatternReaderThread
    * @throws  IOException  If a problem is encountered while attempting to open
    *                       the specified file for reading.
    */
-  StreamFileValuePatternReaderThread(final File file,
-       final LinkedBlockingQueue<String> lineQueue,
+  StreamFileValuePatternReaderThread(@NotNull final File file,
+       @NotNull final LinkedBlockingQueue<String> lineQueue,
        final long maxOfferBlockTimeMillis,
-       final AtomicLong nextReadPosition,
-       final AtomicReference<StreamFileValuePatternReaderThread> threadRef)
+       @NotNull final AtomicLong nextLineNumber,
+       @NotNull final AtomicReference<StreamFileValuePatternReaderThread>
+            threadRef)
        throws IOException
   {
     setName("StreamFileValuePatternReaderThread for file '" +
          file.getAbsolutePath() + '\'');
     setDaemon(true);
 
+    this.file = file;
     this.lineQueue = lineQueue;
     this.maxOfferBlockTimeMillis = maxOfferBlockTimeMillis;
-    this.nextReadPosition = nextReadPosition;
+    this.nextLineNumber = nextLineNumber;
     this.threadRef = threadRef;
 
-    randomAccessFile = new RandomAccessFile(file, "r");
-    randomAccessFile.seek(nextReadPosition.get());
+    final BufferedReader bufferedReader =
+         new BufferedReader(new FileReader(file));
+    fileReader = new AtomicReference<>(bufferedReader);
+
+    final long linesToSkip = nextLineNumber.get();
+    for (long i =0; i < linesToSkip; i++)
+    {
+      if (bufferedReader.readLine() == null)
+      {
+        break;
+      }
+    }
   }
 
 
@@ -123,27 +154,32 @@ final class StreamFileValuePatternReaderThread
   @Override()
   public void run()
   {
+    BufferedReader bufferedReader = fileReader.get();
+
     try
     {
       while (true)
       {
-        // Read the next line of data from the file.  If we get an error, or if
-        // we hit the end of the file, then we'll reset the next read position
-        // to zero and the thread will exit.
+        // Read the next line of data from the file.  If we hit the end of the
+        // file, then reset the next line number to zero and re-open the file.
+        // If we encounter an error, then the thread will exit.
         final String line;
         try
         {
-          line = randomAccessFile.readLine();
+          line = bufferedReader.readLine();
           if (line == null)
           {
-            nextReadPosition.set(0L);
-            return;
+            nextLineNumber.set(0);
+            bufferedReader.close();
+            bufferedReader = new BufferedReader(new FileReader(file));
+            fileReader.set(bufferedReader);
+            continue;
           }
         }
         catch (final Exception e)
         {
           Debug.debugException(e);
-          nextReadPosition.set(0L);
+          nextLineNumber.set(0L);
           return;
         }
 
@@ -159,7 +195,7 @@ final class StreamFileValuePatternReaderThread
           if (lineQueue.offer(line, maxOfferBlockTimeMillis,
                TimeUnit.MILLISECONDS))
           {
-            nextReadPosition.set(randomAccessFile.getFilePointer());
+            nextLineNumber.incrementAndGet();
           }
           else
           {
@@ -183,11 +219,15 @@ final class StreamFileValuePatternReaderThread
       // Close the file.
       try
       {
-        randomAccessFile.close();
+        bufferedReader.close();
       }
       catch (final Exception e)
       {
         Debug.debugException(e);
+      }
+      finally
+      {
+        fileReader.set(null);
       }
     }
   }

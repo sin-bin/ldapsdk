@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,8 @@ package com.unboundid.ldap.sdk.unboundidds.logs;
 
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -58,7 +75,7 @@ public class AbandonRequestAccessLogMessage
 
 
   // The message ID of the operation to abandon.
-  private final Integer idToAbandon;
+  @Nullable private final Integer idToAbandon;
 
 
 
@@ -72,7 +89,7 @@ public class AbandonRequestAccessLogMessage
    * @throws  LogException  If the provided string cannot be parsed as a valid
    *                        log message.
    */
-  public AbandonRequestAccessLogMessage(final String s)
+  public AbandonRequestAccessLogMessage(@NotNull final String s)
          throws LogException
   {
     this(new LogMessage(s));
@@ -87,7 +104,7 @@ public class AbandonRequestAccessLogMessage
    * @param  m  The log message to be parsed as an abandon request access log
    *            message.
    */
-  public AbandonRequestAccessLogMessage(final LogMessage m)
+  public AbandonRequestAccessLogMessage(@NotNull final LogMessage m)
   {
     super(m);
 
@@ -102,6 +119,7 @@ public class AbandonRequestAccessLogMessage
    * @return  The message ID of the operation that should be abandoned, or
    *          {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public final Integer getMessageIDToAbandon()
   {
     return idToAbandon;
@@ -113,6 +131,7 @@ public class AbandonRequestAccessLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public final AccessLogOperationType getOperationType()
   {
     return AccessLogOperationType.ABANDON;

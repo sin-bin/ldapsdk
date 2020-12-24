@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,8 @@ import java.util.Set;
 
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -58,14 +75,14 @@ public final class GSSAPIBindRequestProperties
 
 
   // The password for the GSSAPI bind request.
-  private ASN1OctetString password;
+  @Nullable private ASN1OctetString password;
 
   // Indicates whether to enable JVM-level debugging for GSSAPI processing.
   private boolean enableGSSAPIDebugging;
 
   // Indicates whether the client should be considered the GSSAPI initiator or
   // the acceptor.
-  private Boolean isInitiator;
+  @Nullable private Boolean isInitiator;
 
   // Indicates whether to attempt to refresh the configuration before the JAAS
   // login method is called.
@@ -93,42 +110,42 @@ public final class GSSAPIBindRequestProperties
 
   // The SASL quality of protection value(s) allowed for the DIGEST-MD5 bind
   // request.
-  private List<SASLQualityOfProtection> allowedQoP;
+  @NotNull private List<SASLQualityOfProtection> allowedQoP;
 
   // The names of any system properties that should not be altered by GSSAPI
   // processing.
-  private Set<String> suppressedSystemProperties;
+  @NotNull private Set<String> suppressedSystemProperties;
 
   // The authentication ID string for the GSSAPI bind request.
-  private String authenticationID;
+  @Nullable private String authenticationID;
 
   // The authorization ID string for the GSSAPI bind request, if available.
-  private String authorizationID;
+  @Nullable private String authorizationID;
 
   // The path to the JAAS configuration file to use for bind processing.
-  private String configFilePath;
+  @Nullable private String configFilePath;
 
   // The name that will be used to identify this client in the JAAS framework.
-  private String jaasClientName;
+  @NotNull private String jaasClientName;
 
   // The KDC address for the GSSAPI bind request, if available.
-  private String kdcAddress;
+  @Nullable private String kdcAddress;
 
   // The path to the keytab file to use if useKeyTab is true.
-  private String keyTabPath;
+  @Nullable private String keyTabPath;
 
   // The realm for the GSSAPI bind request, if available.
-  private String realm;
+  @Nullable private String realm;
 
   // The server name to use when creating the SASL client.
-  private String saslClientServerName;
+  @Nullable private String saslClientServerName;
 
   // The protocol that should be used in the Kerberos service principal for
   // the server system.
-  private String servicePrincipalProtocol;
+  @NotNull private String servicePrincipalProtocol;
 
   // The path to the Kerberos ticket cache to use.
-  private String ticketCachePath;
+  @Nullable private String ticketCachePath;
 
 
 
@@ -143,8 +160,8 @@ public final class GSSAPIBindRequestProperties
    *                           be {@code null} if an existing Kerberos session
    *                           should be used.
    */
-  public GSSAPIBindRequestProperties(final String authenticationID,
-                                     final String password)
+  public GSSAPIBindRequestProperties(@Nullable final String authenticationID,
+                                     @Nullable final String password)
   {
     this(authenticationID, null,
          (password == null ? null : new ASN1OctetString(password)), null, null,
@@ -164,8 +181,8 @@ public final class GSSAPIBindRequestProperties
    *                           be {@code null} if an existing Kerberos session
    *                           should be used.
    */
-  public GSSAPIBindRequestProperties(final String authenticationID,
-                                     final byte[] password)
+  public GSSAPIBindRequestProperties(@Nullable final String authenticationID,
+                                     @Nullable final byte[] password)
   {
     this(authenticationID, null,
          (password == null ? null : new ASN1OctetString(password)), null, null,
@@ -198,12 +215,12 @@ public final class GSSAPIBindRequestProperties
    *                           {@code null} to use the default JAAS
    *                           configuration.
    */
-  GSSAPIBindRequestProperties(final String authenticationID,
-                              final String authorizationID,
-                              final ASN1OctetString password,
-                              final String realm,
-                              final String kdcAddress,
-                              final String configFilePath)
+  GSSAPIBindRequestProperties(@Nullable final String authenticationID,
+                              @Nullable final String authorizationID,
+                              @Nullable final ASN1OctetString password,
+                              @Nullable final String realm,
+                              @Nullable final String kdcAddress,
+                              @Nullable final String configFilePath)
   {
     this.authenticationID = authenticationID;
     this.authorizationID  = authorizationID;
@@ -238,6 +255,7 @@ public final class GSSAPIBindRequestProperties
    * @return  The authentication ID for the GSSAPI bind request, or {@code null}
    *          if an existing Kerberos session should be used.
    */
+  @Nullable()
   public String getAuthenticationID()
   {
     return authenticationID;
@@ -252,7 +270,7 @@ public final class GSSAPIBindRequestProperties
    *                           request.  It may be {@code null} if an existing
    *                           Kerberos session should be used.
    */
-  public void setAuthenticationID(final String authenticationID)
+  public void setAuthenticationID(@Nullable final String authenticationID)
   {
     this.authenticationID = authenticationID;
   }
@@ -266,6 +284,7 @@ public final class GSSAPIBindRequestProperties
    *          if the authorization ID should be the same as the authentication
    *          ID.
    */
+  @Nullable()
   public String getAuthorizationID()
   {
     return authorizationID;
@@ -280,7 +299,7 @@ public final class GSSAPIBindRequestProperties
    *                          It may be {@code null} if the authorization ID
    *                          should be the same as the authentication ID.
    */
-  public void setAuthorizationID(final String authorizationID)
+  public void setAuthorizationID(@Nullable final String authorizationID)
   {
     this.authorizationID = authorizationID;
   }
@@ -294,6 +313,7 @@ public final class GSSAPIBindRequestProperties
    * @return  The password that should be used for the GSSAPI bind request, or
    *          {@code null} if an existing Kerberos session should be used.
    */
+  @Nullable()
   public ASN1OctetString getPassword()
   {
     return password;
@@ -308,7 +328,7 @@ public final class GSSAPIBindRequestProperties
    *                   request.  It may be {@code null} if an existing
    *                   Kerberos session should be used.
    */
-  public void setPassword(final String password)
+  public void setPassword(@Nullable final String password)
   {
     if (password == null)
     {
@@ -329,7 +349,7 @@ public final class GSSAPIBindRequestProperties
    *                   request.  It may be {@code null} if an existing
    *                   Kerberos session should be used.
    */
-  public void setPassword(final byte[] password)
+  public void setPassword(@Nullable final byte[] password)
   {
     if (password == null)
     {
@@ -350,7 +370,7 @@ public final class GSSAPIBindRequestProperties
    *                   request.  It may be {@code null} if an existing
    *                   Kerberos session should be used.
    */
-  public void setPassword(final ASN1OctetString password)
+  public void setPassword(@Nullable final ASN1OctetString password)
   {
     this.password = password;
   }
@@ -364,6 +384,7 @@ public final class GSSAPIBindRequestProperties
    *          the request should attempt to use the default realm from the
    *          system configuration.
    */
+  @Nullable()
   public String getRealm()
   {
     return realm;
@@ -378,7 +399,7 @@ public final class GSSAPIBindRequestProperties
    *                {@code null} if the request should attempt to use the
    *                default realm from the system configuration.
    */
-  public void setRealm(final String realm)
+  public void setRealm(@Nullable final String realm)
   {
     this.realm = realm;
   }
@@ -395,6 +416,7 @@ public final class GSSAPIBindRequestProperties
    *          authentication has completed, in order from most preferred to
    *          least preferred.
    */
+  @NotNull()
   public List<SASLQualityOfProtection> getAllowedQoP()
   {
     return allowedQoP;
@@ -415,7 +437,8 @@ public final class GSSAPIBindRequestProperties
    *                     {@link SASLQualityOfProtection#AUTH} quality of
    *                     protection value will be used.
    */
-  public void setAllowedQoP(final List<SASLQualityOfProtection> allowedQoP)
+  public void setAllowedQoP(
+                   @Nullable final List<SASLQualityOfProtection> allowedQoP)
   {
     if ((allowedQoP == null) || allowedQoP.isEmpty())
     {
@@ -443,7 +466,8 @@ public final class GSSAPIBindRequestProperties
    *                     {@link SASLQualityOfProtection#AUTH} quality of
    *                     protection value will be used.
    */
-  public void setAllowedQoP(final SASLQualityOfProtection... allowedQoP)
+  public void setAllowedQoP(
+                   @Nullable final SASLQualityOfProtection... allowedQoP)
   {
     setAllowedQoP(StaticUtils.toList(allowedQoP));
   }
@@ -458,6 +482,7 @@ public final class GSSAPIBindRequestProperties
    *          {@code null} if request should attempt to determine the KDC
    *          address from the system configuration.
    */
+  @Nullable()
   public String getKDCAddress()
   {
     return kdcAddress;
@@ -473,7 +498,7 @@ public final class GSSAPIBindRequestProperties
    *                     attempt to determine the KDC address from the system
    *                     configuration.
    */
-  public void setKDCAddress(final String kdcAddress)
+  public void setKDCAddress(@Nullable final String kdcAddress)
   {
     this.kdcAddress = kdcAddress;
   }
@@ -487,6 +512,7 @@ public final class GSSAPIBindRequestProperties
    * @return  The name that will be used to identify this client in the JAAS
    *          framework.
    */
+  @NotNull()
   public String getJAASClientName()
   {
     return jaasClientName;
@@ -502,7 +528,7 @@ public final class GSSAPIBindRequestProperties
    *                         in the JAAS framework.  It must not be
    *                         {@code null} or empty.
    */
-  public void setJAASClientName(final String jaasClientName)
+  public void setJAASClientName(@NotNull final String jaasClientName)
   {
     Validator.ensureNotNull(jaasClientName);
 
@@ -520,6 +546,7 @@ public final class GSSAPIBindRequestProperties
    *          configuration file should be automatically constructed for the
    *          bind request.
    */
+  @Nullable()
   public String getConfigFilePath()
   {
     return configFilePath;
@@ -537,7 +564,7 @@ public final class GSSAPIBindRequestProperties
    *                         should be automatically constructed for the bind
    *                         request.
    */
-  public void setConfigFilePath(final String configFilePath)
+  public void setConfigFilePath(@Nullable final String configFilePath)
   {
     this.configFilePath = configFilePath;
   }
@@ -553,6 +580,7 @@ public final class GSSAPIBindRequestProperties
    *          {@code SaslClient} should use the address specified when
    *          establishing the connection.
    */
+  @Nullable()
   public String getSASLClientServerName()
   {
     return saslClientServerName;
@@ -570,7 +598,8 @@ public final class GSSAPIBindRequestProperties
    *                               {@code SaslClient} should use the address
    *                               specified when establishing the connection.
    */
-  public void setSASLClientServerName(final String saslClientServerName)
+  public void setSASLClientServerName(
+                   @Nullable final String saslClientServerName)
   {
     this.saslClientServerName = saslClientServerName;
   }
@@ -588,6 +617,7 @@ public final class GSSAPIBindRequestProperties
    * @return  The protocol specified in the service principal that the directory
    *          server uses for its communication with the KDC.
    */
+  @NotNull()
   public String getServicePrincipalProtocol()
   {
     return servicePrincipalProtocol;
@@ -605,7 +635,8 @@ public final class GSSAPIBindRequestProperties
    *                                   principal that the directory server uses
    *                                   for its communication with the KDC.
    */
-  public void setServicePrincipalProtocol(final String servicePrincipalProtocol)
+  public void setServicePrincipalProtocol(
+                   @NotNull final String servicePrincipalProtocol)
   {
     Validator.ensureNotNull(servicePrincipalProtocol);
 
@@ -712,6 +743,7 @@ public final class GSSAPIBindRequestProperties
    *          credentials, or {@code null} if the default keytab location should
    *          be used.
    */
+  @Nullable()
   public String getKeyTabPath()
   {
     return keyTabPath;
@@ -727,7 +759,7 @@ public final class GSSAPIBindRequestProperties
    *                     user credentials.  It may be {@code null} if the
    *                     default keytab location should be used.
    */
-  public void setKeyTabPath(final String keyTabPath)
+  public void setKeyTabPath(@Nullable final String keyTabPath)
   {
     this.keyTabPath = keyTabPath;
   }
@@ -811,6 +843,7 @@ public final class GSSAPIBindRequestProperties
    *          during authentication, or {@code null} if the default ticket cache
    *          file should be used.
    */
+  @Nullable()
   public String getTicketCachePath()
   {
     return ticketCachePath;
@@ -827,7 +860,7 @@ public final class GSSAPIBindRequestProperties
    *                          {@code null} if the default ticket cache file
    *                          should be used.
    */
-  public void setTicketCachePath(final String ticketCachePath)
+  public void setTicketCachePath(@Nullable final String ticketCachePath)
   {
     this.ticketCachePath = ticketCachePath;
   }
@@ -875,6 +908,7 @@ public final class GSSAPIBindRequestProperties
    *          state (which is the default if the {@link #setIsInitiator}  method
    *          has not been called).
    */
+  @Nullable()
   public Boolean getIsInitiator()
   {
     return isInitiator;
@@ -899,7 +933,7 @@ public final class GSSAPIBindRequestProperties
    *                      will always be the initiator unless explicitly
    *                      configured otherwise).
    */
-  public void setIsInitiator(final Boolean isInitiator)
+  public void setIsInitiator(@Nullable final Boolean isInitiator)
   {
     this.isInitiator = isInitiator;
   }
@@ -913,6 +947,7 @@ public final class GSSAPIBindRequestProperties
    * @return  A set of system properties that will not be altered by GSSAPI
    *          processing.
    */
+  @NotNull()
   public Set<String> getSuppressedSystemProperties()
   {
     return suppressedSystemProperties;
@@ -933,7 +968,7 @@ public final class GSSAPIBindRequestProperties
    *                                     suppressed.
    */
   public void setSuppressedSystemProperties(
-                   final Collection<String> suppressedSystemProperties)
+       @Nullable final Collection<String> suppressedSystemProperties)
   {
     if (suppressedSystemProperties == null)
     {
@@ -986,6 +1021,7 @@ public final class GSSAPIBindRequestProperties
    * @return  A string representation of the GSSAPI bind request properties.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -1001,7 +1037,7 @@ public final class GSSAPIBindRequestProperties
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("GSSAPIBindRequestProperties(");
     if (authenticationID != null)

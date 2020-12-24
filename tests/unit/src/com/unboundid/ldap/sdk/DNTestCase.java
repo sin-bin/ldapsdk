@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -142,7 +157,7 @@ public class DNTestCase
   {
     RDN[] rdns =
     {
-      new RDN("givenName=Test+sn=User", schema),
+      new RDN("cn=Test User+emailAddress=test.user@example.com", schema),
       new RDN("ou=People", schema),
       new RDN("dc=example", schema),
       new RDN("dc=com", schema)
@@ -150,12 +165,14 @@ public class DNTestCase
 
     DN dn = new DN(rdns);
     assertNotNull(dn.getRDN());
-    assertEquals(dn.getRDN(), new RDN("givenname=Test+sn=User", schema));
+    assertEquals(dn.getRDN(),
+         new RDN("cn=test user+e=Test.User@EXAMPLE.COM", schema));
     assertNotNull(dn.getRDNs());
     assertEquals(dn.getRDNs().length, 4);
 
     assertEquals(dn.toString(),
-                 "givenName=Test+sn=User,ou=People,dc=example,dc=com");
+         "cn=Test User+emailAddress=test.user@example.com,ou=People," +
+              "dc=example,dc=com");
 
     StringBuilder buffer = new StringBuilder();
     dn.toString(buffer);
@@ -170,7 +187,7 @@ public class DNTestCase
     assertEquals(decodedDN.hashCode(), dn.hashCode());
 
     assertEquals(dn.toNormalizedString(),
-                 "givenname=test+sn=user,ou=people,dc=example,dc=com");
+         "cn=test user+e=test.user@example.com,ou=people,dc=example,dc=com");
     decodedDN = new DN(dn.toNormalizedString(), schema);
     assertEquals(decodedDN, dn);
     assertEquals(decodedDN.hashCode(), dn.hashCode());

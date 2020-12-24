@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -23,6 +38,8 @@ package com.unboundid.ldap.sdk;
 
 
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -56,11 +73,11 @@ public final class RetainConnectExceptionReferralConnector
 {
   // The wrapped referral connector that will actually be used to establish the
   // connection.
-  private final ReferralConnector wrappedReferralConnector;
+  @Nullable private final ReferralConnector wrappedReferralConnector;
 
   // The exception caught in the last attempt to establish a connection for the
   // purpose of following a referral.
-  private volatile LDAPException connectExceptionFromLastAttempt;
+  @Nullable private volatile LDAPException connectExceptionFromLastAttempt;
 
 
 
@@ -89,7 +106,7 @@ public final class RetainConnectExceptionReferralConnector
    *                                   received.
    */
   public RetainConnectExceptionReferralConnector(
-              final ReferralConnector wrappedReferralConnector)
+              @Nullable final ReferralConnector wrappedReferralConnector)
   {
     this.wrappedReferralConnector = wrappedReferralConnector;
 
@@ -107,6 +124,7 @@ public final class RetainConnectExceptionReferralConnector
    *          {@code null} if the last connection attempt was successful or if
    *          there have not yet been any connection attempts.
    */
+  @Nullable()
   public LDAPException getExceptionFromLastConnectAttempt()
   {
     return connectExceptionFromLastAttempt;
@@ -118,8 +136,10 @@ public final class RetainConnectExceptionReferralConnector
    * {@inheritDoc}
    */
   @Override()
-  public LDAPConnection getReferralConnection(final LDAPURL referralURL,
-                                              final LDAPConnection connection)
+  @NotNull()
+  public LDAPConnection getReferralConnection(
+                             @NotNull final LDAPURL referralURL,
+                             @NotNull final LDAPConnection connection)
                  throws LDAPException
   {
     final ReferralConnector connector;

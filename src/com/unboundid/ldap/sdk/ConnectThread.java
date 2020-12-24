@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,8 +44,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocket;
 
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 
 import static com.unboundid.ldap.sdk.LDAPMessages.*;
@@ -53,19 +70,19 @@ final class ConnectThread
       extends Thread
 {
   // Indicates whether the connection has been successfully established.
-  private final AtomicBoolean connected;
+  @NotNull private final AtomicBoolean connected;
 
   // The socket used for the connection.
-  private final AtomicReference<Socket> socket;
+  @NotNull private final AtomicReference<Socket> socket;
 
   // The thread being used to establish the connection.
-  private final AtomicReference<Thread> thread;
+  @NotNull private final AtomicReference<Thread> thread;
 
   // The exception caught while trying to establish the connection.
-  private final AtomicReference<Throwable> exception;
+  @NotNull private final AtomicReference<Throwable> exception;
 
   // A latch that will be used to indicate that the thread has actually started.
-  private final CountDownLatch startLatch;
+  @NotNull private final CountDownLatch startLatch;
 
   // The maximum length of time in milliseconds that the connection attempt
   // should be allowed to block.
@@ -75,10 +92,10 @@ final class ConnectThread
   private final int port;
 
   // The socket factory that will be used to create the connection.
-  private final SocketFactory socketFactory;
+  @NotNull private final SocketFactory socketFactory;
 
   // The address to which the connection should be established.
-  private final InetAddress address;
+  @NotNull private final InetAddress address;
 
 
 
@@ -96,7 +113,8 @@ final class ConnectThread
    *                               that the connection attempt should be allowed
    *                               to block.
    */
-  ConnectThread(final SocketFactory socketFactory, final InetAddress address,
+  ConnectThread(@NotNull final SocketFactory socketFactory,
+                @NotNull final InetAddress address,
                 final int port, final int connectTimeoutMillis)
   {
     super("Background connect thread for " + address + ':' + port);
@@ -147,10 +165,26 @@ final class ConnectThread
         s.connect(new InetSocketAddress(address, port), connectTimeoutMillis);
       }
       connected.set(true);
+
+      if (s instanceof SSLSocket)
+      {
+        try
+        {
+          ((SSLSocket) s).startHandshake();
+        }
+        catch (final Exception e)
+        {
+          Debug.debugException(e);
+          s.close();
+          throw e;
+        }
+      }
     }
     catch (final Throwable t)
     {
       Debug.debugException(t);
+      socket.set(null);
+      connected.set(false);
       exception.set(t);
     }
     finally
@@ -171,6 +205,7 @@ final class ConnectThread
    *                         the connection, or if it cannot be established
    *                         within the specified time limit.
    */
+  @NotNull()
   Socket getConnectedSocket()
          throws LDAPException
   {

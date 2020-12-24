@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -35,6 +50,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -80,7 +97,13 @@ import static com.unboundid.ldap.sdk.unboundidds.extensions.ExtOpMessages.*;
  * See the documentation for the
  * {@link StartInteractiveTransactionExtendedRequest} class for an example that
  * demonstrates the use of interactive transactions.
+ *
+ * @deprecated  The use of interactive transactions is strongly discouraged
+ *              because it can create conditions which are prone to deadlocks
+ *              between operations that may significantly affect performance and
+ *              will result in the cancellation of one or both operations.
  */
+@Deprecated()
 @NotMutable()
 @ThreadSafety(level=ThreadSafetyLevel.COMPLETELY_THREADSAFE)
 public final class StartInteractiveTransactionExtendedResult
@@ -108,10 +131,10 @@ public final class StartInteractiveTransactionExtendedResult
 
 
   // The transaction ID returned by the server.
-  private final ASN1OctetString transactionID;
+  @Nullable private final ASN1OctetString transactionID;
 
   // The list of base DNs returned by the server, if any.
-  private final List<String> baseDNs;
+  @Nullable private final List<String> baseDNs;
 
 
 
@@ -128,7 +151,7 @@ public final class StartInteractiveTransactionExtendedResult
    *                         transaction extended result.
    */
   public StartInteractiveTransactionExtendedResult(
-              final ExtendedResult extendedResult)
+              @NotNull final ExtendedResult extendedResult)
          throws LDAPException
   {
     super(extendedResult);
@@ -223,10 +246,13 @@ public final class StartInteractiveTransactionExtendedResult
    *                            available.
    */
   public StartInteractiveTransactionExtendedResult(final int messageID,
-              final ResultCode resultCode, final String diagnosticMessage,
-              final String matchedDN, final String[] referralURLs,
-              final ASN1OctetString transactionID, final List<String> baseDNs,
-              final Control[] responseControls)
+              @NotNull final ResultCode resultCode,
+              @Nullable final String diagnosticMessage,
+              @Nullable final String matchedDN,
+              @Nullable final String[] referralURLs,
+              @Nullable final ASN1OctetString transactionID,
+              @Nullable final List<String> baseDNs,
+              @Nullable final Control[] responseControls)
   {
     super(messageID, resultCode, diagnosticMessage, matchedDN, referralURLs,
           null, encodeValue(transactionID, baseDNs), responseControls);
@@ -257,9 +283,10 @@ public final class StartInteractiveTransactionExtendedResult
    * @return  The ASN.1 octet string containing the encoded value, or
    *          {@code null} if no value should be used.
    */
+  @Nullable()
   private static ASN1OctetString encodeValue(
-                                      final ASN1OctetString transactionID,
-                                      final List<String> baseDNs)
+                      @Nullable final ASN1OctetString transactionID,
+                      @Nullable final List<String> baseDNs)
   {
     if ((transactionID == null) && (baseDNs == null))
     {
@@ -295,6 +322,7 @@ public final class StartInteractiveTransactionExtendedResult
    * @return  The transaction ID for this start interactive transaction extended
    *          result, or {@code null} if none was provided.
    */
+  @Nullable()
   public ASN1OctetString getTransactionID()
   {
     return transactionID;
@@ -309,6 +337,7 @@ public final class StartInteractiveTransactionExtendedResult
    * @return  The list of base DNs for this start interactive transaction
    *          extended result, or {@code null} if no base DN list was provided.
    */
+  @Nullable()
   public List<String> getBaseDNs()
   {
     return baseDNs;
@@ -320,6 +349,7 @@ public final class StartInteractiveTransactionExtendedResult
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedResultName()
   {
     return INFO_EXTENDED_RESULT_NAME_START_INTERACTIVE_TXN.get();
@@ -331,7 +361,7 @@ public final class StartInteractiveTransactionExtendedResult
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("StartInteractiveTransactionExtendedResult(resultCode=");
     buffer.append(getResultCode());

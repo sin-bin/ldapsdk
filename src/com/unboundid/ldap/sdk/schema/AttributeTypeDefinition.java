@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -57,7 +74,7 @@ public final class AttributeTypeDefinition
 
 
   // The usage for this attribute type.
-  private final AttributeUsage usage;
+  @NotNull private final AttributeUsage usage;
 
   // Indicates whether this attribute type is declared collective.
   private final boolean isCollective;
@@ -72,34 +89,34 @@ public final class AttributeTypeDefinition
   private final boolean isSingleValued;
 
   // The set of extensions for this attribute type.
-  private final Map<String,String[]> extensions;
+  @NotNull private final Map<String,String[]> extensions;
 
   // The string representation of this attribute type.
-  private final String attributeTypeString;
+  @NotNull private final String attributeTypeString;
 
   // The description for this attribute type.
-  private final String description;
+  @Nullable private final String description;
 
   // The name/OID of the equality matching rule for this attribute type.
-  private final String equalityMatchingRule;
+  @Nullable private final String equalityMatchingRule;
 
   // The OID for this attribute type.
-  private final String oid;
+  @NotNull private final String oid;
 
   // The name/OID of the ordering matching rule for this attribute type.
-  private final String orderingMatchingRule;
+  @Nullable private final String orderingMatchingRule;
 
   // The name/OID of the substring matching rule for this attribute type.
-  private final String substringMatchingRule;
+  @Nullable private final String substringMatchingRule;
 
   // The name of the superior type for this attribute type.
-  private final String superiorType;
+  @Nullable private final String superiorType;
 
   // The OID of the syntax for this attribute type.
-  private final String syntaxOID;
+  @Nullable private final String syntaxOID;
 
   // The set of names for this attribute type.
-  private final String[] names;
+  @NotNull private final String[] names;
 
 
 
@@ -113,7 +130,7 @@ public final class AttributeTypeDefinition
    * @throws  LDAPException  If the provided string cannot be decoded as an
    *                         attribute type definition.
    */
-  public AttributeTypeDefinition(final String s)
+  public AttributeTypeDefinition(@NotNull final String s)
          throws LDAPException
   {
     Validator.ensureNotNull(s);
@@ -204,7 +221,8 @@ public final class AttributeTypeDefinition
         if (nameList.isEmpty())
         {
           pos = skipSpaces(attributeTypeString, pos, length);
-          pos = readQDStrings(attributeTypeString, pos, length, nameList);
+          pos = readQDStrings(attributeTypeString, pos, length, token,
+               nameList);
         }
         else
         {
@@ -220,7 +238,7 @@ public final class AttributeTypeDefinition
           pos = skipSpaces(attributeTypeString, pos, length);
 
           buffer = new StringBuilder();
-          pos = readQDString(attributeTypeString, pos, length, buffer);
+          pos = readQDString(attributeTypeString, pos, length, token, buffer);
           descr = buffer.toString();
         }
         else
@@ -413,7 +431,7 @@ public final class AttributeTypeDefinition
         pos = skipSpaces(attributeTypeString, pos, length);
 
         final ArrayList<String> valueList = new ArrayList<>(5);
-        pos = readQDStrings(attributeTypeString, pos, length, valueList);
+        pos = readQDStrings(attributeTypeString, pos, length, token, valueList);
 
         final String[] values = new String[valueList.size()];
         valueList.toArray(values);
@@ -496,14 +514,15 @@ public final class AttributeTypeDefinition
    *                                type.  It may be {@code null} or empty if
    *                                there should not be any extensions.
    */
-  public AttributeTypeDefinition(final String oid, final String name,
-                                 final String description,
-                                 final String equalityMatchingRule,
-                                 final String orderingMatchingRule,
-                                 final String substringMatchingRule,
-                                 final String syntaxOID,
-                                 final boolean isSingleValued,
-                                 final Map<String,String[]> extensions)
+  public AttributeTypeDefinition(@NotNull final String oid,
+               @Nullable final String name,
+               @Nullable final String description,
+               @Nullable final String equalityMatchingRule,
+               @Nullable final String orderingMatchingRule,
+               @Nullable final String substringMatchingRule,
+               @Nullable final String syntaxOID,
+               final boolean isSingleValued,
+               @Nullable final Map<String,String[]> extensions)
   {
     this(oid, ((name == null) ? null : new String[] { name }), description,
          false, null, equalityMatchingRule, orderingMatchingRule,
@@ -558,19 +577,20 @@ public final class AttributeTypeDefinition
    *                                type.  It may be {@code null} or empty if
    *                                there should not be any extensions.
    */
-  public AttributeTypeDefinition(final String oid, final String[] names,
-                                 final String description,
-                                 final boolean isObsolete,
-                                 final String superiorType,
-                                 final String equalityMatchingRule,
-                                 final String orderingMatchingRule,
-                                 final String substringMatchingRule,
-                                 final String syntaxOID,
-                                 final boolean isSingleValued,
-                                 final boolean isCollective,
-                                 final boolean isNoUserModification,
-                                 final AttributeUsage usage,
-                                 final Map<String,String[]> extensions)
+  public AttributeTypeDefinition(@NotNull final String oid,
+              @Nullable final String[] names,
+              @Nullable final String description,
+              final boolean isObsolete,
+              @Nullable final String superiorType,
+              @Nullable final String equalityMatchingRule,
+              @Nullable final String orderingMatchingRule,
+              @Nullable final String substringMatchingRule,
+              @Nullable final String syntaxOID,
+              final boolean isSingleValued,
+              final boolean isCollective,
+              final boolean isNoUserModification,
+              @Nullable final AttributeUsage usage,
+              @Nullable final Map<String,String[]> extensions)
   {
     Validator.ensureNotNull(oid);
 
@@ -627,7 +647,7 @@ public final class AttributeTypeDefinition
    * @param  buffer  The buffer in which to construct a string representation of
    *                 this attribute type definition.
    */
-  private void createDefinitionString(final StringBuilder buffer)
+  private void createDefinitionString(@NotNull final StringBuilder buffer)
   {
     buffer.append("( ");
     buffer.append(oid);
@@ -747,6 +767,7 @@ public final class AttributeTypeDefinition
    *
    * @return  The OID for this attribute type.
    */
+  @NotNull()
   public String getOID()
   {
     return oid;
@@ -760,6 +781,7 @@ public final class AttributeTypeDefinition
    * @return  The set of names for this attribute type, or an empty array if it
    *          does not have any names.
    */
+  @NotNull()
   public String[] getNames()
   {
     return names;
@@ -775,6 +797,7 @@ public final class AttributeTypeDefinition
    * @return  The primary name that can be used to reference this attribute
    *          type.
    */
+  @NotNull()
   public String getNameOrOID()
   {
     if (names.length == 0)
@@ -799,7 +822,7 @@ public final class AttributeTypeDefinition
    * @return  {@code true} if the provided string matches the OID or any of the
    *          names for this attribute type, or {@code false} if not.
    */
-  public boolean hasNameOrOID(final String s)
+  public boolean hasNameOrOID(@NotNull final String s)
   {
     for (final String name : names)
     {
@@ -820,6 +843,7 @@ public final class AttributeTypeDefinition
    * @return  The description for this attribute type, or {@code null} if there
    *          is no description defined.
    */
+  @Nullable()
   public String getDescription()
   {
     return description;
@@ -847,6 +871,7 @@ public final class AttributeTypeDefinition
    * @return  The name or OID of the superior type for this attribute type, or
    *          {@code null} if no superior type is defined.
    */
+  @Nullable()
   public String getSuperiorType()
   {
     return superiorType;
@@ -864,7 +889,8 @@ public final class AttributeTypeDefinition
    *          {@code null} if no superior type is defined, or if the superior
    *          type is not included in the provided schema.
    */
-  public AttributeTypeDefinition getSuperiorType(final Schema schema)
+  @Nullable()
+  public AttributeTypeDefinition getSuperiorType(@NotNull final Schema schema)
   {
     if (superiorType != null)
     {
@@ -884,6 +910,7 @@ public final class AttributeTypeDefinition
    *          type, or {@code null} if no equality matching rule is defined or a
    *          default rule will be inherited.
    */
+  @Nullable()
   public String getEqualityMatchingRule()
   {
     return equalityMatchingRule;
@@ -900,7 +927,8 @@ public final class AttributeTypeDefinition
    * @return  The name or OID of the equality matching rule for this attribute
    *          type, or {@code null} if no equality matching rule is defined.
    */
-  public String getEqualityMatchingRule(final Schema schema)
+  @Nullable()
+  public String getEqualityMatchingRule(@NotNull final Schema schema)
   {
     if (equalityMatchingRule == null)
     {
@@ -924,6 +952,7 @@ public final class AttributeTypeDefinition
    *          type, or {@code null} if no ordering matching rule is defined or a
    *          default rule will be inherited.
    */
+  @Nullable()
   public String getOrderingMatchingRule()
   {
     return orderingMatchingRule;
@@ -940,7 +969,8 @@ public final class AttributeTypeDefinition
    * @return  The name or OID of the ordering matching rule for this attribute
    *          type, or {@code null} if no ordering matching rule is defined.
    */
-  public String getOrderingMatchingRule(final Schema schema)
+  @Nullable()
+  public String getOrderingMatchingRule(@NotNull final Schema schema)
   {
     if (orderingMatchingRule == null)
     {
@@ -964,6 +994,7 @@ public final class AttributeTypeDefinition
    *          type, or {@code null} if no substring matching rule is defined or
    *          a default rule will be inherited.
    */
+  @Nullable()
   public String getSubstringMatchingRule()
   {
     return substringMatchingRule;
@@ -980,7 +1011,8 @@ public final class AttributeTypeDefinition
    * @return  The name or OID of the substring matching rule for this attribute
    *          type, or {@code null} if no substring matching rule is defined.
    */
-  public String getSubstringMatchingRule(final Schema schema)
+  @Nullable()
+  public String getSubstringMatchingRule(@NotNull final Schema schema)
   {
     if (substringMatchingRule == null)
     {
@@ -1003,6 +1035,7 @@ public final class AttributeTypeDefinition
    * @return  The OID of the syntax for this attribute type, or {@code null} if
    *          the syntax will be inherited.
    */
+  @Nullable()
   public String getSyntaxOID()
   {
     return syntaxOID;
@@ -1020,7 +1053,8 @@ public final class AttributeTypeDefinition
    * @return  The OID of the syntax for this attribute type, or {@code null} if
    *          no syntax is defined.
    */
-  public String getSyntaxOID(final Schema schema)
+  @Nullable()
+  public String getSyntaxOID(@NotNull final Schema schema)
   {
     if (syntaxOID == null)
     {
@@ -1044,6 +1078,7 @@ public final class AttributeTypeDefinition
    * @return  The OID of the syntax for this attribute type, or {@code null} if
    *          the syntax will be inherited.
    */
+  @Nullable()
   public String getBaseSyntaxOID()
   {
     return getBaseSyntaxOID(syntaxOID);
@@ -1063,7 +1098,8 @@ public final class AttributeTypeDefinition
    * @return  The OID of the syntax for this attribute type, or {@code null} if
    *          no syntax is defined.
    */
-  public String getBaseSyntaxOID(final Schema schema)
+  @Nullable()
+  public String getBaseSyntaxOID(@NotNull final Schema schema)
   {
     return getBaseSyntaxOID(getSyntaxOID(schema));
   }
@@ -1082,7 +1118,8 @@ public final class AttributeTypeDefinition
    * @return  The OID of the syntax for this attribute type, or {@code null} if
    *          no syntax is defined.
    */
-  public static String getBaseSyntaxOID(final String syntaxOID)
+  @Nullable()
+  public static String getBaseSyntaxOID(@Nullable final String syntaxOID)
   {
     if (syntaxOID == null)
     {
@@ -1138,7 +1175,7 @@ public final class AttributeTypeDefinition
    *          definition for this attribute type, or -1 if no syntax is defined
    *          defined or if it does not have a valid minimum upper bound.
    */
-  public int getSyntaxMinimumUpperBound(final Schema schema)
+  public int getSyntaxMinimumUpperBound(@NotNull final Schema schema)
   {
     return getSyntaxMinimumUpperBound(getSyntaxOID(schema));
   }
@@ -1161,7 +1198,7 @@ public final class AttributeTypeDefinition
    *          syntax OID, or -1 if the provided syntax OID is {@code null} or
    *          does not have a valid minimum upper bound.
    */
-  public static int getSyntaxMinimumUpperBound(final String syntaxOID)
+  public static int getSyntaxMinimumUpperBound(@Nullable final String syntaxOID)
   {
     if (syntaxOID == null)
     {
@@ -1239,6 +1276,7 @@ public final class AttributeTypeDefinition
    *
    * @return  The attribute usage for this attribute type.
    */
+  @NotNull()
   public AttributeUsage getUsage()
   {
     return usage;
@@ -1266,9 +1304,22 @@ public final class AttributeTypeDefinition
    *
    * @return  The set of extensions for this attribute type.
    */
+  @NotNull()
   public Map<String,String[]> getExtensions()
   {
     return extensions;
+  }
+
+
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override()
+  @NotNull()
+  public SchemaElementType getSchemaElementType()
+  {
+    return SchemaElementType.ATTRIBUTE_TYPE;
   }
 
 
@@ -1288,7 +1339,7 @@ public final class AttributeTypeDefinition
    * {@inheritDoc}
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == null)
     {
@@ -1334,6 +1385,7 @@ public final class AttributeTypeDefinition
    * @return  A string representation of this attribute type definition.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return attributeTypeString;

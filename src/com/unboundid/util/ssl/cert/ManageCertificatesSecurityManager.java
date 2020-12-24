@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -21,8 +36,10 @@
 package com.unboundid.util.ssl.cert;
 
 
+
 import java.security.Permission;
 
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -49,7 +66,7 @@ final class ManageCertificatesSecurityManager
   private volatile boolean exitCalledWithZeroStatus;
 
   // The security manager to which all non-exit decisions will be delegated.
-  private final SecurityManager delegateSecurityManager;
+  @Nullable private final SecurityManager delegateSecurityManager;
 
 
 
@@ -101,7 +118,7 @@ final class ManageCertificatesSecurityManager
    * @throws  SecurityException  If the exit attempt should be blocked.
    */
   @Override()
-  public void checkPermission(final Permission permission)
+  public void checkPermission(@Nullable final Permission permission)
          throws SecurityException
   {
     if ((permission == null) || (permission.getName() == null))

@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,6 +49,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -116,22 +133,22 @@ public final class IntermediateClientResponseValue
 
 
   // Indicates whether communication with the upstream server is secure.
-  private final Boolean upstreamServerSecure;
+  @Nullable private final Boolean upstreamServerSecure;
 
   // The upstream response, if available.
-  private final IntermediateClientResponseValue upstreamResponse;
+  @Nullable private final IntermediateClientResponseValue upstreamResponse;
 
   // The server name, which describes the server application, if present.
-  private final String serverName;
+  @Nullable private final String serverName;
 
   // The server response ID, if present.
-  private final String serverResponseID;
+  @Nullable private final String serverResponseID;
 
   // The server session ID, if present.
-  private final String serverSessionID;
+  @Nullable private final String serverSessionID;
 
   // The address of the upstream server, if available.
-  private final String upstreamServerAddress;
+  @Nullable private final String upstreamServerAddress;
 
 
 
@@ -166,10 +183,12 @@ public final class IntermediateClientResponseValue
    *                                response identifier.
    */
   public IntermediateClientResponseValue(
-              final IntermediateClientResponseValue upstreamResponse,
-              final String upstreamServerAddress,
-              final Boolean upstreamServerSecure, final String serverName,
-              final String serverSessionID, final String serverResponseID)
+              @Nullable final IntermediateClientResponseValue upstreamResponse,
+              @Nullable final String upstreamServerAddress,
+              @Nullable final Boolean upstreamServerSecure,
+              @Nullable final String serverName,
+              @Nullable final String serverSessionID,
+              @Nullable final String serverResponseID)
   {
     this.upstreamResponse      = upstreamResponse;
     this.upstreamServerAddress = upstreamServerAddress;
@@ -187,6 +206,7 @@ public final class IntermediateClientResponseValue
    * @return  The wrapped response from an upstream server, or {@code null} if
    *          there is none.
    */
+  @Nullable()
   public IntermediateClientResponseValue getUpstreamResponse()
   {
     return upstreamResponse;
@@ -202,6 +222,7 @@ public final class IntermediateClientResponseValue
    *          {@code null} if there is no upstream server or its address is not
    *          available.
    */
+  @Nullable()
   public String getUpstreamServerAddress()
   {
     return upstreamServerAddress;
@@ -221,6 +242,7 @@ public final class IntermediateClientResponseValue
    *          {@code null} if there is no upstream server or it is not known
    *          whether the communication is secure.
    */
+  @Nullable()
   public Boolean upstreamServerSecure()
   {
     return upstreamServerSecure;
@@ -235,6 +257,7 @@ public final class IntermediateClientResponseValue
    * @return  A string that may be used to identify the server application that
    *          created this intermediate client response value.
    */
+  @Nullable()
   public String getServerName()
   {
     return serverName;
@@ -249,6 +272,7 @@ public final class IntermediateClientResponseValue
    * @return  A string that may be used to identify the session in the server
    *          application, or {@code null} if there is none.
    */
+  @Nullable()
   public String getServerSessionID()
   {
     return serverSessionID;
@@ -263,6 +287,7 @@ public final class IntermediateClientResponseValue
    * @return  A string that may be used to identify the response in the server
    *          application, or {@code null} if there is none.
    */
+  @Nullable()
   public String getServerResponseID()
   {
     return serverResponseID;
@@ -277,6 +302,7 @@ public final class IntermediateClientResponseValue
    * @return  An ASN.1 octet string containing the encoded client response
    *          value.
    */
+  @NotNull()
   public ASN1Sequence encode()
   {
     return encode(ASN1Constants.UNIVERSAL_SEQUENCE_TYPE);
@@ -293,6 +319,7 @@ public final class IntermediateClientResponseValue
    * @return  An ASN.1 octet string containing the encoded client response
    *          value.
    */
+  @NotNull()
   private ASN1Sequence encode(final byte type)
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(6);
@@ -348,8 +375,9 @@ public final class IntermediateClientResponseValue
    * @throws  LDAPException  If the provided sequence cannot be decoded as an
    *                         intermediate client response value.
    */
-  public static IntermediateClientResponseValue
-                     decode(final ASN1Sequence sequence)
+  @NotNull()
+  public static IntermediateClientResponseValue decode(
+                     @NotNull final ASN1Sequence sequence)
          throws LDAPException
   {
     Boolean                         upstreamServerSecure  = null;
@@ -494,7 +522,7 @@ public final class IntermediateClientResponseValue
    *          intermediate client response value, or {@code false} if not.
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == this)
     {
@@ -615,6 +643,7 @@ public final class IntermediateClientResponseValue
    *          value.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -630,7 +659,7 @@ public final class IntermediateClientResponseValue
    *
    * @param  buffer  The buffer to which the information is to be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("IntermediateClientResponseValue(");
 

@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,8 @@ import java.util.Map;
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -73,7 +90,7 @@ public final class ShutdownTask
    * The fully-qualified name of the Java class that is used for the shutdown
    * task.
    */
-  static final String SHUTDOWN_TASK_CLASS =
+  @NotNull static final String SHUTDOWN_TASK_CLASS =
        "com.unboundid.directory.server.tasks.ShutdownTask";
 
 
@@ -81,7 +98,7 @@ public final class ShutdownTask
   /**
    * The name of the attribute used to define a shutdown message.
    */
-  private static final String ATTR_SHUTDOWN_MESSAGE =
+  @NotNull private static final String ATTR_SHUTDOWN_MESSAGE =
        "ds-task-shutdown-message";
 
 
@@ -90,7 +107,7 @@ public final class ShutdownTask
    * The name of the attribute used to indicate whether to restart rather than
    * shut down the server.
    */
-  private static final String ATTR_RESTART_SERVER =
+  @NotNull private static final String ATTR_RESTART_SERVER =
        "ds-task-restart-server";
 
 
@@ -98,14 +115,14 @@ public final class ShutdownTask
   /**
    * The name of the object class used in shutdown task entries.
    */
-  private static final String OC_SHUTDOWN_TASK = "ds-task-shutdown";
+  @NotNull private static final String OC_SHUTDOWN_TASK = "ds-task-shutdown";
 
 
 
   /**
    * The task property for the shutdown message.
    */
-  private static final TaskProperty PROPERTY_SHUTDOWN_MESSAGE =
+  @NotNull private static final TaskProperty PROPERTY_SHUTDOWN_MESSAGE =
        new TaskProperty(ATTR_SHUTDOWN_MESSAGE,
                         INFO_DISPLAY_NAME_SHUTDOWN_MESSAGE.get(),
                         INFO_DESCRIPTION_SHUTDOWN_MESSAGE.get(), String.class,
@@ -116,7 +133,7 @@ public final class ShutdownTask
   /**
    * The task property for the restart server flag.
    */
-  private static final TaskProperty PROPERTY_RESTART_SERVER =
+  @NotNull private static final TaskProperty PROPERTY_RESTART_SERVER =
        new TaskProperty(ATTR_RESTART_SERVER,
                         INFO_DISPLAY_NAME_RESTART_SERVER.get(),
                         INFO_DESCRIPTION_RESTART_SERVER.get(), Boolean.class,
@@ -135,7 +152,7 @@ public final class ShutdownTask
   private final boolean restartServer;
 
   // A message that describes the reason for the shutdown.
-  private final String shutdownMessage;
+  @Nullable private final String shutdownMessage;
 
 
 
@@ -164,7 +181,8 @@ public final class ShutdownTask
    * @param  restartServer    Indicates whether to restart the server rather
    *                          than shut it down.
    */
-  public ShutdownTask(final String taskID, final String shutdownMessage,
+  public ShutdownTask(@Nullable final String taskID,
+                      @Nullable final String shutdownMessage,
                       final boolean restartServer)
   {
     this(taskID, shutdownMessage, restartServer, null, null, null, null, null);
@@ -197,13 +215,14 @@ public final class ShutdownTask
    *                                 that should be notified if this task does
    *                                 not complete successfully.
    */
-  public ShutdownTask(final String taskID, final String shutdownMessage,
-                      final boolean restartServer,
-                      final Date scheduledStartTime,
-                      final List<String> dependencyIDs,
-                      final FailedDependencyAction failedDependencyAction,
-                      final List<String> notifyOnCompletion,
-                      final List<String> notifyOnError)
+  public ShutdownTask(@Nullable final String taskID,
+              @Nullable final String shutdownMessage,
+              final boolean restartServer,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnError)
   {
     this(taskID, shutdownMessage, restartServer, scheduledStartTime,
          dependencyIDs, failedDependencyAction, null, notifyOnCompletion,
@@ -251,17 +270,19 @@ public final class ShutdownTask
    *                                 alert notification if this task fails to
    *                                 complete successfully.
    */
-  public ShutdownTask(final String taskID, final String shutdownMessage,
-                      final boolean restartServer,
-                      final Date scheduledStartTime,
-                      final List<String> dependencyIDs,
-                      final FailedDependencyAction failedDependencyAction,
-                      final List<String> notifyOnStart,
-                      final List<String> notifyOnCompletion,
-                      final List<String> notifyOnSuccess,
-                      final List<String> notifyOnError,
-                      final Boolean alertOnStart, final Boolean alertOnSuccess,
-                      final Boolean alertOnError)
+  public ShutdownTask(@Nullable final String taskID,
+              @Nullable final String shutdownMessage,
+              final boolean restartServer,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnStart,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnSuccess,
+              @Nullable final List<String> notifyOnError,
+              @Nullable final Boolean alertOnStart,
+              @Nullable final Boolean alertOnSuccess,
+              @Nullable final Boolean alertOnError)
   {
     super(taskID, SHUTDOWN_TASK_CLASS, scheduledStartTime, dependencyIDs,
          failedDependencyAction, notifyOnStart, notifyOnCompletion,
@@ -282,7 +303,7 @@ public final class ShutdownTask
    * @throws  TaskException  If the provided entry cannot be parsed as a
    *                         shutdown task entry.
    */
-  public ShutdownTask(final Entry entry)
+  public ShutdownTask(@NotNull final Entry entry)
          throws TaskException
   {
     super(entry);
@@ -307,7 +328,7 @@ public final class ShutdownTask
    * @throws  TaskException  If the provided set of properties cannot be used to
    *                         create a valid shutdown task.
    */
-  public ShutdownTask(final Map<TaskProperty,List<Object>> properties)
+  public ShutdownTask(@NotNull final Map<TaskProperty,List<Object>> properties)
          throws TaskException
   {
     super(SHUTDOWN_TASK_CLASS, properties);
@@ -342,6 +363,7 @@ public final class ShutdownTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskName()
   {
     return INFO_TASK_NAME_SHUTDOWN.get();
@@ -353,6 +375,7 @@ public final class ShutdownTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskDescription()
   {
     return INFO_TASK_DESCRIPTION_SHUTDOWN.get();
@@ -366,6 +389,7 @@ public final class ShutdownTask
    *
    * @return  The shutdown message, or {@code null} if there is none.
    */
+  @Nullable()
   public String getShutdownMessage()
   {
     return shutdownMessage;
@@ -391,6 +415,7 @@ public final class ShutdownTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<String> getAdditionalObjectClasses()
   {
     return Collections.singletonList(OC_SHUTDOWN_TASK);
@@ -402,6 +427,7 @@ public final class ShutdownTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<Attribute> getAdditionalAttributes()
   {
     final ArrayList<Attribute> attrs = new ArrayList<>(2);
@@ -423,6 +449,7 @@ public final class ShutdownTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<TaskProperty> getTaskSpecificProperties()
   {
     final List<TaskProperty> propList = Arrays.asList(
@@ -438,6 +465,7 @@ public final class ShutdownTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<TaskProperty,List<Object>> getTaskPropertyValues()
   {
     final LinkedHashMap<TaskProperty,List<Object>> props =

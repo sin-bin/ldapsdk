@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,8 @@ import java.util.Map;
 
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -74,7 +91,7 @@ public final class ReplicationSummaryMonitorEntry
   /**
    * The structural object class used in replication summary monitor entries.
    */
-  static final String REPLICATION_SUMMARY_MONITOR_OC =
+  @NotNull static final String REPLICATION_SUMMARY_MONITOR_OC =
        "ds-replication-server-summary-monitor-entry";
 
 
@@ -83,7 +100,7 @@ public final class ReplicationSummaryMonitorEntry
    * The name of the attribute that contains the base DN for the replicated
    * data.
    */
-  private static final String ATTR_BASE_DN = "base-dn";
+  @NotNull private static final String ATTR_BASE_DN = "base-dn";
 
 
 
@@ -91,7 +108,8 @@ public final class ReplicationSummaryMonitorEntry
    * The name of the attribute that contains information about the replication
    * servers for the replicated data.
    */
-  private static final String ATTR_REPLICATION_SERVER = "replication-server";
+  @NotNull private static final String ATTR_REPLICATION_SERVER =
+       "replication-server";
 
 
 
@@ -99,7 +117,7 @@ public final class ReplicationSummaryMonitorEntry
    * The name of the attribute that contains information about the replicas
    * for the replicated data.
    */
-  private static final String ATTR_REPLICA = "replica";
+  @NotNull private static final String ATTR_REPLICA = "replica";
 
 
 
@@ -111,13 +129,14 @@ public final class ReplicationSummaryMonitorEntry
 
 
   // The base DN for the replicated data.
-  private final String baseDN;
+  @Nullable private final String baseDN;
 
   // The list of replicas for the replicated data.
-  private final List<ReplicationSummaryReplica> replicas;
+  @NotNull private final List<ReplicationSummaryReplica> replicas;
 
   // The list of replication servers for the replicated data.
-  private final List<ReplicationSummaryReplicationServer> replicationServers;
+  @NotNull private final List<ReplicationSummaryReplicationServer>
+       replicationServers;
 
 
 
@@ -127,7 +146,7 @@ public final class ReplicationSummaryMonitorEntry
    * @param  entry  The entry to be parsed as a replication summary monitor
    *                entry.  It must not be {@code null}.
    */
-  public ReplicationSummaryMonitorEntry(final Entry entry)
+  public ReplicationSummaryMonitorEntry(@NotNull final Entry entry)
   {
     super(entry);
 
@@ -160,6 +179,7 @@ public final class ReplicationSummaryMonitorEntry
    * @return  The base DN for this replication summary monitor entry, or
    *          {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public String getBaseDN()
   {
     return baseDN;
@@ -175,6 +195,7 @@ public final class ReplicationSummaryMonitorEntry
    *          replication server summary monitor entry, or an empty list if it
    *          was not included in the monitor entry.
    */
+  @NotNull()
   public List<ReplicationSummaryReplica> getReplicas()
   {
     return replicas;
@@ -190,6 +211,7 @@ public final class ReplicationSummaryMonitorEntry
    *          this replication server summary monitor entry, or an empty list if
    *          it was not included in the monitor entry.
    */
+  @NotNull()
   public List<ReplicationSummaryReplicationServer> getReplicationServers()
   {
     return replicationServers;
@@ -201,6 +223,7 @@ public final class ReplicationSummaryMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDisplayName()
   {
     return INFO_REPLICATION_SUMMARY_MONITOR_DISPNAME.get();
@@ -212,6 +235,7 @@ public final class ReplicationSummaryMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDescription()
   {
     return INFO_REPLICATION_SUMMARY_MONITOR_DESC.get();
@@ -223,6 +247,7 @@ public final class ReplicationSummaryMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<String,MonitorAttribute> getMonitorAttributes()
   {
     final LinkedHashMap<String,MonitorAttribute> attrs =

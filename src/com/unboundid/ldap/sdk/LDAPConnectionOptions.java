@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,6 +37,8 @@ package com.unboundid.ldap.sdk;
 
 
 
+import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -55,6 +72,8 @@ import com.unboundid.ldap.sdk.unboundidds.extensions.
 import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -132,6 +151,10 @@ import com.unboundid.util.ssl.TrustAllSSLSocketVerifier;
  *       encounters a message that may be larger than the maximum allowed
  *       message size, then the SDK will terminate the connection to the
  *       server.</LI>
+ *   <LI>The {@link LDAPConnectionLogger} that should be used to record
+ *       information about requests sent and responses received over
+ *       connections with this set of options.  By default, no
+ *       {@code LDAPConnectionLogger} will be used.</LI>
  *   <LI>The {@link DisconnectHandler} that should be used to receive
  *       notification if connection is disconnected for any reason.  By default,
  *       no {@code DisconnectHandler} will be used.</LI>
@@ -182,7 +205,7 @@ public final class LDAPConnectionOptions
   /**
    * The prefix that will be used in conjunction with all system properties.
    */
-  private static final String PROPERTY_PREFIX =
+  @NotNull private static final String PROPERTY_PREFIX =
        LDAPConnectionOptions.class.getName() + '.';
 
 
@@ -197,7 +220,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultAbandonTimeout".
    */
-  public static final String PROPERTY_DEFAULT_ABANDON_ON_TIMEOUT =
+  @NotNull public static final String PROPERTY_DEFAULT_ABANDON_ON_TIMEOUT =
        PROPERTY_PREFIX + "defaultAbandonOnTimeout";
 
 
@@ -234,8 +257,9 @@ public final class LDAPConnectionOptions
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.
    * defaultBindWithDNRequiresPassword".
    */
-  public static final String PROPERTY_DEFAULT_BIND_WITH_DN_REQUIRES_PASSWORD =
-       PROPERTY_PREFIX + "defaultBindWithDNRequiresPassword";
+  @NotNull public static final String
+       PROPERTY_DEFAULT_BIND_WITH_DN_REQUIRES_PASSWORD =
+            PROPERTY_PREFIX + "defaultBindWithDNRequiresPassword";
 
 
 
@@ -261,8 +285,9 @@ public final class LDAPConnectionOptions
    * The full name for this system property is "com.unboundid.ldap.sdk.
    * LDAPConnectionOptions.defaultCaptureConnectStackTrace".
    */
-  public static final String PROPERTY_DEFAULT_CAPTURE_CONNECT_STACK_TRACE =
-       PROPERTY_PREFIX + "defaultCaptureConnectStackTrace";
+  @NotNull public static final String
+       PROPERTY_DEFAULT_CAPTURE_CONNECT_STACK_TRACE =
+            PROPERTY_PREFIX + "defaultCaptureConnectStackTrace";
 
 
 
@@ -288,7 +313,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultFollowReferrals".
    */
-  public static final String PROPERTY_DEFAULT_FOLLOW_REFERRALS =
+  @NotNull public static final String PROPERTY_DEFAULT_FOLLOW_REFERRALS =
        PROPERTY_PREFIX + "defaultFollowReferrals";
 
 
@@ -315,7 +340,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultReferralHopLimit".
    */
-  public static final String PROPERTY_DEFAULT_REFERRAL_HOP_LIMIT =
+  @NotNull public static final String PROPERTY_DEFAULT_REFERRAL_HOP_LIMIT =
        PROPERTY_PREFIX + "defaultReferralHopLimit";
 
 
@@ -341,7 +366,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultUseSchema".
    */
-  public static final String PROPERTY_DEFAULT_USE_SCHEMA =
+  @NotNull public static final String PROPERTY_DEFAULT_USE_SCHEMA =
        PROPERTY_PREFIX + "defaultUseSchema";
 
 
@@ -367,7 +392,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultUsePooledSchema".
    */
-  public static final String PROPERTY_DEFAULT_USE_POOLED_SCHEMA =
+  @NotNull public static final String PROPERTY_DEFAULT_USE_POOLED_SCHEMA =
        PROPERTY_PREFIX + "defaultUsePooledSchema";
 
 
@@ -394,8 +419,9 @@ public final class LDAPConnectionOptions
    * The full name for this system property is "com.unboundid.ldap.sdk.
    * LDAPConnectionOptions.defaultPooledSchemaTimeoutMillis".
    */
-  public static final String PROPERTY_DEFAULT_POOLED_SCHEMA_TIMEOUT_MILLIS =
-       PROPERTY_PREFIX + "defaultPooledSchemaTimeoutMillis";
+  @NotNull public static final String
+       PROPERTY_DEFAULT_POOLED_SCHEMA_TIMEOUT_MILLIS =
+            PROPERTY_PREFIX + "defaultPooledSchemaTimeoutMillis";
 
 
 
@@ -420,7 +446,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultUseKeepalive".
    */
-  public static final String PROPERTY_DEFAULT_USE_KEEPALIVE =
+  @NotNull public static final String PROPERTY_DEFAULT_USE_KEEPALIVE =
        PROPERTY_PREFIX + "defaultUseKeepalive";
 
 
@@ -447,7 +473,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultUseLinger".
    */
-  public static final String PROPERTY_DEFAULT_USE_LINGER =
+  @NotNull public static final String PROPERTY_DEFAULT_USE_LINGER =
        PROPERTY_PREFIX + "defaultUseLinger";
 
 
@@ -474,7 +500,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultLingerTimeoutSeconds".
    */
-  public static final String PROPERTY_DEFAULT_LINGER_TIMEOUT_SECONDS =
+  @NotNull public static final String PROPERTY_DEFAULT_LINGER_TIMEOUT_SECONDS =
        PROPERTY_PREFIX + "defaultLingerTimeoutSeconds";
 
 
@@ -501,7 +527,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultUseReuseAddress".
    */
-  public static final String PROPERTY_DEFAULT_USE_REUSE_ADDRESS =
+  @NotNull public static final String PROPERTY_DEFAULT_USE_REUSE_ADDRESS =
        PROPERTY_PREFIX + "defaultUseReuseAddress";
 
 
@@ -528,7 +554,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultUseSynchronousMode".
    */
-  public static final String PROPERTY_DEFAULT_USE_SYNCHRONOUS_MODE =
+  @NotNull public static final String PROPERTY_DEFAULT_USE_SYNCHRONOUS_MODE =
        PROPERTY_PREFIX + "defaultUseSynchronousMode";
 
 
@@ -556,7 +582,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultUseTCPNoDelay".
    */
-  public static final String PROPERTY_DEFAULT_USE_TCP_NODELAY =
+  @NotNull public static final String PROPERTY_DEFAULT_USE_TCP_NODELAY =
        PROPERTY_PREFIX + "defaultUseTCPNoDelay";
 
 
@@ -583,7 +609,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultConnectTimeoutMillis".
    */
-  public static final String PROPERTY_DEFAULT_CONNECT_TIMEOUT_MILLIS =
+  @NotNull public static final String PROPERTY_DEFAULT_CONNECT_TIMEOUT_MILLIS =
        PROPERTY_PREFIX + "defaultConnectTimeoutMillis";
 
 
@@ -610,7 +636,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultMaxMessageSizeBytes".
    */
-  public static final String PROPERTY_DEFAULT_MAX_MESSAGE_SIZE_BYTES =
+  @NotNull public static final String PROPERTY_DEFAULT_MAX_MESSAGE_SIZE_BYTES =
        PROPERTY_PREFIX + "defaultMaxMessageSizeBytes";
 
 
@@ -638,8 +664,9 @@ public final class LDAPConnectionOptions
    * The full name for this system property is "com.unboundid.ldap.sdk.
    * LDAPConnectionOptions.defaultReceiveBufferSizeBytes".
    */
-  public static final String PROPERTY_DEFAULT_RECEIVE_BUFFER_SIZE_BYTES =
-       PROPERTY_PREFIX + "defaultReceiveBufferSizeBytes";
+  @NotNull public static final String
+       PROPERTY_DEFAULT_RECEIVE_BUFFER_SIZE_BYTES =
+            PROPERTY_PREFIX + "defaultReceiveBufferSizeBytes";
 
 
 
@@ -665,7 +692,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is
    * "com.unboundid.ldap.sdk.LDAPConnectionOptions.defaultSendBufferSizeBytes".
    */
-  public static final String PROPERTY_DEFAULT_SEND_BUFFER_SIZE_BYTES =
+  @NotNull public static final String PROPERTY_DEFAULT_SEND_BUFFER_SIZE_BYTES =
        PROPERTY_PREFIX + "defaultSendBufferSizeBytes";
 
 
@@ -695,7 +722,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is "com.unboundid.ldap.sdk.
    * LDAPConnectionOptions.defaultResponseTimeoutMillis".
    */
-  public static final String PROPERTY_DEFAULT_RESPONSE_TIMEOUT_MILLIS =
+  @NotNull public static final String PROPERTY_DEFAULT_RESPONSE_TIMEOUT_MILLIS =
        PROPERTY_PREFIX + "defaultResponseTimeoutMillis";
 
 
@@ -713,8 +740,9 @@ public final class LDAPConnectionOptions
    * The full name for this system property is "com.unboundid.ldap.sdk.
    * LDAPConnectionOptions.defaultAddResponseTimeoutMillis".
    */
-  public static final String PROPERTY_DEFAULT_ADD_RESPONSE_TIMEOUT_MILLIS =
-       PROPERTY_PREFIX + "defaultAddResponseTimeoutMillis";
+  @NotNull public static final String
+       PROPERTY_DEFAULT_ADD_RESPONSE_TIMEOUT_MILLIS =
+            PROPERTY_PREFIX + "defaultAddResponseTimeoutMillis";
 
 
 
@@ -731,8 +759,9 @@ public final class LDAPConnectionOptions
    * The full name for this system property is "com.unboundid.ldap.sdk.
    * LDAPConnectionOptions.defaultBindResponseTimeoutMillis".
    */
-  public static final String PROPERTY_DEFAULT_BIND_RESPONSE_TIMEOUT_MILLIS =
-       PROPERTY_PREFIX + "defaultBindResponseTimeoutMillis";
+  @NotNull public static final String
+       PROPERTY_DEFAULT_BIND_RESPONSE_TIMEOUT_MILLIS =
+            PROPERTY_PREFIX + "defaultBindResponseTimeoutMillis";
 
 
 
@@ -749,8 +778,9 @@ public final class LDAPConnectionOptions
    * The full name for this system property is "com.unboundid.ldap.sdk.
    * LDAPConnectionOptions.defaultCompareResponseTimeoutMillis".
    */
-  public static final String PROPERTY_DEFAULT_COMPARE_RESPONSE_TIMEOUT_MILLIS =
-       PROPERTY_PREFIX + "defaultCompareResponseTimeoutMillis";
+  @NotNull public static final String
+       PROPERTY_DEFAULT_COMPARE_RESPONSE_TIMEOUT_MILLIS =
+            PROPERTY_PREFIX + "defaultCompareResponseTimeoutMillis";
 
 
 
@@ -767,8 +797,9 @@ public final class LDAPConnectionOptions
    * The full name for this system property is "com.unboundid.ldap.sdk.
    * LDAPConnectionOptions.defaultDeleteResponseTimeoutMillis".
    */
-  public static final String PROPERTY_DEFAULT_DELETE_RESPONSE_TIMEOUT_MILLIS =
-       PROPERTY_PREFIX + "defaultDeleteResponseTimeoutMillis";
+  @NotNull public static final String
+       PROPERTY_DEFAULT_DELETE_RESPONSE_TIMEOUT_MILLIS =
+            PROPERTY_PREFIX + "defaultDeleteResponseTimeoutMillis";
 
 
 
@@ -821,8 +852,9 @@ public final class LDAPConnectionOptions
    *   <LI>Validate TOTP Password (1.3.6.1.4.1.30221.2.6.15)</LI>
    * </UL>
    */
-  public static final String PROPERTY_DEFAULT_EXTENDED_RESPONSE_TIMEOUT_MILLIS =
-       PROPERTY_PREFIX + "defaultExtendedResponseTimeoutMillis";
+  @NotNull public static final String
+       PROPERTY_DEFAULT_EXTENDED_RESPONSE_TIMEOUT_MILLIS =
+            PROPERTY_PREFIX + "defaultExtendedResponseTimeoutMillis";
 
 
 
@@ -839,8 +871,9 @@ public final class LDAPConnectionOptions
    * The full name for this system property is "com.unboundid.ldap.sdk.
    * LDAPConnectionOptions.defaultModifyResponseTimeoutMillis".
    */
-  public static final String PROPERTY_DEFAULT_MODIFY_RESPONSE_TIMEOUT_MILLIS =
-       PROPERTY_PREFIX + "defaultModifyResponseTimeoutMillis";
+  @NotNull public static final String
+       PROPERTY_DEFAULT_MODIFY_RESPONSE_TIMEOUT_MILLIS =
+            PROPERTY_PREFIX + "defaultModifyResponseTimeoutMillis";
 
 
 
@@ -857,7 +890,7 @@ public final class LDAPConnectionOptions
    * The full name for this system property is "com.unboundid.ldap.sdk.
    * LDAPConnectionOptions.defaultModifyDNResponseTimeoutMillis".
    */
-  public static final String
+  @NotNull public static final String
        PROPERTY_DEFAULT_MODIFY_DN_RESPONSE_TIMEOUT_MILLIS =
             PROPERTY_PREFIX + "defaultModifyDNResponseTimeoutMillis";
 
@@ -876,8 +909,9 @@ public final class LDAPConnectionOptions
    * The full name for this system property is "com.unboundid.ldap.sdk.
    * LDAPConnectionOptions.defaultSearchResponseTimeoutMillis".
    */
-  public static final String PROPERTY_DEFAULT_SEARCH_RESPONSE_TIMEOUT_MILLIS =
-       PROPERTY_PREFIX + "defaultSearchResponseTimeoutMillis";
+  @NotNull public static final String
+       PROPERTY_DEFAULT_SEARCH_RESPONSE_TIMEOUT_MILLIS =
+            PROPERTY_PREFIX + "defaultSearchResponseTimeoutMillis";
 
 
 
@@ -893,7 +927,7 @@ public final class LDAPConnectionOptions
    * A map that holds the default values for the settings that control the
    * default response timeouts, in milliseconds, for each type of operation.
    */
-  private static final Map<OperationType,Long>
+  @NotNull private static final Map<OperationType,Long>
        DEFAULT_RESPONSE_TIMEOUT_MILLIS_BY_OPERATION_TYPE;
 
 
@@ -903,21 +937,30 @@ public final class LDAPConnectionOptions
    * default response timeouts, in milliseconds, for specific types of extended
    * operations.
    */
-  private static final Map<String,Long>
+  @NotNull private static final Map<String,Long>
        DEFAULT_RESPONSE_TIMEOUT_MILLIS_BY_EXTENDED_OPERATION_TYPE;
+
+
+
+  /**
+   * The default name resolver that will be used to resolve host names to IP
+   * addresses.
+   */
+  @NotNull public static final NameResolver DEFAULT_NAME_RESOLVER;
 
 
 
   static
   {
+    // Get the default response timeout for all types of operations.
     Long allOpsTimeout = null;
     final EnumMap<OperationType,Long> timeoutsByOpType =
          new EnumMap<>(OperationType.class);
     final HashMap<String,Long> timeoutsByExtOpType =
          new HashMap<>(StaticUtils.computeMapCapacity(10));
 
-    final String allOpsPropertyValue =
-         System.getProperty(PROPERTY_DEFAULT_RESPONSE_TIMEOUT_MILLIS);
+    final String allOpsPropertyValue = StaticUtils.getSystemProperty(
+         PROPERTY_DEFAULT_RESPONSE_TIMEOUT_MILLIS);
     if (allOpsPropertyValue != null)
     {
       try
@@ -950,6 +993,8 @@ public final class LDAPConnectionOptions
       }
     }
 
+
+    // Get the default response timeout for each type of operation.
     if (allOpsTimeout == null)
     {
       allOpsTimeout = 300_000L;
@@ -999,6 +1044,9 @@ public final class LDAPConnectionOptions
         }
       }
 
+
+      // Get the default response timeout for different types of extended
+      // operations.
       final Long extendedOpTimeout = getSystemProperty(
            PROPERTY_DEFAULT_EXTENDED_RESPONSE_TIMEOUT_MILLIS, null);
       if (extendedOpTimeout == null)
@@ -1042,12 +1090,72 @@ public final class LDAPConnectionOptions
       }
     }
 
+
+    // Get the default name resolver to use.  If the LDAP SDK is running with
+    // access to the Ping Identity Directory Server's codebase, then we'll use
+    // the server's default name resolver instead of the LDAP SDK's.
+    NameResolver defaultNameResolver = DefaultNameResolver.getInstance();
+    try
+    {
+      if (InternalSDKHelper.getPingIdentityServerRoot() != null)
+      {
+        final Class<?> nrClass = Class.forName(
+             "com.unboundid.directory.server.util.OutageSafeDnsCache");
+        final Method getNameResolverMethod =
+             nrClass.getMethod("getNameResolver");
+        final NameResolver nameResolver =
+             (NameResolver) getNameResolverMethod.invoke(null);
+
+        final InetAddress localHostAddress = nameResolver.getLocalHost();
+        if (localHostAddress != null)
+        {
+          if (nameResolver.getByName(localHostAddress.getHostAddress()) != null)
+          {
+            defaultNameResolver = nameResolver;
+          }
+        }
+      }
+    }
+    catch (final Throwable t)
+    {
+      // This is probably fine.  It just means that we're not running with
+      // access to the server codebase (or a version of the server codebase that
+      // supports the LDAP SDK's name resolver API), or without the appropriate
+      // setup in place (e.g., knowledge of the server root).  In this case,
+      // we'll just use the LDAP SDK's default resolver.
+      //
+      // Note that we intentionally catch Throwable in this case rather than
+      // just Exception because even if the server code is available, there
+      // may be an unexpected Error thrown (e.g., NoClassDefFound or
+      // ExceptionInInitializerError) under certain circumstances, like if the
+      // server's name resolver code cannot identify the server root.
+      Debug.debugException(Level.FINEST, t);
+    }
+
+
     DEFAULT_RESPONSE_TIMEOUT_MILLIS = allOpsTimeout;
     DEFAULT_RESPONSE_TIMEOUT_MILLIS_BY_OPERATION_TYPE =
          Collections.unmodifiableMap(timeoutsByOpType);
     DEFAULT_RESPONSE_TIMEOUT_MILLIS_BY_EXTENDED_OPERATION_TYPE =
          Collections.unmodifiableMap(timeoutsByExtOpType);
+    DEFAULT_NAME_RESOLVER = defaultNameResolver;
   }
+
+
+
+  /**
+   * The name of a system property that can be used to specify the default value
+   * for the "allow concurrent socket factory use" behavior.  If this property
+   * is set at the time that this class is loaded, then its value must be
+   * either "true" or "false".  If this property is not set, then a default
+   * value of "true" will be assumed.
+   * <BR><BR>
+   * The full name for this system property is "com.unboundid.ldap.sdk.
+   * LDAPConnectionOptions.defaultAllowConcurrentSocketFactoryUse".
+   */
+  @NotNull public static final String
+       PROPERTY_DEFAULT_ALLOW_CONCURRENT_SOCKET_FACTORY_USE =
+            PROPERTY_PREFIX + "defaultAllowConcurrentSocketFactoryUse";
 
 
 
@@ -1056,17 +1164,9 @@ public final class LDAPConnectionOptions
    * regard to whether to allow concurrent use of a socket factory to create
    * client connections.
    */
-  private static final boolean DEFAULT_ALLOW_CONCURRENT_SOCKET_FACTORY_USE;
-  static
-  {
-    final String vmVendor =
-         StaticUtils.toLowerCase(System.getProperty("java.vm.vendor"));
-    DEFAULT_ALLOW_CONCURRENT_SOCKET_FACTORY_USE = ((vmVendor != null) &&
-         (vmVendor.contains("sun microsystems") ||
-          vmVendor.contains("oracle") ||
-          vmVendor.contains("apple") ||
-          vmVendor.contains("azul systems")));
-  }
+  private static final boolean DEFAULT_ALLOW_CONCURRENT_SOCKET_FACTORY_USE =
+       getSystemProperty(PROPERTY_DEFAULT_ALLOW_CONCURRENT_SOCKET_FACTORY_USE,
+            true);
 
 
 
@@ -1074,7 +1174,7 @@ public final class LDAPConnectionOptions
    * The default {@code SSLSocketVerifier} instance that will be used for
    * performing extra validation for {@code SSLSocket} instances.
    */
-  private static final SSLSocketVerifier DEFAULT_SSL_SOCKET_VERIFIER =
+  @NotNull private static final SSLSocketVerifier DEFAULT_SSL_SOCKET_VERIFIER =
        TrustAllSSLSocketVerifier.getInstance();
 
 
@@ -1126,7 +1226,7 @@ public final class LDAPConnectionOptions
   private boolean useTCPNoDelay;
 
   // The disconnect handler for associated connections.
-  private DisconnectHandler disconnectHandler;
+  @Nullable private DisconnectHandler disconnectHandler;
 
   // The connect timeout, in milliseconds.
   private int connectTimeoutMillis;
@@ -1147,26 +1247,36 @@ public final class LDAPConnectionOptions
   // The socket send buffer size to request.
   private int sendBufferSizeBytes;
 
+  // The connection logger that should be used to record information about
+  // requests sent and responses received over connections with this set of
+  // options.
+  @Nullable private LDAPConnectionLogger connectionLogger;
+
   // The pooled schema timeout, in milliseconds.
   private long pooledSchemaTimeoutMillis;
 
   // The response timeout, in milliseconds.
   private long responseTimeoutMillis;
 
-  private Map<OperationType,Long> responseTimeoutMillisByOperationType;
+  @NotNull private Map<OperationType,Long> responseTimeoutMillisByOperationType;
 
-  private Map<String,Long> responseTimeoutMillisByExtendedOperationType;
+  @NotNull private Map<String,Long>
+       responseTimeoutMillisByExtendedOperationType;
+
+  // The name resolver that will be used to resolve host names to IP addresses.
+  @NotNull private NameResolver nameResolver;
 
   // Tne default referral connector that should be used for associated
   // connections.
-  private ReferralConnector referralConnector;
+  @Nullable private ReferralConnector referralConnector;
 
   // The SSLSocketVerifier instance to use to perform extra validation on
   // newly-established SSLSocket instances.
-  private SSLSocketVerifier sslSocketVerifier;
+  @NotNull private SSLSocketVerifier sslSocketVerifier;
 
   // The unsolicited notification handler for associated connections.
-  private UnsolicitedNotificationHandler unsolicitedNotificationHandler;
+  @Nullable private UnsolicitedNotificationHandler
+       unsolicitedNotificationHandler;
 
 
 
@@ -1180,6 +1290,7 @@ public final class LDAPConnectionOptions
     bindWithDNRequiresPassword     = DEFAULT_BIND_WITH_DN_REQUIRES_PASSWORD;
     captureConnectStackTrace       = DEFAULT_CAPTURE_CONNECT_STACK_TRACE;
     followReferrals                = DEFAULT_FOLLOW_REFERRALS;
+    nameResolver                   = DEFAULT_NAME_RESOLVER;
     useKeepAlive                   = DEFAULT_USE_KEEPALIVE;
     useLinger                      = DEFAULT_USE_LINGER;
     useReuseAddress                = DEFAULT_USE_REUSE_ADDRESS;
@@ -1195,6 +1306,7 @@ public final class LDAPConnectionOptions
     responseTimeoutMillis          = DEFAULT_RESPONSE_TIMEOUT_MILLIS;
     receiveBufferSizeBytes         = DEFAULT_RECEIVE_BUFFER_SIZE_BYTES;
     sendBufferSizeBytes            = DEFAULT_SEND_BUFFER_SIZE_BYTES;
+    connectionLogger               = null;
     disconnectHandler              = null;
     referralConnector              = null;
     sslSocketVerifier              = DEFAULT_SSL_SOCKET_VERIFIER;
@@ -1217,6 +1329,7 @@ public final class LDAPConnectionOptions
    * @return  A duplicate of this LDAP connection options object that may be
    *          modified without impacting this instance.
    */
+  @NotNull()
   public LDAPConnectionOptions duplicate()
   {
     final LDAPConnectionOptions o = new LDAPConnectionOptions();
@@ -1227,6 +1340,7 @@ public final class LDAPConnectionOptions
     o.bindWithDNRequiresPassword      = bindWithDNRequiresPassword;
     o.captureConnectStackTrace        = captureConnectStackTrace;
     o.followReferrals                 = followReferrals;
+    o.nameResolver                    = nameResolver;
     o.useKeepAlive                    = useKeepAlive;
     o.useLinger                       = useLinger;
     o.useReuseAddress                 = useReuseAddress;
@@ -1238,9 +1352,10 @@ public final class LDAPConnectionOptions
     o.lingerTimeoutSeconds            = lingerTimeoutSeconds;
     o.maxMessageSizeBytes             = maxMessageSizeBytes;
     o.pooledSchemaTimeoutMillis       = pooledSchemaTimeoutMillis;
-    o.responseTimeoutMillis            = responseTimeoutMillis;
+    o.responseTimeoutMillis           = responseTimeoutMillis;
     o.referralConnector               = referralConnector;
     o.referralHopLimit                = referralHopLimit;
+    o.connectionLogger                = connectionLogger;
     o.disconnectHandler               = disconnectHandler;
     o.unsolicitedNotificationHandler  = unsolicitedNotificationHandler;
     o.receiveBufferSizeBytes          = receiveBufferSizeBytes;
@@ -1320,6 +1435,42 @@ public final class LDAPConnectionOptions
   public void setAutoReconnect(final boolean autoReconnect)
   {
     this.autoReconnect = autoReconnect;
+  }
+
+
+
+  /**
+   * Retrieves the name resolver that should be used to resolve host names to IP
+   * addresses.
+   *
+   * @return  The name resolver that should be used to resolve host names to IP
+   *          addresses.
+   */
+  @NotNull()
+  public NameResolver getNameResolver()
+  {
+    return nameResolver;
+  }
+
+
+
+  /**
+   * Sets the name resolver that should be used to resolve host names to IP
+   * addresses.
+   *
+   * @param  nameResolver  The name resolver that should be used to resolve host
+   *                       names to IP addresses.
+   */
+  public void setNameResolver(@Nullable final NameResolver nameResolver)
+  {
+    if (nameResolver == null)
+    {
+      this.nameResolver = DEFAULT_NAME_RESOLVER;
+    }
+    else
+    {
+      this.nameResolver = nameResolver;
+    }
   }
 
 
@@ -1483,7 +1634,8 @@ public final class LDAPConnectionOptions
    *          response from the server, or zero if there should not be any
    *          default timeout.
    */
-  public long getResponseTimeoutMillis(final OperationType operationType)
+  public long getResponseTimeoutMillis(
+                   @NotNull final OperationType operationType)
   {
     return responseTimeoutMillisByOperationType.get(operationType);
   }
@@ -1504,8 +1656,9 @@ public final class LDAPConnectionOptions
    *                                while waiting for a response from the
    *                                server.
    */
-  public void setResponseTimeoutMillis(final OperationType operationType,
-                                       final long responseTimeoutMillis)
+  public void setResponseTimeoutMillis(
+                   @NotNull final OperationType operationType,
+                   final long responseTimeoutMillis)
   {
     final EnumMap<OperationType,Long> newOperationTimeouts =
          new EnumMap<>(OperationType.class);
@@ -1532,7 +1685,8 @@ public final class LDAPConnectionOptions
    *          a response from the server, or zero if there should not be any
    *          default timeout.
    */
-  public long getExtendedOperationResponseTimeoutMillis(final String requestOID)
+  public long getExtendedOperationResponseTimeoutMillis(
+                   @NotNull final String requestOID)
   {
     final Long timeout =
          responseTimeoutMillisByExtendedOperationType.get(requestOID);
@@ -1562,7 +1716,8 @@ public final class LDAPConnectionOptions
    *                                while waiting for a response from the
    *                                server.
    */
-  public void setExtendedOperationResponseTimeoutMillis(final String requestOID,
+  public void setExtendedOperationResponseTimeoutMillis(
+                   @NotNull final String requestOID,
                    final long responseTimeoutMillis)
   {
     final HashMap<String,Long> newExtOpTimeouts =
@@ -1717,6 +1872,19 @@ public final class LDAPConnectionOptions
    * Indicates whether to try to use schema information when reading data from
    * the server (e.g., to select the appropriate matching rules for the
    * attributes included in a search result entry).
+   * <BR><BR>
+   * If the LDAP SDK is configured to make use of schema, then it may be able
+   * to more accurately perform client-side matching, including methods like
+   * {@link Filter#matchesEntry(Entry)} or {@link Attribute#hasValue(String)}.
+   * If both {@code useSchema} and {@code useSPooledSchema} are {@code false},
+   * then all client-side matching for attribute values will treat them as
+   * directory string values with a caseIgnoreMatch equality matching rule.  If
+   * either {@code useSchema} or {@code usePooledSchema} is {@code true}, then
+   * the LDAP SDK may be able to use the attribute type definitions from that
+   * schema to determine the appropriate syntax and matching rules to use for
+   * client-side matching operations involving those attributes.  Any attribute
+   * types that are not defined in the schema will still be treated as
+   * case-insensitive directory string values.
    *
    * @return  {@code true} if schema should be used when reading data from the
    *          server, or {@code false} if not.
@@ -1732,6 +1900,19 @@ public final class LDAPConnectionOptions
    * Specifies whether to try to use schema information when reading data from
    * the server (e.g., to select the appropriate matching rules for the
    * attributes included in a search result entry).
+   * <BR><BR>
+   * If the LDAP SDK is configured to make use of schema, then it may be able
+   * to more accurately perform client-side matching, including methods like
+   * {@link Filter#matchesEntry(Entry)} or {@link Attribute#hasValue(String)}.
+   * If both {@code useSchema} and {@code useSPooledSchema} are {@code false},
+   * then all client-side matching for attribute values will treat them as
+   * directory string values with a caseIgnoreMatch equality matching rule.  If
+   * either {@code useSchema} or {@code usePooledSchema} is {@code true}, then
+   * the LDAP SDK may be able to use the attribute type definitions from that
+   * schema to determine the appropriate syntax and matching rules to use for
+   * client-side matching operations involving those attributes.  Any attribute
+   * types that are not defined in the schema will still be treated as
+   * case-insensitive directory string values.
    * <BR><BR>
    * Note that calling this method with a value of {@code true} will also cause
    * the {@code usePooledSchema} setting to be given a value of false, since
@@ -1761,6 +1942,19 @@ public final class LDAPConnectionOptions
    * avoiding the need for each connection to retrieve its own copy of the
    * schema).
    * <BR><BR>
+   * If the LDAP SDK is configured to make use of schema, then it may be able
+   * to more accurately perform client-side matching, including methods like
+   * {@link Filter#matchesEntry(Entry)} or {@link Attribute#hasValue(String)}.
+   * If both {@code useSchema} and {@code useSPooledSchema} are {@code false},
+   * then all client-side matching for attribute values will treat them as
+   * directory string values with a caseIgnoreMatch equality matching rule.  If
+   * either {@code useSchema} or {@code usePooledSchema} is {@code true}, then
+   * the LDAP SDK may be able to use the attribute type definitions from that
+   * schema to determine the appropriate syntax and matching rules to use for
+   * client-side matching operations involving those attributes.  Any attribute
+   * types that are not defined in the schema will still be treated as
+   * case-insensitive directory string values.
+   * <BR><BR>
    * If pooled schema is to be used, then it may be configured to expire so that
    * the schema may be periodically re-retrieved for new connections to allow
    * schema updates to be incorporated.  This behavior is controlled by the
@@ -1782,6 +1976,19 @@ public final class LDAPConnectionOptions
    * shared schema information when reading data from the server (e.g., to
    * select the appropriate matching rules for the attributes included in a
    * search result entry).
+   * <BR><BR>
+   * If the LDAP SDK is configured to make use of schema, then it may be able
+   * to more accurately perform client-side matching, including methods like
+   * {@link Filter#matchesEntry(Entry)} or {@link Attribute#hasValue(String)}.
+   * If both {@code useSchema} and {@code useSPooledSchema} are {@code false},
+   * then all client-side matching for attribute values will treat them as
+   * directory string values with a caseIgnoreMatch equality matching rule.  If
+   * either {@code useSchema} or {@code usePooledSchema} is {@code true}, then
+   * the LDAP SDK may be able to use the attribute type definitions from that
+   * schema to determine the appropriate syntax and matching rules to use for
+   * client-side matching operations involving those attributes.  Any attribute
+   * types that are not defined in the schema will still be treated as
+   * case-insensitive directory string values.
    * <BR><BR>
    * Note that calling this method with a value of {@code true} will also cause
    * the {@code useSchema} setting to be given a value of false, since the two
@@ -1990,6 +2197,7 @@ public final class LDAPConnectionOptions
    *          created using the same socket factory and bind request as the
    *          connection on which the referral was received.
    */
+  @Nullable()
   public ReferralConnector getReferralConnector()
   {
     return referralConnector;
@@ -2012,7 +2220,8 @@ public final class LDAPConnectionOptions
    *                            authenticate connections for following
    *                            referrals.
    */
-  public void setReferralConnector(final ReferralConnector referralConnector)
+  public void setReferralConnector(
+                   @Nullable final ReferralConnector referralConnector)
   {
     this.referralConnector = referralConnector;
   }
@@ -2056,11 +2265,48 @@ public final class LDAPConnectionOptions
 
 
   /**
+   * Retrieves the logger that should be used to record information about
+   * requests sent and responses received over connections with this set of
+   * connection options.
+   *
+   * @return  The logger that should be used to record information about the
+   *          requests sent and responses received over connection with this set
+   *          of options, or {@code null} if no logging should be performed.
+   */
+  @Nullable()
+  public LDAPConnectionLogger getConnectionLogger()
+  {
+    return connectionLogger;
+  }
+
+
+
+  /**
+   * Specifies the logger that should be used to record information about
+   * requests sent and responses received over connections with this set of
+   * connection options.
+   *
+   * @param  connectionLogger  The logger that should be used to record
+   *                           information about the requests sent and
+   *                           responses received over connection with this set
+   *                           of options.  It may be {@code null} if no logging
+   *                           should be performed.
+   */
+  public void setConnectionLogger(
+                   @Nullable final LDAPConnectionLogger connectionLogger)
+  {
+    this.connectionLogger = connectionLogger;
+  }
+
+
+
+  /**
    * Retrieves the disconnect handler to use for associated connections.
    *
    * @return  the disconnect handler to use for associated connections, or
    *          {@code null} if none is defined.
    */
+  @Nullable()
   public DisconnectHandler getDisconnectHandler()
   {
     return disconnectHandler;
@@ -2073,7 +2319,7 @@ public final class LDAPConnectionOptions
    *
    * @param  handler  The disconnect handler to use for associated connections.
    */
-  public void setDisconnectHandler(final DisconnectHandler handler)
+  public void setDisconnectHandler(@Nullable final DisconnectHandler handler)
   {
     disconnectHandler = handler;
   }
@@ -2087,6 +2333,7 @@ public final class LDAPConnectionOptions
    * @return  The unsolicited notification handler to use for associated
    *          connections, or {@code null} if none is defined.
    */
+  @Nullable()
   public UnsolicitedNotificationHandler getUnsolicitedNotificationHandler()
   {
     return unsolicitedNotificationHandler;
@@ -2102,7 +2349,7 @@ public final class LDAPConnectionOptions
    *                  connections.
    */
   public void setUnsolicitedNotificationHandler(
-                   final UnsolicitedNotificationHandler handler)
+                   @Nullable final UnsolicitedNotificationHandler handler)
   {
     unsolicitedNotificationHandler = handler;
   }
@@ -2228,6 +2475,7 @@ public final class LDAPConnectionOptions
    *          additional validation for any newly-created {@code SSLSocket}
    *          instances.
    */
+  @NotNull()
   public SSLSocketVerifier getSSLSocketVerifier()
   {
     return sslSocketVerifier;
@@ -2243,7 +2491,8 @@ public final class LDAPConnectionOptions
    *                            to perform additional validation for any
    *                            newly-created {@code SSLSocket} instances.
    */
-  public void setSSLSocketVerifier(final SSLSocketVerifier sslSocketVerifier)
+  public void setSSLSocketVerifier(
+                   @Nullable final SSLSocketVerifier sslSocketVerifier)
   {
     if (sslSocketVerifier == null)
     {
@@ -2270,10 +2519,10 @@ public final class LDAPConnectionOptions
    *          default value if the system property is not set with a valid
    *          value.
    */
-  static boolean getSystemProperty(final String propertyName,
+  static boolean getSystemProperty(@NotNull final String propertyName,
                                    final boolean defaultValue)
   {
-    final String propertyValue = System.getProperty(propertyName);
+    final String propertyValue = StaticUtils.getSystemProperty(propertyName);
     if (propertyValue == null)
     {
       if (Debug.debugEnabled())
@@ -2338,10 +2587,11 @@ public final class LDAPConnectionOptions
    *          default value if the system property is not set with a valid
    *          value.
    */
-  static int getSystemProperty(final String propertyName,
+  static int getSystemProperty(@NotNull final String propertyName,
                                final int defaultValue)
   {
-    final String propertyValueString = System.getProperty(propertyName);
+    final String propertyValueString =
+         StaticUtils.getSystemProperty(propertyName);
     if (propertyValueString == null)
     {
       if (Debug.debugEnabled())
@@ -2398,10 +2648,12 @@ public final class LDAPConnectionOptions
    *          default value if the system property is not set with a valid
    *          value.
    */
-  static Long getSystemProperty(final String propertyName,
-                                final Long defaultValue)
+  @Nullable()
+  static Long getSystemProperty(@NotNull final String propertyName,
+                                @Nullable final Long defaultValue)
   {
-    final String propertyValueString = System.getProperty(propertyName);
+    final String propertyValueString =
+         StaticUtils.getSystemProperty(propertyName);
     if (propertyValueString == null)
     {
       if (Debug.debugEnabled())
@@ -2451,6 +2703,7 @@ public final class LDAPConnectionOptions
    * @return  A string representation of this LDAP connection.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -2467,10 +2720,12 @@ public final class LDAPConnectionOptions
    * @param  buffer  The buffer to which to append a string representation of
    *                 this LDAP connection.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("LDAPConnectionOptions(autoReconnect=");
     buffer.append(autoReconnect);
+    buffer.append(", nameResolver=");
+    nameResolver.toString(buffer);
     buffer.append(", bindWithDNRequiresPassword=");
     buffer.append(bindWithDNRequiresPassword);
     buffer.append(", followReferrals=");
@@ -2544,11 +2799,19 @@ public final class LDAPConnectionOptions
     buffer.append(sendBufferSizeBytes);
     buffer.append(", allowConcurrentSocketFactoryUse=");
     buffer.append(allowConcurrentSocketFactoryUse);
+
+    if (connectionLogger != null)
+    {
+      buffer.append(", connectionLoggerClass=");
+      buffer.append(connectionLogger.getClass().getName());
+    }
+
     if (disconnectHandler != null)
     {
       buffer.append(", disconnectHandlerClass=");
       buffer.append(disconnectHandler.getClass().getName());
     }
+
     if (unsolicitedNotificationHandler != null)
     {
       buffer.append(", unsolicitedNotificationHandlerClass=");

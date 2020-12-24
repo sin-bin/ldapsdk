@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -23,6 +38,8 @@ package com.unboundid.ldap.sdk.unboundidds.logs;
 
 
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -55,16 +72,16 @@ public abstract class AccessLogMessage
 
 
   // The connection ID for this access log message.
-  private final Long connectionID;
+  @Nullable private final Long connectionID;
 
   // The Directory Server instance name for this access log message.
-  private final String instanceName;
+  @Nullable private final String instanceName;
 
   // The server product name for this access log message.
-  private final String productName;
+  @Nullable private final String productName;
 
   // The startup ID for this access log message;
-  private final String startupID;
+  @Nullable private final String startupID;
 
 
 
@@ -73,7 +90,7 @@ public abstract class AccessLogMessage
    *
    * @param  m  The log message to be parsed as an access log message.
    */
-  protected AccessLogMessage(final LogMessage m)
+  protected AccessLogMessage(@NotNull final LogMessage m)
   {
     super(m);
 
@@ -95,7 +112,8 @@ public abstract class AccessLogMessage
    * @throws  LogException  If an error occurs while trying to parse the log
    *                        message.
    */
-  public static AccessLogMessage parse(final String s)
+  @NotNull()
+  public static AccessLogMessage parse(@NotNull final String s)
          throws LogException
   {
     return AccessLogReader.parse(s);
@@ -109,6 +127,7 @@ public abstract class AccessLogMessage
    * @return  The server product name for this access log message, or
    *          {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public final String getProductName()
   {
     return productName;
@@ -122,6 +141,7 @@ public abstract class AccessLogMessage
    * @return  The Directory Server instance name for this access log message, or
    *          {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public final String getInstanceName()
   {
     return instanceName;
@@ -135,6 +155,7 @@ public abstract class AccessLogMessage
    * @return  The Directory Server startup ID for this access log message, or
    *          {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public final String getStartupID()
   {
     return startupID;
@@ -150,6 +171,7 @@ public abstract class AccessLogMessage
    *          message is associated, or {@code null} if it is not included in
    *          the log message.
    */
+  @Nullable
   public final Long getConnectionID()
   {
     return connectionID;
@@ -162,5 +184,6 @@ public abstract class AccessLogMessage
    *
    * @return  The message type for this access log message.
    */
+  @NotNull()
   public abstract AccessLogMessageType getMessageType();
 }

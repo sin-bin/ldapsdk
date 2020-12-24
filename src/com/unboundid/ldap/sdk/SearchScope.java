@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -68,7 +85,7 @@ public final class SearchScope
    * A predefined baseObject scope value, which indicates that only the entry
    * specified by the base DN should be considered.
    */
-  public static final SearchScope BASE =
+  @NotNull public static final SearchScope BASE =
        new SearchScope("BASE", BASE_INT_VALUE);
 
 
@@ -85,7 +102,8 @@ public final class SearchScope
    * that are immediate subordinates of the entry specified by the base DN (but
    * not the base entry itself) should be considered.
    */
-  public static final SearchScope ONE = new SearchScope("ONE", ONE_INT_VALUE);
+  @NotNull public static final SearchScope ONE =
+       new SearchScope("ONE", ONE_INT_VALUE);
 
 
 
@@ -100,7 +118,8 @@ public final class SearchScope
    * A predefined wholeSubtree scope value, which indicates that the base entry
    * itself and any subordinate entries (to any depth) should be considered.
    */
-  public static final SearchScope SUB = new SearchScope("SUB", SUB_INT_VALUE);
+  @NotNull public static final SearchScope SUB =
+       new SearchScope("SUB", SUB_INT_VALUE);
 
 
 
@@ -116,7 +135,7 @@ public final class SearchScope
    * subordinate entries (to any depth) below the entry specified by the base DN
    * should be considered, but the base entry itself should not be considered.
    */
-  public static final SearchScope SUBORDINATE_SUBTREE =
+  @NotNull public static final SearchScope SUBORDINATE_SUBTREE =
        new SearchScope("SUBORDINATE_SUBTREE", SUBORDINATE_SUBTREE_INT_VALUE);
 
 
@@ -124,7 +143,7 @@ public final class SearchScope
   /**
    * The set of search scope objects created with undefined int values.
    */
-  private static final HashMap<Integer,SearchScope> UNDEFINED_SCOPES =
+  @NotNull private static final HashMap<Integer,SearchScope> UNDEFINED_SCOPES =
        new HashMap<>(StaticUtils.computeMapCapacity(5));
 
 
@@ -140,7 +159,7 @@ public final class SearchScope
   private final int intValue;
 
   // The name to use for this search scope.
-  private final String name;
+  @NotNull private final String name;
 
 
 
@@ -164,7 +183,7 @@ public final class SearchScope
    * @param  name      The name to use for this search scope.
    * @param  intValue  The integer value to use for this search scope.
    */
-  private SearchScope(final String name, final int intValue)
+  private SearchScope(@NotNull final String name, final int intValue)
   {
     this.name     = name;
     this.intValue = intValue;
@@ -177,6 +196,7 @@ public final class SearchScope
    *
    * @return  The name for this search scope.
    */
+  @NotNull()
   public String getName()
   {
     return name;
@@ -206,6 +226,7 @@ public final class SearchScope
    *          scope if the provided value does not match any of the predefined
    *          scopes.
    */
+  @NotNull()
   public static SearchScope valueOf(final int intValue)
   {
     switch (intValue)
@@ -244,6 +265,7 @@ public final class SearchScope
    * @return  The search scope with the specified integer value, or {@code null}
    *          if the provided integer value does not represent a defined scope.
    */
+  @Nullable()
   public static SearchScope definedValueOf(final int intValue)
   {
     switch (intValue)
@@ -268,6 +290,7 @@ public final class SearchScope
    *
    * @return  An array of all search scopes defined in the LDAP SDK.
    */
+  @NotNull()
   public static SearchScope[] values()
   {
     return new SearchScope[]
@@ -303,7 +326,7 @@ public final class SearchScope
    *          equal to this search scope, or {@code false} if not.
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == null)
     {
@@ -331,6 +354,7 @@ public final class SearchScope
    * @return  A string representation of this search scope.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return name;

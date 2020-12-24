@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -70,10 +85,10 @@ public final class CloseableLock
 {
   // The {@code Closeable} object that will be returned by all of the methods
   // used to acquire the lock.
-  private final Lock lock;
+  @NotNull private final Lock lock;
 
   // The reentrant lock that will be used to actually perform the locking.
-  private final ReentrantLock reentrantLock;
+  @NotNull private final ReentrantLock reentrantLock;
 
 
 
@@ -111,6 +126,7 @@ public final class CloseableLock
    * @return  The {@link Lock} instance that may be used to perform the
    *          unlock via the try-with-resources facility.
    */
+  @NotNull()
   public Lock lock()
   {
     reentrantLock.lock();
@@ -128,6 +144,7 @@ public final class CloseableLock
    * @throws  InterruptedException  If the thread is interrupted while waiting
    *                                to acquire the lock.
    */
+  @NotNull()
   public Lock lockInterruptibly()
          throws InterruptedException
   {
@@ -155,7 +172,8 @@ public final class CloseableLock
    * @throws  TimeoutException  If the lock could not be acquired within the
    *                            specified length of time.
    */
-  public Lock tryLock(final long waitTime, final TimeUnit timeUnit)
+  @NotNull()
+  public Lock tryLock(final long waitTime, @NotNull final TimeUnit timeUnit)
          throws InterruptedException, TimeoutException
   {
     if (waitTime <= 0)
@@ -253,7 +271,7 @@ public final class CloseableLock
    * @return  {@code true} if the specified thread is currently waiting to
    *          acquire this lock, or {@code false} if not.
    */
-  public boolean hasQueuedThread(final Thread thread)
+  public boolean hasQueuedThread(@NotNull final Thread thread)
   {
     Validator.ensureNotNull(thread);
 
@@ -282,6 +300,7 @@ public final class CloseableLock
    * @return  A string representation of this lock.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return "CloseableLock(lock=" + reentrantLock.toString() + ')';
@@ -298,7 +317,7 @@ public final class CloseableLock
          implements Closeable
   {
     // The associated reentrant lock.
-    private final ReentrantLock lock;
+    @NotNull private final ReentrantLock lock;
 
 
 
@@ -308,7 +327,7 @@ public final class CloseableLock
      * @param  lock  The lock that will be unlocked when the [@link #close()}
      *               method is called.  This must not be {@code null}.
      */
-    private Lock(final ReentrantLock lock)
+    private Lock(@NotNull final ReentrantLock lock)
     {
       this.lock = lock;
     }

@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -47,6 +63,8 @@ import com.unboundid.ldap.sdk.controls.ProxiedAuthorizationV2RequestControl;
 import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
 import com.unboundid.util.Debug;
 import com.unboundid.util.FixedRateBarrier;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ResultCodeCounter;
 import com.unboundid.util.ValuePattern;
 
@@ -60,86 +78,89 @@ final class SearchAndModRateThread
       extends Thread
 {
   // Indicates whether a request has been made to stop running.
-  private final AtomicBoolean stopRequested;
+  @NotNull private final AtomicBoolean stopRequested;
+
+  // The number of authrate threads that are currently running.
+  @NotNull private final AtomicInteger runningThreads;
 
   // The counter used to track the number of errors encountered while searching.
-  private final AtomicLong errorCounter;
+  @NotNull private final AtomicLong errorCounter;
 
   // The counter used to track the number of modifications performed.
-  private final AtomicLong modCounter;
+  @NotNull private final AtomicLong modCounter;
 
   // The value that will be updated with total duration of the modifies.
-  private final AtomicLong modDurations;
+  @NotNull private final AtomicLong modDurations;
 
   // The counter used to track the number of iterations remaining on the
   // current connection.
-  private final AtomicLong remainingIterationsBeforeReconnect;
+  @NotNull private final AtomicLong remainingIterationsBeforeReconnect;
 
   // The counter used to track the number of searches performed.
-  private final AtomicLong searchCounter;
+  @NotNull private final AtomicLong searchCounter;
 
   // The value that will be updated with total duration of the searches.
-  private final AtomicLong searchDurations;
+  @NotNull private final AtomicLong searchDurations;
 
   // The thread that is actually performing the search and modify operations.
-  private final AtomicReference<Thread> searchAndModThread;
+  @NotNull private final AtomicReference<Thread> searchAndModThread;
 
   // The result code for this thread.
-  private final AtomicReference<ResultCode> resultCode;
+  @NotNull private final AtomicReference<ResultCode> resultCode;
 
   // The set of characters that may be included in modify values.
-  private final byte[] charSet;
+  @NotNull private final byte[] charSet;
 
   // The barrier that will be used to coordinate starting among all the threads.
-  private final CyclicBarrier startBarrier;
+  @NotNull private final CyclicBarrier startBarrier;
+
+  // The barrier to use for controlling the rate of searches.  null if no
+  // rate-limiting should be used.
+  @Nullable private final FixedRateBarrier fixedRateBarrier;
 
   // The length to use for modify values.
   private final int valueLength;
 
   // The page size that should be used with the simple paged results request
   // control.
-  private final Integer simplePageSize;
+  @Nullable private final Integer simplePageSize;
 
   // The connection to use for the searches.
-  private LDAPConnection connection;
+  @Nullable private LDAPConnection connection;
 
   // The set of controls that should be included in modify requests.
-  private final List<Control> modifyControls;
+  @NotNull private final List<Control> modifyControls;
 
   // The set of controls that should be included in search requests.
-  private final List<Control> searchControls;
+  @NotNull private final List<Control> searchControls;
 
   // The number of iterations to request on a connection before closing and
   // re-establishing it.
   private final long iterationsBeforeReconnect;
 
   // The random number generator to use for this thread.
-  private final Random random;
+  @NotNull private final Random random;
 
   // The result code counter to use for failed operations.
-  private final ResultCodeCounter rcCounter;
+  @NotNull private final ResultCodeCounter rcCounter;
 
   // A reference to the associated tool.
-  private final SearchAndModRate searchAndModRate;
+  @NotNull private final SearchAndModRate searchAndModRate;
 
   // The search request to generate.
-  private final SearchRequest searchRequest;
+  @NotNull private final SearchRequest searchRequest;
 
   // The set of attributes to modify.
-  private final String[] modAttributes;
+  @NotNull private final String[] modAttributes;
 
   // The value pattern to use for proxied authorization.
-  private final ValuePattern authzID;
+  @Nullable private final ValuePattern authzID;
 
   // The value pattern to use for the base DNs.
-  private final ValuePattern baseDN;
+  @NotNull private final ValuePattern baseDN;
 
   // The value pattern to use for the filters.
-  private final ValuePattern filter;
-
-  // The barrier to use for controlling the rate of searches.  null if no
-  // rate-limiting should be used.
-  private final FixedRateBarrier fixedRateBarrier;
+  @NotNull private final ValuePattern filter;
 
 
 
@@ -180,6 +201,9 @@ final class SearchAndModRateThread
    *                                    newly-established connection.
    * @param  randomSeed                 The seed to use for the random number
    *                                    generator.
+   * @param  runningThreads             An atomic integer that will be
+   *                                    incremented when this thread starts,
+   *                                    and decremented when it completes.
    * @param  startBarrier               A barrier used to coordinate starting
    *                                    between all of the threads.
    * @param  searchCounter              A value that will be used to keep track
@@ -203,19 +227,29 @@ final class SearchAndModRateThread
    *                                    rate of searches.  {@code null} if no
    *                                    rate-limiting should be used.
    */
-  SearchAndModRateThread(final SearchAndModRate searchAndModRate,
-       final int threadNumber, final LDAPConnection connection,
-       final ValuePattern baseDN, final SearchScope scope,
-       final ValuePattern filter, final String[] returnAttributes,
-       final String[] modAttributes, final int valueLength,
-       final byte[] charSet, final ValuePattern authzID,
-       final Integer simplePageSize, final List<Control> searchControls,
-       final List<Control> modifyControls, final long iterationsBeforeReconnect,
-       final long randomSeed, final CyclicBarrier startBarrier,
-       final AtomicLong searchCounter, final AtomicLong modCounter,
-       final AtomicLong searchDurations, final AtomicLong modDurations,
-       final AtomicLong errorCounter, final ResultCodeCounter rcCounter,
-       final FixedRateBarrier rateBarrier)
+  SearchAndModRateThread(@NotNull final SearchAndModRate searchAndModRate,
+       final int threadNumber,
+       @NotNull final LDAPConnection connection,
+       @NotNull final ValuePattern baseDN,
+       @NotNull final SearchScope scope,
+       @NotNull final ValuePattern filter,
+       @NotNull final String[] returnAttributes,
+       @NotNull final String[] modAttributes, final int valueLength,
+       @NotNull final byte[] charSet,
+       @Nullable final ValuePattern authzID,
+       @Nullable final Integer simplePageSize,
+       @NotNull final List<Control> searchControls,
+       @NotNull final List<Control> modifyControls,
+       final long iterationsBeforeReconnect, final long randomSeed,
+       @NotNull final AtomicInteger runningThreads,
+       @NotNull final CyclicBarrier startBarrier,
+       @NotNull final AtomicLong searchCounter,
+       @NotNull final AtomicLong modCounter,
+       @NotNull final AtomicLong searchDurations,
+       @NotNull final AtomicLong modDurations,
+       @NotNull final AtomicLong errorCounter,
+       @NotNull final ResultCodeCounter rcCounter,
+       @Nullable final FixedRateBarrier rateBarrier)
   {
     setName("SearchAndModRate Thread " + threadNumber);
     setDaemon(true);
@@ -238,6 +272,7 @@ final class SearchAndModRateThread
     this.modDurations               = modDurations;
     this.errorCounter               = errorCounter;
     this.rcCounter                  = rcCounter;
+    this.runningThreads             = runningThreads;
     this.startBarrier               = startBarrier;
     fixedRateBarrier                = rateBarrier;
 
@@ -269,105 +304,106 @@ final class SearchAndModRateThread
   @Override()
   public void run()
   {
-    searchAndModThread.set(currentThread());
-
-    final Modification[] mods = new Modification[modAttributes.length];
-    final byte[] valueBytes = new byte[valueLength];
-    final ASN1OctetString[] values = new ASN1OctetString[1];
-    final ModifyRequest modifyRequest = new ModifyRequest("", mods);
-
     try
     {
-      startBarrier.await();
-    }
-    catch (final Exception e)
-    {
-      Debug.debugException(e);
-    }
+      searchAndModThread.set(currentThread());
+      runningThreads.incrementAndGet();
 
-searchLoop:
-    while (! stopRequested.get())
-    {
-      if ((iterationsBeforeReconnect > 0L) &&
-          (remainingIterationsBeforeReconnect.decrementAndGet() <= 0))
+      final Modification[] mods = new Modification[modAttributes.length];
+      final byte[] valueBytes = new byte[valueLength];
+      final ASN1OctetString[] values = new ASN1OctetString[1];
+      final ModifyRequest modifyRequest = new ModifyRequest("", mods);
+
+      try
       {
-        remainingIterationsBeforeReconnect.set(iterationsBeforeReconnect);
-        if (connection != null)
-        {
-          connection.close();
-          connection = null;
-        }
+        startBarrier.await();
+      }
+      catch (final Exception e)
+      {
+        Debug.debugException(e);
       }
 
-      if (connection == null)
+searchLoop:
+      while (! stopRequested.get())
       {
+        if ((iterationsBeforeReconnect > 0L) &&
+             (remainingIterationsBeforeReconnect.decrementAndGet() <= 0))
+        {
+          remainingIterationsBeforeReconnect.set(iterationsBeforeReconnect);
+          if (connection != null)
+          {
+            connection.close();
+            connection = null;
+          }
+        }
+
+        if (connection == null)
+        {
+          try
+          {
+            connection = searchAndModRate.getConnection();
+          }
+          catch (final LDAPException le)
+          {
+            Debug.debugException(le);
+
+            errorCounter.incrementAndGet();
+
+            final ResultCode rc = le.getResultCode();
+            rcCounter.increment(rc);
+            resultCode.compareAndSet(null, rc);
+
+            if (fixedRateBarrier != null)
+            {
+              fixedRateBarrier.await();
+            }
+
+            continue;
+          }
+        }
+
+        // If we're trying for a specific target rate, then we might need to
+        // wait until issuing the next search.
+        if (fixedRateBarrier != null)
+        {
+          fixedRateBarrier.await();
+        }
+
+        ProxiedAuthorizationV2RequestControl proxyControl = null;
         try
         {
-          connection = searchAndModRate.getConnection();
+          searchRequest.setBaseDN(baseDN.nextValue());
+          searchRequest.setFilter(filter.nextValue());
+
+          searchRequest.setControls(searchControls);
+
+          if (authzID != null)
+          {
+            proxyControl = new ProxiedAuthorizationV2RequestControl(
+                 authzID.nextValue());
+            searchRequest.addControl(proxyControl);
+          }
+
+          if (simplePageSize != null)
+          {
+            searchRequest.addControl(
+                 new SimplePagedResultsControl(simplePageSize));
+          }
         }
         catch (final LDAPException le)
         {
           Debug.debugException(le);
-
           errorCounter.incrementAndGet();
 
           final ResultCode rc = le.getResultCode();
           rcCounter.increment(rc);
           resultCode.compareAndSet(null, rc);
-
-          if (fixedRateBarrier != null)
-          {
-            fixedRateBarrier.await();
-          }
-
           continue;
         }
-      }
 
-      // If we're trying for a specific target rate, then we might need to
-      // wait until issuing the next search.
-      if (fixedRateBarrier != null)
-      {
-        fixedRateBarrier.await();
-      }
+        final ASN1OctetString pagedResultCookie = null;
+        final long searchStartTime = System.nanoTime();
 
-      ProxiedAuthorizationV2RequestControl proxyControl = null;
-      try
-      {
-        searchRequest.setBaseDN(baseDN.nextValue());
-        searchRequest.setFilter(filter.nextValue());
-
-        searchRequest.setControls(searchControls);
-
-        if (authzID != null)
-        {
-          proxyControl = new ProxiedAuthorizationV2RequestControl(
-               authzID.nextValue());
-          searchRequest.addControl(proxyControl);
-        }
-
-        if (simplePageSize != null)
-        {
-          searchRequest.addControl(
-               new SimplePagedResultsControl(simplePageSize));
-        }
-      }
-      catch (final LDAPException le)
-      {
-        Debug.debugException(le);
-        errorCounter.incrementAndGet();
-
-        final ResultCode rc = le.getResultCode();
-        rcCounter.increment(rc);
-        resultCode.compareAndSet(null, rc);
-        continue;
-      }
-
-      final ASN1OctetString pagedResultCookie = null;
-      final long searchStartTime = System.nanoTime();
-
-      try
-      {
         while (true)
         {
           final SearchResult r;
@@ -391,6 +427,11 @@ searchLoop:
             }
 
             continue searchLoop;
+          }
+          finally
+          {
+            searchCounter.incrementAndGet();
+            searchDurations.addAndGet(System.nanoTime() - searchStartTime);
           }
 
           for (int i=0; i < valueLength; i++)
@@ -460,7 +501,8 @@ searchLoop:
           {
             final SimplePagedResultsControl sprResponse =
                  SimplePagedResultsControl.get(r);
-            if ((sprResponse == null) || (! sprResponse.moreResultsToReturn()))
+            if ((sprResponse == null) ||
+                 (! sprResponse.moreResultsToReturn()))
             {
               break;
             }
@@ -485,19 +527,17 @@ searchLoop:
           }
         }
       }
-      finally
-      {
-        searchCounter.incrementAndGet();
-        searchDurations.addAndGet(System.nanoTime() - searchStartTime);
-      }
     }
-
-    if (connection != null)
+    finally
     {
-      connection.close();
-    }
+      if (connection != null)
+      {
+        connection.close();
+      }
 
-    searchAndModThread.set(null);
+      searchAndModThread.set(null);
+      runningThreads.decrementAndGet();
+    }
   }
 
 
@@ -508,6 +548,7 @@ searchLoop:
    * @return  A result code that provides information about whether any errors
    *          were encountered during processing.
    */
+  @NotNull()
   public ResultCode stopRunning()
   {
     stopRequested.set(true);

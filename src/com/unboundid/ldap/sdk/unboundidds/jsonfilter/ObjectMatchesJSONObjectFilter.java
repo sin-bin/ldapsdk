@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,7 @@ import java.util.Set;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -117,7 +133,7 @@ public final class ObjectMatchesJSONObjectFilter
    * The value that should be used for the filterType element of the JSON object
    * that represents an "object matches" filter.
    */
-  public static final String FILTER_TYPE = "objectMatches";
+  @NotNull public static final String FILTER_TYPE = "objectMatches";
 
 
 
@@ -125,7 +141,7 @@ public final class ObjectMatchesJSONObjectFilter
    * The name of the JSON field that is used to specify the field in the target
    * JSON object for which to make the determination.
    */
-  public static final String FIELD_FIELD_PATH = "field";
+  @NotNull public static final String FIELD_FIELD_PATH = "field";
 
 
 
@@ -133,14 +149,14 @@ public final class ObjectMatchesJSONObjectFilter
    * The name of the JSON field that is used to specify the filter to match
    * against the object in the target field.
    */
-  public static final String FIELD_FILTER = "filter";
+  @NotNull public static final String FIELD_FILTER = "filter";
 
 
 
   /**
    * The pre-allocated set of required field names.
    */
-  private static final Set<String> REQUIRED_FIELD_NAMES =
+  @NotNull private static final Set<String> REQUIRED_FIELD_NAMES =
        Collections.unmodifiableSet(new HashSet<>(
             Arrays.asList(FIELD_FIELD_PATH, FIELD_FILTER)));
 
@@ -149,7 +165,7 @@ public final class ObjectMatchesJSONObjectFilter
   /**
    * The pre-allocated set of optional field names.
    */
-  private static final Set<String> OPTIONAL_FIELD_NAMES =
+  @NotNull private static final Set<String> OPTIONAL_FIELD_NAMES =
        Collections.emptySet();
 
 
@@ -162,10 +178,10 @@ public final class ObjectMatchesJSONObjectFilter
 
 
   // The filter to match against the object(s) in the target field.
-  private volatile JSONObjectFilter filter;
+  @NotNull private volatile JSONObjectFilter filter;
 
   // The field path specifier for the target field.
-  private volatile List<String> field;
+  @NotNull private volatile List<String> field;
 
 
 
@@ -192,8 +208,8 @@ public final class ObjectMatchesJSONObjectFilter
    * @param  filter  The filter that will be matched against JSON objects
    *                 contained in the specified field.
    */
-  public ObjectMatchesJSONObjectFilter(final String field,
-                                       final JSONObjectFilter filter)
+  public ObjectMatchesJSONObjectFilter(@NotNull final String field,
+                                       @NotNull final JSONObjectFilter filter)
   {
     this(Collections.singletonList(field), filter);
   }
@@ -210,8 +226,8 @@ public final class ObjectMatchesJSONObjectFilter
    * @param  filter  The filter that will be matched against JSON objects
    *                 contained in the specified field.
    */
-  public ObjectMatchesJSONObjectFilter(final List<String> field,
-                                       final JSONObjectFilter filter)
+  public ObjectMatchesJSONObjectFilter(@NotNull final List<String> field,
+                                       @NotNull final JSONObjectFilter filter)
   {
     Validator.ensureNotNull(field);
     Validator.ensureFalse(field.isEmpty());
@@ -229,6 +245,7 @@ public final class ObjectMatchesJSONObjectFilter
    *
    * @return  The field path specifier for this filter.
    */
+  @NotNull()
   public List<String> getField()
   {
     return field;
@@ -244,7 +261,7 @@ public final class ObjectMatchesJSONObjectFilter
    *                for the {@link JSONObjectFilter} class for information about
    *                field path specifiers.
    */
-  public void setField(final String... field)
+  public void setField(@NotNull final String... field)
   {
     setField(StaticUtils.toList(field));
   }
@@ -259,7 +276,7 @@ public final class ObjectMatchesJSONObjectFilter
    *                for the {@link JSONObjectFilter} class for information about
    *                field path specifiers.
    */
-  public void setField(final List<String> field)
+  public void setField(@NotNull final List<String> field)
   {
     Validator.ensureNotNull(field);
     Validator.ensureFalse(field.isEmpty());
@@ -276,6 +293,7 @@ public final class ObjectMatchesJSONObjectFilter
    * @return  The filter that will be matched against any JSON objects contained
    *          in the value of the specified field.
    */
+  @NotNull()
   public JSONObjectFilter getFilter()
   {
     return filter;
@@ -291,7 +309,7 @@ public final class ObjectMatchesJSONObjectFilter
    *                 contained in the value of the specified field.  It must
    *                 not be {@code null}.
    */
-  public void setFilter(final JSONObjectFilter filter)
+  public void setFilter(@NotNull final JSONObjectFilter filter)
   {
     Validator.ensureNotNull(filter);
 
@@ -304,6 +322,7 @@ public final class ObjectMatchesJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getFilterType()
   {
     return FILTER_TYPE;
@@ -315,6 +334,7 @@ public final class ObjectMatchesJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected Set<String> getRequiredFieldNames()
   {
     return REQUIRED_FIELD_NAMES;
@@ -326,6 +346,7 @@ public final class ObjectMatchesJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected Set<String> getOptionalFieldNames()
   {
     return OPTIONAL_FIELD_NAMES;
@@ -337,7 +358,7 @@ public final class ObjectMatchesJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
-  public boolean matchesJSONObject(final JSONObject o)
+  public boolean matchesJSONObject(@NotNull final JSONObject o)
   {
     final List<JSONValue> candidates = getValues(o, field);
     if (candidates.isEmpty())
@@ -376,6 +397,7 @@ public final class ObjectMatchesJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public JSONObject toJSONObject()
   {
     final LinkedHashMap<String,JSONValue> fields =
@@ -409,8 +431,9 @@ public final class ObjectMatchesJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected ObjectMatchesJSONObjectFilter decodeFilter(
-                                               final JSONObject filterObject)
+                 @NotNull final JSONObject filterObject)
             throws JSONException
   {
     final List<String> fieldPath =

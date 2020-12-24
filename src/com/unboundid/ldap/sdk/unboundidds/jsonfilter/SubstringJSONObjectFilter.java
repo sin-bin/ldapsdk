@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -136,7 +153,7 @@ public final class SubstringJSONObjectFilter
    * The value that should be used for the filterType element of the JSON object
    * that represents a "substring" filter.
    */
-  public static final String FILTER_TYPE = "substring";
+  @NotNull public static final String FILTER_TYPE = "substring";
 
 
 
@@ -144,7 +161,7 @@ public final class SubstringJSONObjectFilter
    * The name of the JSON field that is used to specify the field in the target
    * JSON object for which to make the determination.
    */
-  public static final String FIELD_FIELD_PATH = "field";
+  @NotNull public static final String FIELD_FIELD_PATH = "field";
 
 
 
@@ -152,7 +169,7 @@ public final class SubstringJSONObjectFilter
    * The name of the JSON field that is used to specify a string that must
    * appear at the beginning of a matching value.
    */
-  public static final String FIELD_STARTS_WITH = "startsWith";
+  @NotNull public static final String FIELD_STARTS_WITH = "startsWith";
 
 
 
@@ -160,7 +177,7 @@ public final class SubstringJSONObjectFilter
    * The name of the JSON field that is used to specify one or more strings
    * that must appear somewhere in a matching value.
    */
-  public static final String FIELD_CONTAINS = "contains";
+  @NotNull public static final String FIELD_CONTAINS = "contains";
 
 
 
@@ -168,7 +185,7 @@ public final class SubstringJSONObjectFilter
    * The name of the JSON field that is used to specify a string that must
    * appear at the end of a matching value.
    */
-  public static final String FIELD_ENDS_WITH = "endsWith";
+  @NotNull public static final String FIELD_ENDS_WITH = "endsWith";
 
 
 
@@ -176,14 +193,14 @@ public final class SubstringJSONObjectFilter
    * The name of the JSON field that is used to indicate whether string matching
    * should be case-sensitive.
    */
-  public static final String FIELD_CASE_SENSITIVE = "caseSensitive";
+  @NotNull public static final String FIELD_CASE_SENSITIVE = "caseSensitive";
 
 
 
   /**
    * The pre-allocated set of required field names.
    */
-  private static final Set<String> REQUIRED_FIELD_NAMES =
+  @NotNull private static final Set<String> REQUIRED_FIELD_NAMES =
        Collections.unmodifiableSet(new HashSet<>(
             Collections.singletonList(FIELD_FIELD_PATH)));
 
@@ -192,7 +209,7 @@ public final class SubstringJSONObjectFilter
   /**
    * The pre-allocated set of optional field names.
    */
-  private static final Set<String> OPTIONAL_FIELD_NAMES =
+  @NotNull private static final Set<String> OPTIONAL_FIELD_NAMES =
        Collections.unmodifiableSet(new HashSet<>(
             Arrays.asList(FIELD_STARTS_WITH, FIELD_CONTAINS, FIELD_ENDS_WITH,
                  FIELD_CASE_SENSITIVE)));
@@ -213,31 +230,31 @@ public final class SubstringJSONObjectFilter
   private volatile int minLength;
 
   // The substring(s) that must appear somewhere in matching values.
-  private volatile List<String> contains;
+  @NotNull private volatile List<String> contains;
 
   // The "contains" values that should be used for matching purposes.  If
   // caseSensitive is false, then this will be an all-lowercase version of
   // contains.  Otherwise, it will be the same as contains.
-  private volatile List<String> matchContains;
+  @NotNull private volatile List<String> matchContains;
 
   // The field path specifier for the target field.
-  private volatile List<String> field;
+  @NotNull private volatile List<String> field;
 
   // The substring that must appear at the end of matching values.
-  private volatile String endsWith;
+  @Nullable private volatile String endsWith;
 
   // The "ends with" value that should be used for matching purposes.  If
   // caseSensitive is false, then this will be an all-lowercase version of
   // endsWith.  Otherwise, it will be the same as endsWith.
-  private volatile String matchEndsWith;
+  @Nullable private volatile String matchEndsWith;
 
   // The "starts with" value that should be used for matching purposes.  If
   // caseSensitive is false, then this will be an all-lowercase version of
   // startsWith.  Otherwise, it will be the same as startsWith.
-  private volatile String matchStartsWith;
+  @Nullable private volatile String matchStartsWith;
 
   // The substring that must appear at the beginning of matching values.
-  private volatile String startsWith;
+  @Nullable private volatile String startsWith;
 
 
 
@@ -274,10 +291,10 @@ public final class SubstringJSONObjectFilter
    *                        matching values.
    * @param  caseSensitive  Indicates whether matching should be case sensitive.
    */
-  private SubstringJSONObjectFilter(final List<String> field,
-                                    final String startsWith,
-                                    final List<String> contains,
-                                    final String endsWith,
+  private SubstringJSONObjectFilter(@NotNull final List<String> field,
+                                    @Nullable final String startsWith,
+                                    @Nullable final List<String> contains,
+                                    @Nullable final String endsWith,
                                     final boolean caseSensitive)
   {
     this.field = field;
@@ -311,8 +328,10 @@ public final class SubstringJSONObjectFilter
    *                     matching will be performed using only
    *                     {@code startsWith} and/or {@code contains} substrings.
    */
-  public SubstringJSONObjectFilter(final String field, final String startsWith,
-                                   final String contains, final String endsWith)
+  public SubstringJSONObjectFilter(@NotNull final String field,
+                                   @Nullable final String startsWith,
+                                   @Nullable final String contains,
+                                   @Nullable final String endsWith)
   {
     this(Collections.singletonList(field), startsWith,
          ((contains == null) ? null : Collections.singletonList(contains)),
@@ -343,10 +362,10 @@ public final class SubstringJSONObjectFilter
    *                     matching will be performed using only
    *                     {@code startsWith} and/or {@code contains} substrings.
    */
-  public SubstringJSONObjectFilter(final List<String> field,
-                                   final String startsWith,
-                                   final List<String> contains,
-                                   final String endsWith)
+  public SubstringJSONObjectFilter(@NotNull final List<String> field,
+                                   @Nullable final String startsWith,
+                                   @Nullable final List<String> contains,
+                                   @Nullable final String endsWith)
   {
     Validator.ensureNotNull(field);
     Validator.ensureFalse(field.isEmpty());
@@ -364,6 +383,7 @@ public final class SubstringJSONObjectFilter
    *
    * @return  The field path specifier for this filter.
    */
+  @NotNull()
   public List<String> getField()
   {
     return field;
@@ -379,7 +399,7 @@ public final class SubstringJSONObjectFilter
    *                for the {@link JSONObjectFilter} class for information about
    *                field path specifiers.
    */
-  public void setField(final String... field)
+  public void setField(@NotNull final String... field)
   {
     setField(StaticUtils.toList(field));
   }
@@ -394,7 +414,7 @@ public final class SubstringJSONObjectFilter
    *                for the {@link JSONObjectFilter} class for information about
    *                field path specifiers.
    */
-  public void setField(final List<String> field)
+  public void setField(@NotNull final List<String> field)
   {
     Validator.ensureNotNull(field);
     Validator.ensureFalse(field.isEmpty());
@@ -412,6 +432,7 @@ public final class SubstringJSONObjectFilter
    *          values, or {@code null} if no "starts with" substring has been
    *          defined.
    */
+  @Nullable()
   public String getStartsWith()
   {
     return startsWith;
@@ -427,6 +448,7 @@ public final class SubstringJSONObjectFilter
    * @return  The list of strings that must appear somewhere in the value, or
    *          an empty list if no "contains" substrings have been defined.
    */
+  @NotNull()
   public List<String> getContains()
   {
     return contains;
@@ -441,6 +463,7 @@ public final class SubstringJSONObjectFilter
    * @return  The substring that must appear at the end of matching values, or
    *          {@code null} if no "starts with" substring has been defined.
    */
+  @Nullable()
   public String getEndsWith()
   {
     return endsWith;
@@ -466,9 +489,9 @@ public final class SubstringJSONObjectFilter
    *                     matching will be performed using only
    *                     {@code startsWith} and/or {@code contains} substrings.
    */
-  public void setSubstringComponents(final String startsWith,
-                                     final String contains,
-                                     final String endsWith)
+  public void setSubstringComponents(@Nullable final String startsWith,
+                                     @Nullable final String contains,
+                                     @Nullable final String endsWith)
   {
     setSubstringComponents(startsWith,
          (contains == null) ? null : Collections.singletonList(contains),
@@ -495,9 +518,9 @@ public final class SubstringJSONObjectFilter
    *                     matching will be performed using only
    *                     {@code startsWith} and/or {@code contains} substrings.
    */
-  public void setSubstringComponents(final String startsWith,
-                                     final List<String> contains,
-                                     final String endsWith)
+  public void setSubstringComponents(@Nullable final String startsWith,
+                                     @Nullable final List<String> contains,
+                                     @Nullable final String endsWith)
   {
     Validator.ensureFalse((startsWith == null) && (contains == null) &&
          (endsWith == null));
@@ -595,6 +618,7 @@ public final class SubstringJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getFilterType()
   {
     return FILTER_TYPE;
@@ -606,6 +630,7 @@ public final class SubstringJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected Set<String> getRequiredFieldNames()
   {
     return REQUIRED_FIELD_NAMES;
@@ -617,6 +642,7 @@ public final class SubstringJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected Set<String> getOptionalFieldNames()
   {
     return OPTIONAL_FIELD_NAMES;
@@ -628,7 +654,7 @@ public final class SubstringJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
-  public boolean matchesJSONObject(final JSONObject o)
+  public boolean matchesJSONObject(@NotNull final JSONObject o)
   {
     final List<JSONValue> candidates = getValues(o, field);
     if (candidates.isEmpty())
@@ -671,7 +697,7 @@ public final class SubstringJSONObjectFilter
    * @return  {@code true} if the substring assertion matches the provided
    *          value, or {@code false} if not.
    */
-  private boolean matchesValue(final JSONValue v)
+  private boolean matchesValue(@NotNull final JSONValue v)
   {
     if (! (v instanceof JSONString))
     {
@@ -692,7 +718,7 @@ public final class SubstringJSONObjectFilter
    * @return  {@code true} if the substring assertion defined in this filter
    *          matches the provided string, or {@code false} if not.
    */
-  public boolean matchesString(final String s)
+  public boolean matchesString(@NotNull final String s)
   {
 
     final String stringValue;
@@ -749,6 +775,7 @@ public final class SubstringJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public JSONObject toJSONObject()
   {
     final LinkedHashMap<String,JSONValue> fields =
@@ -813,8 +840,9 @@ public final class SubstringJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected SubstringJSONObjectFilter decodeFilter(
-                                           final JSONObject filterObject)
+                 @NotNull final JSONObject filterObject)
             throws JSONException
   {
     final List<String> fieldPath =

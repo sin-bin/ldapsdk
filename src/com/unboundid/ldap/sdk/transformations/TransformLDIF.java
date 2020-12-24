@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,14 +42,17 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPOutputStream;
 
 import com.unboundid.ldap.sdk.Attribute;
+import com.unboundid.ldap.sdk.ChangeType;
 import com.unboundid.ldap.sdk.DN;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.ldap.sdk.LDAPException;
@@ -52,6 +70,8 @@ import com.unboundid.ldif.LDIFRecord;
 import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.CommandLineTool;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.PassphraseEncryptedOutputStream;
 import com.unboundid.util.StaticUtils;
@@ -130,55 +150,58 @@ public final class TransformLDIF
 
 
   // The arguments for use by this program.
-  private BooleanArgument addToExistingValues = null;
-  private BooleanArgument appendToTargetLDIF = null;
-  private BooleanArgument compressTarget = null;
-  private BooleanArgument encryptTarget = null;
-  private BooleanArgument excludeNonMatchingEntries = null;
-  private BooleanArgument flattenAddOmittedRDNAttributesToEntry = null;
-  private BooleanArgument flattenAddOmittedRDNAttributesToRDN = null;
-  private BooleanArgument hideRedactedValueCount = null;
-  private BooleanArgument processDNs = null;
-  private BooleanArgument sourceCompressed = null;
-  private BooleanArgument sourceContainsChangeRecords = null;
-  private BooleanArgument sourceFromStandardInput = null;
-  private BooleanArgument targetToStandardOutput = null;
-  private DNArgument addAttributeBaseDN = null;
-  private DNArgument excludeEntryBaseDN = null;
-  private DNArgument flattenBaseDN = null;
-  private DNArgument moveSubtreeFrom = null;
-  private DNArgument moveSubtreeTo = null;
-  private FileArgument encryptionPassphraseFile = null;
-  private FileArgument schemaPath = null;
-  private FileArgument sourceLDIF = null;
-  private FileArgument targetLDIF = null;
-  private FilterArgument addAttributeFilter = null;
-  private FilterArgument excludeEntryFilter = null;
-  private FilterArgument flattenExcludeFilter = null;
-  private IntegerArgument initialSequentialValue = null;
-  private IntegerArgument numThreads = null;
-  private IntegerArgument randomSeed = null;
-  private IntegerArgument sequentialValueIncrement = null;
-  private IntegerArgument wrapColumn = null;
-  private ScopeArgument addAttributeScope = null;
-  private ScopeArgument excludeEntryScope = null;
-  private StringArgument addAttributeName = null;
-  private StringArgument addAttributeValue = null;
-  private StringArgument excludeAttribute = null;
-  private StringArgument redactAttribute = null;
-  private StringArgument renameAttributeFrom = null;
-  private StringArgument renameAttributeTo = null;
-  private StringArgument replaceValuesAttribute = null;
-  private StringArgument replacementValue = null;
-  private StringArgument scrambleAttribute = null;
-  private StringArgument scrambleJSONField = null;
-  private StringArgument sequentialAttribute = null;
-  private StringArgument textAfterSequentialValue = null;
-  private StringArgument textBeforeSequentialValue = null;
+  @Nullable private BooleanArgument addToExistingValues = null;
+  @Nullable private BooleanArgument appendToTargetLDIF = null;
+  @Nullable private BooleanArgument compressTarget = null;
+  @Nullable private BooleanArgument encryptTarget = null;
+  @Nullable private BooleanArgument excludeRecordsWithoutChangeType = null;
+  @Nullable private BooleanArgument excludeNonMatchingEntries = null;
+  @Nullable private BooleanArgument flattenAddOmittedRDNAttributesToEntry =
+       null;
+  @Nullable private BooleanArgument flattenAddOmittedRDNAttributesToRDN = null;
+  @Nullable private BooleanArgument hideRedactedValueCount = null;
+  @Nullable private BooleanArgument processDNs = null;
+  @Nullable private BooleanArgument sourceCompressed = null;
+  @Nullable private BooleanArgument sourceContainsChangeRecords = null;
+  @Nullable private BooleanArgument sourceFromStandardInput = null;
+  @Nullable private BooleanArgument targetToStandardOutput = null;
+  @Nullable private DNArgument addAttributeBaseDN = null;
+  @Nullable private DNArgument excludeEntryBaseDN = null;
+  @Nullable private DNArgument flattenBaseDN = null;
+  @Nullable private DNArgument moveSubtreeFrom = null;
+  @Nullable private DNArgument moveSubtreeTo = null;
+  @Nullable private FileArgument encryptionPassphraseFile = null;
+  @Nullable private FileArgument schemaPath = null;
+  @Nullable private FileArgument sourceLDIF = null;
+  @Nullable private FileArgument targetLDIF = null;
+  @Nullable private FilterArgument addAttributeFilter = null;
+  @Nullable private FilterArgument excludeEntryFilter = null;
+  @Nullable private FilterArgument flattenExcludeFilter = null;
+  @Nullable private IntegerArgument initialSequentialValue = null;
+  @Nullable private IntegerArgument numThreads = null;
+  @Nullable private IntegerArgument randomSeed = null;
+  @Nullable private IntegerArgument sequentialValueIncrement = null;
+  @Nullable private IntegerArgument wrapColumn = null;
+  @Nullable private ScopeArgument addAttributeScope = null;
+  @Nullable private ScopeArgument excludeEntryScope = null;
+  @Nullable private StringArgument addAttributeName = null;
+  @Nullable private StringArgument addAttributeValue = null;
+  @Nullable private StringArgument excludeAttribute = null;
+  @Nullable private StringArgument excludeChangeType  = null;
+  @Nullable private StringArgument redactAttribute = null;
+  @Nullable private StringArgument renameAttributeFrom = null;
+  @Nullable private StringArgument renameAttributeTo = null;
+  @Nullable private StringArgument replaceValuesAttribute = null;
+  @Nullable private StringArgument replacementValue = null;
+  @Nullable private StringArgument scrambleAttribute = null;
+  @Nullable private StringArgument scrambleJSONField = null;
+  @Nullable private StringArgument sequentialAttribute = null;
+  @Nullable private StringArgument textAfterSequentialValue = null;
+  @Nullable private StringArgument textBeforeSequentialValue = null;
 
   // A set of thread-local byte stream buffers that will be used to construct
   // the LDIF representations of records.
-  private final ThreadLocal<ByteStringBuffer> byteStringBuffers =
+  @NotNull private final ThreadLocal<ByteStringBuffer> byteStringBuffers =
        new ThreadLocal<>();
 
 
@@ -188,7 +211,7 @@ public final class TransformLDIF
    *
    * @param  args  The command-line arguments provided to this program.
    */
-  public static void main(final String... args)
+  public static void main(@NotNull final String... args)
   {
     final ResultCode resultCode = main(System.out, System.err, args);
     if (resultCode != ResultCode.SUCCESS)
@@ -211,8 +234,10 @@ public final class TransformLDIF
    * @return  A result code indicating whether processing completed
    *          successfully.
    */
-  public static ResultCode main(final OutputStream out, final OutputStream err,
-                                final String... args)
+  @NotNull()
+  public static ResultCode main(@Nullable final OutputStream out,
+                                @Nullable final OutputStream err,
+                                @NotNull final String... args)
   {
     final TransformLDIF tool = new TransformLDIF(out, err);
     return tool.runTool(args);
@@ -228,7 +253,8 @@ public final class TransformLDIF
    * @param  err  The output stream to use for standard error.  It may be
    *              {@code null} if standard error should be suppressed.
    */
-  public TransformLDIF(final OutputStream out, final OutputStream err)
+  public TransformLDIF(@Nullable final OutputStream out,
+                       @Nullable final OutputStream err)
   {
     super(out, err);
   }
@@ -239,6 +265,7 @@ public final class TransformLDIF
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "transform-ldif";
@@ -250,6 +277,7 @@ public final class TransformLDIF
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return INFO_TRANSFORM_LDIF_TOOL_DESCRIPTION.get();
@@ -261,6 +289,7 @@ public final class TransformLDIF
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -305,7 +334,7 @@ public final class TransformLDIF
    * {@inheritDoc}
    */
   @Override()
-  public void addToolArguments(final ArgumentParser parser)
+  public void addToolArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     // Add arguments pertaining to the source and target LDIF files.
@@ -756,6 +785,31 @@ public final class TransformLDIF
          excludeEntryBaseDN, excludeEntryScope, excludeEntryFilter);
 
 
+    // Add arguments for excluding records based on their change types.
+    excludeChangeType = new StringArgument(null, "excludeChangeType",
+         false, 0, INFO_TRANSFORM_LDIF_PLACEHOLDER_CHANGE_TYPES.get(),
+         INFO_TRANSFORM_LDIF_ARG_DESC_EXCLUDE_CHANGE_TYPE.get(),
+         StaticUtils.setOf("add", "delete", "modify", "moddn"));
+    excludeChangeType.addLongIdentifier("exclude-change-type", true);
+    excludeChangeType.addLongIdentifier("exclude-changetype", true);
+    excludeChangeType.setArgumentGroupName(
+         INFO_TRANSFORM_LDIF_ARG_GROUP_EXCLUDE.get());
+    parser.addArgument(excludeChangeType);
+
+
+    // Add arguments for excluding records that don't have a change type.
+    excludeRecordsWithoutChangeType = new BooleanArgument(null,
+         "excludeRecordsWithoutChangeType", 1,
+         INFO_TRANSFORM_LDIF_EXCLUDE_WITHOUT_CHANGETYPE.get());
+    excludeRecordsWithoutChangeType.addLongIdentifier(
+         "exclude-records-without-change-type", true);
+    excludeRecordsWithoutChangeType.addLongIdentifier(
+         "exclude-records-without-changetype", true);
+    excludeRecordsWithoutChangeType.setArgumentGroupName(
+         INFO_TRANSFORM_LDIF_ARG_GROUP_EXCLUDE.get());
+    parser.addArgument(excludeRecordsWithoutChangeType);
+
+
     // Add the remaining arguments.
     schemaPath = new FileArgument(null, "schemaPath", false, 0, null,
          INFO_TRANSFORM_LDIF_ARG_DESC_SCHEMA_PATH.get(),
@@ -783,7 +837,8 @@ public final class TransformLDIF
     parser.addRequiredArgumentSet(scrambleAttribute, sequentialAttribute,
          replaceValuesAttribute, addAttributeName, renameAttributeFrom,
          flattenBaseDN, moveSubtreeFrom, redactAttribute, excludeAttribute,
-         excludeEntryBaseDN, excludeEntryScope, excludeEntryFilter);
+         excludeEntryBaseDN, excludeEntryScope, excludeEntryFilter,
+         excludeChangeType, excludeRecordsWithoutChangeType);
   }
 
 
@@ -844,6 +899,7 @@ public final class TransformLDIF
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     final Schema schema;
@@ -1171,6 +1227,7 @@ processingBlock:
    * @throws  LDAPException  If a problem is encountered while retrieving the
    *                         schema.
    */
+  @Nullable()
   private Schema getSchema()
           throws LDAPException
   {
@@ -1228,7 +1285,8 @@ processingBlock:
       // schema files in it, then read the schema from that directory.
       try
       {
-        final String instanceRootStr = System.getenv("INSTANCE_ROOT");
+        final String instanceRootStr =
+             StaticUtils.getEnvironmentVariable("INSTANCE_ROOT");
         if (instanceRootStr != null)
         {
           final File instanceRoot = new File(instanceRootStr);
@@ -1282,9 +1340,11 @@ processingBlock:
    *                                  the result set.
    */
   private void createTranslators(
-       final List<LDIFReaderEntryTranslator> entryTranslators,
-       final List<LDIFReaderChangeRecordTranslator> changeRecordTranslators,
-       final Schema schema, final AtomicLong excludedEntryCount)
+       @NotNull final List<LDIFReaderEntryTranslator> entryTranslators,
+       @NotNull final List<LDIFReaderChangeRecordTranslator>
+            changeRecordTranslators,
+       @Nullable final Schema schema,
+       @NotNull final AtomicLong excludedEntryCount)
   {
     if (scrambleAttribute.isPresent())
     {
@@ -1431,6 +1491,23 @@ processingBlock:
       entryTranslators.add(t);
     }
 
+    if (excludeChangeType.isPresent())
+    {
+      final Set<ChangeType> changeTypes = EnumSet.noneOf(ChangeType.class);
+      for (final String changeTypeName : excludeChangeType.getValues())
+      {
+        changeTypes.add(ChangeType.forName(changeTypeName));
+      }
+
+      changeRecordTranslators.add(
+           new ExcludeChangeTypeTransformation(changeTypes));
+    }
+
+    if (excludeRecordsWithoutChangeType.isPresent())
+    {
+      entryTranslators.add(new ExcludeAllEntriesTransformation());
+    }
+
     entryTranslators.add(this);
   }
 
@@ -1440,6 +1517,7 @@ processingBlock:
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> examples =
@@ -1508,7 +1586,9 @@ processingBlock:
    * {@inheritDoc}
    */
   @Override()
-  public Entry translate(final Entry original, final long firstLineNumber)
+  @Nullable()
+  public Entry translate(@NotNull final Entry original,
+                         final long firstLineNumber)
          throws LDIFException
   {
     final ByteStringBuffer buffer = getBuffer();
@@ -1532,6 +1612,7 @@ processingBlock:
    *
    * @return  A byte string buffer that can be used to perform LDIF encoding.
    */
+  @NotNull()
   private ByteStringBuffer getBuffer()
   {
     ByteStringBuffer buffer = byteStringBuffers.get();

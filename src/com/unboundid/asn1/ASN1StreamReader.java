@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,8 +48,11 @@ import java.util.Date;
 import java.util.logging.Level;
 import javax.security.sasl.SaslClient;
 
+import com.unboundid.ldap.sdk.LDAPConnectionOptions;
 import com.unboundid.util.Debug;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -57,6 +75,15 @@ import static com.unboundid.asn1.ASN1Messages.*;
 public final class ASN1StreamReader
        implements Closeable
 {
+  /**
+   * The default maximum element size that will be used for the constructor that
+   * does not specify a size.
+   */
+  private static final int DEFAULT_MAX_ELEMENT_SIZE_BYTES =
+       new LDAPConnectionOptions().getMaxMessageSize();
+
+
+
   // Indicates whether socket timeout exceptions should be ignored for the
   // initial read of an element.
   private boolean ignoreInitialSocketTimeout;
@@ -67,10 +94,10 @@ public final class ASN1StreamReader
 
   // The input stream that will be used for reading data after it has been
   // unwrapped by SASL processing.
-  private volatile ByteArrayInputStream saslInputStream;
+  @Nullable private volatile ByteArrayInputStream saslInputStream;
 
   // The input stream from which data will be read.
-  private final InputStream inputStream;
+  @NotNull private final InputStream inputStream;
 
   // The maximum element size that will be allowed.
   private final int maxElementSize;
@@ -80,23 +107,24 @@ public final class ASN1StreamReader
 
   // The SASL client that will be used to unwrap any data read over this
   // stream reader.
-  private volatile SaslClient saslClient;
+  @Nullable private volatile SaslClient saslClient;
 
 
 
   /**
    * Creates a new ASN.1 stream reader that will read data from the provided
-   * input stream.  It will use a maximum element size of
-   * {@code Integer.MAX_VALUE}.
+   * input stream.  It will use a maximum element size equal to the default
+   * value returned by the {@link LDAPConnectionOptions#getMaxMessageSize()}
+   * method.
    *
    * @param  inputStream  The input stream from which data should be read.  If
    *                      the provided input stream does not support the use of
    *                      the {@code mark} and {@code reset} methods, then it
    *                      will be wrapped with a {@code BufferedInputStream}.
    */
-  public ASN1StreamReader(final InputStream inputStream)
+  public ASN1StreamReader(@NotNull final InputStream inputStream)
   {
-    this(inputStream, Integer.MAX_VALUE);
+    this(inputStream, DEFAULT_MAX_ELEMENT_SIZE_BYTES);
   }
 
 
@@ -115,7 +143,7 @@ public final class ASN1StreamReader
    *                         may be read.  A value less than or equal to zero
    *                         will be interpreted as {@code Integer.MAX_VALUE}.
    */
-  public ASN1StreamReader(final InputStream inputStream,
+  public ASN1StreamReader(@NotNull final InputStream inputStream,
                           final int maxElementSize)
   {
     if (inputStream.markSupported())
@@ -297,7 +325,7 @@ public final class ASN1StreamReader
     }
     else
     {
-      if (saslInputStream == null)
+      if ((saslInputStream == null) || (saslInputStream.available() <= 0))
       {
         readAndDecodeSASLData(-1);
       }
@@ -482,6 +510,7 @@ public final class ASN1StreamReader
    *                       made to read an element larger than the maximum
    *                       allowed size.
    */
+  @Nullable()
   public ASN1Element readElement()
          throws IOException
   {
@@ -534,6 +563,7 @@ public final class ASN1StreamReader
    * @throws  ASN1Exception  If the data read cannot be parsed as an ASN.1
    *                         Boolean element.
    */
+  @Nullable()
   public Boolean readBoolean()
          throws IOException, ASN1Exception
   {
@@ -586,6 +616,7 @@ public final class ASN1StreamReader
    * @throws  ASN1Exception  If the data read cannot be parsed as an ASN.1
    *                         enumerated element.
    */
+  @Nullable()
   public Integer readEnumerated()
          throws IOException, ASN1Exception
   {
@@ -612,6 +643,7 @@ public final class ASN1StreamReader
    * @throws  ASN1Exception  If the data read cannot be parsed as an ASN.1
    *                         generalized time element.
    */
+  @Nullable()
   public Date readGeneralizedTime()
          throws IOException, ASN1Exception
   {
@@ -667,6 +699,7 @@ public final class ASN1StreamReader
    * @throws  ASN1Exception  If the data read cannot be parsed as an ASN.1
    *                         integer element.
    */
+  @Nullable()
   public Integer readInteger()
          throws IOException, ASN1Exception
   {
@@ -743,6 +776,7 @@ public final class ASN1StreamReader
    * @throws  ASN1Exception  If the data read cannot be parsed as an ASN.1
    *                         integer element.
    */
+  @Nullable()
   public Long readLong()
          throws IOException, ASN1Exception
   {
@@ -831,6 +865,7 @@ public final class ASN1StreamReader
    * @throws  ASN1Exception  If the data read cannot be parsed as an ASN.1
    *                         integer element.
    */
+  @Nullable()
   public BigInteger readBigInteger()
          throws IOException, ASN1Exception
   {
@@ -917,6 +952,7 @@ public final class ASN1StreamReader
    *                       made to read an element larger than the maximum
    *                       allowed size.
    */
+  @Nullable()
   public byte[] readBytes()
          throws IOException
   {
@@ -965,6 +1001,7 @@ public final class ASN1StreamReader
    *                       made to read an element larger than the maximum
    *                       allowed size.
    */
+  @Nullable()
   public String readString()
          throws IOException
   {
@@ -1018,6 +1055,7 @@ public final class ASN1StreamReader
    * @throws  ASN1Exception  If the data read cannot be parsed as an ASN.1 UTC
    *                         time element.
    */
+  @Nullable()
   public Date readUTCTime()
          throws IOException, ASN1Exception
   {
@@ -1073,6 +1111,7 @@ public final class ASN1StreamReader
    *                       made to read an element larger than the maximum
    *                       allowed size.
    */
+  @Nullable()
   public ASN1StreamReaderSequence beginSequence()
          throws IOException
   {
@@ -1108,6 +1147,7 @@ public final class ASN1StreamReader
    *                       made to read an element larger than the maximum
    *                       allowed size.
    */
+  @Nullable()
   public ASN1StreamReaderSet beginSet()
          throws IOException
   {
@@ -1211,7 +1251,8 @@ public final class ASN1StreamReader
    *
    * @throws  IOException  If a problem occurs while reading data.
    */
-  private int read(final byte[] buffer, final int offset, final int length)
+  private int read(@NotNull final byte[] buffer, final int offset,
+                   final int length)
           throws IOException
   {
     if (saslClient != null)
@@ -1266,7 +1307,7 @@ public final class ASN1StreamReader
    * @param  saslClient  The SASL client to use to unwrap any data read over
    *                     this ASN.1 stream reader.
    */
-  void setSASLClient(final SaslClient saslClient)
+  void setSASLClient(@NotNull final SaslClient saslClient)
   {
     this.saslClient = saslClient;
   }

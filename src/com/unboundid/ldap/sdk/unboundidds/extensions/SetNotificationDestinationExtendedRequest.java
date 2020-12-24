@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,6 +52,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -83,7 +100,7 @@ public final class SetNotificationDestinationExtendedRequest
    * The OID (1.3.6.1.4.1.30221.2.6.36) for the set notification destination
    * extended request.
    */
-  public static final String SET_NOTIFICATION_DESTINATION_REQUEST_OID =
+  @NotNull public static final String SET_NOTIFICATION_DESTINATION_REQUEST_OID =
        "1.3.6.1.4.1.30221.2.6.36";
 
 
@@ -104,16 +121,16 @@ public final class SetNotificationDestinationExtendedRequest
 
 
   // The implementation-specific details for the notification destination.
-  private final List<ASN1OctetString> destinationDetails;
+  @NotNull private final List<ASN1OctetString> destinationDetails;
 
   // The change type for the destination details.
-  private final SetNotificationDestinationChangeType changeType;
+  @NotNull private final SetNotificationDestinationChangeType changeType;
 
   // The notification destination ID.
-  private final String destinationID;
+  @NotNull private final String destinationID;
 
   // The notification manager ID.
-  private final String managerID;
+  @NotNull private final String managerID;
 
 
 
@@ -129,9 +146,10 @@ public final class SetNotificationDestinationExtendedRequest
    *                             notification destination.  At least one detail
    *                             value must be provided.
    */
-  public SetNotificationDestinationExtendedRequest(final String managerID,
-              final String destinationID,
-              final ASN1OctetString... destinationDetails)
+  public SetNotificationDestinationExtendedRequest(
+              @NotNull final String managerID,
+              @NotNull final String destinationID,
+              @NotNull final ASN1OctetString... destinationDetails)
   {
     this(managerID, destinationID, StaticUtils.toList(destinationDetails),
          SetNotificationDestinationChangeType.REPLACE);
@@ -154,10 +172,11 @@ public final class SetNotificationDestinationExtendedRequest
    *                             It may be {@code null} or empty if no controls
    *                             are needed.
    */
-  public SetNotificationDestinationExtendedRequest(final String managerID,
-              final String destinationID,
-              final Collection<ASN1OctetString> destinationDetails,
-              final Control... controls)
+  public SetNotificationDestinationExtendedRequest(
+              @NotNull final String managerID,
+              @NotNull final String destinationID,
+              @NotNull final Collection<ASN1OctetString> destinationDetails,
+              @Nullable final Control... controls)
   {
     this(managerID, destinationID, destinationDetails,
          SetNotificationDestinationChangeType.REPLACE, controls);
@@ -181,11 +200,12 @@ public final class SetNotificationDestinationExtendedRequest
    *                             It may be {@code null} or empty if no controls
    *                             are needed.
    */
-  public SetNotificationDestinationExtendedRequest(final String managerID,
-              final String destinationID,
-              final Collection<ASN1OctetString> destinationDetails,
-              final SetNotificationDestinationChangeType changeType,
-              final Control... controls)
+  public SetNotificationDestinationExtendedRequest(
+              @NotNull final String managerID,
+              @NotNull final String destinationID,
+              @NotNull final Collection<ASN1OctetString> destinationDetails,
+              @Nullable final SetNotificationDestinationChangeType changeType,
+              @Nullable final Control... controls)
   {
     super(SET_NOTIFICATION_DESTINATION_REQUEST_OID,
          encodeValue(managerID, destinationID, destinationDetails, changeType),
@@ -218,7 +238,7 @@ public final class SetNotificationDestinationExtendedRequest
    * @throws  LDAPException  If a problem occurs while decoding the request.
    */
   public SetNotificationDestinationExtendedRequest(
-              final ExtendedRequest extendedRequest)
+              @NotNull final ExtendedRequest extendedRequest)
          throws LDAPException
   {
     super(extendedRequest);
@@ -308,10 +328,11 @@ public final class SetNotificationDestinationExtendedRequest
    *
    * @return  The ASN.1 octet string containing the encoded value.
    */
-  private static ASN1OctetString encodeValue(final String managerID,
-                      final String destinationID,
-                      final Collection<ASN1OctetString> destinationDetails,
-                      final SetNotificationDestinationChangeType changeType)
+  @NotNull()
+  private static ASN1OctetString encodeValue(@NotNull final String managerID,
+               @NotNull final String destinationID,
+               @NotNull final Collection<ASN1OctetString> destinationDetails,
+               @Nullable final SetNotificationDestinationChangeType changeType)
   {
     Validator.ensureNotNull(managerID);
     Validator.ensureNotNull(destinationID);
@@ -341,6 +362,7 @@ public final class SetNotificationDestinationExtendedRequest
    *
    * @return  The notification manager ID.
    */
+  @NotNull()
   public String getManagerID()
   {
     return managerID;
@@ -353,6 +375,7 @@ public final class SetNotificationDestinationExtendedRequest
    *
    * @return  The notification destination ID.
    */
+  @NotNull()
   public String getDestinationID()
   {
     return destinationID;
@@ -367,6 +390,7 @@ public final class SetNotificationDestinationExtendedRequest
    * @return  The implementation-specific details for the notification
    *          destination.
    */
+  @NotNull()
   public List<ASN1OctetString> getDestinationDetails()
   {
     return destinationDetails;
@@ -379,6 +403,7 @@ public final class SetNotificationDestinationExtendedRequest
    *
    * @return  The change type for the destination details.
    */
+  @NotNull()
   public SetNotificationDestinationChangeType getChangeType()
   {
     return changeType;
@@ -390,6 +415,7 @@ public final class SetNotificationDestinationExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public SetNotificationDestinationExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -401,8 +427,9 @@ public final class SetNotificationDestinationExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public SetNotificationDestinationExtendedRequest
-              duplicate(final Control[] controls)
+  @NotNull()
+  public SetNotificationDestinationExtendedRequest duplicate(
+              @Nullable final Control[] controls)
   {
     final SetNotificationDestinationExtendedRequest r =
          new SetNotificationDestinationExtendedRequest(managerID,
@@ -417,6 +444,7 @@ public final class SetNotificationDestinationExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_EXTENDED_REQUEST_NAME_SET_NOTIFICATION_DEST.get();
@@ -428,7 +456,7 @@ public final class SetNotificationDestinationExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("SetNotificationDestinationExtendedRequest(managerID='");
     buffer.append(managerID);

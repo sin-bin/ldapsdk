@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -36,6 +51,7 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -130,7 +146,7 @@ public final class PersistentSearchRequestControl
    * The OID (2.16.840.1.113730.3.4.3) for the persistent search request
    * control.
    */
-  public static final String PERSISTENT_SEARCH_REQUEST_OID =
+  @NotNull public static final String PERSISTENT_SEARCH_REQUEST_OID =
        "2.16.840.1.113730.3.4.3";
 
 
@@ -153,7 +169,7 @@ public final class PersistentSearchRequestControl
 
   // The set of change types for which this persistent search control is
   // registered.
-  private final EnumSet<PersistentSearchChangeType> changeTypes;
+  @NotNull private final EnumSet<PersistentSearchChangeType> changeTypes;
 
 
 
@@ -172,7 +188,7 @@ public final class PersistentSearchRequestControl
    *                      entry change notification control.
    */
   public PersistentSearchRequestControl(
-              final PersistentSearchChangeType changeType,
+              @NotNull final PersistentSearchChangeType changeType,
               final boolean changesOnly, final boolean returnECs)
   {
     super(PERSISTENT_SEARCH_REQUEST_OID, true,
@@ -201,7 +217,7 @@ public final class PersistentSearchRequestControl
    *                      entry change notification control.
    */
   public PersistentSearchRequestControl(
-              final Set<PersistentSearchChangeType> changeTypes,
+              @NotNull final Set<PersistentSearchChangeType> changeTypes,
               final boolean changesOnly, final boolean returnECs)
   {
     super(PERSISTENT_SEARCH_REQUEST_OID, true,
@@ -230,7 +246,7 @@ public final class PersistentSearchRequestControl
    *                      critical.
    */
   public PersistentSearchRequestControl(
-              final PersistentSearchChangeType changeType,
+              @NotNull final PersistentSearchChangeType changeType,
               final boolean changesOnly, final boolean returnECs,
               final boolean isCritical)
   {
@@ -261,7 +277,7 @@ public final class PersistentSearchRequestControl
    *                      critical.
    */
   public PersistentSearchRequestControl(
-              final Set<PersistentSearchChangeType> changeTypes,
+              @NotNull final Set<PersistentSearchChangeType> changeTypes,
               final boolean changesOnly, final boolean returnECs,
               final boolean isCritical)
   {
@@ -285,7 +301,7 @@ public final class PersistentSearchRequestControl
    * @throws  LDAPException  If the provided control cannot be decoded as a
    *                         persistent search request control.
    */
-  public PersistentSearchRequestControl(final Control control)
+  public PersistentSearchRequestControl(@NotNull final Control control)
          throws LDAPException
   {
     super(control);
@@ -336,8 +352,9 @@ public final class PersistentSearchRequestControl
    * @return  An ASN.1 octet string that can be used as the value for this
    *          control.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(
-               final PersistentSearchChangeType changeType,
+               @NotNull final PersistentSearchChangeType changeType,
                final boolean changesOnly, final boolean returnECs)
   {
     Validator.ensureNotNull(changeType);
@@ -371,8 +388,9 @@ public final class PersistentSearchRequestControl
    * @return  An ASN.1 octet string that can be used as the value for this
    *          control.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(
-               final Set<PersistentSearchChangeType> changeTypes,
+               @NotNull final Set<PersistentSearchChangeType> changeTypes,
                final boolean changesOnly, final boolean returnECs)
   {
     Validator.ensureNotNull(changeTypes);
@@ -399,6 +417,7 @@ public final class PersistentSearchRequestControl
    * @return  The set of change types for this persistent search request
    *          control.
    */
+  @NotNull()
   public Set<PersistentSearchChangeType> getChangeTypes()
   {
     return changeTypes;
@@ -442,6 +461,7 @@ public final class PersistentSearchRequestControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_PSEARCH_REQUEST.get();
@@ -453,7 +473,7 @@ public final class PersistentSearchRequestControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("PersistentSearchRequestControl(changeTypes={");
 

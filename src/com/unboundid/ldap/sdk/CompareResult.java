@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,8 @@ package com.unboundid.ldap.sdk;
 import com.unboundid.asn1.ASN1StreamReader;
 import com.unboundid.asn1.ASN1StreamReaderSequence;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -55,7 +72,7 @@ public final class CompareResult
    * @param  ldapResult  The LDAP result object to use to create this compare
    *                     response.
    */
-  public CompareResult(final LDAPResult ldapResult)
+  public CompareResult(@NotNull final LDAPResult ldapResult)
   {
     super(ldapResult);
   }
@@ -68,7 +85,7 @@ public final class CompareResult
    * @param  exception  The {@code LDAPException} to use to create this compare
    *                    result.
    */
-  public CompareResult(final LDAPException exception)
+  public CompareResult(@NotNull final LDAPException exception)
   {
     super(exception.toLDAPResult());
   }
@@ -89,10 +106,12 @@ public final class CompareResult
    * @param  responseControls   The set of controls from the response, if
    *                            available.
    */
-  public CompareResult(final int messageID, final ResultCode resultCode,
-                       final String diagnosticMessage, final String matchedDN,
-                       final String[] referralURLs,
-                       final Control[] responseControls)
+  public CompareResult(final int messageID,
+                       @NotNull final ResultCode resultCode,
+                       @Nullable final String diagnosticMessage,
+                       @Nullable final String matchedDN,
+                       @Nullable final String[] referralURLs,
+                       @Nullable final Control[] responseControls)
   {
     super(messageID, resultCode, diagnosticMessage, matchedDN, referralURLs,
           responseControls);
@@ -116,9 +135,10 @@ public final class CompareResult
    * @throws  LDAPException  If a problem occurs while reading or decoding data
    *                         from the ASN.1 stream reader.
    */
+  @NotNull()
   static CompareResult readCompareResultFrom(final int messageID,
-                            final ASN1StreamReaderSequence messageSequence,
-                            final ASN1StreamReader reader)
+              @NotNull final ASN1StreamReaderSequence messageSequence,
+              @NotNull final ASN1StreamReader reader)
          throws LDAPException
   {
     return new CompareResult(LDAPResult.readLDAPResultFrom(messageID,

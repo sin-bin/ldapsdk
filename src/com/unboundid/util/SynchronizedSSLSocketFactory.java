@@ -1,9 +1,24 @@
 /*
- * Copyright 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2012-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -41,7 +56,7 @@ public final class SynchronizedSSLSocketFactory
        extends SSLSocketFactory
 {
   // The wrapped SSL socket factory.
-  private final SSLSocketFactory factory;
+  @NotNull private final SSLSocketFactory factory;
 
 
 
@@ -51,7 +66,7 @@ public final class SynchronizedSSLSocketFactory
    *
    * @param  factory  The socket factory to be wrapped.
    */
-  public SynchronizedSSLSocketFactory(final SSLSocketFactory factory)
+  public SynchronizedSSLSocketFactory(@NotNull final SSLSocketFactory factory)
   {
     this.factory = factory;
   }
@@ -65,6 +80,7 @@ public final class SynchronizedSSLSocketFactory
    * @return  The {@code SSLSocketFactory} instance wrapped by this synchronized
    *          SSL socket factory.
    */
+  @NotNull()
   public SSLSocketFactory getWrappedSocketFactory()
   {
     return factory;
@@ -83,7 +99,8 @@ public final class SynchronizedSSLSocketFactory
    * @throws  IOException  If a problem occurs while creating the socket.
    */
   @Override()
-  public Socket createSocket(final String host, final int port)
+  @NotNull()
+  public Socket createSocket(@NotNull final String host, final int port)
          throws IOException
   {
     synchronized (factory)
@@ -101,18 +118,17 @@ public final class SynchronizedSSLSocketFactory
    *                       established.
    * @param  port          The port to which the connection should be
    *                       established.
-   * @param  localAddress  The local address to use for the connection.  This
-   *                       will be ignored.
-   * @param  localPort     The local port to use for the connection.  This will
-   *                       be ignored.
+   * @param  localAddress  The local address to use for the connection.
+   * @param  localPort     The local port to use for the connection.
    *
    * @return  The SSL socket that was created.
    *
    * @throws  IOException  If a problem occurs while creating the socket.
    */
   @Override()
-  public Socket createSocket(final String host, final int port,
-                             final InetAddress localAddress,
+  @NotNull()
+  public Socket createSocket(@NotNull final String host, final int port,
+                             @NotNull final InetAddress localAddress,
                              final int localPort)
          throws IOException
   {
@@ -135,7 +151,8 @@ public final class SynchronizedSSLSocketFactory
    * @throws  IOException  If a problem occurs while creating the socket.
    */
   @Override()
-  public Socket createSocket(final InetAddress address, final int port)
+  @NotNull()
+  public Socket createSocket(@NotNull final InetAddress address, final int port)
          throws IOException
   {
     synchronized (factory)
@@ -153,18 +170,17 @@ public final class SynchronizedSSLSocketFactory
    *                       established.
    * @param  port          The port to which the connection should be
    *                       established.
-   * @param  localAddress  The local address to use for the connection.  This
-   *                       will be ignored.
-   * @param  localPort     The local port to use for the connection.  This will
-   *                       be ignored.
+   * @param  localAddress  The local address to use for the connection.
+   * @param  localPort     The local port to use for the connection.
    *
    * @return  The SSL socket that was created.
    *
    * @throws  IOException  If a problem occurs while creating the socket.
    */
   @Override()
-  public Socket createSocket(final InetAddress address, final int port,
-                             final InetAddress localAddress,
+  @NotNull()
+  public Socket createSocket(@NotNull final InetAddress address, final int port,
+                             @NotNull final InetAddress localAddress,
                              final int localPort)
          throws IOException
   {
@@ -191,7 +207,9 @@ public final class SynchronizedSSLSocketFactory
    * @throws  IOException  If a problem occurs while creating the socket.
    */
   @Override()
-  public Socket createSocket(final Socket s, final String host, final int port,
+  @NotNull()
+  public Socket createSocket(@NotNull final Socket s,
+                             @NotNull final String host, final int port,
                              final boolean autoClose)
          throws IOException
   {
@@ -209,6 +227,7 @@ public final class SynchronizedSSLSocketFactory
    * @return  The set of cipher suites which are enabled by default.
    */
   @Override()
+  @NotNull()
   public String[] getDefaultCipherSuites()
   {
     synchronized (factory)
@@ -225,6 +244,7 @@ public final class SynchronizedSSLSocketFactory
    * @return  The entire set of cipher suites that could be used.
    */
   @Override()
+  @NotNull()
   public String[] getSupportedCipherSuites()
   {
     synchronized (factory)

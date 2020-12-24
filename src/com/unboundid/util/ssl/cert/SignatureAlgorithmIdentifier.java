@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,6 +37,8 @@ package com.unboundid.util.ssl.cert;
 
 
 
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.OID;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -169,14 +186,14 @@ public enum SignatureAlgorithmIdentifier
 
 
   // The OID for this signature algorithm.
-  private final OID oid;
+  @NotNull private final OID oid;
 
   // The name for this signature algorithm as it would be used internally by
   // Java.
-  private final String javaName;
+  @NotNull private final String javaName;
 
   // The user-friendly name for this signature algorithm.
-  private final String userFriendlyName;
+  @NotNull private final String userFriendlyName;
 
 
 
@@ -190,8 +207,9 @@ public enum SignatureAlgorithmIdentifier
    * @param  userFriendlyName  The user-friendly name for this signature
    *                           algorithm.
    */
-  SignatureAlgorithmIdentifier(final String oidString, final String javaName,
-                               final String userFriendlyName)
+  SignatureAlgorithmIdentifier(@NotNull final String oidString,
+                               @NotNull final String javaName,
+                               @NotNull final String userFriendlyName)
   {
     this.javaName = javaName;
     this.userFriendlyName = userFriendlyName;
@@ -206,6 +224,7 @@ public enum SignatureAlgorithmIdentifier
    *
    * @return  The OID for this signature algorithm.
    */
+  @NotNull()
   public OID getOID()
   {
     return oid;
@@ -220,6 +239,7 @@ public enum SignatureAlgorithmIdentifier
    * @return  The name for this signature algorithm as it would be used
    *          internally by Java.
    */
+  @NotNull()
   public String getJavaName()
   {
     return javaName;
@@ -232,6 +252,7 @@ public enum SignatureAlgorithmIdentifier
    *
    * @return  The user-friendly name for this signature algorithm.
    */
+  @NotNull()
   public String getUserFriendlyName()
   {
     return userFriendlyName;
@@ -250,7 +271,8 @@ public enum SignatureAlgorithmIdentifier
    *          {@code null} if the provided OID does not reference a known
    *          signature algorithm identifier.
    */
-  public static SignatureAlgorithmIdentifier forOID(final OID oid)
+  @Nullable()
+  public static SignatureAlgorithmIdentifier forOID(@NotNull final OID oid)
   {
     for (final SignatureAlgorithmIdentifier v : values())
     {
@@ -276,7 +298,8 @@ public enum SignatureAlgorithmIdentifier
    *          {@code null} if the provided name does not reference a known
    *          signature algorithm identifier.
    */
-  public static SignatureAlgorithmIdentifier forName(final String name)
+  @Nullable()
+  public static SignatureAlgorithmIdentifier forName(@NotNull final String name)
   {
     final String preparedName = prepareName(name);
     for (final SignatureAlgorithmIdentifier v : values())
@@ -300,7 +323,8 @@ public enum SignatureAlgorithmIdentifier
    *
    * @return  The prepared version of the provided name.
    */
-  private static String prepareName(final String name)
+  @NotNull()
+  private static String prepareName(@NotNull final String name)
   {
     final StringBuilder buffer = new StringBuilder(name.length());
 
@@ -335,7 +359,8 @@ public enum SignatureAlgorithmIdentifier
    *          value with the provided OID, or a string representation of the OID
    *          if there is no value with that OID.
    */
-  public static String getNameOrOID(final OID oid)
+  @NotNull()
+  public static String getNameOrOID(@NotNull final OID oid)
   {
     final SignatureAlgorithmIdentifier id = forOID(oid);
     if (id == null)
@@ -356,6 +381,7 @@ public enum SignatureAlgorithmIdentifier
    * @return  A string representation of this signature algorithm identifier.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return userFriendlyName;

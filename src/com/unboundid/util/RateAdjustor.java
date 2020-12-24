@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -109,21 +124,21 @@ public final class RateAdjustor extends Thread
    * The text that must appear on a line by itself in order to denote that the
    * end of the file header has been reached.
    */
-  public static final String END_HEADER_TEXT = "END HEADER";
+  @NotNull public static final String END_HEADER_TEXT = "END HEADER";
 
 
 
   /**
    * The header key that represents the default duration.
    */
-  public static final String DEFAULT_DURATION_KEY = "default-duration";
+  @NotNull public static final String DEFAULT_DURATION_KEY = "default-duration";
 
 
 
   /**
    * The header key that represents the format of the file.
    */
-  public static final String FORMAT_KEY = "format";
+  @NotNull public static final String FORMAT_KEY = "format";
 
 
 
@@ -131,14 +146,15 @@ public final class RateAdjustor extends Thread
    * The value of the format key that represents a list of rates and durations
    * within the input file.
    */
-  public static final String FORMAT_VALUE_RATE_DURATION = "rate-and-duration";
+  @NotNull public static final String FORMAT_VALUE_RATE_DURATION =
+       "rate-and-duration";
 
 
 
   /**
    * A list of all formats that we support.
    */
-  public static final List<String> FORMATS =
+  @NotNull public static final List<String> FORMATS =
        Collections.singletonList(FORMAT_VALUE_RATE_DURATION);
 
 
@@ -146,14 +162,14 @@ public final class RateAdjustor extends Thread
   /**
    * The header key that represents whether the input should be repeated.
    */
-  public static final String REPEAT_KEY = "repeat";
+  @NotNull public static final String REPEAT_KEY = "repeat";
 
 
 
   /**
    * A list of all header keys that we support.
    */
-  public static final List<String> KEYS =
+  @NotNull public static final List<String> KEYS =
        Arrays.asList(DEFAULT_DURATION_KEY, FORMAT_KEY, REPEAT_KEY);
 
 
@@ -175,11 +191,11 @@ public final class RateAdjustor extends Thread
 
 
   // The barrier whose rate is adjusted.
-  private final FixedRateBarrier barrier;
+  @NotNull private final FixedRateBarrier barrier;
 
   // A list of rates per second and the number of milliseconds that the
   // specified rate should be maintained.
-  private final List<ObjectPair<Double,Long>> ratesAndDurations;
+  @NotNull private final List<ObjectPair<Double,Long>> ratesAndDurations;
 
   // If this is true, then the ratesAndDurations will be repeated until this is
   // shut down.
@@ -189,10 +205,11 @@ public final class RateAdjustor extends Thread
   private volatile boolean shutDown = false;
 
   // This is used to make sure we set the initial rate before start() returns.
-  private final CountDownLatch initialRateSetLatch = new CountDownLatch(1);
+  @NotNull private final CountDownLatch initialRateSetLatch =
+       new CountDownLatch(1);
 
   // This allows us to interrupt when we are sleeping.
-  private final WakeableSleeper sleeper = new WakeableSleeper();
+  @NotNull private final WakeableSleeper sleeper = new WakeableSleeper();
 
 
 
@@ -214,9 +231,11 @@ public final class RateAdjustor extends Thread
    * @throws  IllegalArgumentException  If there is a problem with the rates
    *                                    input.
    */
-  public static RateAdjustor newInstance(final FixedRateBarrier barrier,
-                                         final Integer baseRatePerSecond,
-                                         final File rates)
+  @NotNull()
+  public static RateAdjustor newInstance(
+                                  @NotNull final FixedRateBarrier barrier,
+                                  @Nullable final Integer baseRatePerSecond,
+                                  @NotNull final File rates)
          throws IOException, IllegalArgumentException
   {
     final Reader reader = new FileReader(rates);
@@ -240,8 +259,9 @@ public final class RateAdjustor extends Thread
    *           specifies the path to a variable rate data file for use in
    *           conjunction with this rate adjustor.
    */
+  @Nullable()
   public static String getVariableRateDataArgumentDescription(
-                            final String genArgName)
+                            @NotNull final String genArgName)
   {
     return INFO_RATE_ADJUSTOR_VARIABLE_RATE_DATA_ARG_DESCRIPTION.get(
          genArgName);
@@ -261,8 +281,9 @@ public final class RateAdjustor extends Thread
    *           generates a sample variable rate data file that serves as
    *           documentation of the variable rate data format.
    */
+  @Nullable()
   public static String getGenerateSampleVariableRateFileDescription(
-                            final String dataFileArgName)
+                            @NotNull final String dataFileArgName)
   {
     return INFO_RATE_ADJUSTOR_GENERATE_SAMPLE_RATE_FILE_ARG_DESCRIPTION.get(
          dataFileArgName);
@@ -278,7 +299,7 @@ public final class RateAdjustor extends Thread
    * @throws  IOException  If a problem is encountered while writing to the
    *                       specified file.
    */
-  public static void writeSampleVariableRateFile(final File f)
+  public static void writeSampleVariableRateFile(@NotNull final File f)
          throws IOException
   {
     final PrintWriter w = new PrintWriter(f);
@@ -1153,9 +1174,9 @@ public final class RateAdjustor extends Thread
    * @throws  IllegalArgumentException  If there is a problem with the rates
    *                                    input.
    */
-  public RateAdjustor(final FixedRateBarrier barrier,
+  public RateAdjustor(@NotNull final FixedRateBarrier barrier,
                       final long baseRatePerSecond,
-                      final Reader rates)
+                      @NotNull final Reader rates)
          throws IOException, IllegalArgumentException
   {
     // Read the header first.
@@ -1426,6 +1447,7 @@ public final class RateAdjustor extends Thread
    *
    * @return  The list of rates and durations.
    */
+  @NotNull()
   List<ObjectPair<Double,Long>> getRatesAndDurations()
   {
     return ratesAndDurations;
@@ -1474,7 +1496,8 @@ public final class RateAdjustor extends Thread
    *                                    headers have the same key, there is no
    *                                    end of header marker, etc.).
    */
-  static Map<String,String> consumeHeader(final List<String> lines)
+  @NotNull()
+  static Map<String,String> consumeHeader(@NotNull final List<String> lines)
          throws IllegalArgumentException
   {
     // The header will look like this:
@@ -1549,7 +1572,9 @@ public final class RateAdjustor extends Thread
    *
    * @throws  IOException  If there is a problem reading from the Reader.
    */
-  private static List<String> readLines(final Reader reader) throws IOException
+  @NotNull()
+  private static List<String> readLines(@NotNull final Reader reader)
+          throws IOException
   {
     final BufferedReader bufferedReader = new BufferedReader(reader);
 

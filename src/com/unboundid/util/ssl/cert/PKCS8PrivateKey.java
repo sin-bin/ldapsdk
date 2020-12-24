@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -40,6 +55,8 @@ import com.unboundid.asn1.ASN1Sequence;
 import com.unboundid.util.Base64;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.OID;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -123,33 +140,33 @@ public final class PKCS8PrivateKey
 
 
   // The corresponding public key, if available.
-  private final ASN1BitString publicKey;
+  @Nullable private final ASN1BitString publicKey;
 
   // The ASN.1 element with the encoded set of attributes.
-  private final ASN1Element attributesElement;
+  @Nullable private final ASN1Element attributesElement;
 
   // The ASN.1 element with the encoded private key algorithm parameters.
-  private final ASN1Element privateKeyAlgorithmParameters;
+  @Nullable private final ASN1Element privateKeyAlgorithmParameters;
 
   // The encoded representation of the private key.
-  private final ASN1OctetString encodedPrivateKey;
+  @NotNull private final ASN1OctetString encodedPrivateKey;
 
   // The bytes that comprise the encoded representation of the PKCS #8 private
   // key.
-  private final byte[] pkcs8PrivateKeyBytes;
+  @NotNull private final byte[] pkcs8PrivateKeyBytes;
 
   // The decoded representation of the private key, if available.
-  private final DecodedPrivateKey decodedPrivateKey;
+  @Nullable private final DecodedPrivateKey decodedPrivateKey;
 
   // The OID for the private key algorithm.
-  private final OID privateKeyAlgorithmOID;
+  @NotNull private final OID privateKeyAlgorithmOID;
 
   // The PKCS #8 private key version.
-  private final PKCS8PrivateKeyVersion version;
+  @NotNull private final PKCS8PrivateKeyVersion version;
 
   // The private key algorithm name that corresponds with the private key
   // algorithm OID, if available.
-  private final String privateKeyAlgorithmName;
+  @Nullable private final String privateKeyAlgorithmName;
 
 
 
@@ -184,13 +201,13 @@ public final class PKCS8PrivateKey
    * @throws  CertException  If a problem is encountered while creating the
    *                         private key.
    */
-  PKCS8PrivateKey(final PKCS8PrivateKeyVersion version,
-                  final OID privateKeyAlgorithmOID,
-                  final ASN1Element privateKeyAlgorithmParameters,
-                  final ASN1OctetString encodedPrivateKey,
-                  final DecodedPrivateKey decodedPrivateKey,
-                  final ASN1Element attributesElement,
-                  final ASN1BitString publicKey)
+  PKCS8PrivateKey(@NotNull final PKCS8PrivateKeyVersion version,
+                  @NotNull final OID privateKeyAlgorithmOID,
+                  @Nullable final ASN1Element privateKeyAlgorithmParameters,
+                  @NotNull final ASN1OctetString encodedPrivateKey,
+                  @Nullable final DecodedPrivateKey decodedPrivateKey,
+                  @Nullable final ASN1Element attributesElement,
+                  @Nullable final ASN1BitString publicKey)
        throws CertException
   {
     this.version = version;
@@ -226,7 +243,7 @@ public final class PKCS8PrivateKey
    * @throws  CertException  If the contents of the provided byte array could
    *                         not be decoded as a valid PKCS #8 private key.
    */
-  public PKCS8PrivateKey(final byte[] privateKeyBytes)
+  public PKCS8PrivateKey(@NotNull final byte[] privateKeyBytes)
          throws CertException
   {
     pkcs8PrivateKeyBytes = privateKeyBytes;
@@ -390,7 +407,8 @@ public final class PKCS8PrivateKey
    * @throws  CertException  If a problem is encountered while trying to wrap
    *                         the private key.
    */
-  static byte[] wrapRSAPrivateKey(final byte[] rsaPrivateKeyBytes)
+  @NotNull()
+  static byte[] wrapRSAPrivateKey(@NotNull final byte[] rsaPrivateKeyBytes)
          throws CertException
   {
     try
@@ -422,6 +440,7 @@ public final class PKCS8PrivateKey
    * @throws  CertException  If a problem is encountered while trying to encode
    *                         the X.509 certificate.
    */
+  @NotNull()
   ASN1Element encode()
        throws CertException
   {
@@ -476,6 +495,7 @@ public final class PKCS8PrivateKey
    * @return  The bytes that comprise the encoded representation of this PKCS #8
    *          private key.
    */
+  @NotNull()
   public byte[] getPKCS8PrivateKeyBytes()
   {
     return pkcs8PrivateKeyBytes;
@@ -488,6 +508,7 @@ public final class PKCS8PrivateKey
    *
    * @return  The private key version.
    */
+  @NotNull()
   public PKCS8PrivateKeyVersion getVersion()
   {
     return version;
@@ -500,6 +521,7 @@ public final class PKCS8PrivateKey
    *
    * @return  The private key algorithm OID.
    */
+  @NotNull()
   public OID getPrivateKeyAlgorithmOID()
   {
     return privateKeyAlgorithmOID;
@@ -513,6 +535,7 @@ public final class PKCS8PrivateKey
    * @return  The private key algorithm name, or {@code null} if private key
    *          algorithm OID is not recognized.
    */
+  @Nullable()
   public String getPrivateKeyAlgorithmName()
   {
     return privateKeyAlgorithmName;
@@ -527,6 +550,7 @@ public final class PKCS8PrivateKey
    * @return  The private key algorithm name if it is available, or a string
    *          representation of the private key algorithm OID if it is not.
    */
+  @NotNull()
   public String getPrivateKeyAlgorithmNameOrOID()
   {
     if (privateKeyAlgorithmName == null)
@@ -547,6 +571,7 @@ public final class PKCS8PrivateKey
    * @return  The encoded private key algorithm parameters, or {@code null} if
    *          there are no private key algorithm parameters.
    */
+  @Nullable()
   public ASN1Element getPrivateKeyAlgorithmParameters()
   {
     return privateKeyAlgorithmParameters;
@@ -559,6 +584,7 @@ public final class PKCS8PrivateKey
    *
    * @return  The encoded private key data.
    */
+  @NotNull()
   public ASN1OctetString getEncodedPrivateKey()
   {
     return encodedPrivateKey;
@@ -572,6 +598,7 @@ public final class PKCS8PrivateKey
    * @return  The decoded private key, or {@code null} if the decoded key is
    *          not available.
    */
+  @Nullable()
   public DecodedPrivateKey getDecodedPrivateKey()
   {
     return decodedPrivateKey;
@@ -587,6 +614,7 @@ public final class PKCS8PrivateKey
    *          attributes, or {@code null} if the private key does not have any
    *          attributes.
    */
+  @Nullable()
   public ASN1Element getAttributesElement()
   {
     return attributesElement;
@@ -600,6 +628,7 @@ public final class PKCS8PrivateKey
    * @return  The public key included in the private key, or {@code null} if the
    *          private key does not include a public key.
    */
+  @Nullable()
   public ASN1BitString getPublicKey()
   {
     return publicKey;
@@ -617,6 +646,7 @@ public final class PKCS8PrivateKey
    * @throws  GeneralSecurityException  If a problem is encountered while
    *                                    performing the conversion.
    */
+  @NotNull()
   public PrivateKey toPrivateKey()
          throws GeneralSecurityException
   {
@@ -634,6 +664,7 @@ public final class PKCS8PrivateKey
    * @return  A string representation of the decoded X.509 certificate.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -649,7 +680,7 @@ public final class PKCS8PrivateKey
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("PKCS8PrivateKey(version='");
     buffer.append(version.getName());
@@ -705,6 +736,7 @@ public final class PKCS8PrivateKey
    * @return  A list of the lines that comprise a PEM representation of this
    *          certificate signing request.
    */
+  @NotNull()
   public List<String> toPEM()
   {
     final ArrayList<String> lines = new ArrayList<>(10);
@@ -727,6 +759,7 @@ public final class PKCS8PrivateKey
    * @return  A multi-line string containing a PEM representation of this
    *          certificate signing request.
    */
+  @NotNull()
   public String toPEMString()
   {
     final StringBuilder buffer = new StringBuilder();

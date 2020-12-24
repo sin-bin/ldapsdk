@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -23,9 +38,11 @@ package com.unboundid.util.args;
 
 
 import java.io.Serializable;
-import java.util.List;
+import java.text.ParseException;
 
+import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.OID;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -113,74 +130,21 @@ public final class OIDArgumentValueValidator
    * {@inheritDoc}
    */
   @Override()
-  public void validateArgumentValue(final Argument argument,
-                                    final String valueString)
+  public void validateArgumentValue(@NotNull final Argument argument,
+                                    @NotNull final String valueString)
          throws ArgumentException
   {
-    if (valueString.isEmpty())
+    try
     {
-      throw new ArgumentException(ERR_OID_VALIDATOR_EMPTY.get(valueString,
-           argument.getIdentifierString()));
+      OID.parseNumericOID(valueString, isStrict);
     }
-
-    if (valueString.startsWith(".") || valueString.endsWith("."))
+    catch (final ParseException e)
     {
+      Debug.debugException(e);
       throw new ArgumentException(
-           ERR_OID_VALIDATOR_STARTS_OR_ENDS_WITH_PERIOD.get(valueString,
-                argument.getIdentifierString()));
-    }
-
-    if (valueString.contains(".."))
-    {
-      throw new ArgumentException(
-           ERR_OID_VALIDATOR_CONSECUTIVE_PERIODS.get(valueString,
-                argument.getIdentifierString()));
-    }
-
-    final OID oid = new OID(valueString);
-    if (! oid.isValidNumericOID())
-    {
-      throw new ArgumentException(
-           ERR_OID_VALIDATOR_ILLEGAL_CHARACTER.get(valueString,
-                argument.getIdentifierString()));
-    }
-
-    if (! isStrict)
-    {
-      return;
-    }
-
-    final List<Integer> components = oid.getComponents();
-    if (components.size() < 2)
-    {
-      throw new ArgumentException(
-           ERR_OID_VALIDATOR_NOT_ENOUGH_COMPONENTS.get(valueString,
-                argument.getIdentifierString()));
-    }
-
-    final int firstComponent = components.get(0);
-    final int secondComponent = components.get(1);
-    switch (firstComponent)
-    {
-      case 0:
-      case 1:
-        if (secondComponent > 39)
-        {
-          throw new ArgumentException(
-               ERR_OID_VALIDATOR_ILLEGAL_SECOND_COMPONENT.get(valueString,
-                    argument.getIdentifierString()));
-        }
-        break;
-
-      case 2:
-        // We don't need to do any more validation.
-        break;
-
-      default:
-        // Invalid value for the first component.
-        throw new ArgumentException(
-             ERR_OID_VALIDATOR_ILLEGAL_FIRST_COMPONENT.get(valueString,
-                  argument.getIdentifierString()));
+           ERR_OID_VALIDATOR_INVALID_VALUE.get(argument.getIdentifierString(),
+                e.getMessage()),
+           e);
     }
   }
 
@@ -192,6 +156,7 @@ public final class OIDArgumentValueValidator
    * @return  A string representation of this argument value validator.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -208,7 +173,7 @@ public final class OIDArgumentValueValidator
    * @param  buffer  The buffer to which the string representation should be
    *                 appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("OIDArgumentValueValidator(isStrict=");
     buffer.append(isStrict);

@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,6 +49,8 @@ import java.util.Set;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -63,31 +80,31 @@ public final class ObjectClassDefinition
   private final boolean isObsolete;
 
   // The set of extensions for this object class.
-  private final Map<String,String[]> extensions;
+  @NotNull private final Map<String,String[]> extensions;
 
   // The object class type for this object class.
-  private final ObjectClassType objectClassType;
+  @Nullable private final ObjectClassType objectClassType;
 
   // The description for this object class.
-  private final String description;
+  @Nullable private final String description;
 
   // The string representation of this object class.
-  private final String objectClassString;
+  @NotNull private final String objectClassString;
 
   // The OID for this object class.
-  private final String oid;
+  @NotNull private final String oid;
 
   // The set of names for this object class.
-  private final String[] names;
+  @NotNull private final String[] names;
 
   // The names/OIDs of the optional attributes.
-  private final String[] optionalAttributes;
+  @NotNull private final String[] optionalAttributes;
 
   // The names/OIDs of the required attributes.
-  private final String[] requiredAttributes;
+  @NotNull private final String[] requiredAttributes;
 
   // The set of superior object class names/OIDs.
-  private final String[] superiorClasses;
+  @NotNull private final String[] superiorClasses;
 
 
 
@@ -101,7 +118,7 @@ public final class ObjectClassDefinition
    * @throws  LDAPException  If the provided string cannot be decoded as an
    *                         object class definition.
    */
-  public ObjectClassDefinition(final String s)
+  public ObjectClassDefinition(@NotNull final String s)
          throws LDAPException
   {
     Validator.ensureNotNull(s);
@@ -186,7 +203,7 @@ public final class ObjectClassDefinition
         if (nameList.isEmpty())
         {
           pos = skipSpaces(objectClassString, pos, length);
-          pos = readQDStrings(objectClassString, pos, length, nameList);
+          pos = readQDStrings(objectClassString, pos, length, token, nameList);
         }
         else
         {
@@ -202,7 +219,7 @@ public final class ObjectClassDefinition
           pos = skipSpaces(objectClassString, pos, length);
 
           buffer = new StringBuilder();
-          pos = readQDString(objectClassString, pos, length, buffer);
+          pos = readQDString(objectClassString, pos, length, token, buffer);
           descr = buffer.toString();
         }
         else
@@ -230,7 +247,7 @@ public final class ObjectClassDefinition
         if (supList.isEmpty())
         {
           pos = skipSpaces(objectClassString, pos, length);
-          pos = readOIDs(objectClassString, pos, length, supList);
+          pos = readOIDs(objectClassString, pos, length, token, supList);
         }
         else
         {
@@ -283,7 +300,7 @@ public final class ObjectClassDefinition
         if (reqAttrs.isEmpty())
         {
           pos = skipSpaces(objectClassString, pos, length);
-          pos = readOIDs(objectClassString, pos, length, reqAttrs);
+          pos = readOIDs(objectClassString, pos, length, token, reqAttrs);
         }
         else
         {
@@ -297,7 +314,7 @@ public final class ObjectClassDefinition
         if (optAttrs.isEmpty())
         {
           pos = skipSpaces(objectClassString, pos, length);
-          pos = readOIDs(objectClassString, pos, length, optAttrs);
+          pos = readOIDs(objectClassString, pos, length, token, optAttrs);
         }
         else
         {
@@ -311,7 +328,7 @@ public final class ObjectClassDefinition
         pos = skipSpaces(objectClassString, pos, length);
 
         final ArrayList<String> valueList = new ArrayList<>(5);
-        pos = readQDStrings(objectClassString, pos, length, valueList);
+        pos = readQDStrings(objectClassString, pos, length, token, valueList);
 
         final String[] values = new String[valueList.size()];
         valueList.toArray(values);
@@ -380,13 +397,14 @@ public final class ObjectClassDefinition
    *                             It may be {@code null} or empty if there should
    *                             not be any extensions.
    */
-  public ObjectClassDefinition(final String oid, final String name,
-                               final String description,
-                               final String superiorClass,
-                               final ObjectClassType objectClassType,
-                               final String[] requiredAttributes,
-                               final String[] optionalAttributes,
-                               final Map<String,String[]> extensions)
+  public ObjectClassDefinition(@NotNull final String oid,
+                               @Nullable final String name,
+                               @Nullable final String description,
+                               @Nullable final String superiorClass,
+                               @Nullable final ObjectClassType objectClassType,
+                               @Nullable final String[] requiredAttributes,
+                               @Nullable final String[] optionalAttributes,
+                               @Nullable final Map<String,String[]> extensions)
   {
     this(oid, ((name == null) ? null : new String[] { name }), description,
          false,
@@ -421,13 +439,14 @@ public final class ObjectClassDefinition
    *                             It may be {@code null} or empty if there should
    *                             not be any extensions.
    */
-  public ObjectClassDefinition(final String oid, final String name,
-                               final String description,
-                               final String superiorClass,
-                               final ObjectClassType objectClassType,
-                               final Collection<String> requiredAttributes,
-                               final Collection<String> optionalAttributes,
-                               final Map<String,String[]> extensions)
+  public ObjectClassDefinition(@NotNull final String oid,
+              @Nullable final String name,
+              @Nullable final String description,
+              @Nullable final String superiorClass,
+              @Nullable final ObjectClassType objectClassType,
+              @Nullable final Collection<String> requiredAttributes,
+              @Nullable final Collection<String> optionalAttributes,
+              @Nullable final Map<String,String[]> extensions)
   {
     this(oid, ((name == null) ? null : new String[] { name }), description,
          false,
@@ -464,14 +483,15 @@ public final class ObjectClassDefinition
    *                             It may be {@code null} or empty if there should
    *                             not be any extensions.
    */
-  public ObjectClassDefinition(final String oid, final String[] names,
-                               final String description,
+  public ObjectClassDefinition(@NotNull final String oid,
+                               @Nullable final String[] names,
+                               @Nullable final String description,
                                final boolean isObsolete,
-                               final String[] superiorClasses,
-                               final ObjectClassType objectClassType,
-                               final String[] requiredAttributes,
-                               final String[] optionalAttributes,
-                               final Map<String,String[]> extensions)
+                               @Nullable final String[] superiorClasses,
+                               @Nullable final ObjectClassType objectClassType,
+                               @Nullable final String[] requiredAttributes,
+                               @Nullable final String[] optionalAttributes,
+                               @Nullable final Map<String,String[]> extensions)
   {
     Validator.ensureNotNull(oid);
 
@@ -539,7 +559,7 @@ public final class ObjectClassDefinition
    * @param  buffer  The buffer in which to construct a string representation of
    *                 this object class definition.
    */
-  private void createDefinitionString(final StringBuilder buffer)
+  private void createDefinitionString(@NotNull final StringBuilder buffer)
   {
     buffer.append("( ");
     buffer.append(oid);
@@ -686,6 +706,7 @@ public final class ObjectClassDefinition
    *
    * @return  The OID for this object class.
    */
+  @NotNull()
   public String getOID()
   {
     return oid;
@@ -699,6 +720,7 @@ public final class ObjectClassDefinition
    * @return  The set of names for this object class, or an empty array if it
    *          does not have any names.
    */
+  @NotNull()
   public String[] getNames()
   {
     return names;
@@ -713,6 +735,7 @@ public final class ObjectClassDefinition
    *
    * @return  The primary name that can be used to reference this object class.
    */
+  @NotNull()
   public String getNameOrOID()
   {
     if (names.length == 0)
@@ -737,7 +760,7 @@ public final class ObjectClassDefinition
    * @return  {@code true} if the provided string matches the OID or any of the
    *          names for this object class, or {@code false} if not.
    */
-  public boolean hasNameOrOID(final String s)
+  public boolean hasNameOrOID(@NotNull final String s)
   {
     for (final String name : names)
     {
@@ -758,6 +781,7 @@ public final class ObjectClassDefinition
    * @return  The description for this object class, or {@code null} if there is
    *          no description defined.
    */
+  @Nullable()
   public String getDescription()
   {
     return description;
@@ -785,6 +809,7 @@ public final class ObjectClassDefinition
    * @return  The names or OIDs of the superior classes for this object class,
    *          or an empty array if it does not have any superior classes.
    */
+  @NotNull()
   public String[] getSuperiorClasses()
   {
     return superiorClasses;
@@ -802,8 +827,9 @@ public final class ObjectClassDefinition
    *
    * @return  The object class definitions for the superior object classes.
    */
-  public Set<ObjectClassDefinition> getSuperiorClasses(final Schema schema,
-                                                       final boolean recursive)
+  @NotNull()
+  public Set<ObjectClassDefinition> getSuperiorClasses(
+              @NotNull final Schema schema, final boolean recursive)
   {
     final LinkedHashSet<ObjectClassDefinition> ocSet =
          new LinkedHashSet<>(StaticUtils.computeMapCapacity(10));
@@ -832,9 +858,9 @@ public final class ObjectClassDefinition
    * @param  oc      The object class definition to be processed.
    * @param  ocSet   The set to which the definitions should be added.
    */
-  private static void getSuperiorClasses(final Schema schema,
-                                         final ObjectClassDefinition oc,
-                                         final Set<ObjectClassDefinition> ocSet)
+  private static void getSuperiorClasses(@NotNull final Schema schema,
+                           @NotNull final ObjectClassDefinition oc,
+                           @NotNull final Set<ObjectClassDefinition> ocSet)
   {
     for (final String s : oc.superiorClasses)
     {
@@ -859,6 +885,7 @@ public final class ObjectClassDefinition
    * @return  The object class type for this object class, or {@code null} if it
    *          is not defined in the schema element.
    */
+  @Nullable()
   public ObjectClassType getObjectClassType()
   {
     return objectClassType;
@@ -891,7 +918,8 @@ public final class ObjectClassDefinition
    *          {@link ObjectClassType#STRUCTURAL} if it is not explicitly
    *          defined.
    */
-  public ObjectClassType getObjectClassType(final Schema schema)
+  @NotNull()
+  public ObjectClassType getObjectClassType(@NotNull final Schema schema)
   {
     if (objectClassType == null)
     {
@@ -915,6 +943,7 @@ public final class ObjectClassDefinition
    *          present in entries containing this object class, or an empty array
    *          if there are no required attributes.
    */
+  @NotNull()
   public String[] getRequiredAttributes()
   {
     return requiredAttributes;
@@ -936,8 +965,10 @@ public final class ObjectClassDefinition
    * @return  The attribute type definitions for the attributes that are
    *          required to be present in entries containing this object class.
    */
-  public Set<AttributeTypeDefinition> getRequiredAttributes(final Schema schema,
-                                           final boolean includeSuperiorClasses)
+  @NotNull()
+  public Set<AttributeTypeDefinition> getRequiredAttributes(
+              @NotNull final Schema schema,
+              final boolean includeSuperiorClasses)
   {
     final HashSet<AttributeTypeDefinition> attrSet =
          new HashSet<>(StaticUtils.computeMapCapacity(20));
@@ -976,9 +1007,10 @@ public final class ObjectClassDefinition
    * @param  attrSet  The set to which the attribute type definitions should be
    *                  added.
    */
-  private static void getSuperiorRequiredAttributes(final Schema schema,
-                           final ObjectClassDefinition oc,
-                           final Set<AttributeTypeDefinition> attrSet)
+  private static void getSuperiorRequiredAttributes(
+                           @NotNull final Schema schema,
+                           @NotNull final ObjectClassDefinition oc,
+                           @NotNull final Set<AttributeTypeDefinition> attrSet)
   {
     for (final String s : oc.requiredAttributes)
     {
@@ -1011,6 +1043,7 @@ public final class ObjectClassDefinition
    *          in entries containing this object class, or an empty array if
    *          there are no optional attributes.
    */
+  @NotNull()
   public String[] getOptionalAttributes()
   {
     return optionalAttributes;
@@ -1032,8 +1065,10 @@ public final class ObjectClassDefinition
    * @return  The attribute type definitions for the attributes that may
    *          optionally be present in entries containing this object class.
    */
-  public Set<AttributeTypeDefinition> getOptionalAttributes(final Schema schema,
-                                           final boolean includeSuperiorClasses)
+  @NotNull()
+  public Set<AttributeTypeDefinition> getOptionalAttributes(
+              @NotNull final Schema schema,
+              final boolean includeSuperiorClasses)
   {
     final HashSet<AttributeTypeDefinition> attrSet =
          new HashSet<>(StaticUtils.computeMapCapacity(20));
@@ -1080,10 +1115,11 @@ public final class ObjectClassDefinition
    *                      be added.
    * @param  requiredSet  x
    */
-  private static void getSuperiorOptionalAttributes(final Schema schema,
-                           final ObjectClassDefinition oc,
-                           final Set<AttributeTypeDefinition> attrSet,
-                           final Set<AttributeTypeDefinition> requiredSet)
+  private static void getSuperiorOptionalAttributes(
+               @NotNull final Schema schema,
+               @NotNull final ObjectClassDefinition oc,
+               @NotNull final Set<AttributeTypeDefinition> attrSet,
+               @NotNull final Set<AttributeTypeDefinition> requiredSet)
   {
     for (final String s : oc.optionalAttributes)
     {
@@ -1113,9 +1149,22 @@ public final class ObjectClassDefinition
    *
    * @return  The set of extensions for this object class.
    */
+  @NotNull()
   public Map<String,String[]> getExtensions()
   {
     return extensions;
+  }
+
+
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override()
+  @NotNull()
+  public SchemaElementType getSchemaElementType()
+  {
+    return SchemaElementType.OBJECT_CLASS;
   }
 
 
@@ -1135,7 +1184,7 @@ public final class ObjectClassDefinition
    * {@inheritDoc}
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == null)
     {
@@ -1176,6 +1225,7 @@ public final class ObjectClassDefinition
    * @return  A string representation of this object class definition.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return objectClassString;

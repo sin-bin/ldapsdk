@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -71,7 +88,7 @@ public final class MissingChangelogEntriesIntermediateResponse
    * The OID (1.3.6.1.4.1.30221.2.6.12) for the get stream directory values
    * intermediate response.
    */
-  public static final String
+  @NotNull public static final String
        MISSING_CHANGELOG_ENTRIES_INTERMEDIATE_RESPONSE_OID =
             "1.3.6.1.4.1.30221.2.6.12";
 
@@ -93,7 +110,7 @@ public final class MissingChangelogEntriesIntermediateResponse
 
   // A message which may provide additional information about the missing
   // changes.
-  private final String message;
+  @Nullable private final String message;
 
 
 
@@ -108,8 +125,9 @@ public final class MissingChangelogEntriesIntermediateResponse
    *                   response.  It may be {@code null} or empty if no controls
    *                   should be included.
    */
-  public MissingChangelogEntriesIntermediateResponse(final String message,
-                                                     final Control... controls)
+  public MissingChangelogEntriesIntermediateResponse(
+              @Nullable final String message,
+              @Nullable final Control... controls)
   {
     super(MISSING_CHANGELOG_ENTRIES_INTERMEDIATE_RESPONSE_OID,
           encodeValue(message), controls);
@@ -129,7 +147,7 @@ public final class MissingChangelogEntriesIntermediateResponse
    *                         decoded as a missing changelog entries response.
    */
   public MissingChangelogEntriesIntermediateResponse(
-              final IntermediateResponse r)
+              @NotNull final IntermediateResponse r)
          throws LDAPException
   {
     super(r);
@@ -186,7 +204,8 @@ public final class MissingChangelogEntriesIntermediateResponse
    * @return  The encoded value, or {@code null} if no value should be included
    *          in the intermediate response.
    */
-  private static ASN1OctetString encodeValue(final String message)
+  @Nullable()
+  private static ASN1OctetString encodeValue(@Nullable final String message)
   {
     if (message == null)
     {
@@ -207,6 +226,7 @@ public final class MissingChangelogEntriesIntermediateResponse
    * @return  A message which may provide additional information about the
    *          missing changes, or {@code null} if none is available.
    */
+  @Nullable()
   public String getMessage()
   {
     return message;
@@ -218,6 +238,7 @@ public final class MissingChangelogEntriesIntermediateResponse
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getIntermediateResponseName()
   {
     return INFO_MISSING_CHANGELOG_ENTRIES_IR_NAME.get();
@@ -229,6 +250,7 @@ public final class MissingChangelogEntriesIntermediateResponse
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public String valueToString()
   {
     if (message == null)
@@ -251,7 +273,7 @@ public final class MissingChangelogEntriesIntermediateResponse
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("MissingChangelogEntriesIntermediateResponse(");
 

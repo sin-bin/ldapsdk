@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,8 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import com.unboundid.util.NotNull;
 
 
 
@@ -183,7 +200,7 @@ public @interface LDAPField
    *
    * @return  The encoder class for the field.
    */
-  Class<? extends ObjectEncoder> encoderClass()
+  @NotNull Class<? extends ObjectEncoder> encoderClass()
        default DefaultObjectEncoder.class;
 
 
@@ -195,7 +212,7 @@ public @interface LDAPField
    *
    * @return  The filter usage value for this field.
    */
-  FilterUsage filterUsage() default FilterUsage.CONDITIONALLY_ALLOWED;
+  @NotNull FilterUsage filterUsage() default FilterUsage.CONDITIONALLY_ALLOWED;
 
 
 
@@ -208,7 +225,7 @@ public @interface LDAPField
    *          be stored in LDAP entries, or an empty string if the attribute
    *          name should match the name of the associated field.
    */
-  String attribute() default "";
+  @NotNull String attribute() default "";
 
 
 
@@ -225,7 +242,7 @@ public @interface LDAPField
    *          corresponding LDAP entry, or an empty array if there should not be
    *          any default values.
    */
-  String[] defaultDecodeValue() default {};
+  @NotNull String[] defaultDecodeValue() default {};
 
 
 
@@ -238,7 +255,7 @@ public @interface LDAPField
    *          value, or an empty array if there should not be any default
    *          values.
    */
-  String[] defaultEncodeValue() default {};
+  @NotNull String[] defaultEncodeValue() default {};
 
 
 
@@ -256,5 +273,5 @@ public @interface LDAPField
    *          may be used, or an empty array if it should be assumed to only be
    *          included in the structural object class.
    */
-  String[] objectClass() default {};
+  @NotNull String[] objectClass() default {};
 }

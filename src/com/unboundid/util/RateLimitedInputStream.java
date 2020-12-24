@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,10 +52,10 @@ public final class RateLimitedInputStream
        extends InputStream
 {
   // The fixed-rate barrier that will serve as a rate limiter for this class.
-  private final FixedRateBarrier rateLimiter;
+  @NotNull private final FixedRateBarrier rateLimiter;
 
   // The input stream from which the data will actually be read.
-  private final InputStream wrappedStream;
+  @NotNull private final InputStream wrappedStream;
 
   // The maximum number of bytes that can be read in any single call to the
   // rate limiter.
@@ -58,7 +73,7 @@ public final class RateLimitedInputStream
    *                            be read using this input stream.  It must be
    *                            greater than zero.
    */
-  public RateLimitedInputStream(final InputStream wrappedStream,
+  public RateLimitedInputStream(@NotNull final InputStream wrappedStream,
                                 final int maxBytesPerSecond)
   {
     Validator.ensureTrue((wrappedStream != null),
@@ -121,7 +136,7 @@ public final class RateLimitedInputStream
    *                       data from the underlying input stream.
    */
   @Override()
-  public int read(final byte[] b)
+  public int read(@NotNull final byte[] b)
          throws IOException
   {
     return read(b, 0, b.length);
@@ -145,7 +160,7 @@ public final class RateLimitedInputStream
    *                       data from the underlying input stream.
    */
   @Override()
-  public int read(final byte[] b, final int offset, final int length)
+  public int read(@NotNull final byte[] b, final int offset, final int length)
          throws IOException
   {
     if (length <= 0)

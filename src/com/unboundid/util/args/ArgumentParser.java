@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -40,16 +55,20 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.unboundid.ldap.sdk.unboundidds.tools.ToolUtils;
 import com.unboundid.util.CommandLineTool;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -74,7 +93,7 @@ public final class ArgumentParser
    * properties file that should be used to obtain the default values for
    * arguments not specified via the command line.
    */
-  public static final String PROPERTY_DEFAULT_PROPERTIES_FILE_PATH =
+  @NotNull public static final String PROPERTY_DEFAULT_PROPERTIES_FILE_PATH =
        ArgumentParser.class.getName() + ".propertiesFilePath";
 
 
@@ -84,7 +103,7 @@ public final class ArgumentParser
    * properties file that should be used to obtain the default values for
    * arguments not specified via the command line.
    */
-  public static final String ENV_DEFAULT_PROPERTIES_FILE_PATH =
+  @NotNull public static final String ENV_DEFAULT_PROPERTIES_FILE_PATH =
        "UNBOUNDID_TOOL_PROPERTIES_FILE_PATH";
 
 
@@ -93,7 +112,7 @@ public final class ArgumentParser
    * The name of the argument used to specify the path to a file to which all
    * output should be written.
    */
-  private static final String ARG_NAME_OUTPUT_FILE = "outputFile";
+  @NotNull private static final String ARG_NAME_OUTPUT_FILE = "outputFile";
 
 
 
@@ -101,7 +120,7 @@ public final class ArgumentParser
    * The name of the argument used to indicate that output should be written to
    * both the output file and the console.
    */
-  private static final String ARG_NAME_TEE_OUTPUT = "teeOutput";
+  @NotNull private static final String ARG_NAME_TEE_OUTPUT = "teeOutput";
 
 
 
@@ -110,7 +129,7 @@ public final class ArgumentParser
    * which to obtain the default values for arguments not specified via the
    * command line.
    */
-  private static final String ARG_NAME_PROPERTIES_FILE_PATH =
+  @NotNull private static final String ARG_NAME_PROPERTIES_FILE_PATH =
        "propertiesFilePath";
 
 
@@ -119,7 +138,7 @@ public final class ArgumentParser
    * The name of the argument used to specify the path to a file to be generated
    * with information about the properties that the tool supports.
    */
-  private static final String ARG_NAME_GENERATE_PROPERTIES_FILE =
+  @NotNull private static final String ARG_NAME_GENERATE_PROPERTIES_FILE =
        "generatePropertiesFile";
 
 
@@ -129,7 +148,8 @@ public final class ArgumentParser
    * properties file to obtain default values for arguments not specified via
    * the command line.
    */
-  private static final String ARG_NAME_NO_PROPERTIES_FILE = "noPropertiesFile";
+  @NotNull private static final String ARG_NAME_NO_PROPERTIES_FILE =
+       "noPropertiesFile";
 
 
 
@@ -137,8 +157,9 @@ public final class ArgumentParser
    * The name of the argument used to indicate that the tool should suppress the
    * comment that lists the argument values obtained from a properties file.
    */
-  private static final String ARG_NAME_SUPPRESS_PROPERTIES_FILE_COMMENT =
-       "suppressPropertiesFileComment";
+  @NotNull private static final String
+       ARG_NAME_SUPPRESS_PROPERTIES_FILE_COMMENT =
+            "suppressPropertiesFileComment";
 
 
 
@@ -151,10 +172,10 @@ public final class ArgumentParser
 
   // The command-line tool with which this argument parser is associated, if
   // any.
-  private volatile CommandLineTool commandLineTool;
+  @Nullable private volatile CommandLineTool commandLineTool;
 
   // The properties file used to obtain arguments for this tool.
-  private volatile File propertiesFileUsed;
+  @Nullable private volatile File propertiesFileUsed;
 
   // The maximum number of trailing arguments allowed to be provided.
   private final int maxTrailingArgs;
@@ -164,58 +185,59 @@ public final class ArgumentParser
 
   // The set of named arguments associated with this parser, indexed by short
   // identifier.
-  private final LinkedHashMap<Character,Argument> namedArgsByShortID;
+  @NotNull private final LinkedHashMap<Character,Argument> namedArgsByShortID;
 
   // The set of named arguments associated with this parser, indexed by long
   // identifier.
-  private final LinkedHashMap<String,Argument> namedArgsByLongID;
+  @NotNull private final LinkedHashMap<String,Argument> namedArgsByLongID;
 
   // The set of subcommands associated with this parser, indexed by name.
-  private final LinkedHashMap<String,SubCommand> subCommandsByName;
+  @NotNull private final LinkedHashMap<String,SubCommand> subCommandsByName;
 
   // The full set of named arguments associated with this parser.
-  private final List<Argument> namedArgs;
+  @NotNull private final List<Argument> namedArgs;
 
   // Sets of arguments in which if the key argument is provided, then at least
   // one of the value arguments must also be provided.
-  private final List<ObjectPair<Argument,Set<Argument>>> dependentArgumentSets;
+  @NotNull private final List<ObjectPair<Argument,Set<Argument>>>
+       dependentArgumentSets;
 
   // Sets of arguments in which at most one argument in the list is allowed to
   // be present.
-  private final List<Set<Argument>> exclusiveArgumentSets;
+  @NotNull private final List<Set<Argument>> exclusiveArgumentSets;
 
   // Sets of arguments in which at least one argument in the list is required to
   // be present.
-  private final List<Set<Argument>> requiredArgumentSets;
+  @NotNull private final List<Set<Argument>> requiredArgumentSets;
 
   // A list of any arguments set from the properties file rather than explicitly
   // provided on the command line.
-  private final List<String> argumentsSetFromPropertiesFile;
+  @NotNull private final List<String> argumentsSetFromPropertiesFile;
 
   // The list of trailing arguments provided on the command line.
-  private final List<String> trailingArgs;
+  @NotNull private final List<String> trailingArgs;
 
   // The full list of subcommands associated with this argument parser.
-  private final List<SubCommand> subCommands;
+  @NotNull private final List<SubCommand> subCommands;
 
   // A list of additional paragraphs that make up the complete description for
   // the associated command.
-  private final List<String> additionalCommandDescriptionParagraphs;
+  @NotNull private final List<String> additionalCommandDescriptionParagraphs;
 
   // The description for the associated command.
-  private final String commandDescription;
+  @NotNull private final String commandDescription;
 
   // The name for the associated command.
-  private final String commandName;
+  @NotNull private final String commandName;
 
   // The placeholder string for the trailing arguments.
-  private final String trailingArgsPlaceholder;
+  @Nullable private final String trailingArgsPlaceholder;
 
   // The subcommand with which this argument parser is associated.
-  private volatile SubCommand parentSubCommand;
+  @Nullable private volatile SubCommand parentSubCommand;
 
   // The subcommand that was included in the set of command-line arguments.
-  private volatile SubCommand selectedSubCommand;
+  @Nullable private volatile SubCommand selectedSubCommand;
 
 
 
@@ -234,8 +256,8 @@ public final class ArgumentParser
    * @throws  ArgumentException  If either the command name or command
    *                             description is {@code null},
    */
-  public ArgumentParser(final String commandName,
-                        final String commandDescription)
+  public ArgumentParser(@NotNull final String commandName,
+                        @NotNull final String commandDescription)
          throws ArgumentException
   {
     this(commandName, commandDescription, 0, null);
@@ -274,10 +296,10 @@ public final class ArgumentParser
    *                             the trailing arguments placeholder is
    *                             {@code null}.
    */
-  public ArgumentParser(final String commandName,
-                        final String commandDescription,
+  public ArgumentParser(@NotNull final String commandName,
+                        @NotNull final String commandDescription,
                         final int maxTrailingArgs,
-                        final String trailingArgsPlaceholder)
+                        @Nullable final String trailingArgsPlaceholder)
          throws ArgumentException
   {
     this(commandName, commandDescription, 0, maxTrailingArgs,
@@ -322,11 +344,11 @@ public final class ArgumentParser
    *                             the trailing arguments placeholder is
    *                             {@code null}.
    */
-  public ArgumentParser(final String commandName,
-                        final String commandDescription,
+  public ArgumentParser(@NotNull final String commandName,
+                        @NotNull final String commandDescription,
                         final int minTrailingArgs,
                         final int maxTrailingArgs,
-                        final String trailingArgsPlaceholder)
+                        @Nullable final String trailingArgsPlaceholder)
          throws ArgumentException
   {
     this(commandName, commandDescription, null, minTrailingArgs,
@@ -374,12 +396,12 @@ public final class ArgumentParser
    *                             the trailing arguments placeholder is
    *                             {@code null}.
    */
-  public ArgumentParser(final String commandName,
-              final String commandDescription,
-              final List<String> additionalCommandDescriptionParagraphs,
-              final int minTrailingArgs, final int maxTrailingArgs,
-              final String trailingArgsPlaceholder)
-         throws ArgumentException
+  public ArgumentParser(@NotNull final String commandName,
+       @NotNull final String commandDescription,
+       @Nullable final List<String> additionalCommandDescriptionParagraphs,
+       final int minTrailingArgs, final int maxTrailingArgs,
+       @Nullable final String trailingArgsPlaceholder)
+       throws ArgumentException
   {
     if (commandName == null)
     {
@@ -464,7 +486,8 @@ public final class ArgumentParser
    * @param  subCommand  The subcommand with which this argument parser is to be
    *                     associated.
    */
-  ArgumentParser(final ArgumentParser source, final SubCommand subCommand)
+  ArgumentParser(@NotNull final ArgumentParser source,
+                 @Nullable final SubCommand subCommand)
   {
     commandName             = source.commandName;
     commandDescription      = source.commandDescription;
@@ -585,6 +608,7 @@ public final class ArgumentParser
    * @return  The name of the application or utility with which this command
    *          line argument parser is associated.
    */
+  @NotNull()
   public String getCommandName()
   {
     return commandName;
@@ -603,6 +627,7 @@ public final class ArgumentParser
    * @return  A description of the application or utility with which this
    *          command line argument parser is associated.
    */
+  @NotNull()
   public String getCommandDescription()
   {
     return commandDescription;
@@ -626,6 +651,7 @@ public final class ArgumentParser
    *          which this command line argument parser is associated, or an empty
    *          list if the description should only include a single paragraph.
    */
+  @NotNull()
   public List<String> getAdditionalCommandDescriptionParagraphs()
   {
     return additionalCommandDescriptionParagraphs;
@@ -670,6 +696,7 @@ public final class ArgumentParser
    *          to indicate what may be included in the trailing arguments, or
    *          {@code null} if unnamed trailing arguments are not allowed.
    */
+  @Nullable()
   public String getTrailingArgumentsPlaceholder()
   {
     return trailingArgsPlaceholder;
@@ -725,7 +752,7 @@ public final class ArgumentParser
    *     provided on the command line.  If this is not specified and the
    *     {@code noPropertiesFile} argument is not present, then the argument
    *     parser may use a default properties file path specified using either
-   *     the {@code com.unboundid.util.args.ArgumentParser..propertiesFilePath}
+   *     the {@code com.unboundid.util.args.ArgumentParser.propertiesFilePath}
    *     system property or the {@code UNBOUNDID_TOOL_PROPERTIES_FILE_PATH}
    *     environment variable.
    *   </LI>
@@ -797,6 +824,7 @@ public final class ArgumentParser
    *          file that was generated, or {@code null} if no properties file was
    *          generated.
    */
+  @Nullable()
   public File getGeneratedPropertiesFile()
   {
     final Argument a = getNamedArgument(ARG_NAME_GENERATE_PROPERTIES_FILE);
@@ -819,7 +847,8 @@ public final class ArgumentParser
    * @return  The named argument with the specified short identifier, or
    *          {@code null} if there is no such argument.
    */
-  public Argument getNamedArgument(final Character shortIdentifier)
+  @Nullable()
+  public Argument getNamedArgument(@NotNull final Character shortIdentifier)
   {
     Validator.ensureNotNull(shortIdentifier);
     return namedArgsByShortID.get(shortIdentifier);
@@ -839,7 +868,8 @@ public final class ArgumentParser
    * @return  The named argument with the specified long identifier, or
    *          {@code null} if there is no such argument.
    */
-  public Argument getNamedArgument(final String identifier)
+  @Nullable()
+  public Argument getNamedArgument(@NotNull final String identifier)
   {
     Validator.ensureNotNull(identifier);
 
@@ -872,7 +902,9 @@ public final class ArgumentParser
    * @return  The argument list argument with the specified identifier, or
    *          {@code null} if there is no such argument.
    */
-  public ArgumentListArgument getArgumentListArgument(final String identifier)
+  @Nullable()
+  public ArgumentListArgument getArgumentListArgument(
+                                   @NotNull final String identifier)
   {
     final Argument a = getNamedArgument(identifier);
     if (a == null)
@@ -899,7 +931,8 @@ public final class ArgumentParser
    * @return  The Boolean argument with the specified identifier, or
    *          {@code null} if there is no such argument.
    */
-  public BooleanArgument getBooleanArgument(final String identifier)
+  @Nullable()
+  public BooleanArgument getBooleanArgument(@NotNull final String identifier)
   {
     final Argument a = getNamedArgument(identifier);
     if (a == null)
@@ -926,7 +959,9 @@ public final class ArgumentParser
    * @return  The Boolean value argument with the specified identifier, or
    *          {@code null} if there is no such argument.
    */
-  public BooleanValueArgument getBooleanValueArgument(final String identifier)
+  @Nullable()
+  public BooleanValueArgument getBooleanValueArgument(
+                                   @NotNull final String identifier)
   {
     final Argument a = getNamedArgument(identifier);
     if (a == null)
@@ -953,7 +988,8 @@ public final class ArgumentParser
    * @return  The control argument with the specified identifier, or
    *          {@code null} if there is no such argument.
    */
-  public ControlArgument getControlArgument(final String identifier)
+  @Nullable()
+  public ControlArgument getControlArgument(@NotNull final String identifier)
   {
     final Argument a = getNamedArgument(identifier);
     if (a == null)
@@ -980,7 +1016,8 @@ public final class ArgumentParser
    * @return  The DN argument with the specified identifier, or
    *          {@code null} if there is no such argument.
    */
-  public DNArgument getDNArgument(final String identifier)
+  @Nullable()
+  public DNArgument getDNArgument(@NotNull final String identifier)
   {
     final Argument a = getNamedArgument(identifier);
     if (a == null)
@@ -1007,7 +1044,8 @@ public final class ArgumentParser
    * @return  The duration argument with the specified identifier, or
    *          {@code null} if there is no such argument.
    */
-  public DurationArgument getDurationArgument(final String identifier)
+  @Nullable()
+  public DurationArgument getDurationArgument(@NotNull final String identifier)
   {
     final Argument a = getNamedArgument(identifier);
     if (a == null)
@@ -1034,7 +1072,8 @@ public final class ArgumentParser
    * @return  The file argument with the specified identifier, or
    *          {@code null} if there is no such argument.
    */
-  public FileArgument getFileArgument(final String identifier)
+  @Nullable()
+  public FileArgument getFileArgument(@NotNull final String identifier)
   {
     final Argument a = getNamedArgument(identifier);
     if (a == null)
@@ -1061,7 +1100,8 @@ public final class ArgumentParser
    * @return  The filter argument with the specified identifier, or
    *          {@code null} if there is no such argument.
    */
-  public FilterArgument getFilterArgument(final String identifier)
+  @Nullable()
+  public FilterArgument getFilterArgument(@NotNull final String identifier)
   {
     final Argument a = getNamedArgument(identifier);
     if (a == null)
@@ -1088,7 +1128,8 @@ public final class ArgumentParser
    * @return  The integer argument with the specified identifier, or
    *          {@code null} if there is no such argument.
    */
-  public IntegerArgument getIntegerArgument(final String identifier)
+  @Nullable()
+  public IntegerArgument getIntegerArgument(@NotNull final String identifier)
   {
     final Argument a = getNamedArgument(identifier);
     if (a == null)
@@ -1115,7 +1156,8 @@ public final class ArgumentParser
    * @return  The scope argument with the specified identifier, or
    *          {@code null} if there is no such argument.
    */
-  public ScopeArgument getScopeArgument(final String identifier)
+  @Nullable()
+  public ScopeArgument getScopeArgument(@NotNull final String identifier)
   {
     final Argument a = getNamedArgument(identifier);
     if (a == null)
@@ -1142,7 +1184,8 @@ public final class ArgumentParser
    * @return  The string argument with the specified identifier, or
    *          {@code null} if there is no such argument.
    */
-  public StringArgument getStringArgument(final String identifier)
+  @Nullable()
+  public StringArgument getStringArgument(@NotNull final String identifier)
   {
     final Argument a = getNamedArgument(identifier);
     if (a == null)
@@ -1169,7 +1212,9 @@ public final class ArgumentParser
    * @return  The timestamp argument with the specified identifier, or
    *          {@code null} if there is no such argument.
    */
-  public TimestampArgument getTimestampArgument(final String identifier)
+  @Nullable()
+  public TimestampArgument getTimestampArgument(
+                                @NotNull final String identifier)
   {
     final Argument a = getNamedArgument(identifier);
     if (a == null)
@@ -1191,6 +1236,7 @@ public final class ArgumentParser
    * @return  The set of named arguments defined for use with this argument
    *          parser.
    */
+  @NotNull()
   public List<Argument> getNamedArguments()
   {
     return Collections.unmodifiableList(namedArgs);
@@ -1206,7 +1252,7 @@ public final class ArgumentParser
    * @throws  ArgumentException  If the provided argument conflicts with another
    *                             argument already registered with this parser.
    */
-  public void addArgument(final Argument argument)
+  public void addArgument(@NotNull final Argument argument)
          throws ArgumentException
   {
     argument.setRegistered();
@@ -1287,6 +1333,7 @@ public final class ArgumentParser
    *
    * @return  The list of dependent argument sets for this argument parser.
    */
+  @NotNull()
   public List<ObjectPair<Argument,Set<Argument>>> getDependentArgumentSets()
   {
     return Collections.unmodifiableList(dependentArgumentSets);
@@ -1310,8 +1357,8 @@ public final class ArgumentParser
    *                             empty, and all arguments must have already been
    *                             registered with this argument parser.
    */
-  public void addDependentArgumentSet(final Argument targetArgument,
-                   final Collection<Argument> dependentArguments)
+  public void addDependentArgumentSet(@NotNull final Argument targetArgument,
+                   @NotNull final Collection<Argument> dependentArguments)
   {
     Validator.ensureNotNull(targetArgument, dependentArguments);
 
@@ -1367,9 +1414,9 @@ public final class ArgumentParser
    *                         must have already been registered with this
    *                         argument parser.
    */
-  public void addDependentArgumentSet(final Argument targetArgument,
-                                      final Argument dependentArg1,
-                                      final Argument... remaining)
+  public void addDependentArgumentSet(@NotNull final Argument targetArgument,
+                                      @NotNull final Argument dependentArg1,
+                                      @Nullable final Argument... remaining)
   {
     Validator.ensureNotNull(targetArgument, dependentArg1);
 
@@ -1414,6 +1461,85 @@ public final class ArgumentParser
 
 
   /**
+   * Adds the provided set of arguments as mutually dependent, such that if any
+   * of the arguments is provided, then all of them must be provided.  It will
+   * be implemented by creating multiple dependent argument sets (one for each
+   * argument in the provided collection).
+   *
+   * @param  arguments  The collection of arguments to be used to create the
+   *                    dependent argument sets.  It must not be {@code null},
+   *                    and must contain at least two elements.
+   */
+  public void addMutuallyDependentArgumentSet(
+                   @NotNull final Collection<Argument> arguments)
+  {
+    Validator.ensureNotNullWithMessage(arguments,
+         "ArgumentParser.addMutuallyDependentArgumentSet.arguments must not " +
+              "be null.");
+    Validator.ensureTrue((arguments.size() >= 2),
+         "ArgumentParser.addMutuallyDependentArgumentSet.arguments must " +
+              "contain at least two elements.");
+
+    for (final Argument a : arguments)
+    {
+      Validator.ensureTrue(namedArgs.contains(a),
+           "ArgumentParser.addMutuallyDependentArgumentSet invoked with " +
+                "argument " + a.getIdentifierString() +
+                " that is not registered with the argument parser.");
+    }
+
+    final Set<Argument> allArgsSet = new HashSet<>(arguments);
+    for (final Argument a : allArgsSet)
+    {
+      final Set<Argument> dependentArgs = new HashSet<>(allArgsSet);
+      dependentArgs.remove(a);
+      addDependentArgumentSet(a, dependentArgs);
+    }
+  }
+
+
+
+  /**
+   * Adds the provided set of arguments as mutually dependent, such that if any
+   * of the arguments is provided, then all of them must be provided.  It will
+   * be implemented by creating multiple dependent argument sets (one for each
+   * argument in the provided collection).
+   *
+   * @param  arg1       The first argument to include in the mutually dependent
+   *                    argument set.  It must not be {@code null}.
+   * @param  arg2       The second argument to include in the mutually dependent
+   *                    argument set.  It must not be {@code null}.
+   * @param  remaining  An optional set of additional arguments to include in
+   *                    the mutually dependent argument set.  It may be
+   *                    {@code null} or empty if only two arguments should be
+   *                    included in the mutually dependent argument set.
+   */
+  public void addMutuallyDependentArgumentSet(@NotNull final Argument arg1,
+                   @NotNull final Argument arg2,
+                   @Nullable final Argument... remaining)
+  {
+    Validator.ensureNotNullWithMessage(arg1,
+         "ArgumentParser.addMutuallyDependentArgumentSet.arg1 must not be " +
+              "null.");
+    Validator.ensureNotNullWithMessage(arg2,
+         "ArgumentParser.addMutuallyDependentArgumentSet.arg2 must not be " +
+              "null.");
+
+    final List<Argument> args = new ArrayList<>(10);
+    args.add(arg1);
+    args.add(arg2);
+
+    if (remaining != null)
+    {
+      args.addAll(Arrays.asList(remaining));
+    }
+
+    addMutuallyDependentArgumentSet(args);
+  }
+
+
+
+  /**
    * Retrieves the list of exclusive argument sets for this argument parser.
    * If an argument contained in an exclusive argument set is provided, then
    * none of the other arguments in that set may be provided.  It is acceptable
@@ -1422,6 +1548,7 @@ public final class ArgumentParser
    *
    * @return  The list of exclusive argument sets for this argument parser.
    */
+  @NotNull()
   public List<Set<Argument>> getExclusiveArgumentSets()
   {
     return Collections.unmodifiableList(exclusiveArgumentSets);
@@ -1442,7 +1569,7 @@ public final class ArgumentParser
    *                             parser.
    */
   public void addExclusiveArgumentSet(
-                   final Collection<Argument> exclusiveArguments)
+                   @NotNull final Collection<Argument> exclusiveArguments)
   {
     Validator.ensureNotNull(exclusiveArguments);
 
@@ -1482,8 +1609,9 @@ public final class ArgumentParser
    *                    non-empty then all arguments must have already been
    *                    registered with this argument parser.
    */
-  public void addExclusiveArgumentSet(final Argument arg1, final Argument arg2,
-                                      final Argument... remaining)
+  public void addExclusiveArgumentSet(@NotNull final Argument arg1,
+                                      @NotNull final Argument arg2,
+                                      @Nullable final Argument... remaining)
   {
     Validator.ensureNotNull(arg1, arg2);
 
@@ -1539,6 +1667,7 @@ public final class ArgumentParser
    *
    * @return  The list of required argument sets for this argument parser.
    */
+  @NotNull()
   public List<Set<Argument>> getRequiredArgumentSets()
   {
     return Collections.unmodifiableList(requiredArgumentSets);
@@ -1559,7 +1688,7 @@ public final class ArgumentParser
    *                            parser.
    */
   public void addRequiredArgumentSet(
-                   final Collection<Argument> requiredArguments)
+                   @NotNull final Collection<Argument> requiredArguments)
   {
     Validator.ensureNotNull(requiredArguments);
 
@@ -1599,8 +1728,9 @@ public final class ArgumentParser
    *                    non-empty then all arguments must have already been
    *                    registered with this argument parser.
    */
-  public void addRequiredArgumentSet(final Argument arg1, final Argument arg2,
-                                     final Argument... remaining)
+  public void addRequiredArgumentSet(@NotNull final Argument arg1,
+                                     @NotNull final Argument arg2,
+                                     @Nullable final Argument... remaining)
   {
     Validator.ensureNotNull(arg1, arg2);
 
@@ -1669,6 +1799,7 @@ public final class ArgumentParser
    * @return  The subcommand that was provided in the set of command-line
    *          arguments, or {@code null} if there is none.
    */
+  @Nullable()
   public SubCommand getSelectedSubCommand()
   {
     return selectedSubCommand;
@@ -1684,7 +1815,7 @@ public final class ArgumentParser
    *                     command-line arguments.  It may be {@code null} if no
    *                     subcommand should be used.
    */
-  void setSelectedSubCommand(final SubCommand subcommand)
+  void setSelectedSubCommand(@Nullable final SubCommand subcommand)
   {
     selectedSubCommand = subcommand;
     if (subcommand != null)
@@ -1701,6 +1832,7 @@ public final class ArgumentParser
    * @return  A list of all subcommands associated with this argument parser, or
    *          an empty list if there are no associated subcommands.
    */
+  @NotNull()
   public List<SubCommand> getSubCommands()
   {
     return Collections.unmodifiableList(subCommands);
@@ -1716,7 +1848,8 @@ public final class ArgumentParser
    * @return  The subcommand with the provided name, or {@code null} if there is
    *          no such subcommand.
    */
-  public SubCommand getSubCommand(final String name)
+  @Nullable()
+  public SubCommand getSubCommand(@Nullable final String name)
   {
     if (name == null)
     {
@@ -1741,7 +1874,7 @@ public final class ArgumentParser
    *                             conflict between any of the subcommand-specific
    *                             arguments and global arguments.
    */
-  public void addSubCommand(final SubCommand subCommand)
+  public void addSubCommand(@NotNull final SubCommand subCommand)
          throws ArgumentException
   {
     // Ensure that the subcommand isn't already registered with an argument
@@ -1799,7 +1932,8 @@ public final class ArgumentParser
    *
    * @throws  ArgumentException  If the provided name is already in use.
    */
-  void addSubCommand(final String name, final SubCommand subCommand)
+  void addSubCommand(@NotNull final String name,
+                     @NotNull final SubCommand subCommand)
        throws ArgumentException
   {
     final String lowerName = StaticUtils.toLowerCase(name);
@@ -1821,9 +1955,30 @@ public final class ArgumentParser
    * @return  The set of unnamed trailing arguments in the provided command line
    *          arguments, or an empty list if there were none.
    */
+  @NotNull()
   public List<String> getTrailingArguments()
   {
     return Collections.unmodifiableList(trailingArgs);
+  }
+
+
+
+  /**
+   * Resets this argument parser so that it appears as if it had not been used
+   * to parse any command-line arguments.
+   */
+  void reset()
+  {
+    selectedSubCommand = null;
+
+    for (final Argument a : namedArgs)
+    {
+      a.reset();
+    }
+
+    propertiesFileUsed = null;
+    argumentsSetFromPropertiesFile.clear();
+    trailingArgs.clear();
   }
 
 
@@ -1846,7 +2001,7 @@ public final class ArgumentParser
    * @throws  ArgumentException  If the parser already has the maximum allowed
    *                             number of trailing arguments.
    */
-  void addTrailingArgument(final String value)
+  void addTrailingArgument(@NotNull final String value)
        throws ArgumentException
   {
     if ((maxTrailingArgs > 0) && (trailingArgs.size() >= maxTrailingArgs))
@@ -1868,6 +2023,7 @@ public final class ArgumentParser
    *          not set on the command line, or {@code null} if no properties file
    *          was used.
    */
+  @Nullable()
   public File getPropertiesFileUsed()
   {
     return propertiesFileUsed;
@@ -1886,6 +2042,7 @@ public final class ArgumentParser
    *          provided on the command line, or an empty list if no arguments
    *          were set from a properties file.
    */
+  @NotNull()
   public List<String> getArgumentsSetFromPropertiesFile()
   {
     return Collections.unmodifiableList(argumentsSetFromPropertiesFile);
@@ -1916,6 +2073,7 @@ public final class ArgumentParser
    *
    * @return  The "clean" copy of this argument parser.
    */
+  @NotNull()
   public ArgumentParser getCleanCopy()
   {
     return new ArgumentParser(this, null);
@@ -1932,14 +2090,14 @@ public final class ArgumentParser
    * @throws  ArgumentException  If a problem occurs while attempting to parse
    *                             the argument information.
    */
-  public void parse(final String[] args)
+  public void parse(@NotNull final String[] args)
          throws ArgumentException
   {
     // Iterate through the provided args strings and process them.
-    ArgumentParser subCommandParser    = null;
-    boolean        inTrailingArgs      = false;
-    boolean        skipFinalValidation = false;
-    String         subCommandName      = null;
+    ArgumentParser subCommandParser = null;
+    boolean inTrailingArgs = false;
+    String subCommandName = null;
+    final AtomicBoolean skipFinalValidation = new AtomicBoolean(false);
     for (int i=0; i < args.length; i++)
     {
       final String s = args[i];
@@ -1994,7 +2152,10 @@ public final class ArgumentParser
         }
         else if (a.isUsageArgument())
         {
-          skipFinalValidation |= skipFinalValidationBecauseOfArgument(a);
+          if (skipFinalValidationBecauseOfArgument(a))
+          {
+            skipFinalValidation.set(true);
+          }
         }
 
         a.incrementOccurrences();
@@ -2049,7 +2210,10 @@ public final class ArgumentParser
           }
           else if (a.isUsageArgument())
           {
-            skipFinalValidation |= skipFinalValidationBecauseOfArgument(a);
+            if (skipFinalValidationBecauseOfArgument(a))
+            {
+              skipFinalValidation.set(true);
+            }
           }
 
           a.incrementOccurrences();
@@ -2082,7 +2246,10 @@ public final class ArgumentParser
           }
           else if (a.isUsageArgument())
           {
-            skipFinalValidation |= skipFinalValidationBecauseOfArgument(a);
+            if (skipFinalValidationBecauseOfArgument(a))
+            {
+              skipFinalValidation.set(true);
+            }
           }
 
           a.incrementOccurrences();
@@ -2110,7 +2277,10 @@ public final class ArgumentParser
               }
               else if (a.isUsageArgument())
               {
-                skipFinalValidation |= skipFinalValidationBecauseOfArgument(a);
+                if (skipFinalValidationBecauseOfArgument(a))
+                {
+                  skipFinalValidation.set(true);
+                }
               }
 
               a.incrementOccurrences();
@@ -2166,7 +2336,7 @@ public final class ArgumentParser
 
     // Perform any appropriate processing related to the use of a properties
     // file.
-    if (! handlePropertiesFile())
+    if (! handlePropertiesFile(skipFinalValidation))
     {
       return;
     }
@@ -2174,7 +2344,7 @@ public final class ArgumentParser
 
     // If a usage argument was provided, then no further validation should be
     // performed.
-    if (skipFinalValidation)
+    if (skipFinalValidation.get())
     {
       return;
     }
@@ -2204,7 +2374,8 @@ public final class ArgumentParser
    *                          parser is associated.  It may be {@code null} if
    *                          there is no associated command-line tool.
    */
-  public void setCommandLineTool(final CommandLineTool commandLineTool)
+  public void setCommandLineTool(
+                   @Nullable final CommandLineTool commandLineTool)
   {
     this.commandLineTool = commandLineTool;
   }
@@ -2219,7 +2390,7 @@ public final class ArgumentParser
    *
    * @throws  ArgumentException  If a validation problem is encountered.
    */
-  private static void doFinalValidation(final ArgumentParser parser)
+  private static void doFinalValidation(@NotNull final ArgumentParser parser)
           throws ArgumentException
   {
     // Make sure that all required arguments have values.
@@ -2367,7 +2538,8 @@ public final class ArgumentParser
    * @return  {@code true} if the provided argument is one that indicates that
    *          final validation should be skipped, or {@code false} if not.
    */
-  private static boolean skipFinalValidationBecauseOfArgument(final Argument a)
+  private static boolean skipFinalValidationBecauseOfArgument(
+                              @NotNull final Argument a)
   {
     // We will skip final validation for all usage arguments except the ones
     // used for interacting with properties and output files.
@@ -2390,6 +2562,10 @@ public final class ArgumentParser
    * Performs any appropriate properties file processing for this argument
    * parser.
    *
+   * @param  skipFinalValidation  A flag that indicates whether to skip final
+   *                              validation because a qualifying usage argument
+   *                              was provided.
+   *
    * @return  {@code true} if the tool should continue processing, or
    *          {@code false} if it should return immediately.
    *
@@ -2397,7 +2573,8 @@ public final class ArgumentParser
    *                             to parse a properties file or update arguments
    *                             with the values contained in it.
    */
-  private boolean handlePropertiesFile()
+  private boolean handlePropertiesFile(
+                       @NotNull final AtomicBoolean skipFinalValidation)
           throws ArgumentException
   {
     final BooleanArgument noPropertiesFile;
@@ -2480,7 +2657,8 @@ public final class ArgumentParser
       final File propertiesFile = propertiesFilePath.getValue();
       if (propertiesFile.exists() && propertiesFile.isFile())
       {
-        handlePropertiesFile(propertiesFilePath.getValue());
+        handlePropertiesFile(propertiesFilePath.getValue(),
+             skipFinalValidation);
       }
       else
       {
@@ -2497,10 +2675,12 @@ public final class ArgumentParser
     // JVM property or an environment variable.  If both are defined, the JVM
     // property will take precedence.  If a property or environment variable
     // specifies an invalid value, then we'll just ignore it.
-    String path = System.getProperty(PROPERTY_DEFAULT_PROPERTIES_FILE_PATH);
+    String path = StaticUtils.getSystemProperty(
+         PROPERTY_DEFAULT_PROPERTIES_FILE_PATH);
     if (path == null)
     {
-      path = System.getenv(ENV_DEFAULT_PROPERTIES_FILE_PATH);
+      path = StaticUtils.getEnvironmentVariable(
+           ENV_DEFAULT_PROPERTIES_FILE_PATH);
     }
 
     if (path != null)
@@ -2508,7 +2688,7 @@ public final class ArgumentParser
       final File propertiesFile = new File(path);
       if (propertiesFile.exists() && propertiesFile.isFile())
       {
-        handlePropertiesFile(propertiesFile);
+        handlePropertiesFile(propertiesFile, skipFinalValidation);
       }
     }
 
@@ -2526,7 +2706,7 @@ public final class ArgumentParser
    * @throws  ArgumentException  If a problem is encountered while writing the
    *                             properties file.
    */
-  private void generatePropertiesFile(final String path)
+  private void generatePropertiesFile(@NotNull final String path)
           throws ArgumentException
   {
     final PrintWriter w;
@@ -2594,9 +2774,9 @@ public final class ArgumentParser
    * @param  a   The argument for which to write the properties.  It must not be
    *             {@code null}.
    */
-  private void writeArgumentProperties(final PrintWriter w,
-                                       final SubCommand sc,
-                                       final Argument a)
+  private void writeArgumentProperties(@NotNull final PrintWriter w,
+                                       @Nullable final SubCommand sc,
+                                       @NotNull final Argument a)
   {
     if (a.isUsageArgument() || a.isHidden())
     {
@@ -2668,7 +2848,8 @@ public final class ArgumentParser
    * @param  w  The writer to use to write the wrapped and commented string.
    * @param  s  The string to be wrapped and written.
    */
-  private static void wrapComment(final PrintWriter w, final String s)
+  private static void wrapComment(@NotNull final PrintWriter w,
+                                  @NotNull final String s)
   {
     for (final String line : StaticUtils.wrapLine(s, 77))
     {
@@ -2682,13 +2863,17 @@ public final class ArgumentParser
    * Reads the contents of the specified properties file and updates the
    * configured arguments as appropriate.
    *
-   * @param  propertiesFile  The properties file to process.
+   * @param  propertiesFile       The properties file to process.
+   * @param  skipFinalValidation  A flag that indicates whether to skip final
+   *                              validation because a qualifying usage argument
+   *                              was provided.
    *
    * @throws  ArgumentException  If a problem is encountered while examining the
    *                             properties file, or while trying to assign a
    *                             property value to a corresponding argument.
    */
-  private void handlePropertiesFile(final File propertiesFile)
+  private void handlePropertiesFile(@NotNull final File propertiesFile,
+                    @NotNull final AtomicBoolean skipFinalValidation)
           throws ArgumentException
   {
     final String propertiesFilePath = propertiesFile.getAbsolutePath();
@@ -2985,14 +3170,14 @@ public final class ArgumentParser
       // Iterate through all of the named arguments for the argument parser and
       // see if we should use the properties to assign values to any of the
       // arguments that weren't provided on the command line.
-      setArgsFromPropertiesFile(propertyMap, false);
+      setArgsFromPropertiesFile(propertyMap, false, skipFinalValidation);
 
 
       // If there is a selected subcommand, then iterate through all of its
       // arguments.
       if (selectedSubCommand != null)
       {
-        setArgsFromPropertiesFile(propertyMap, true);
+        setArgsFromPropertiesFile(propertyMap, true, skipFinalValidation);
       }
     }
     finally
@@ -3013,13 +3198,15 @@ public final class ArgumentParser
   /**
    * Retrieves a string that contains the contents of the provided buffer, but
    * with any Unicode escape sequences converted to the appropriate character
-   * representation.
+   * representation, and any other escapes having the initial backslash
+   * removed.
    *
-   * @param  propertiesFilePath  The path to the properties file
-   * @param  lineNumber  The line number on which the property definition
-   *                     starts.
-   * @param  buffer      The buffer containing the data to be processed.  It
-   *                     must not be {@code null} but may be empty.
+   * @param  propertiesFilePath  The path to the properties file being written.
+   *                             It must not be {@code null}.
+   * @param  lineNumber          The line number on which the property
+   *                             definition starts.
+   * @param  buffer              The buffer containing the data to be processed.
+   *                             It must not be {@code null} but may be empty.
    *
    * @return  A string that contains the contents of the provided buffer, but
    *          with any Unicode escape sequences converted to the appropriate
@@ -3028,9 +3215,10 @@ public final class ArgumentParser
    * @throws  ArgumentException  If a malformed Unicode escape sequence is
    *                             encountered.
    */
-  static String handleUnicodeEscapes(final String propertiesFilePath,
+  @NotNull()
+  static String handleUnicodeEscapes(@NotNull final String propertiesFilePath,
                                      final int lineNumber,
-                                     final StringBuilder buffer)
+                                     @NotNull final StringBuilder buffer)
          throws ArgumentException
   {
     int pos = 0;
@@ -3066,7 +3254,7 @@ public final class ArgumentParser
           }
           else
           {
-            pos++;
+            buffer.deleteCharAt(pos);
           }
         }
       }
@@ -3083,18 +3271,23 @@ public final class ArgumentParser
    * Sets the values of any arguments not provided on the command line but
    * defined in the properties file.
    *
-   * @param  propertyMap    A map of properties read from the properties file.
-   * @param  useSubCommand  Indicates whether to use the argument parser
-   *                        associated with the selected subcommand rather than
-   *                        the global argument parser.
+   * @param  propertyMap          A map of properties read from the properties
+   *                              file.
+   * @param  useSubCommand        Indicates whether to use the argument parser
+   *                              associated with the selected subcommand rather
+   *                              than the global argument parser.
+   * @param  skipFinalValidation  A flag that indicates whether to skip final
+   *                              validation because a qualifying usage argument
+   *                              was provided.
    *
    * @throws  ArgumentException  If a problem is encountered while examining the
    *                             properties file, or while trying to assign a
    *                             property value to a corresponding argument.
    */
   private void setArgsFromPropertiesFile(
-                    final Map<String,ArrayList<String>> propertyMap,
-                    final boolean useSubCommand)
+                    @NotNull final Map<String,ArrayList<String>> propertyMap,
+                    final boolean useSubCommand,
+                    @NotNull final AtomicBoolean skipFinalValidation)
           throws ArgumentException
   {
     final ArgumentParser p;
@@ -3200,6 +3393,11 @@ exclusiveArgumentLoop:
             }
           }
         }
+
+        if (a.isUsageArgument() && skipFinalValidationBecauseOfArgument(a))
+        {
+          skipFinalValidation.set(true);
+        }
       }
     }
   }
@@ -3216,6 +3414,7 @@ exclusiveArgumentLoop:
    *
    * @return  The lines that make up the usage information for this program.
    */
+  @NotNull()
   public List<String> getUsage(final int maxWidth)
   {
     // If a subcommand was selected, then provide usage specific to that
@@ -3446,6 +3645,7 @@ exclusiveArgumentLoop:
    * @return  The lines that make up the usage information for the selected
    *          subcommand.
    */
+  @NotNull()
   private List<String> getSubCommandUsage(final int maxWidth)
   {
     // First is a description of the subcommand.
@@ -3597,7 +3797,8 @@ exclusiveArgumentLoop:
    * @param  indent    Indicates whether to indent each line.
    * @param  maxWidth  The maximum width of each line, in characters.
    */
-  private static void getArgUsage(final Argument a, final List<String> lines,
+  private static void getArgUsage(@NotNull final Argument a,
+                                  @NotNull final List<String> lines,
                                   final boolean indent, final int maxWidth)
   {
     final StringBuilder argLine = new StringBuilder();
@@ -3720,7 +3921,8 @@ exclusiveArgumentLoop:
    * @throws  IOException  If an error occurs while attempting to write to the
    *                       provided output stream.
    */
-  public void getUsage(final OutputStream outputStream, final int maxWidth)
+  public void getUsage(@NotNull final OutputStream outputStream,
+                       final int maxWidth)
          throws IOException
   {
     final List<String> usageLines = getUsage(maxWidth);
@@ -3742,6 +3944,7 @@ exclusiveArgumentLoop:
    *
    * @return  A string representation of the usage information
    */
+  @NotNull()
   public String getUsageString(final int maxWidth)
   {
     final StringBuilder buffer = new StringBuilder();
@@ -3760,7 +3963,8 @@ exclusiveArgumentLoop:
    *                   less than or equal to zero, then no wrapping will be
    *                   performed.
    */
-  public void getUsageString(final StringBuilder buffer, final int maxWidth)
+  public void getUsageString(@NotNull final StringBuilder buffer,
+                             final int maxWidth)
   {
     for (final String line : getUsage(maxWidth))
     {
@@ -3777,6 +3981,7 @@ exclusiveArgumentLoop:
    * @return  A string representation of this argument parser.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -3792,7 +3997,7 @@ exclusiveArgumentLoop:
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ArgumentParser(commandName='");
     buffer.append(commandName);

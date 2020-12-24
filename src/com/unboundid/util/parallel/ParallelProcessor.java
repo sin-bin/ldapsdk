@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,6 +49,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.unboundid.util.Debug;
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.LDAPSDKThreadFactory;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -59,13 +76,13 @@ public final class ParallelProcessor<I,O>
    * This processes the input items.  It is called in parallel by each worker
    * thread.  So it must be thread-safe.
    */
-  private final Processor<I,O> processor;
+  @NotNull private final Processor<I,O> processor;
 
   /**
    * The work done in parallel during processAll is done by the invoking thread
    * and this pool of worker threads.
    */
-  private final List<Thread> workers;
+  @NotNull private final List<Thread> workers;
 
   /**
    * When a batch of work is passed into processAll, we don't release all of the
@@ -85,13 +102,13 @@ public final class ParallelProcessor<I,O>
    * two different times:  when there is work to do for an processAll call and
    * when the Invoker is shutdown.
    */
-  private final Semaphore workerSemaphore = new Semaphore(0);
+  @NotNull private final Semaphore workerSemaphore = new Semaphore(0);
 
   /**
    * This is how the Worker threads access the 'items' parameter passed into
    * invoke().
    */
-  private final AtomicReference<List<? extends I>> inputItems =
+  @NotNull private final AtomicReference<List<? extends I>> inputItems =
        new AtomicReference<>();
 
   /**
@@ -99,27 +116,27 @@ public final class ParallelProcessor<I,O>
    * back to processAll.  The list is pre-populated with null values, and the
    * Worker just sets the values.
    */
-  private final AtomicReference<List<Result<I,O>>> outputItems =
+  @NotNull private final AtomicReference<List<Result<I,O>>> outputItems =
        new AtomicReference<>();
 
   /**
    * This is how each worker thread decides what inputItems to process. It's
    * usually more efficient then having them contend for a queue.
    */
-  private final AtomicInteger nextToProcess = new AtomicInteger();
+  @NotNull private final AtomicInteger nextToProcess = new AtomicInteger();
 
   /**
    * When there are no more inputItems to process, each Worker thread triggers
    * this countdown latch so that the thread that called processAll knows that
    * all of the processing has completed.
    */
-  private volatile CountDownLatch processingCompleteSignal;
+  @Nullable private volatile CountDownLatch processingCompleteSignal;
 
   /**
    * Set by shutdown() when the Invoker is shutdown.  It triggers all of the
    * Worker threads to exit.
    */
-  private final AtomicBoolean shutdown = new AtomicBoolean();
+  @NotNull private final AtomicBoolean shutdown = new AtomicBoolean();
 
 
 
@@ -148,7 +165,7 @@ public final class ParallelProcessor<I,O>
    *                       too large is a bigger danger than having it be too
    *                       small.
    */
-  public ParallelProcessor(final Processor<I,O> processor,
+  public ParallelProcessor(@NotNull final Processor<I,O> processor,
                            final int totalThreads,
                            final int minPerThread)
   {
@@ -185,8 +202,8 @@ public final class ParallelProcessor<I,O>
    *                        too large is a bigger danger than having it be too
    *                        small.
    */
-  public ParallelProcessor(final Processor<I,O> processor,
-                           final ThreadFactory threadFactory,
+  public ParallelProcessor(@NotNull final Processor<I,O> processor,
+                           @Nullable final ThreadFactory threadFactory,
                            final int totalThreads,
                            final int minPerThread)
   {
@@ -240,9 +257,10 @@ public final class ParallelProcessor<I,O>
    *                               processing.
    * @throws IllegalStateException If this thread is called after shutdown().
    */
+  @NotNull()
   public synchronized ArrayList<Result<I,O>> processAll(
-       final List<? extends I> items)
-       throws InterruptedException, IllegalStateException
+              @NotNull final List<? extends I> items)
+         throws InterruptedException, IllegalStateException
   {
     if (shutdown.get())
     {
@@ -365,7 +383,8 @@ public final class ParallelProcessor<I,O>
    *
    * @return The result of the processing.
    */
-  private ProcessResult process(final I input)
+  @NotNull()
+  private ProcessResult process(@NotNull final I input)
   {
     O output = null;
     Throwable failureCause = null;
@@ -454,14 +473,14 @@ public final class ParallelProcessor<I,O>
        implements Result<I,O>
   {
     // The item that was passed into processAll.
-    private final I inputItem;
+    @NotNull private final I inputItem;
 
     // The result of calling processor#process().  This will always be null
     // if failureCause is set.
-    private final O outputItem;
+    @Nullable private final O outputItem;
 
     // If processor#process() throws an Exception, it is set here.
-    private final Throwable failureCause;
+    @Nullable private final Throwable failureCause;
 
 
 
@@ -474,9 +493,9 @@ public final class ParallelProcessor<I,O>
      * @param failureCause If processor#process() throws an Exception, it is set
      *                     here.
      */
-    private ProcessResult(final I inputItem,
-                          final O outputItem,
-                          final Throwable failureCause)
+    private ProcessResult(@NotNull final I inputItem,
+                          @Nullable final O outputItem,
+                          @Nullable final Throwable failureCause)
     {
       this.inputItem = inputItem;
       this.outputItem = outputItem;
@@ -489,6 +508,7 @@ public final class ParallelProcessor<I,O>
      * {@inheritDoc}
      */
     @Override()
+    @NotNull()
     public I getInput()
     {
       return inputItem;
@@ -500,6 +520,7 @@ public final class ParallelProcessor<I,O>
      * {@inheritDoc}
      */
     @Override()
+    @Nullable()
     public O getOutput()
     {
       return outputItem;
@@ -511,6 +532,7 @@ public final class ParallelProcessor<I,O>
      * {@inheritDoc}
      */
     @Override()
+    @Nullable()
     public Throwable getFailureCause()
     {
       return failureCause;

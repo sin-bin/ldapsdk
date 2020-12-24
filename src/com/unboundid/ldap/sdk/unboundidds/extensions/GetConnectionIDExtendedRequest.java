@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             IntermediateClientRequestControl;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -87,7 +104,7 @@ public final class GetConnectionIDExtendedRequest
    * The OID (1.3.6.1.4.1.30221.1.6.2) for the get connection ID extended
    * request.
    */
-  public static final String GET_CONNECTION_ID_REQUEST_OID =
+  @NotNull public static final String GET_CONNECTION_ID_REQUEST_OID =
        "1.3.6.1.4.1.30221.1.6.2";
 
 
@@ -115,7 +132,7 @@ public final class GetConnectionIDExtendedRequest
    *
    * @param  controls  The set of controls to include in the request.
    */
-  public GetConnectionIDExtendedRequest(final Control[] controls)
+  public GetConnectionIDExtendedRequest(@Nullable final Control[] controls)
   {
     super(GET_CONNECTION_ID_REQUEST_OID, null, controls);
   }
@@ -131,7 +148,8 @@ public final class GetConnectionIDExtendedRequest
    *
    * @throws  LDAPException  If a problem occurs while decoding the request.
    */
-  public GetConnectionIDExtendedRequest(final ExtendedRequest extendedRequest)
+  public GetConnectionIDExtendedRequest(
+              @NotNull final ExtendedRequest extendedRequest)
          throws LDAPException
   {
     super(extendedRequest);
@@ -149,8 +167,9 @@ public final class GetConnectionIDExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public GetConnectionIDExtendedResult process(final LDAPConnection connection,
-                                               final int depth)
+  @NotNull()
+  public GetConnectionIDExtendedResult process(
+              @NotNull final LDAPConnection connection, final int depth)
          throws LDAPException
   {
     final ExtendedResult extendedResponse = super.process(connection, depth);
@@ -163,6 +182,7 @@ public final class GetConnectionIDExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public GetConnectionIDExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -174,7 +194,9 @@ public final class GetConnectionIDExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public GetConnectionIDExtendedRequest duplicate(final Control[] controls)
+  @NotNull()
+  public GetConnectionIDExtendedRequest duplicate(
+              @Nullable final Control[] controls)
   {
     final GetConnectionIDExtendedRequest r =
          new GetConnectionIDExtendedRequest(controls);
@@ -188,6 +210,7 @@ public final class GetConnectionIDExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_EXTENDED_REQUEST_NAME_GET_CONNECTION_ID.get();
@@ -199,7 +222,7 @@ public final class GetConnectionIDExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("GetConnectionIDExtendedRequest(");
 

@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -43,6 +58,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -83,22 +100,22 @@ public final class ExtendedResponseProtocolOp
 
 
   // The value for this extended response.
-  private final ASN1OctetString responseValue;
+  @Nullable private final ASN1OctetString responseValue;
 
   // The result code for this extended response.
   private final int resultCode;
 
   // The referral URLs for this extended response.
-  private final List<String> referralURLs;
+  @NotNull private final List<String> referralURLs;
 
   // The diagnostic message for this extended response.
-  private final String diagnosticMessage;
+  @Nullable private final String diagnosticMessage;
 
   // The matched DN for this extended response.
-  private final String matchedDN;
+  @Nullable private final String matchedDN;
 
   // The OID for this extended response.
-  private final String responseOID;
+  @Nullable private final String responseOID;
 
 
 
@@ -116,11 +133,11 @@ public final class ExtendedResponseProtocolOp
    * @param  responseValue      The value for this response, if any.
    */
   public ExtendedResponseProtocolOp(final int resultCode,
-                                    final String matchedDN,
-                                    final String diagnosticMessage,
-                                    final List<String> referralURLs,
-                                    final String responseOID,
-                                    final ASN1OctetString responseValue)
+              @Nullable final String matchedDN,
+              @Nullable final String diagnosticMessage,
+              @Nullable final List<String> referralURLs,
+              @Nullable final String responseOID,
+              @Nullable final ASN1OctetString responseValue)
   {
     this.resultCode        = resultCode;
     this.matchedDN         = matchedDN;
@@ -156,7 +173,7 @@ public final class ExtendedResponseProtocolOp
    * @param  result  The extended result object to use to create this protocol
    *                 op.
    */
-  public ExtendedResponseProtocolOp(final LDAPResult result)
+  public ExtendedResponseProtocolOp(@NotNull final LDAPResult result)
   {
     resultCode        = result.getResultCode().intValue();
     matchedDN         = result.getMatchedDN();
@@ -188,7 +205,7 @@ public final class ExtendedResponseProtocolOp
    * @throws  LDAPException  If a problem occurs while reading or parsing the
    *                         extended response.
    */
-  ExtendedResponseProtocolOp(final ASN1StreamReader reader)
+  ExtendedResponseProtocolOp(@NotNull final ASN1StreamReader reader)
        throws LDAPException
   {
     try
@@ -286,6 +303,7 @@ public final class ExtendedResponseProtocolOp
    * @return  The matched DN for this extended response, or {@code null} if
    *          there is no matched DN.
    */
+  @Nullable()
   public String getMatchedDN()
   {
     return matchedDN;
@@ -299,6 +317,7 @@ public final class ExtendedResponseProtocolOp
    * @return  The diagnostic message for this extended response, or {@code null}
    *          if there is no diagnostic message.
    */
+  @Nullable()
   public String getDiagnosticMessage()
   {
     return diagnosticMessage;
@@ -312,6 +331,7 @@ public final class ExtendedResponseProtocolOp
    * @return  The list of referral URLs for this extended response, or an empty
    *          list if there are no referral URLs.
    */
+  @NotNull()
   public List<String> getReferralURLs()
   {
     return referralURLs;
@@ -325,6 +345,7 @@ public final class ExtendedResponseProtocolOp
    * @return  The OID for this extended response, or {@code null} if there is no
    *          response OID.
    */
+  @Nullable()
   public String getResponseOID()
   {
     return responseOID;
@@ -338,6 +359,7 @@ public final class ExtendedResponseProtocolOp
    * @return  The value for this extended response, or {@code null} if there is
    *          no response value.
    */
+  @Nullable()
   public ASN1OctetString getResponseValue()
   {
     return responseValue;
@@ -360,6 +382,7 @@ public final class ExtendedResponseProtocolOp
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ASN1Element encodeProtocolOp()
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(6);
@@ -423,8 +446,9 @@ public final class ExtendedResponseProtocolOp
    * @throws  LDAPException  If the provided ASN.1 element cannot be decoded as
    *                         an extended response protocol op.
    */
+  @NotNull()
   public static ExtendedResponseProtocolOp decodeProtocolOp(
-                                                final ASN1Element element)
+                     @NotNull final ASN1Element element)
          throws LDAPException
   {
     try
@@ -519,7 +543,7 @@ public final class ExtendedResponseProtocolOp
    * {@inheritDoc}
    */
   @Override()
-  public void writeTo(final ASN1Buffer buffer)
+  public void writeTo(@NotNull final ASN1Buffer buffer)
   {
     final ASN1BufferSequence opSequence =
          buffer.beginSequence(LDAPMessage.PROTOCOL_OP_TYPE_EXTENDED_RESPONSE);
@@ -562,7 +586,8 @@ public final class ExtendedResponseProtocolOp
    *
    * @return  The extended result that was created.
    */
-  public ExtendedResult toExtendedResult(final Control... controls)
+  @NotNull()
+  public ExtendedResult toExtendedResult(@Nullable final Control... controls)
   {
     final String[] referralArray = new String[referralURLs.size()];
     referralURLs.toArray(referralArray);
@@ -580,6 +605,7 @@ public final class ExtendedResponseProtocolOp
    * @return  A string representation of this protocol op.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -593,7 +619,7 @@ public final class ExtendedResponseProtocolOp
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ExtendedResponseProtocolOp(resultCode=");
     buffer.append(resultCode);

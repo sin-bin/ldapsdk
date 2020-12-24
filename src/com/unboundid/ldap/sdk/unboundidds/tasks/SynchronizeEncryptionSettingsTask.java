@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,8 @@ import java.util.Map;
 
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -61,7 +78,7 @@ public final class SynchronizeEncryptionSettingsTask
    * The fully-qualified name of the Java class that is used for the synchronize
    * encryption settings task.
    */
-  static final String SYNCHRONIZE_ENCRYPTION_SETTINGS_TASK_CLASS =
+  @NotNull static final String SYNCHRONIZE_ENCRYPTION_SETTINGS_TASK_CLASS =
        "com.unboundid.directory.server.crypto." +
             "SynchronizeEncryptionSettingsTask";
 
@@ -71,7 +88,7 @@ public final class SynchronizeEncryptionSettingsTask
    * The name of the object class used in synchronize encryption settings task
    * entries.
    */
-  private static final String OC_SYNCHRONIZE_ENCRYPTION_SETTINGS_TASK =
+  @NotNull private static final String OC_SYNCHRONIZE_ENCRYPTION_SETTINGS_TASK =
        "ds-task-synchronize-encryption-settings";
 
 
@@ -103,7 +120,7 @@ public final class SynchronizeEncryptionSettingsTask
    *                        {@code null} then a UUID will be generated for use
    *                        as the task ID.
    */
-  public SynchronizeEncryptionSettingsTask(final String taskID)
+  public SynchronizeEncryptionSettingsTask(@Nullable final String taskID)
   {
     this(taskID, null, null, null, null, null);
   }
@@ -132,11 +149,12 @@ public final class SynchronizeEncryptionSettingsTask
    *                                 that should be notified if this task does
    *                                 not complete successfully.
    */
-  public SynchronizeEncryptionSettingsTask(final String taskID,
-              final Date scheduledStartTime, final List<String> dependencyIDs,
-              final FailedDependencyAction failedDependencyAction,
-              final List<String> notifyOnCompletion,
-              final List<String> notifyOnError)
+  public SynchronizeEncryptionSettingsTask(@Nullable final String taskID,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnError)
   {
     this(taskID, scheduledStartTime, dependencyIDs, failedDependencyAction,
          null, notifyOnCompletion, null, notifyOnError, null, null, null);
@@ -180,14 +198,17 @@ public final class SynchronizeEncryptionSettingsTask
    *                                 alert notification if this task fails to
    *                                 complete successfully.
    */
-  public SynchronizeEncryptionSettingsTask(final String taskID,
-              final Date scheduledStartTime, final List<String> dependencyIDs,
-              final FailedDependencyAction failedDependencyAction,
-              final List<String> notifyOnStart,
-              final List<String> notifyOnCompletion,
-              final List<String> notifyOnSuccess,
-              final List<String> notifyOnError, final Boolean alertOnStart,
-              final Boolean alertOnSuccess, final Boolean alertOnError)
+  public SynchronizeEncryptionSettingsTask(@Nullable final String taskID,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnStart,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnSuccess,
+              @Nullable final List<String> notifyOnError,
+              @Nullable final Boolean alertOnStart,
+              @Nullable final Boolean alertOnSuccess,
+              @Nullable final Boolean alertOnError)
   {
     super(taskID, SYNCHRONIZE_ENCRYPTION_SETTINGS_TASK_CLASS,
          scheduledStartTime, dependencyIDs, failedDependencyAction,
@@ -206,7 +227,7 @@ public final class SynchronizeEncryptionSettingsTask
    * @throws  TaskException  If the provided entry cannot be parsed as a
    *                         synchronize encryption settings task entry.
    */
-  public SynchronizeEncryptionSettingsTask(final Entry entry)
+  public SynchronizeEncryptionSettingsTask(@NotNull final Entry entry)
          throws TaskException
   {
     super(entry);
@@ -227,7 +248,7 @@ public final class SynchronizeEncryptionSettingsTask
    *                         task.
    */
   public SynchronizeEncryptionSettingsTask(
-              final Map<TaskProperty,List<Object>> properties)
+              @NotNull final Map<TaskProperty,List<Object>> properties)
          throws TaskException
   {
     super(SYNCHRONIZE_ENCRYPTION_SETTINGS_TASK_CLASS, properties);
@@ -239,6 +260,7 @@ public final class SynchronizeEncryptionSettingsTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskName()
   {
     return INFO_TASK_NAME_SYNCHRONIZE_ENCRYPTION_SETTINGS.get();
@@ -250,6 +272,7 @@ public final class SynchronizeEncryptionSettingsTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskDescription()
   {
     return INFO_TASK_DESCRIPTION_SYNCHRONIZE_ENCRYPTION_SETTINGS.get();
@@ -261,6 +284,7 @@ public final class SynchronizeEncryptionSettingsTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<String> getAdditionalObjectClasses()
   {
     return Collections.singletonList(OC_SYNCHRONIZE_ENCRYPTION_SETTINGS_TASK);

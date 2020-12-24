@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,8 @@ import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPConnectionPool;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.args.ArgumentParser;
 import com.unboundid.util.args.IntegerArgument;
 
@@ -57,34 +74,35 @@ import com.unboundid.util.args.IntegerArgument;
 final class ManageAccountSearchProcessor
 {
   // A queue used to hold the filters for the searches to process.
-  private final LinkedBlockingQueue<Filter> filterQueue;
+  @Nullable private final LinkedBlockingQueue<Filter> filterQueue;
 
   // A handle to the manage-account tool instance with which this search
   // processor is associated.
-  private final ManageAccount manageAccount;
+  @NotNull private final ManageAccount manageAccount;
 
   // A handle to the manage-account processor that will be used to process the
   // identified search result entries.
-  private final ManageAccountProcessor manageAccountProcessor;
+  @NotNull private final ManageAccountProcessor manageAccountProcessor;
 
   // The active search operation for this processor, if only a single search
   // thread is to be used.
-  private volatile ManageAccountSearchOperation activeSearchOperation;
+  @Nullable private volatile ManageAccountSearchOperation activeSearchOperation;
 
   // The maximum page size to use when performing searches.
   private final int simplePageSize;
 
   // The connection pool to use to communicate with the server.
-  private final LDAPConnectionPool pool;
+  @NotNull private final LDAPConnectionPool pool;
 
   // The list of processor threads that have been created.
-  private final List<ManageAccountSearchProcessorThread> searchProcessorThreads;
+  @NotNull private final List<ManageAccountSearchProcessorThread>
+       searchProcessorThreads;
 
   // The base DN to use for search requests.
-  private final String baseDN;
+  @NotNull private final String baseDN;
 
   // The user ID attribute.
-  private final String userIDAttribute;
+  @NotNull private final String userIDAttribute;
 
 
 
@@ -101,9 +119,9 @@ final class ManageAccountSearchProcessor
    * @param  pool                    The connection pool to use to communicate
    *                                 with the server.
    */
-  ManageAccountSearchProcessor(final ManageAccount manageAccount,
-       final ManageAccountProcessor manageAccountProcessor,
-       final LDAPConnectionPool pool)
+  ManageAccountSearchProcessor(@NotNull final ManageAccount manageAccount,
+       @NotNull final ManageAccountProcessor manageAccountProcessor,
+       @NotNull final LDAPConnectionPool pool)
   {
     this.manageAccount = manageAccount;
     this.manageAccountProcessor = manageAccountProcessor;
@@ -160,7 +178,7 @@ final class ManageAccountSearchProcessor
    *
    * @param  filter  The filter to use for the search request to process.
    */
-  void processFilter(final Filter filter)
+  void processFilter(@NotNull final Filter filter)
   {
     if (filterQueue == null)
     {
@@ -213,7 +231,7 @@ final class ManageAccountSearchProcessor
    * @throws  LDAPException  If the provided string cannot be parsed as a valid
    *                         search filter.
    */
-  void processFilter(final String filter)
+  void processFilter(@NotNull final String filter)
        throws LDAPException
   {
     processFilter(Filter.create(filter));
@@ -230,7 +248,7 @@ final class ManageAccountSearchProcessor
    *
    * @param  userID  The user ID for which toi search.
    */
-  void processUserID(final String userID)
+  void processUserID(@NotNull final String userID)
   {
     processFilter(Filter.createEqualityFilter(userIDAttribute, userID));
   }
@@ -244,6 +262,7 @@ final class ManageAccountSearchProcessor
    * @return  The next search request to be processed, or {@code null} if no
    *          more processing should be performed.
    */
+  @Nullable()
   ManageAccountSearchOperation getSearchOperation()
   {
     // If the tool has been interrupted, then return null to signal that the

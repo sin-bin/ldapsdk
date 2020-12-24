@@ -1,9 +1,24 @@
 /*
- * Copyright 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2013-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,6 +49,8 @@ import com.unboundid.ldap.sdk.ExtendedResult;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -83,7 +100,7 @@ public final class GetConfigurationExtendedResult
    * The OID (1.3.6.1.4.1.30221.2.6.29) for the get configuration extended
    * result.
    */
-  public static final String GET_CONFIG_RESULT_OID =
+  @NotNull public static final String GET_CONFIG_RESULT_OID =
        "1.3.6.1.4.1.30221.2.6.29";
 
 
@@ -120,13 +137,13 @@ public final class GetConfigurationExtendedResult
 
 
   // The raw data for the configuration file that has been returned.
-  private final byte[] fileData;
+  @Nullable private final byte[] fileData;
 
   // The type of configuration that has been returned.
-  private final GetConfigurationType configurationType;
+  @Nullable private final GetConfigurationType configurationType;
 
   // The name of the configuration file that has been returned.
-  private final String fileName;
+  @Nullable private final String fileName;
 
 
 
@@ -140,7 +157,7 @@ public final class GetConfigurationExtendedResult
    * @throws LDAPException  If the provided extended result cannot be parsed as
    *                         a valid get configuration extended result.
    */
-  public GetConfigurationExtendedResult(final ExtendedResult result)
+  public GetConfigurationExtendedResult(@NotNull final ExtendedResult result)
        throws LDAPException
   {
     super(result);
@@ -210,11 +227,14 @@ public final class GetConfigurationExtendedResult
    *                            available.
    */
   public GetConfigurationExtendedResult(final int messageID,
-              final ResultCode resultCode, final String diagnosticMessage,
-              final String matchedDN, final String[] referralURLs,
-              final GetConfigurationType configurationType,
-              final String fileName, final byte[] fileData,
-              final Control... responseControls)
+              @NotNull final ResultCode resultCode,
+              @Nullable final String diagnosticMessage,
+              @Nullable final String matchedDN,
+              @Nullable final String[] referralURLs,
+              @Nullable final GetConfigurationType configurationType,
+              @Nullable final String fileName,
+              @Nullable final byte[] fileData,
+              @Nullable final Control... responseControls)
   {
     super(messageID, resultCode, diagnosticMessage, matchedDN, referralURLs,
          ((configurationType == null) ? null : GET_CONFIG_RESULT_OID),
@@ -243,9 +263,11 @@ public final class GetConfigurationExtendedResult
    *          value for a get configuration extended result, or {@code null} if
    *          a result with the provided information should not have a value.
    */
+  @Nullable()
   public static ASN1OctetString encodeValue(
-                     final GetConfigurationType configurationType,
-                     final String fileName, final byte[] fileData)
+                     @Nullable final GetConfigurationType configurationType,
+                     @Nullable final String fileName,
+                     @Nullable final byte[] fileData)
   {
     if (configurationType == null)
     {
@@ -280,6 +302,7 @@ public final class GetConfigurationExtendedResult
    * @return  The type of configuration that has been returned, or {@code null}
    *          if this is not available.
    */
+  @Nullable()
   public GetConfigurationType getConfigurationType()
   {
     return configurationType;
@@ -294,6 +317,7 @@ public final class GetConfigurationExtendedResult
    * @return  The name of the configuration file that has been returned, or
    *          {@code null} if this is not available.
    */
+  @Nullable()
   public String getFileName()
   {
     return fileName;
@@ -308,6 +332,7 @@ public final class GetConfigurationExtendedResult
    * @return  The raw data for the configuration file that has been returned,
    *          or {@code null} if this is not available.
    */
+  @Nullable()
   public byte[] getFileData()
   {
     return fileData;
@@ -322,6 +347,7 @@ public final class GetConfigurationExtendedResult
    * @return  An input stream that may be used to read the file data that has
    *          been returned, or {@code null} if this is not available.
    */
+  @Nullable()
   public InputStream getFileDataInputStream()
   {
     if (fileData == null)
@@ -340,6 +366,7 @@ public final class GetConfigurationExtendedResult
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedResultName()
   {
     return INFO_EXTENDED_RESULT_NAME_GET_CONFIG.get();
@@ -351,7 +378,7 @@ public final class GetConfigurationExtendedResult
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("GetConfigurationExtendedResult(resultCode=");
     buffer.append(getResultCode());

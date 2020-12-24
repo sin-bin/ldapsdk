@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,8 @@ import java.util.List;
 import com.unboundid.ldap.sdk.schema.Schema;
 import com.unboundid.ldif.LDIFException;
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -37,7 +54,14 @@ import com.unboundid.util.ThreadSafetyLevel;
  * This interface defines a set of methods that are available for objects that
  * may be used to communicate with an LDAP directory server.  This can be used
  * to facilitate development of methods which can be used for either a single
- * LDAP connection or an LDAP connection pool.
+ * LDAP connection or an LDAP connection pool.  Note that this interface does
+ * not include support for bind or extended operations, as they may alter the
+ * state of the underlying connection (or connection-like object), and care must
+ * be taken when invoking such operations.  The {@link FullLDAPInterface}
+ * interface is a subclass of this interface that does include support for
+ * bind and extended operations, but those methods should be used with care to
+ * ensure that they do not inappropriately alter the state of the associated
+ * object.
  * <BR><BR>
  * At present, all implementations provided by the LDAP SDK are at least mostly
  * threadsafe and can be used to process multiple requests concurrently.
@@ -61,8 +85,9 @@ public interface LDAPInterface
    * @throws  LDAPException  If a problem occurs while attempting to retrieve
    *                         the server root DSE.
    */
+  @Nullable()
   RootDSE getRootDSE()
-       throws LDAPException;
+          throws LDAPException;
 
 
 
@@ -80,8 +105,9 @@ public interface LDAPInterface
    * @throws  LDAPException  If a problem occurs while attempting to retrieve
    *                         the server schema.
    */
+  @Nullable()
   Schema getSchema()
-       throws LDAPException;
+         throws LDAPException;
 
 
 
@@ -104,7 +130,8 @@ public interface LDAPInterface
    * @throws  LDAPException  If a problem occurs while attempting to retrieve
    *                         the server schema.
    */
-  Schema getSchema(String entryDN)
+  @Nullable()
+  Schema getSchema(@Nullable String entryDN)
        throws LDAPException;
 
 
@@ -122,7 +149,8 @@ public interface LDAPInterface
    * @throws  LDAPException  If a problem occurs while sending the request or
    *                         reading the response.
    */
-  SearchResultEntry getEntry(String dn)
+  @Nullable()
+  SearchResultEntry getEntry(@NotNull String dn)
        throws LDAPException;
 
 
@@ -143,7 +171,8 @@ public interface LDAPInterface
    * @throws  LDAPException  If a problem occurs while sending the request or
    *                         reading the response.
    */
-  SearchResultEntry getEntry(String dn, String... attributes)
+  @Nullable()
+  SearchResultEntry getEntry(@NotNull String dn, @Nullable String... attributes)
        throws LDAPException;
 
 
@@ -162,7 +191,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult add(String dn, Attribute... attributes)
+  @NotNull()
+  LDAPResult add(@NotNull String dn, @NotNull Attribute... attributes)
        throws LDAPException;
 
 
@@ -181,7 +211,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult add(String dn, Collection<Attribute> attributes)
+  @NotNull()
+  LDAPResult add(@NotNull String dn, @NotNull Collection<Attribute> attributes)
        throws LDAPException;
 
 
@@ -197,7 +228,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult add(Entry entry)
+  @NotNull()
+  LDAPResult add(@NotNull Entry entry)
        throws LDAPException;
 
 
@@ -217,7 +249,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult add(String... ldifLines)
+  @NotNull()
+  LDAPResult add(@NotNull String... ldifLines)
        throws LDIFException, LDAPException;
 
 
@@ -234,7 +267,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult add(AddRequest addRequest)
+  @NotNull()
+  LDAPResult add(@NotNull AddRequest addRequest)
        throws LDAPException;
 
 
@@ -251,7 +285,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult add(ReadOnlyAddRequest addRequest)
+  @NotNull()
+  LDAPResult add(@NotNull ReadOnlyAddRequest addRequest)
        throws LDAPException;
 
 
@@ -272,7 +307,9 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  CompareResult compare(String dn, String attributeName, String assertionValue)
+  @NotNull()
+  CompareResult compare(@NotNull String dn, @NotNull String attributeName,
+                        @NotNull String assertionValue)
        throws LDAPException;
 
 
@@ -289,7 +326,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  CompareResult compare(CompareRequest compareRequest)
+  @NotNull()
+  CompareResult compare(@NotNull CompareRequest compareRequest)
        throws LDAPException;
 
 
@@ -306,7 +344,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  CompareResult compare(ReadOnlyCompareRequest compareRequest)
+  @NotNull()
+  CompareResult compare(@NotNull ReadOnlyCompareRequest compareRequest)
        throws LDAPException;
 
 
@@ -322,7 +361,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult delete(String dn)
+  @NotNull()
+  LDAPResult delete(@NotNull String dn)
        throws LDAPException;
 
 
@@ -339,7 +379,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult delete(DeleteRequest deleteRequest)
+  @NotNull()
+  LDAPResult delete(@NotNull DeleteRequest deleteRequest)
        throws LDAPException;
 
 
@@ -356,7 +397,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult delete(ReadOnlyDeleteRequest deleteRequest)
+  @NotNull()
+  LDAPResult delete(@NotNull ReadOnlyDeleteRequest deleteRequest)
        throws LDAPException;
 
 
@@ -374,7 +416,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult modify(String dn, Modification mod)
+  @NotNull()
+  LDAPResult modify(@NotNull String dn, @NotNull Modification mod)
        throws LDAPException;
 
 
@@ -391,7 +434,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult modify(String dn, Modification... mods)
+  @NotNull()
+  LDAPResult modify(@NotNull String dn, @NotNull Modification... mods)
        throws LDAPException;
 
 
@@ -409,7 +453,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult modify(String dn, List<Modification> mods)
+  @NotNull()
+  LDAPResult modify(@NotNull String dn, @NotNull List<Modification> mods)
        throws LDAPException;
 
 
@@ -432,7 +477,8 @@ public interface LDAPInterface
    *                         reading the response.
    *
    */
-  LDAPResult modify(String... ldifModificationLines)
+  @NotNull()
+  LDAPResult modify(@NotNull String... ldifModificationLines)
        throws LDIFException, LDAPException;
 
 
@@ -449,7 +495,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult modify(ModifyRequest modifyRequest)
+  @NotNull()
+  LDAPResult modify(@NotNull ModifyRequest modifyRequest)
        throws LDAPException;
 
 
@@ -466,7 +513,8 @@ public interface LDAPInterface
    *                         problem is encountered while sending the request or
    *                         reading the response.
    */
-  LDAPResult modify(ReadOnlyModifyRequest modifyRequest)
+  @NotNull()
+  LDAPResult modify(@NotNull ReadOnlyModifyRequest modifyRequest)
        throws LDAPException;
 
 
@@ -487,7 +535,9 @@ public interface LDAPInterface
    *                         a problem is encountered while sending the request
    *                         or reading the response.
    */
-  LDAPResult modifyDN(String dn, String newRDN, boolean deleteOldRDN)
+  @NotNull()
+  LDAPResult modifyDN(@NotNull String dn, @NotNull String newRDN,
+                      boolean deleteOldRDN)
        throws LDAPException;
 
 
@@ -511,8 +561,9 @@ public interface LDAPInterface
    *                         a problem is encountered while sending the request
    *                         or reading the response.
    */
-  LDAPResult modifyDN(String dn, String newRDN, boolean deleteOldRDN,
-                      String newSuperiorDN)
+  @NotNull()
+  LDAPResult modifyDN(@NotNull String dn, @NotNull String newRDN,
+                      boolean deleteOldRDN, @Nullable String newSuperiorDN)
        throws LDAPException;
 
 
@@ -529,7 +580,8 @@ public interface LDAPInterface
    *                         a problem is encountered while sending the request
    *                         or reading the response.
    */
-  LDAPResult modifyDN(ModifyDNRequest modifyDNRequest)
+  @NotNull()
+  LDAPResult modifyDN(@NotNull ModifyDNRequest modifyDNRequest)
        throws LDAPException;
 
 
@@ -546,7 +598,8 @@ public interface LDAPInterface
    *                         a problem is encountered while sending the request
    *                         or reading the response.
    */
-  LDAPResult modifyDN(ReadOnlyModifyDNRequest modifyDNRequest)
+  @NotNull()
+  LDAPResult modifyDN(@NotNull ReadOnlyModifyDNRequest modifyDNRequest)
        throws LDAPException;
 
 
@@ -591,8 +644,9 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResult search(String baseDN, SearchScope scope, String filter,
-                      String... attributes)
+  @NotNull()
+  SearchResult search(@NotNull String baseDN, @NotNull SearchScope scope,
+                      @NotNull String filter, @Nullable String... attributes)
        throws LDAPSearchException;
 
 
@@ -635,8 +689,9 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResult search(String baseDN, SearchScope scope, Filter filter,
-                      String... attributes)
+  @NotNull()
+  SearchResult search(@NotNull String baseDN, @NotNull SearchScope scope,
+                      @NotNull Filter filter, @Nullable String... attributes)
        throws LDAPSearchException;
 
 
@@ -687,8 +742,10 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResult search(SearchResultListener searchResultListener, String baseDN,
-                      SearchScope scope, String filter, String... attributes)
+  @NotNull()
+  SearchResult search(@Nullable SearchResultListener searchResultListener,
+                      @NotNull String baseDN, @NotNull SearchScope scope,
+                      @NotNull String filter, @Nullable String... attributes)
        throws LDAPSearchException;
 
 
@@ -737,8 +794,10 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResult search(SearchResultListener searchResultListener, String baseDN,
-                      SearchScope scope, Filter filter, String... attributes)
+  @NotNull()
+  SearchResult search(@Nullable SearchResultListener searchResultListener,
+                      @NotNull String baseDN, @NotNull SearchScope scope,
+                      @NotNull Filter filter, @Nullable String... attributes)
        throws LDAPSearchException;
 
 
@@ -793,10 +852,11 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResult search(String baseDN, SearchScope scope,
-                      DereferencePolicy derefPolicy, int sizeLimit,
-                      int timeLimit, boolean typesOnly, String filter,
-                      String... attributes)
+  @NotNull()
+  SearchResult search(@NotNull String baseDN, @NotNull SearchScope scope,
+                      @NotNull DereferencePolicy derefPolicy, int sizeLimit,
+                      int timeLimit, boolean typesOnly,
+                      @NotNull String filter, @Nullable String... attributes)
        throws LDAPSearchException;
 
 
@@ -849,10 +909,11 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResult search(String baseDN, SearchScope scope,
-                      DereferencePolicy derefPolicy, int sizeLimit,
-                      int timeLimit, boolean typesOnly, Filter filter,
-                      String... attributes)
+  @NotNull()
+  SearchResult search(@NotNull String baseDN, @NotNull SearchScope scope,
+                      @NotNull DereferencePolicy derefPolicy, int sizeLimit,
+                      int timeLimit, boolean typesOnly, @NotNull Filter filter,
+                      @Nullable String... attributes)
        throws LDAPSearchException;
 
 
@@ -916,10 +977,12 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResult search(SearchResultListener searchResultListener, String baseDN,
-                      SearchScope scope, DereferencePolicy derefPolicy,
-                      int sizeLimit, int timeLimit, boolean typesOnly,
-                      String filter, String... attributes)
+  @NotNull()
+  SearchResult search(@Nullable SearchResultListener searchResultListener,
+                      @NotNull String baseDN, @NotNull SearchScope scope,
+                      @NotNull DereferencePolicy derefPolicy, int sizeLimit,
+                      int timeLimit, boolean typesOnly,
+                      @NotNull String filter, @Nullable String... attributes)
        throws LDAPSearchException;
 
 
@@ -981,10 +1044,12 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResult search(SearchResultListener searchResultListener, String baseDN,
-                      SearchScope scope, DereferencePolicy derefPolicy,
-                      int sizeLimit, int timeLimit, boolean typesOnly,
-                      Filter filter, String... attributes)
+  @NotNull()
+  SearchResult search(@Nullable SearchResultListener searchResultListener,
+                      @NotNull String baseDN, @NotNull SearchScope scope,
+                      @NotNull DereferencePolicy derefPolicy, int sizeLimit,
+                      int timeLimit, boolean typesOnly,
+                      @NotNull Filter filter, @Nullable String... attributes)
        throws LDAPSearchException;
 
 
@@ -1020,7 +1085,8 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResult search(SearchRequest searchRequest)
+  @NotNull()
+  SearchResult search(@NotNull SearchRequest searchRequest)
        throws LDAPSearchException;
 
 
@@ -1056,7 +1122,8 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResult search(ReadOnlySearchRequest searchRequest)
+  @NotNull()
+  SearchResult search(@NotNull ReadOnlySearchRequest searchRequest)
        throws LDAPSearchException;
 
 
@@ -1102,8 +1169,11 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResultEntry searchForEntry(String baseDN, SearchScope scope,
-                                   String filter, String... attributes)
+  @Nullable()
+  SearchResultEntry searchForEntry(@NotNull String baseDN,
+                                   @NotNull SearchScope scope,
+                                   @NotNull String filter,
+                                   @Nullable String... attributes)
        throws LDAPSearchException;
 
 
@@ -1149,8 +1219,11 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResultEntry searchForEntry(String baseDN, SearchScope scope,
-                                   Filter filter, String... attributes)
+  @Nullable()
+  SearchResultEntry searchForEntry(@NotNull String baseDN,
+                                   @NotNull SearchScope scope,
+                                   @NotNull Filter filter,
+                                   @Nullable String... attributes)
        throws LDAPSearchException;
 
 
@@ -1203,10 +1276,13 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResultEntry searchForEntry(String baseDN, SearchScope scope,
-                                   DereferencePolicy derefPolicy, int timeLimit,
-                                   boolean typesOnly, String filter,
-                                   String... attributes)
+  @Nullable()
+  SearchResultEntry searchForEntry(@NotNull String baseDN,
+                                   @NotNull SearchScope scope,
+                                   @NotNull DereferencePolicy derefPolicy,
+                                   int timeLimit, boolean typesOnly,
+                                   @NotNull String filter,
+                                   @Nullable String... attributes)
        throws LDAPSearchException;
 
 
@@ -1258,10 +1334,13 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResultEntry searchForEntry(String baseDN, SearchScope scope,
-                                   DereferencePolicy derefPolicy, int timeLimit,
-                                   boolean typesOnly, Filter filter,
-                                   String... attributes)
+  @Nullable()
+  SearchResultEntry searchForEntry(@NotNull String baseDN,
+                                   @NotNull SearchScope scope,
+                                   @NotNull DereferencePolicy derefPolicy,
+                                   int timeLimit, boolean typesOnly,
+                                   @NotNull Filter filter,
+                                   @Nullable String... attributes)
        throws LDAPSearchException;
 
 
@@ -1300,7 +1379,8 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResultEntry searchForEntry(SearchRequest searchRequest)
+  @Nullable()
+  SearchResultEntry searchForEntry(@NotNull SearchRequest searchRequest)
        throws LDAPSearchException;
 
 
@@ -1339,6 +1419,7 @@ public interface LDAPInterface
    *                               examined to obtain information about those
    *                               entries and/or references.
    */
-  SearchResultEntry searchForEntry(ReadOnlySearchRequest searchRequest)
+  @Nullable()
+  SearchResultEntry searchForEntry(@NotNull ReadOnlySearchRequest searchRequest)
        throws LDAPSearchException;
 }

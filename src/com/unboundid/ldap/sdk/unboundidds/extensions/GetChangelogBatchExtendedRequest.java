@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -47,6 +62,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -140,7 +157,7 @@ public final class GetChangelogBatchExtendedRequest
    * The OID (1.3.6.1.4.1.30221.2.6.10) for the get changelog batch extended
    * request.
    */
-  public static final String GET_CHANGELOG_BATCH_REQUEST_OID =
+  @NotNull public static final String GET_CHANGELOG_BATCH_REQUEST_OID =
        "1.3.6.1.4.1.30221.2.6.10";
 
 
@@ -262,33 +279,34 @@ public final class GetChangelogBatchExtendedRequest
   private final boolean waitForMaxChanges;
 
   // The change selection criteria for the request, if any.
-  private final ChangelogBatchChangeSelectionCriteria changeSelectionCriteria;
+  @Nullable private final ChangelogBatchChangeSelectionCriteria
+       changeSelectionCriteria;
 
   // The starting point for the batch of changes to retrieve.
-  private final ChangelogBatchStartingPoint startingPoint;
+  @NotNull private final ChangelogBatchStartingPoint startingPoint;
 
   // The entry listener for this request.
-  private final ChangelogEntryListener entryListener;
+  @Nullable private final ChangelogEntryListener entryListener;
 
   // The maximum number of changes to retrieve in the batch.
   private final int maxChanges;
 
   // The list of base DNs for entries to exclude from the results.
-  private final List<String> excludeBaseDNs;
+  @NotNull private final List<String> excludeBaseDNs;
 
   // The list of base DNs for entries to include in the results.
-  private final List<String> includeBaseDNs;
+  @NotNull private final List<String> includeBaseDNs;
 
   // The maximum length of time in milliseconds to wait for changes to become
   // available.
   private final long maxWaitTimeMillis;
 
   // The set of change types for changes to include in the results.
-  private final Set<ChangeType> changeTypes;
+  @NotNull private final Set<ChangeType> changeTypes;
 
   // The DN of a user for whom to pare down the contents of changelog entries
   // based on access control and sensitive attribute restrictions, if defined.
-  private final String pareEntriesForUserDN;
+  @Nullable private final String pareEntriesForUserDN;
 
 
 
@@ -319,9 +337,9 @@ public final class GetChangelogBatchExtendedRequest
    *                            be no controls.
    */
   public GetChangelogBatchExtendedRequest(
-              final ChangelogBatchStartingPoint startingPoint,
+              @NotNull final ChangelogBatchStartingPoint startingPoint,
               final int maxChanges, final long maxWaitTimeMillis,
-              final Control... controls)
+              @Nullable final Control... controls)
   {
     this(null, startingPoint, maxChanges, maxWaitTimeMillis, false, null, null,
          null, false, null, null, false, false, controls);
@@ -363,10 +381,10 @@ public final class GetChangelogBatchExtendedRequest
    *                            be no controls.
    */
   public GetChangelogBatchExtendedRequest(
-              final ChangelogEntryListener entryListener,
-              final ChangelogBatchStartingPoint startingPoint,
+              @Nullable final ChangelogEntryListener entryListener,
+              @NotNull final ChangelogBatchStartingPoint startingPoint,
               final int maxChanges, final long maxWaitTimeMillis,
-              final Control... controls)
+              @Nullable final Control... controls)
   {
     this(entryListener, startingPoint, maxChanges, maxWaitTimeMillis, false,
          null, null, null, false, null, null, false, false, controls);
@@ -429,14 +447,14 @@ public final class GetChangelogBatchExtendedRequest
    *                                   if there should be no controls.
    */
   public GetChangelogBatchExtendedRequest(
-              final ChangelogBatchStartingPoint startingPoint,
+              @NotNull final ChangelogBatchStartingPoint startingPoint,
               final int maxChanges, final long maxWaitTimeMillis,
               final boolean waitForMaxChanges,
-              final List<String> includeBaseDNs,
-              final List<String> excludeBaseDNs,
-              final Set<ChangeType> changeTypes,
+              @Nullable final List<String> includeBaseDNs,
+              @Nullable final List<String> excludeBaseDNs,
+              @Nullable final Set<ChangeType> changeTypes,
               final boolean continueOnMissingChanges,
-              final Control... controls)
+              @Nullable final Control... controls)
   {
     this(null, startingPoint, maxChanges, maxWaitTimeMillis, waitForMaxChanges,
          includeBaseDNs, excludeBaseDNs, changeTypes, continueOnMissingChanges,
@@ -507,15 +525,15 @@ public final class GetChangelogBatchExtendedRequest
    *                                   if there should be no controls.
    */
   public GetChangelogBatchExtendedRequest(
-              final ChangelogEntryListener entryListener,
-              final ChangelogBatchStartingPoint startingPoint,
+              @Nullable final ChangelogEntryListener entryListener,
+              @NotNull final ChangelogBatchStartingPoint startingPoint,
               final int maxChanges, final long maxWaitTimeMillis,
               final boolean waitForMaxChanges,
-              final List<String> includeBaseDNs,
-              final List<String> excludeBaseDNs,
-              final Set<ChangeType> changeTypes,
+              @Nullable final List<String> includeBaseDNs,
+              @Nullable final List<String> excludeBaseDNs,
+              @Nullable final Set<ChangeType> changeTypes,
               final boolean continueOnMissingChanges,
-              final Control... controls)
+              @Nullable final Control... controls)
   {
     this(entryListener, startingPoint, maxChanges, maxWaitTimeMillis,
          waitForMaxChanges, includeBaseDNs, excludeBaseDNs, changeTypes,
@@ -601,18 +619,18 @@ public final class GetChangelogBatchExtendedRequest
    *                                   if there should be no controls.
    */
   public GetChangelogBatchExtendedRequest(
-              final ChangelogEntryListener entryListener,
-              final ChangelogBatchStartingPoint startingPoint,
+              @Nullable final ChangelogEntryListener entryListener,
+              @NotNull final ChangelogBatchStartingPoint startingPoint,
               final int maxChanges, final long maxWaitTimeMillis,
               final boolean waitForMaxChanges,
-              final List<String> includeBaseDNs,
-              final List<String> excludeBaseDNs,
-              final Set<ChangeType> changeTypes,
+              @Nullable final List<String> includeBaseDNs,
+              @Nullable final List<String> excludeBaseDNs,
+              @Nullable final Set<ChangeType> changeTypes,
               final boolean continueOnMissingChanges,
-              final String pareEntriesForUserDN,
-              final ChangelogBatchChangeSelectionCriteria
+              @Nullable final String pareEntriesForUserDN,
+              @Nullable final ChangelogBatchChangeSelectionCriteria
                          changeSelectionCriteria,
-              final Control... controls)
+              @Nullable final Control... controls)
   {
     this(entryListener, startingPoint, maxChanges, maxWaitTimeMillis,
          waitForMaxChanges, includeBaseDNs, excludeBaseDNs, changeTypes,
@@ -720,20 +738,20 @@ public final class GetChangelogBatchExtendedRequest
    *                                         should be no controls.
    */
   public GetChangelogBatchExtendedRequest(
-              final ChangelogEntryListener entryListener,
-              final ChangelogBatchStartingPoint startingPoint,
+              @Nullable final ChangelogEntryListener entryListener,
+              @NotNull final ChangelogBatchStartingPoint startingPoint,
               final int maxChanges, final long maxWaitTimeMillis,
               final boolean waitForMaxChanges,
-              final List<String> includeBaseDNs,
-              final List<String> excludeBaseDNs,
-              final Set<ChangeType> changeTypes,
+              @Nullable final List<String> includeBaseDNs,
+              @Nullable final List<String> excludeBaseDNs,
+              @Nullable final Set<ChangeType> changeTypes,
               final boolean continueOnMissingChanges,
-              final String pareEntriesForUserDN,
-              final ChangelogBatchChangeSelectionCriteria
+              @Nullable final String pareEntriesForUserDN,
+              @Nullable final ChangelogBatchChangeSelectionCriteria
                          changeSelectionCriteria,
               final boolean includeSoftDeletedEntryMods,
               final boolean includeSoftDeletedEntryDeletes,
-              final Control... controls)
+              @Nullable final Control... controls)
   {
     super(GET_CHANGELOG_BATCH_REQUEST_OID,
          encodeValue(startingPoint, maxChanges, maxWaitTimeMillis,
@@ -803,7 +821,8 @@ public final class GetChangelogBatchExtendedRequest
    * @throws  LDAPException  If the provided generic request cannot be decoded
    *                         as a get changelog batch extended request.
    */
-  public GetChangelogBatchExtendedRequest(final ExtendedRequest extendedRequest)
+  public GetChangelogBatchExtendedRequest(
+              @NotNull final ExtendedRequest extendedRequest)
          throws LDAPException
   {
     super(extendedRequest.getOID(), extendedRequest.getValue(),
@@ -1080,19 +1099,20 @@ public final class GetChangelogBatchExtendedRequest
    *
    * @return  The value for the extended request.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(
-                      final ChangelogBatchStartingPoint startingPoint,
-                      final int maxChanges, final long maxWaitTimeMillis,
-                      final boolean waitForMaxChanges,
-                      final List<String> includeBaseDNs,
-                      final List<String> excludeBaseDNs,
-                      final Set<ChangeType> changeTypes,
-                      final boolean continueOnMissingChanges,
-                      final String pareEntriesForUserDN,
-                      final ChangelogBatchChangeSelectionCriteria
-                                 changeSelectionCriteria,
-                      final boolean includeSoftDeletedEntryMods,
-                      final boolean includeSoftDeletedEntryDeletes)
+       @NotNull final ChangelogBatchStartingPoint startingPoint,
+       final int maxChanges, final long maxWaitTimeMillis,
+       final boolean waitForMaxChanges,
+       @Nullable final List<String> includeBaseDNs,
+       @Nullable final List<String> excludeBaseDNs,
+       @Nullable final Set<ChangeType> changeTypes,
+       final boolean continueOnMissingChanges,
+       @Nullable final String pareEntriesForUserDN,
+       @Nullable final ChangelogBatchChangeSelectionCriteria
+            changeSelectionCriteria,
+       final boolean includeSoftDeletedEntryMods,
+       final boolean includeSoftDeletedEntryDeletes)
   {
     Validator.ensureNotNull(startingPoint);
 
@@ -1201,6 +1221,7 @@ public final class GetChangelogBatchExtendedRequest
    *
    * @return  The starting point for the batch of changes to retrieve.
    */
+  @NotNull()
   public ChangelogBatchStartingPoint getStartingPoint()
   {
     return startingPoint;
@@ -1272,6 +1293,7 @@ public final class GetChangelogBatchExtendedRequest
    * @return  A list of the include base DNs for changes to retrieve, or an
    *          empty list if there are none.
    */
+  @NotNull()
   public List<String> getIncludeBaseDNs()
   {
     return includeBaseDNs;
@@ -1292,6 +1314,7 @@ public final class GetChangelogBatchExtendedRequest
    * @return  A list of the exclude base DNs for changes to retrieve, or an
    *          empty list if there are none.
    */
+  @NotNull()
   public List<String> getExcludeBaseDNs()
   {
     return excludeBaseDNs;
@@ -1304,6 +1327,7 @@ public final class GetChangelogBatchExtendedRequest
    *
    * @return  The set of change types for changes to be returned to the client.
    */
+  @NotNull()
   public Set<ChangeType> getChangeTypes()
   {
     return changeTypes;
@@ -1338,6 +1362,7 @@ public final class GetChangelogBatchExtendedRequest
    *          restrictions, or {@code null} if changelog entries should not be
    *          pared based for any user.
    */
+  @Nullable()
   public String getPareEntriesForUserDN()
   {
     return pareEntriesForUserDN;
@@ -1352,6 +1377,7 @@ public final class GetChangelogBatchExtendedRequest
    * @return  The change selection criteria for this get changelog batch
    *          extended request, or {@code null} if none is defined.
    */
+  @Nullable()
   public ChangelogBatchChangeSelectionCriteria getChangeSelectionCriteria()
   {
     return changeSelectionCriteria;
@@ -1395,6 +1421,7 @@ public final class GetChangelogBatchExtendedRequest
    *          or {@code null} if the entries will be made available in the
    *          extended result.
    */
+  @Nullable()
   public ChangelogEntryListener getEntryListener()
   {
     return entryListener;
@@ -1406,8 +1433,9 @@ public final class GetChangelogBatchExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public GetChangelogBatchExtendedResult process(
-              final LDAPConnection connection, final int depth)
+              @NotNull final LDAPConnection connection, final int depth)
          throws LDAPException
   {
     final IntermediateResponseListener l = getIntermediateResponseListener();
@@ -1468,6 +1496,7 @@ public final class GetChangelogBatchExtendedRequest
    * {@inheritDoc}.
    */
   @Override()
+  @NotNull()
   public GetChangelogBatchExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -1479,7 +1508,9 @@ public final class GetChangelogBatchExtendedRequest
    * {@inheritDoc}.
    */
   @Override()
-  public GetChangelogBatchExtendedRequest duplicate(final Control[] controls)
+  @NotNull()
+  public GetChangelogBatchExtendedRequest duplicate(
+              @Nullable final Control[] controls)
   {
     final GetChangelogBatchExtendedRequest r =
          new GetChangelogBatchExtendedRequest(entryListener, startingPoint,
@@ -1498,6 +1529,7 @@ public final class GetChangelogBatchExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_GET_CHANGELOG_BATCH_REQ_NAME.get();
@@ -1509,7 +1541,7 @@ public final class GetChangelogBatchExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("GetChangelogBatchExtendedRequest(startingPoint=");
     startingPoint.toString(buffer);

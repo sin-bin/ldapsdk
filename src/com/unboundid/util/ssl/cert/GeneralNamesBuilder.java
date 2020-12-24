@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,7 @@ import java.util.List;
 import com.unboundid.asn1.ASN1Element;
 import com.unboundid.ldap.sdk.DN;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.OID;
 import com.unboundid.util.ThreadSafety;
@@ -54,31 +70,31 @@ final class GeneralNamesBuilder
 
 
   // The set of EDI party name values.
-  private final List<ASN1Element> ediPartyNames;
+  @NotNull private final List<ASN1Element> ediPartyNames;
 
   // The set of X.400 name values.
-  private final List<ASN1Element> x400Addresses;
+  @NotNull private final List<ASN1Element> x400Addresses;
 
   // The set of directory name values.
-  private final List<DN> directoryNames;
+  @NotNull private final List<DN> directoryNames;
 
   // The set of IP address values.
-  private final List<InetAddress> ipAddresses;
+  @NotNull private final List<InetAddress> ipAddresses;
 
   // The other names included in the extension.
-  private final List<ObjectPair<OID,ASN1Element>> otherNames;
+  @NotNull private final List<ObjectPair<OID,ASN1Element>> otherNames;
 
   // The registered IDs included in the extension.
-  private final List<OID> registeredIDs;
+  @NotNull private final List<OID> registeredIDs;
 
   // The DNS names included in the extension.
-  private final List<String> dnsNames;
+  @NotNull private final List<String> dnsNames;
 
   // The RFC 822 names (email addresses) in the extension.
-  private final List<String> rfc822Names;
+  @NotNull private final List<String> rfc822Names;
 
   // The uniform resource identifiers in the extension.
-  private final List<String> uniformResourceIdentifiers;
+  @NotNull private final List<String> uniformResourceIdentifiers;
 
 
 
@@ -105,6 +121,7 @@ final class GeneralNamesBuilder
    *
    * @return  The set of other name values.
    */
+  @NotNull()
   List<ObjectPair<OID,ASN1Element>> getOtherNames()
   {
     return otherNames;
@@ -122,7 +139,9 @@ final class GeneralNamesBuilder
    *
    * @return  A reference to this object so that calls may be chained.
    */
-  GeneralNamesBuilder addOtherName(final OID oid, final ASN1Element value)
+  @NotNull()
+  GeneralNamesBuilder addOtherName(@NotNull final OID oid,
+                                   @NotNull final ASN1Element value)
   {
     otherNames.add(new ObjectPair<>(oid, value));
     return this;
@@ -135,6 +154,7 @@ final class GeneralNamesBuilder
    *
    * @return  The set of RFC 822 name values.
    */
+  @NotNull()
   List<String> getRFC822Names()
   {
     return rfc822Names;
@@ -150,7 +170,8 @@ final class GeneralNamesBuilder
    *
    * @return  A reference to this object so that calls may be chained.
    */
-  GeneralNamesBuilder addRFC822Name(final String emailAddress)
+  @NotNull()
+  GeneralNamesBuilder addRFC822Name(@NotNull final String emailAddress)
   {
     rfc822Names.add(emailAddress);
     return this;
@@ -163,6 +184,7 @@ final class GeneralNamesBuilder
    *
    * @return  The set of DNS name values.
    */
+  @NotNull()
   List<String> getDNSNames()
   {
     return dnsNames;
@@ -178,7 +200,8 @@ final class GeneralNamesBuilder
    *
    * @return  A reference to this object so that calls may be chained.
    */
-  GeneralNamesBuilder addDNSName(final String dnsName)
+  @NotNull()
+  GeneralNamesBuilder addDNSName(@NotNull final String dnsName)
   {
     dnsNames.add(dnsName);
     return this;
@@ -191,6 +214,7 @@ final class GeneralNamesBuilder
    *
    * @return  The set of X.400 address values.
    */
+  @NotNull()
   List<ASN1Element> getX400Addresses()
   {
     return x400Addresses;
@@ -206,7 +230,8 @@ final class GeneralNamesBuilder
    *
    * @return  A reference to this object so that calls may be chained.
    */
-  GeneralNamesBuilder addX400Address(final ASN1Element x400Address)
+  @NotNull()
+  GeneralNamesBuilder addX400Address(@NotNull final ASN1Element x400Address)
   {
     x400Addresses.add(x400Address);
     return this;
@@ -219,6 +244,7 @@ final class GeneralNamesBuilder
    *
    * @return  The set of directory name values.
    */
+  @NotNull()
   List<DN> getDirectoryNames()
   {
     return directoryNames;
@@ -234,7 +260,8 @@ final class GeneralNamesBuilder
    *
    * @return  A reference to this object so that calls may be chained.
    */
-  GeneralNamesBuilder addDirectoryName(final DN dn)
+  @NotNull()
+  GeneralNamesBuilder addDirectoryName(@NotNull final DN dn)
   {
     directoryNames.add(dn);
     return this;
@@ -247,6 +274,7 @@ final class GeneralNamesBuilder
    *
    * @return  The set of EDI party name values.
    */
+  @NotNull()
   List<ASN1Element> getEDIPartyNames()
   {
     return ediPartyNames;
@@ -262,7 +290,8 @@ final class GeneralNamesBuilder
    *
    * @return  A reference to this object so that calls may be chained.
    */
-  GeneralNamesBuilder addEDIPartyName(final ASN1Element value)
+  @NotNull()
+  GeneralNamesBuilder addEDIPartyName(@NotNull final ASN1Element value)
   {
     ediPartyNames.add(value);
     return this;
@@ -275,6 +304,7 @@ final class GeneralNamesBuilder
    *
    * @return  The set of uniform resource identifier (URI) values.
    */
+  @NotNull()
   List<String> getUniformResourceIdentifiers()
   {
     return uniformResourceIdentifiers;
@@ -290,7 +320,8 @@ final class GeneralNamesBuilder
    *
    * @return  A reference to this object so that calls may be chained.
    */
-  GeneralNamesBuilder addUniformResourceIdentifier(final String uri)
+  @NotNull()
+  GeneralNamesBuilder addUniformResourceIdentifier(@NotNull final String uri)
   {
     uniformResourceIdentifiers.add(uri);
     return this;
@@ -303,6 +334,7 @@ final class GeneralNamesBuilder
    *
    * @return  The set of IP address values.
    */
+  @NotNull()
   List<InetAddress> getIPAddresses()
   {
     return ipAddresses;
@@ -318,7 +350,8 @@ final class GeneralNamesBuilder
    *
    * @return  A reference to this object so that calls may be chained.
    */
-  GeneralNamesBuilder addIPAddress(final InetAddress ipAddress)
+  @NotNull()
+  GeneralNamesBuilder addIPAddress(@NotNull final InetAddress ipAddress)
   {
     ipAddresses.add(ipAddress);
     return this;
@@ -331,6 +364,7 @@ final class GeneralNamesBuilder
    *
    * @return  The set of registered ID values.
    */
+  @NotNull()
   List<OID> getRegisteredIDs()
   {
     return registeredIDs;
@@ -346,7 +380,8 @@ final class GeneralNamesBuilder
    *
    * @return  A reference to this object so that calls may be chained.
    */
-  GeneralNamesBuilder addRegisteredID(final OID id)
+  @NotNull()
+  GeneralNamesBuilder addRegisteredID(@NotNull final OID id)
   {
     registeredIDs.add(id);
     return this;
@@ -359,6 +394,7 @@ final class GeneralNamesBuilder
    *
    * @return  The {@code GeneralNames} value created from this builder.
    */
+  @NotNull()
   GeneralNames build()
   {
     return new GeneralNames(

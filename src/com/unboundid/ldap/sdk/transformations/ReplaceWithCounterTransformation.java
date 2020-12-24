@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -36,6 +51,8 @@ import com.unboundid.ldap.sdk.RDN;
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 import com.unboundid.ldap.sdk.schema.Schema;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -55,7 +72,7 @@ public final class ReplaceWithCounterTransformation
        implements EntryTransformation
 {
   // The counter to use to obtain the values.
-  private final AtomicLong counter;
+  @NotNull private final AtomicLong counter;
 
   // Indicates whether to update the DN of the target entry if its RDN includes
   // the target attribute.
@@ -65,16 +82,16 @@ public final class ReplaceWithCounterTransformation
   private final long incrementAmount;
 
   // The schema to use when processing.
-  private final Schema schema;
+  @Nullable private final Schema schema;
 
   // The names that may be used to reference the attribute to replace.
-  private final Set<String> names;
+  @NotNull private final Set<String> names;
 
   // The static text that will appear after the number in generated values.
-  private final String afterText;
+  @Nullable private final String afterText;
 
   // The static text that will appear before the number in generated values.
-  private final String beforeText;
+  @Nullable private final String beforeText;
 
 
 
@@ -100,12 +117,12 @@ public final class ReplaceWithCounterTransformation
    * @param  replaceInRDN     Indicates whether to update the DN of the target
    *                          entry if its RDN includes the target attribute.
    */
-  public ReplaceWithCounterTransformation(final Schema schema,
-                                          final String attributeName,
+  public ReplaceWithCounterTransformation(@Nullable final Schema schema,
+                                          @NotNull final String attributeName,
                                           final long initialValue,
                                           final long incrementAmount,
-                                          final String beforeText,
-                                          final String afterText,
+                                          @Nullable final String beforeText,
+                                          @Nullable final String afterText,
                                           final boolean replaceInRDN)
   {
     this.incrementAmount = incrementAmount;
@@ -177,7 +194,8 @@ public final class ReplaceWithCounterTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry transformEntry(final Entry e)
+  @Nullable()
+  public Entry transformEntry(@NotNull final Entry e)
   {
     if (e == null)
     {
@@ -297,7 +315,9 @@ public final class ReplaceWithCounterTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry translate(final Entry original, final long firstLineNumber)
+  @Nullable()
+  public Entry translate(@NotNull final Entry original,
+                         final long firstLineNumber)
   {
     return transformEntry(original);
   }
@@ -308,7 +328,8 @@ public final class ReplaceWithCounterTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry translateEntryToWrite(final Entry original)
+  @Nullable()
+  public Entry translateEntryToWrite(@NotNull final Entry original)
   {
     return transformEntry(original);
   }

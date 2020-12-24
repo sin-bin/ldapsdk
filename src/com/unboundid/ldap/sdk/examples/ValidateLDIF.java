@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -50,6 +65,8 @@ import com.unboundid.ldif.LDIFReaderEntryTranslator;
 import com.unboundid.ldif.LDIFWriter;
 import com.unboundid.util.Debug;
 import com.unboundid.util.LDAPCommandLineTool;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -151,44 +168,45 @@ public final class ValidateLDIF
   /**
    * The end-of-line character for this platform.
    */
-  private static final String EOL = System.getProperty("line.separator", "\n");
+  @NotNull private static final String EOL =
+       StaticUtils.getSystemProperty("line.separator", "\n");
 
 
 
   // The arguments used by this program.
-  private BooleanArgument ignoreDuplicateValues;
-  private BooleanArgument ignoreUndefinedObjectClasses;
-  private BooleanArgument ignoreUndefinedAttributes;
-  private BooleanArgument ignoreMalformedDNs;
-  private BooleanArgument ignoreMissingRDNValues;
-  private BooleanArgument ignoreMissingSuperiorObjectClasses;
-  private BooleanArgument ignoreStructuralObjectClasses;
-  private BooleanArgument ignoreProhibitedObjectClasses;
-  private BooleanArgument ignoreProhibitedAttributes;
-  private BooleanArgument ignoreMissingAttributes;
-  private BooleanArgument ignoreSingleValuedAttributes;
-  private BooleanArgument ignoreAttributeSyntax;
-  private BooleanArgument ignoreNameForms;
-  private BooleanArgument isCompressed;
-  private FileArgument    schemaDirectory;
-  private FileArgument    ldifFile;
-  private FileArgument    rejectFile;
-  private FileArgument    encryptionPassphraseFile;
-  private IntegerArgument numThreads;
-  private StringArgument  ignoreSyntaxViolationsForAttribute;
+  @Nullable private BooleanArgument ignoreDuplicateValues;
+  @Nullable private BooleanArgument ignoreUndefinedObjectClasses;
+  @Nullable private BooleanArgument ignoreUndefinedAttributes;
+  @Nullable private BooleanArgument ignoreMalformedDNs;
+  @Nullable private BooleanArgument ignoreMissingRDNValues;
+  @Nullable private BooleanArgument ignoreMissingSuperiorObjectClasses;
+  @Nullable private BooleanArgument ignoreStructuralObjectClasses;
+  @Nullable private BooleanArgument ignoreProhibitedObjectClasses;
+  @Nullable private BooleanArgument ignoreProhibitedAttributes;
+  @Nullable private BooleanArgument ignoreMissingAttributes;
+  @Nullable private BooleanArgument ignoreSingleValuedAttributes;
+  @Nullable private BooleanArgument ignoreAttributeSyntax;
+  @Nullable private BooleanArgument ignoreNameForms;
+  @Nullable private BooleanArgument isCompressed;
+  @Nullable private FileArgument    schemaDirectory;
+  @Nullable private FileArgument    ldifFile;
+  @Nullable private FileArgument    rejectFile;
+  @Nullable private FileArgument    encryptionPassphraseFile;
+  @Nullable private IntegerArgument numThreads;
+  @Nullable private StringArgument  ignoreSyntaxViolationsForAttribute;
 
   // The counter used to keep track of the number of entries processed.
-  private final AtomicLong entriesProcessed = new AtomicLong(0L);
+  @NotNull private final AtomicLong entriesProcessed = new AtomicLong(0L);
 
   // The counter used to keep track of the number of entries that could not be
   // parsed as valid entries.
-  private final AtomicLong malformedEntries = new AtomicLong(0L);
+  @NotNull private final AtomicLong malformedEntries = new AtomicLong(0L);
 
   // The entry validator that will be used to validate the entries.
-  private EntryValidator entryValidator;
+  @Nullable private EntryValidator entryValidator;
 
   // The LDIF writer that will be used to write rejected entries.
-  private LDIFWriter rejectWriter;
+  @Nullable private LDIFWriter rejectWriter;
 
 
 
@@ -198,7 +216,7 @@ public final class ValidateLDIF
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String[] args)
+  public static void main(@NotNull final String[] args)
   {
     final ResultCode resultCode = main(args, System.out, System.err);
     if (resultCode != ResultCode.SUCCESS)
@@ -223,9 +241,10 @@ public final class ValidateLDIF
    *
    * @return  A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args,
-                                final OutputStream outStream,
-                                final OutputStream errStream)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream)
   {
     final ValidateLDIF validateLDIF = new ValidateLDIF(outStream, errStream);
     return validateLDIF.runTool(args);
@@ -243,8 +262,8 @@ public final class ValidateLDIF
    *                    written.  It may be {@code null} if error messages
    *                    should be suppressed.
    */
-  public ValidateLDIF(final OutputStream outStream,
-                      final OutputStream errStream)
+  public ValidateLDIF(@Nullable final OutputStream outStream,
+                      @Nullable final OutputStream errStream)
   {
     super(outStream, errStream);
   }
@@ -257,6 +276,7 @@ public final class ValidateLDIF
    * @return  The name for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "validate-ldif";
@@ -270,6 +290,7 @@ public final class ValidateLDIF
    * @return  The description for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return "Validate the contents of an LDIF file " +
@@ -284,6 +305,7 @@ public final class ValidateLDIF
    * @return  The version string for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -400,6 +422,24 @@ public final class ValidateLDIF
 
 
   /**
+   * Indicates whether this tool should provide a command-line argument that
+   * allows for low-level SSL debugging.  If this returns {@code true}, then an
+   * "--enableSSLDebugging}" argument will be added that sets the
+   * "javax.net.debug" system property to "all" before attempting any
+   * communication.
+   *
+   * @return  {@code true} if this tool should offer an "--enableSSLDebugging"
+   *          argument, or {@code false} if not.
+   */
+  @Override()
+  protected boolean supportsSSLDebugging()
+  {
+    return true;
+  }
+
+
+
+  /**
    * Adds the arguments used by this program that aren't already provided by the
    * generic {@code LDAPCommandLineTool} framework.
    *
@@ -408,7 +448,7 @@ public final class ValidateLDIF
    * @throws  ArgumentException  If a problem occurs while adding the arguments.
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     String description = "The path to the LDIF file to process.  The tool " +
@@ -632,6 +672,7 @@ public final class ValidateLDIF
    * @return  The result code for the processing that was performed.
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     // Get the connection to the directory server and use it to read the schema.
@@ -956,7 +997,8 @@ public final class ValidateLDIF
    *          after this method is done.
    */
   @Override()
-  public Entry translate(final Entry entry, final long firstLineNumber)
+  @Nullable()
+  public Entry translate(@NotNull final Entry entry, final long firstLineNumber)
   {
     final ArrayList<String> invalidReasons = new ArrayList<>(5);
     if (! entryValidator.entryIsValid(entry, invalidReasons))
@@ -997,7 +1039,8 @@ public final class ValidateLDIF
    * @return  The string from the provided list, or {@code null} if the provided
    *          list is empty or {@code null}.
    */
-  private static String listToString(final List<String> l)
+  @Nullable()
+  private static String listToString(@Nullable final List<String> l)
   {
     if ((l == null) || (l.isEmpty()))
     {
@@ -1024,6 +1067,7 @@ public final class ValidateLDIF
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> examples =
@@ -1074,6 +1118,7 @@ public final class ValidateLDIF
    *
    * Returns the EntryValidator
    */
+  @Nullable()
   public EntryValidator getEntryValidator()
   {
     return entryValidator;

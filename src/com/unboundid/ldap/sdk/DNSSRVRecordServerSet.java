@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import javax.net.SocketFactory;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -109,7 +126,7 @@ public final class DNSSRVRecordServerSet
   /**
    * The default SRV record name that will be retrieved if none is specified.
    */
-  private static final String DEFAULT_RECORD_NAME = "_ldap._tcp";
+  @NotNull private static final String DEFAULT_RECORD_NAME = "_ldap._tcp";
 
 
 
@@ -126,19 +143,19 @@ public final class DNSSRVRecordServerSet
    * server(s) to query.  The default behavior will be to attempt to determine
    * which DNS server(s) to use from the underlying system configuration.
    */
-  private static final String DEFAULT_DNS_PROVIDER_URL = "dns:";
+  @NotNull private static final String DEFAULT_DNS_PROVIDER_URL = "dns:";
 
 
 
   // The bind request to use to authenticate connections created by this
   // server set.
-  private final BindRequest bindRequest;
+  @Nullable private final BindRequest bindRequest;
 
   // The properties that will be used to initialize the JNDI context.
-  private final Hashtable<String,String> jndiProperties;
+  @NotNull private final Hashtable<String,String> jndiProperties;
 
   // The connection options to use for newly-created connections.
-  private final LDAPConnectionOptions connectionOptions;
+  @Nullable private final LDAPConnectionOptions connectionOptions;
 
   // The maximum length of time in milliseconds that previously-retrieved
   // information should be considered valid.
@@ -146,19 +163,19 @@ public final class DNSSRVRecordServerSet
 
   // The post-connect processor to invoke against connections created by this
   // server set.
-  private final PostConnectProcessor postConnectProcessor;
+  @Nullable private final PostConnectProcessor postConnectProcessor;
 
   // The socket factory that should be used to create connections.
-  private final SocketFactory socketFactory;
+  @Nullable private final SocketFactory socketFactory;
 
   // The cached set of SRV records.
-  private volatile SRVRecordSet recordSet;
+  @Nullable private volatile SRVRecordSet recordSet;
 
   // The name of the DNS SRV record to retrieve.
-  private final String recordName;
+  @NotNull private final String recordName;
 
   // The DNS provider URL to use.
-  private final String providerURL;
+  @NotNull private final String providerURL;
 
 
 
@@ -173,7 +190,7 @@ public final class DNSSRVRecordServerSet
    *                     {@code null}, then a default record name of
    *                     "_ldap._tcp" will be used.
    */
-  public DNSSRVRecordServerSet(final String recordName)
+  public DNSSRVRecordServerSet(@Nullable final String recordName)
   {
     this(recordName, null, DEFAULT_TTL_MILLIS, null, null);
   }
@@ -206,10 +223,11 @@ public final class DNSSRVRecordServerSet
    *                            may be {@code null} if the default connection
    *                            options should be used.
    */
-  public DNSSRVRecordServerSet(final String recordName,
-                               final String providerURL, final long ttlMillis,
-                               final SocketFactory socketFactory,
-                               final LDAPConnectionOptions connectionOptions)
+  public DNSSRVRecordServerSet(@Nullable final String recordName,
+              @Nullable final String providerURL,
+              final long ttlMillis,
+              @Nullable final SocketFactory socketFactory,
+              @Nullable final LDAPConnectionOptions connectionOptions)
   {
     this(recordName, providerURL, null, ttlMillis, socketFactory,
          connectionOptions);
@@ -248,12 +266,12 @@ public final class DNSSRVRecordServerSet
    *                            may be {@code null} if the default connection
    *                            options should be used.
    */
-  public DNSSRVRecordServerSet(final String recordName,
-                               final String providerURL,
-                               final Properties jndiProperties,
-                               final long ttlMillis,
-                               final SocketFactory socketFactory,
-                               final LDAPConnectionOptions connectionOptions)
+  public DNSSRVRecordServerSet(@Nullable final String recordName,
+              @Nullable final String providerURL,
+              @Nullable final Properties jndiProperties,
+              final long ttlMillis,
+              @Nullable final SocketFactory socketFactory,
+              @Nullable final LDAPConnectionOptions connectionOptions)
   {
     this(recordName, providerURL, jndiProperties, ttlMillis, socketFactory,
          connectionOptions, null, null);
@@ -301,14 +319,14 @@ public final class DNSSRVRecordServerSet
    *                               may be {@code null} if this server set should
    *                               not perform any post-connect processing.
    */
-  public DNSSRVRecordServerSet(final String recordName,
-                               final String providerURL,
-                               final Properties jndiProperties,
-                               final long ttlMillis,
-                               final SocketFactory socketFactory,
-                               final LDAPConnectionOptions connectionOptions,
-                               final BindRequest bindRequest,
-                               final PostConnectProcessor postConnectProcessor)
+  public DNSSRVRecordServerSet(@Nullable final String recordName,
+              @Nullable final String providerURL,
+              @Nullable final Properties jndiProperties,
+              final long ttlMillis,
+              @Nullable final SocketFactory socketFactory,
+              @Nullable final LDAPConnectionOptions connectionOptions,
+              @Nullable final BindRequest bindRequest,
+              @Nullable final PostConnectProcessor postConnectProcessor)
   {
     this.socketFactory = socketFactory;
     this.connectionOptions = connectionOptions;
@@ -373,6 +391,7 @@ public final class DNSSRVRecordServerSet
    *
    * @return  The name of the DNS SRV record to retrieve.
    */
+  @NotNull()
   public String getRecordName()
   {
     return recordName;
@@ -385,6 +404,7 @@ public final class DNSSRVRecordServerSet
    *
    * @return  The JNDI provider URL that specifies the DNS server(s) to use.
    */
+  @NotNull()
   public String getProviderURL()
   {
     return providerURL;
@@ -401,6 +421,7 @@ public final class DNSSRVRecordServerSet
    * @return  An unmodifiable map of properties that will be used to initialize
    *          the JNDI context used to interact with DNS.
    */
+  @NotNull()
   public Map<String,String> getJNDIProperties()
   {
     return Collections.unmodifiableMap(jndiProperties);
@@ -431,6 +452,7 @@ public final class DNSSRVRecordServerSet
    * @return  The socket factory that will be used when creating connections, or
    *          {@code null} if the JVM-default socket factory will be used.
    */
+  @Nullable()
   public SocketFactory getSocketFactory()
   {
     return socketFactory;
@@ -446,6 +468,7 @@ public final class DNSSRVRecordServerSet
    *          created, or {@code null} if a default set of options should be
    *          used.
    */
+  @Nullable()
   public LDAPConnectionOptions getConnectionOptions()
   {
     return connectionOptions;
@@ -479,6 +502,7 @@ public final class DNSSRVRecordServerSet
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPConnection getConnection()
          throws LDAPException
   {
@@ -491,8 +515,9 @@ public final class DNSSRVRecordServerSet
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPConnection getConnection(
-                             final LDAPConnectionPoolHealthCheck healthCheck)
+              @Nullable final LDAPConnectionPoolHealthCheck healthCheck)
          throws LDAPException
   {
     // If there is no cached record set, or if the cached set is expired, then
@@ -532,6 +557,7 @@ public final class DNSSRVRecordServerSet
              connectionOptions, r.getAddress(), r.getPort());
         doBindPostConnectAndHealthCheckProcessing(connection, bindRequest,
              postConnectProcessor, healthCheck);
+        associateConnectionWithThisServerSet(connection);
         return connection;
       }
       catch (final LDAPException le)
@@ -555,7 +581,7 @@ public final class DNSSRVRecordServerSet
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("DNSSRVRecordServerSet(recordName='");
     buffer.append(recordName);

@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,8 @@ import java.util.Map;
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -72,7 +89,7 @@ public final class LeaveLockdownModeTask
    * The fully-qualified name of the Java class that is used for the leave
    * lockdown mode task.
    */
-  static final String LEAVE_LOCKDOWN_MODE_TASK_CLASS =
+  @NotNull static final String LEAVE_LOCKDOWN_MODE_TASK_CLASS =
        "com.unboundid.directory.server.tasks.LeaveLockdownModeTask";
 
 
@@ -81,7 +98,7 @@ public final class LeaveLockdownModeTask
    * The name of the attribute used to specify the reason for taking the server
    * out of lockdown mode.
    */
-  private static final String ATTR_LEAVE_LOCKDOWN_REASON =
+  @NotNull private static final String ATTR_LEAVE_LOCKDOWN_REASON =
        "ds-task-leave-lockdown-reason";
 
 
@@ -89,7 +106,7 @@ public final class LeaveLockdownModeTask
   /**
    * The task property for the leave-lockdown reason.
    */
-  private static final TaskProperty PROPERTY_LEAVE_LOCKDOWN_REASON =
+  @NotNull private static final TaskProperty PROPERTY_LEAVE_LOCKDOWN_REASON =
        new TaskProperty(ATTR_LEAVE_LOCKDOWN_REASON,
                         INFO_DISPLAY_NAME_LEAVE_LOCKDOWN_REASON.get(),
                         INFO_DESCRIPTION_LEAVE_LOCKDOWN_REASON.get(),
@@ -100,7 +117,7 @@ public final class LeaveLockdownModeTask
   /**
    * The name of the object class used in leave-lockdown-mode task entries.
    */
-  private static final String OC_LEAVE_LOCKDOWN_MODE_TASK =
+  @NotNull private static final String OC_LEAVE_LOCKDOWN_MODE_TASK =
       "ds-task-leave-lockdown-mode";
 
 
@@ -113,7 +130,7 @@ public final class LeaveLockdownModeTask
 
 
   // The reason for leaving lockdown mode.
-  private final String reason;
+  @Nullable private final String reason;
 
 
 
@@ -136,7 +153,7 @@ public final class LeaveLockdownModeTask
    * @param  taskID  The task ID to use for this task.  If it is {@code null}
    *                 then a UUID will be generated for use as the task ID.
    */
-  public LeaveLockdownModeTask(final String taskID)
+  public LeaveLockdownModeTask(@Nullable final String taskID)
   {
     this(taskID, null);
   }
@@ -151,7 +168,8 @@ public final class LeaveLockdownModeTask
    * @param  reason  The user-specified reason for leaving lockdown mode. This
    *                 may be {@code null}.
    */
-  public LeaveLockdownModeTask(final String taskID, final String reason)
+  public LeaveLockdownModeTask(@Nullable final String taskID,
+                               @Nullable final String reason)
   {
     this(taskID, reason, null, null, null, null, null);
   }
@@ -179,11 +197,12 @@ public final class LeaveLockdownModeTask
    *                                 that should be notified if this task does
    *                                 not complete successfully.
    */
-  public LeaveLockdownModeTask(final String taskID,
-              final Date scheduledStartTime, final List<String> dependencyIDs,
-              final FailedDependencyAction failedDependencyAction,
-              final List<String> notifyOnCompletion,
-              final List<String> notifyOnError)
+  public LeaveLockdownModeTask(@Nullable final String taskID,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnError)
   {
     this(taskID, null, scheduledStartTime, dependencyIDs,
          failedDependencyAction, notifyOnCompletion, notifyOnError);
@@ -214,11 +233,13 @@ public final class LeaveLockdownModeTask
    *                                 that should be notified if this task does
    *                                 not complete successfully.
    */
-  public LeaveLockdownModeTask(final String taskID, final String reason,
-              final Date scheduledStartTime, final List<String> dependencyIDs,
-              final FailedDependencyAction failedDependencyAction,
-              final List<String> notifyOnCompletion,
-              final List<String> notifyOnError)
+  public LeaveLockdownModeTask(@Nullable final String taskID,
+              @Nullable final String reason,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnError)
   {
     this(taskID, reason, scheduledStartTime, dependencyIDs,
          failedDependencyAction, null, notifyOnCompletion, null,
@@ -264,14 +285,18 @@ public final class LeaveLockdownModeTask
    *                                 alert notification if this task fails to
    *                                 complete successfully.
    */
-  public LeaveLockdownModeTask(final String taskID, final String reason,
-              final Date scheduledStartTime, final List<String> dependencyIDs,
-              final FailedDependencyAction failedDependencyAction,
-              final List<String> notifyOnStart,
-              final List<String> notifyOnCompletion,
-              final List<String> notifyOnSuccess,
-              final List<String> notifyOnError, final Boolean alertOnStart,
-              final Boolean alertOnSuccess, final Boolean alertOnError)
+  public LeaveLockdownModeTask(@Nullable final String taskID,
+              @Nullable final String reason,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnStart,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnSuccess,
+              @Nullable final List<String> notifyOnError,
+              @Nullable final Boolean alertOnStart,
+              @Nullable final Boolean alertOnSuccess,
+              @Nullable final Boolean alertOnError)
   {
     super(taskID, LEAVE_LOCKDOWN_MODE_TASK_CLASS, scheduledStartTime,
          dependencyIDs, failedDependencyAction, notifyOnStart,
@@ -291,7 +316,7 @@ public final class LeaveLockdownModeTask
    * @throws  TaskException  If the provided entry cannot be parsed as a leave
    *                         lockdown mode task entry.
    */
-  public LeaveLockdownModeTask(final Entry entry)
+  public LeaveLockdownModeTask(@NotNull final Entry entry)
          throws TaskException
   {
     super(entry);
@@ -313,7 +338,8 @@ public final class LeaveLockdownModeTask
    * @throws  TaskException  If the provided set of properties cannot be used to
    *                         create a valid leave lockdown mode task.
    */
-  public LeaveLockdownModeTask(final Map<TaskProperty,List<Object>> properties)
+  public LeaveLockdownModeTask(
+              @NotNull final Map<TaskProperty,List<Object>> properties)
          throws TaskException
   {
     super(LEAVE_LOCKDOWN_MODE_TASK_CLASS, properties);
@@ -345,6 +371,7 @@ public final class LeaveLockdownModeTask
    * @return  The reason the server is leaving lockdown mode, or {@code null}
    *          if none was specified.
    */
+  @Nullable()
   public String getReason()
   {
     return reason;
@@ -356,6 +383,7 @@ public final class LeaveLockdownModeTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskName()
   {
     return INFO_TASK_NAME_LEAVE_LOCKDOWN_MODE.get();
@@ -367,6 +395,7 @@ public final class LeaveLockdownModeTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskDescription()
   {
     return INFO_TASK_DESCRIPTION_LEAVE_LOCKDOWN_MODE.get();
@@ -378,6 +407,7 @@ public final class LeaveLockdownModeTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<String> getAdditionalObjectClasses()
   {
     return Collections.singletonList(OC_LEAVE_LOCKDOWN_MODE_TASK);
@@ -389,6 +419,7 @@ public final class LeaveLockdownModeTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<Attribute> getAdditionalAttributes()
   {
     final ArrayList<Attribute> attrs = new ArrayList<>(1);
@@ -405,6 +436,7 @@ public final class LeaveLockdownModeTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<TaskProperty> getTaskSpecificProperties()
   {
     final List<TaskProperty> propList =
@@ -419,6 +451,7 @@ public final class LeaveLockdownModeTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<TaskProperty,List<Object>> getTaskPropertyValues()
   {
     final LinkedHashMap<TaskProperty,List<Object>> props =

@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,8 @@ import java.util.Collections;
 import java.util.List;
 
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -61,10 +78,10 @@ public final class BooleanValueArgument
 
 
   // The default value for this argument.
-  private final Boolean defaultValue;
+  @Nullable private final Boolean defaultValue;
 
   // The provided value for this argument.
-  private Boolean value;
+  @Nullable private Boolean value;
 
 
 
@@ -85,9 +102,9 @@ public final class BooleanValueArgument
    * @throws  ArgumentException  If there is a problem with the definition of
    *                             this argument.
    */
-  public BooleanValueArgument(final Character shortIdentifier,
-                              final String longIdentifier,
-                              final String description)
+  public BooleanValueArgument(@Nullable final Character shortIdentifier,
+                              @Nullable final String longIdentifier,
+                              @NotNull final String description)
          throws ArgumentException
   {
     this(shortIdentifier, longIdentifier, false, null, description);
@@ -116,11 +133,11 @@ public final class BooleanValueArgument
    * @throws  ArgumentException  If there is a problem with the definition of
    *                             this argument.
    */
-  public BooleanValueArgument(final Character shortIdentifier,
-                              final String longIdentifier,
+  public BooleanValueArgument(@Nullable final Character shortIdentifier,
+                              @Nullable final String longIdentifier,
                               final boolean isRequired,
-                              final String valuePlaceholder,
-                              final String description)
+                              @Nullable final String valuePlaceholder,
+                              @NotNull final String description)
          throws ArgumentException
   {
     this(shortIdentifier, longIdentifier, isRequired, valuePlaceholder,
@@ -154,12 +171,12 @@ public final class BooleanValueArgument
    * @throws  ArgumentException  If there is a problem with the definition of
    *                             this argument.
    */
-  public BooleanValueArgument(final Character shortIdentifier,
-                              final String longIdentifier,
+  public BooleanValueArgument(@Nullable final Character shortIdentifier,
+                              @Nullable final String longIdentifier,
                               final boolean isRequired,
-                              final String valuePlaceholder,
-                              final String description,
-                              final Boolean defaultValue)
+                              @Nullable final String valuePlaceholder,
+                              @NotNull final String description,
+                              @Nullable final Boolean defaultValue)
          throws ArgumentException
   {
     super(shortIdentifier, longIdentifier, isRequired, 1,
@@ -181,7 +198,7 @@ public final class BooleanValueArgument
    *
    * @param  source  The source argument to use for this argument.
    */
-  private BooleanValueArgument(final BooleanValueArgument source)
+  private BooleanValueArgument(@NotNull final BooleanValueArgument source)
   {
     super(source);
 
@@ -195,6 +212,7 @@ public final class BooleanValueArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<String> getValueStringRepresentations(final boolean useDefault)
   {
     if (value == null)
@@ -233,6 +251,7 @@ public final class BooleanValueArgument
    * @return  The default value for this argument, or {@code null} if none is
    *          defined.
    */
+  @Nullable()
   public Boolean getDefaultValue()
   {
     return defaultValue;
@@ -248,6 +267,7 @@ public final class BooleanValueArgument
    *          returned.  If no value was provided and no default value was
    *          defined, then {@code null} will be returned.
    */
+  @Nullable()
   public Boolean getValue()
   {
     if (value == null)
@@ -266,7 +286,7 @@ public final class BooleanValueArgument
    * {@inheritDoc}
    */
   @Override()
-  protected void addValue(final String valueString)
+  protected void addValue(@NotNull final String valueString)
             throws ArgumentException
   {
     if (value != null)
@@ -291,7 +311,7 @@ public final class BooleanValueArgument
     else
     {
       throw new ArgumentException(ERR_ARG_VALUE_NOT_ALLOWED.get(
-           valueString, getIdentifierString()));
+           valueString, getIdentifierString(), "'true', 'false'"));
     }
   }
 
@@ -301,6 +321,7 @@ public final class BooleanValueArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getDataTypeName()
   {
     return INFO_BOOLEAN_VALUE_TYPE_NAME.get();
@@ -312,6 +333,7 @@ public final class BooleanValueArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getValueConstraints()
   {
     return INFO_BOOLEAN_VALUE_CONSTRAINTS.get();
@@ -335,6 +357,7 @@ public final class BooleanValueArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public BooleanValueArgument getCleanCopy()
   {
     return new BooleanValueArgument(this);
@@ -346,7 +369,7 @@ public final class BooleanValueArgument
    * {@inheritDoc}
    */
   @Override()
-  protected void addToCommandLine(final List<String> argStrings)
+  protected void addToCommandLine(@NotNull final List<String> argStrings)
   {
     if (value != null)
     {
@@ -368,7 +391,7 @@ public final class BooleanValueArgument
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("BooleanValueArgument(");
     appendBasicToStringInfo(buffer);

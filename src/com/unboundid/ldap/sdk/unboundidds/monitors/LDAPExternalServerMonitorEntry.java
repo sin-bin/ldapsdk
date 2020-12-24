@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,8 @@ import java.util.Map;
 
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -78,7 +95,7 @@ public final class LDAPExternalServerMonitorEntry
   /**
    * The structural object class used in LDAP external server monitor entries.
    */
-  protected static final String LDAP_EXTERNAL_SERVER_MONITOR_OC =
+  @NotNull protected static final String LDAP_EXTERNAL_SERVER_MONITOR_OC =
        "ds-ldap-external-server-monitor-entry";
 
 
@@ -87,7 +104,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of add operations
    * attempted in the backend server.
    */
-  private static final String ATTR_ADD_ATTEMPTS = "add-attempts";
+  @NotNull private static final String ATTR_ADD_ATTEMPTS = "add-attempts";
 
 
 
@@ -95,7 +112,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of add operations
    * that failed.
    */
-  private static final String ATTR_ADD_FAILURES = "add-failures";
+  @NotNull private static final String ATTR_ADD_FAILURES = "add-failures";
 
 
 
@@ -103,7 +120,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of add operations
    * completed successfully.
    */
-  private static final String ATTR_ADD_SUCCESSES = "add-successes";
+  @NotNull private static final String ATTR_ADD_SUCCESSES = "add-successes";
 
 
 
@@ -111,7 +128,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of bind operations
    * attempted in the backend server.
    */
-  private static final String ATTR_BIND_ATTEMPTS = "bind-attempts";
+  @NotNull private static final String ATTR_BIND_ATTEMPTS = "bind-attempts";
 
 
 
@@ -119,7 +136,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of bind operations
    * that failed.
    */
-  private static final String ATTR_BIND_FAILURES = "bind-failures";
+  @NotNull private static final String ATTR_BIND_FAILURES = "bind-failures";
 
 
 
@@ -127,7 +144,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of bind operations
    * completed successfully.
    */
-  private static final String ATTR_BIND_SUCCESSES = "bind-successes";
+  @NotNull private static final String ATTR_BIND_SUCCESSES = "bind-successes";
 
 
 
@@ -135,7 +152,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the communication security
    * mechanism.
    */
-  private static final String ATTR_COMMUNICATION_SECURITY =
+  @NotNull private static final String ATTR_COMMUNICATION_SECURITY =
        "communication-security";
 
 
@@ -144,7 +161,8 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of compare operations
    * attempted in the backend server.
    */
-  private static final String ATTR_COMPARE_ATTEMPTS = "compare-attempts";
+  @NotNull private static final String ATTR_COMPARE_ATTEMPTS =
+       "compare-attempts";
 
 
 
@@ -152,7 +170,8 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of compare operations
    * that failed.
    */
-  private static final String ATTR_COMPARE_FAILURES = "compare-failures";
+  @NotNull private static final String ATTR_COMPARE_FAILURES =
+       "compare-failures";
 
 
 
@@ -160,7 +179,8 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of compare operations
    * completed successfully.
    */
-  private static final String ATTR_COMPARE_SUCCESSES = "compare-successes";
+  @NotNull private static final String ATTR_COMPARE_SUCCESSES =
+       "compare-successes";
 
 
 
@@ -168,7 +188,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of delete operations
    * attempted in the backend server.
    */
-  private static final String ATTR_DELETE_ATTEMPTS = "delete-attempts";
+  @NotNull private static final String ATTR_DELETE_ATTEMPTS = "delete-attempts";
 
 
 
@@ -176,7 +196,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of delete operations
    * that failed.
    */
-  private static final String ATTR_DELETE_FAILURES = "delete-failures";
+  @NotNull private static final String ATTR_DELETE_FAILURES = "delete-failures";
 
 
 
@@ -184,14 +204,15 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of delete operations
    * completed successfully.
    */
-  private static final String ATTR_DELETE_SUCCESSES = "delete-successes";
+  @NotNull private static final String ATTR_DELETE_SUCCESSES =
+       "delete-successes";
 
 
 
   /**
    * The name of the attribute used to provide health check messages.
    */
-  private static final String ATTR_HEALTH_CHECK_MESSAGE =
+  @NotNull private static final String ATTR_HEALTH_CHECK_MESSAGE =
        "health-check-message";
 
 
@@ -199,14 +220,16 @@ public final class LDAPExternalServerMonitorEntry
   /**
    * The name of the attribute used to provide the health check state.
    */
-  private static final String ATTR_HEALTH_CHECK_STATE = "health-check-state";
+  @NotNull private static final String ATTR_HEALTH_CHECK_STATE =
+       "health-check-state";
 
 
 
   /**
    * The name of the attribute used to provide the health check score.
    */
-  private static final String ATTR_HEALTH_CHECK_SCORE = "health-check-score";
+  @NotNull private static final String ATTR_HEALTH_CHECK_SCORE =
+       "health-check-score";
 
 
 
@@ -214,7 +237,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the time the health check
    * information was last updated.
    */
-  private static final String ATTR_HEALTH_CHECK_UPDATE_TIME =
+  @NotNull private static final String ATTR_HEALTH_CHECK_UPDATE_TIME =
        "health-check-update-time";
 
 
@@ -223,7 +246,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the DN of the load-balancing
    * algorithm configuration entry.
    */
-  private static final String ATTR_LOAD_BALANCING_ALGORITHM_DN =
+  @NotNull private static final String ATTR_LOAD_BALANCING_ALGORITHM_DN =
        "load-balancing-algorithm";
 
 
@@ -232,7 +255,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of modify operations
    * attempted in the backend server.
    */
-  private static final String ATTR_MODIFY_ATTEMPTS = "modify-attempts";
+  @NotNull private static final String ATTR_MODIFY_ATTEMPTS = "modify-attempts";
 
 
 
@@ -240,7 +263,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of modify operations
    * that failed.
    */
-  private static final String ATTR_MODIFY_FAILURES = "modify-failures";
+  @NotNull private static final String ATTR_MODIFY_FAILURES = "modify-failures";
 
 
 
@@ -248,7 +271,8 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of modify operations
    * completed successfully.
    */
-  private static final String ATTR_MODIFY_SUCCESSES = "modify-successes";
+  @NotNull private static final String ATTR_MODIFY_SUCCESSES =
+       "modify-successes";
 
 
 
@@ -256,7 +280,8 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of modify DN
    * operations attempted in the backend server.
    */
-  private static final String ATTR_MODIFY_DN_ATTEMPTS = "modify-dn-attempts";
+  @NotNull private static final String ATTR_MODIFY_DN_ATTEMPTS =
+       "modify-dn-attempts";
 
 
 
@@ -264,7 +289,8 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of modify DN
    * operations that failed.
    */
-  private static final String ATTR_MODIFY_DN_FAILURES = "modify-dn-failures";
+  @NotNull private static final String ATTR_MODIFY_DN_FAILURES =
+       "modify-dn-failures";
 
 
 
@@ -272,7 +298,8 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of modify DN
    * operations completed successfully.
    */
-  private static final String ATTR_MODIFY_DN_SUCCESSES = "modify-dn-successes";
+  @NotNull private static final String ATTR_MODIFY_DN_SUCCESSES =
+       "modify-dn-successes";
 
 
 
@@ -280,7 +307,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of search operations
    * attempted in the backend server.
    */
-  private static final String ATTR_SEARCH_ATTEMPTS = "search-attempts";
+  @NotNull private static final String ATTR_SEARCH_ATTEMPTS = "search-attempts";
 
 
 
@@ -288,7 +315,7 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of search operations
    * that failed.
    */
-  private static final String ATTR_SEARCH_FAILURES = "search-failures";
+  @NotNull private static final String ATTR_SEARCH_FAILURES = "search-failures";
 
 
 
@@ -296,21 +323,22 @@ public final class LDAPExternalServerMonitorEntry
    * The name of the attribute used to provide the number of search operations
    * completed successfully.
    */
-  private static final String ATTR_SEARCH_SUCCESSES = "search-successes";
+  @NotNull private static final String ATTR_SEARCH_SUCCESSES =
+       "search-successes";
 
 
 
   /**
    * The name of the attribute used to provide the server address.
    */
-  private static final String ATTR_SERVER_ADDRESS = "server-address";
+  @NotNull private static final String ATTR_SERVER_ADDRESS = "server-address";
 
 
 
   /**
    * The name of the attribute used to provide the server port.
    */
-  private static final String ATTR_SERVER_PORT = "server-port";
+  @NotNull private static final String ATTR_SERVER_PORT = "server-port";
 
 
 
@@ -318,7 +346,7 @@ public final class LDAPExternalServerMonitorEntry
    * The prefix for attributes providing information from a connection pool used
    * only for bind operations.
    */
-  private static final String ATTR_PREFIX_BIND_POOL = "bind-";
+  @NotNull private static final String ATTR_PREFIX_BIND_POOL = "bind-";
 
 
 
@@ -326,7 +354,7 @@ public final class LDAPExternalServerMonitorEntry
    * The prefix for attributes providing information from a connection pool used
    * for all types of operations.
    */
-  private static final String ATTR_PREFIX_COMMON_POOL = "common-";
+  @NotNull private static final String ATTR_PREFIX_COMMON_POOL = "common-";
 
 
 
@@ -334,7 +362,7 @@ public final class LDAPExternalServerMonitorEntry
    * The prefix for attributes providing information from a connection pool used
    * only for non-bind operations.
    */
-  private static final String ATTR_PREFIX_NONBIND_POOL = "non-bind-";
+  @NotNull private static final String ATTR_PREFIX_NONBIND_POOL = "non-bind-";
 
 
 
@@ -342,7 +370,7 @@ public final class LDAPExternalServerMonitorEntry
    * The suffix for the attribute used to provide the number of available
    * connections from a pool.
    */
-  private static final String ATTR_SUFFIX_AVAILABLE_CONNS =
+  @NotNull private static final String ATTR_SUFFIX_AVAILABLE_CONNS =
        "pool-available-connections";
 
 
@@ -351,7 +379,7 @@ public final class LDAPExternalServerMonitorEntry
    * The suffix for the attribute used to provide the number of connections
    * closed as defunct.
    */
-  private static final String ATTR_SUFFIX_CLOSED_DEFUNCT =
+  @NotNull private static final String ATTR_SUFFIX_CLOSED_DEFUNCT =
        "pool-num-closed-defunct";
 
 
@@ -360,7 +388,7 @@ public final class LDAPExternalServerMonitorEntry
    * The suffix for the attribute used to provide the number of connections
    * closed as expired.
    */
-  private static final String ATTR_SUFFIX_CLOSED_EXPIRED =
+  @NotNull private static final String ATTR_SUFFIX_CLOSED_EXPIRED =
        "pool-num-closed-expired";
 
 
@@ -369,7 +397,7 @@ public final class LDAPExternalServerMonitorEntry
    * The suffix for the attribute used to provide the number of connections
    * closed as unneeded.
    */
-  private static final String ATTR_SUFFIX_CLOSED_UNNEEDED =
+  @NotNull private static final String ATTR_SUFFIX_CLOSED_UNNEEDED =
        "pool-num-closed-unneeded";
 
 
@@ -378,7 +406,7 @@ public final class LDAPExternalServerMonitorEntry
    * The suffix for the attribute used to provide the number of failed
    * checkouts.
    */
-  private static final String ATTR_SUFFIX_FAILED_CHECKOUTS =
+  @NotNull private static final String ATTR_SUFFIX_FAILED_CHECKOUTS =
        "pool-num-failed-checkouts";
 
 
@@ -387,7 +415,7 @@ public final class LDAPExternalServerMonitorEntry
    * The suffix for the attribute used to provide the number of failed
    * connection attempts.
    */
-  private static final String ATTR_SUFFIX_FAILED_CONNECTS =
+  @NotNull private static final String ATTR_SUFFIX_FAILED_CONNECTS =
        "pool-num-failed-connection-attempts";
 
 
@@ -396,7 +424,7 @@ public final class LDAPExternalServerMonitorEntry
    * The suffix for the attribute used to provide the maximum number of
    * available connections from a pool.
    */
-  private static final String ATTR_SUFFIX_MAX_AVAILABLE_CONNS =
+  @NotNull private static final String ATTR_SUFFIX_MAX_AVAILABLE_CONNS =
        "pool-max-available-connections";
 
 
@@ -405,7 +433,7 @@ public final class LDAPExternalServerMonitorEntry
    * The suffix for the attribute used to provide the number of connections
    * released as valid back to the pool.
    */
-  private static final String ATTR_SUFFIX_RELEASED_VALID =
+  @NotNull private static final String ATTR_SUFFIX_RELEASED_VALID =
        "pool-num-released-valid";
 
 
@@ -414,7 +442,7 @@ public final class LDAPExternalServerMonitorEntry
    * The suffix for the attribute used to provide the number of successful
    * checkouts.
    */
-  private static final String ATTR_SUFFIX_SUCCESSFUL_CHECKOUTS =
+  @NotNull private static final String ATTR_SUFFIX_SUCCESSFUL_CHECKOUTS =
        "pool-num-successful-checkouts";
 
 
@@ -423,8 +451,9 @@ public final class LDAPExternalServerMonitorEntry
    * The suffix for the attribute used to provide the number of successful
    * checkouts after waiting for a connection to become available.
    */
-  private static final String ATTR_SUFFIX_SUCCESSFUL_CHECKOUTS_AFTER_WAITING =
-       "pool-num-successful-checkouts-after-waiting";
+  @NotNull private static final String
+       ATTR_SUFFIX_SUCCESSFUL_CHECKOUTS_AFTER_WAITING =
+            "pool-num-successful-checkouts-after-waiting";
 
 
 
@@ -432,8 +461,9 @@ public final class LDAPExternalServerMonitorEntry
    * The suffix for the attribute used to provide the number of successful
    * checkouts after creating a new connection.
    */
-  private static final String ATTR_SUFFIX_SUCCESSFUL_CHECKOUTS_NEW_CONN =
-       "pool-num-successful-checkouts-new-connection";
+  @NotNull private static final String
+       ATTR_SUFFIX_SUCCESSFUL_CHECKOUTS_NEW_CONN =
+            "pool-num-successful-checkouts-new-connection";
 
 
 
@@ -441,8 +471,9 @@ public final class LDAPExternalServerMonitorEntry
    * The suffix for the attribute used to provide the number of successful
    * checkouts without waiting.
    */
-  private static final String ATTR_SUFFIX_SUCCESSFUL_CHECKOUTS_WITHOUT_WAITING =
-       "pool-num-successful-checkouts-without-waiting";
+  @NotNull private static final String
+       ATTR_SUFFIX_SUCCESSFUL_CHECKOUTS_WITHOUT_WAITING =
+            "pool-num-successful-checkouts-without-waiting";
 
 
 
@@ -450,7 +481,7 @@ public final class LDAPExternalServerMonitorEntry
    * The suffix for the attribute used to provide the number of successful
    * connection attempts.
    */
-  private static final String ATTR_SUFFIX_SUCCESSFUL_CONNECTS =
+  @NotNull private static final String ATTR_SUFFIX_SUCCESSFUL_CONNECTS =
        "pool-num-successful-connection-attempts";
 
 
@@ -463,227 +494,227 @@ public final class LDAPExternalServerMonitorEntry
 
 
   // The time the health check information was last updated.
-  private final Date healthCheckUpdateTime;
+  @Nullable private final Date healthCheckUpdateTime;
 
   // The health check state for the server.
-  private final HealthCheckState healthCheckState;
+  @Nullable private final HealthCheckState healthCheckState;
 
   // The list of health check messages.
-  private final List<String> healthCheckMessages;
+  @NotNull private final List<String> healthCheckMessages;
 
   // The number of add operations attempted.
-  private final Long addAttempts;
+  @Nullable private final Long addAttempts;
 
   // The number of failed add operations.
-  private final Long addFailures;
+  @Nullable private final Long addFailures;
 
   // The number of successful add operations.
-  private final Long addSuccesses;
+  @Nullable private final Long addSuccesses;
 
   // The number of bind operations attempted.
-  private final Long bindAttempts;
+  @Nullable private final Long bindAttempts;
 
   // The number of failed bind operations.
-  private final Long bindFailures;
+  @Nullable private final Long bindFailures;
 
   // The number of available connections in the bind pool.
-  private final Long bindPoolAvailableConnections;
+  @Nullable private final Long bindPoolAvailableConnections;
 
   // The maximum number of available connections in the bind pool.
-  private final Long bindPoolMaxAvailableConnections;
+  @Nullable private final Long bindPoolMaxAvailableConnections;
 
   // The number of connections in the bind pool that have been closed as
   // defunct.
-  private final Long bindPoolNumClosedDefunct;
+  @Nullable private final Long bindPoolNumClosedDefunct;
 
   // The number of connections in the bind pool that have been closed as
   // expired.
-  private final Long bindPoolNumClosedExpired;
+  @Nullable private final Long bindPoolNumClosedExpired;
 
   // The number of connections in the bind pool that have been closed as
   // unneeded.
-  private final Long bindPoolNumClosedUnneeded;
+  @Nullable private final Long bindPoolNumClosedUnneeded;
 
   // The number of available failed checkouts in the bind pool.
-  private final Long bindPoolNumFailedCheckouts;
+  @Nullable private final Long bindPoolNumFailedCheckouts;
 
   // The number of available failed connection attempts in the bind pool.
-  private final Long bindPoolNumFailedConnectionAttempts;
+  @Nullable private final Long bindPoolNumFailedConnectionAttempts;
 
   // The total number of connections released as valid back to the bind pool.
-  private final Long bindPoolNumReleasedValid;
+  @Nullable private final Long bindPoolNumReleasedValid;
 
   // The total number of successful checkouts from the bind pool.
-  private final Long bindPoolNumSuccessfulCheckouts;
+  @Nullable private final Long bindPoolNumSuccessfulCheckouts;
 
   // The total number of successful checkouts from the bind pool after waiting
   // for a connection to become available.
-  private final Long bindPoolNumSuccessfulCheckoutsAfterWaiting;
+  @Nullable private final Long bindPoolNumSuccessfulCheckoutsAfterWaiting;
 
   // The total number of successful checkouts from the bind pool after creating
   // a new connection.
-  private final Long bindPoolNumSuccessfulCheckoutsNewConnection;
+  @Nullable private final Long bindPoolNumSuccessfulCheckoutsNewConnection;
 
   // The total number of successful checkouts from the bind pool without waiting
   // for a connection to become available.
-  private final Long bindPoolNumSuccessfulCheckoutsWithoutWaiting;
+  @Nullable private final Long bindPoolNumSuccessfulCheckoutsWithoutWaiting;
 
   // The number of successful connection attempts in the bind pool.
-  private final Long bindPoolNumSuccessfulConnectionAttempts;
+  @Nullable private final Long bindPoolNumSuccessfulConnectionAttempts;
 
   // The number of successful bind operations.
-  private final Long bindSuccesses;
+  @Nullable private final Long bindSuccesses;
 
   // The number of available connections in the common pool.
-  private final Long commonPoolAvailableConnections;
+  @Nullable private final Long commonPoolAvailableConnections;
 
   // The maximum number of available connections in the common pool.
-  private final Long commonPoolMaxAvailableConnections;
+  @Nullable private final Long commonPoolMaxAvailableConnections;
 
   // The number of connections in the common pool that have been closed as
   // defunct.
-  private final Long commonPoolNumClosedDefunct;
+  @Nullable private final Long commonPoolNumClosedDefunct;
 
   // The number of connections in the common pool that have been closed as
   // expired.
-  private final Long commonPoolNumClosedExpired;
+  @Nullable private final Long commonPoolNumClosedExpired;
 
   // The number of connections in the common pool that have been closed as
   // unneeded.
-  private final Long commonPoolNumClosedUnneeded;
+  @Nullable private final Long commonPoolNumClosedUnneeded;
 
   // The number of available failed checkouts in the common pool.
-  private final Long commonPoolNumFailedCheckouts;
+  @Nullable private final Long commonPoolNumFailedCheckouts;
 
   // The number of available failed connection attempts in the common pool.
-  private final Long commonPoolNumFailedConnectionAttempts;
+  @Nullable private final Long commonPoolNumFailedConnectionAttempts;
 
   // The total number of connections released as valid back to the common pool.
-  private final Long commonPoolNumReleasedValid;
+  @Nullable private final Long commonPoolNumReleasedValid;
 
   // The total number of successful checkouts from the common pool.
-  private final Long commonPoolNumSuccessfulCheckouts;
+  @Nullable private final Long commonPoolNumSuccessfulCheckouts;
 
   // The total number of successful checkouts from the common pool after waiting
   // for a connection to become available.
-  private final Long commonPoolNumSuccessfulCheckoutsAfterWaiting;
+  @Nullable private final Long commonPoolNumSuccessfulCheckoutsAfterWaiting;
 
   // The total number of successful checkouts from the common pool after
   // creating a new connection.
-  private final Long commonPoolNumSuccessfulCheckoutsNewConnection;
+  @Nullable private final Long commonPoolNumSuccessfulCheckoutsNewConnection;
 
   // The total number of successful checkouts from the common pool without
   // waiting for a connection to become available.
-  private final Long commonPoolNumSuccessfulCheckoutsWithoutWaiting;
+  @Nullable private final Long commonPoolNumSuccessfulCheckoutsWithoutWaiting;
 
   // The number of successful connection attempts in the common pool.
-  private final Long commonPoolNumSuccessfulConnectionAttempts;
+  @Nullable private final Long commonPoolNumSuccessfulConnectionAttempts;
 
   // The number of compare operations attempted.
-  private final Long compareAttempts;
+  @Nullable private final Long compareAttempts;
 
   // The number of failed compare operations.
-  private final Long compareFailures;
+  @Nullable private final Long compareFailures;
 
   // The number of successful compare operations.
-  private final Long compareSuccesses;
+  @Nullable private final Long compareSuccesses;
 
   // The number of delete operations attempted.
-  private final Long deleteAttempts;
+  @Nullable private final Long deleteAttempts;
 
   // The number of failed delete operations.
-  private final Long deleteFailures;
+  @Nullable private final Long deleteFailures;
 
   // The number of successful delete operations.
-  private final Long deleteSuccesses;
+  @Nullable private final Long deleteSuccesses;
 
   // The health check score for the server.
-  private final Long healthCheckScore;
+  @Nullable private final Long healthCheckScore;
 
   // The number of modify operations attempted.
-  private final Long modifyAttempts;
+  @Nullable private final Long modifyAttempts;
 
   // The number of failed modify operations.
-  private final Long modifyFailures;
+  @Nullable private final Long modifyFailures;
 
   // The number of successful modify operations.
-  private final Long modifySuccesses;
+  @Nullable private final Long modifySuccesses;
 
   // The number of modify DN operations attempted.
-  private final Long modifyDNAttempts;
+  @Nullable private final Long modifyDNAttempts;
 
   // The number of failed modify DN operations.
-  private final Long modifyDNFailures;
+  @Nullable private final Long modifyDNFailures;
 
   // The number of successful modify DN operations.
-  private final Long modifyDNSuccesses;
+  @Nullable private final Long modifyDNSuccesses;
 
   // The number of available connections in the non-bind pool.
-  private final Long nonBindPoolAvailableConnections;
+  @Nullable private final Long nonBindPoolAvailableConnections;
 
   // The maximum number of available connections in the non-bind pool.
-  private final Long nonBindPoolMaxAvailableConnections;
+  @Nullable private final Long nonBindPoolMaxAvailableConnections;
 
   // The number of connections in the non-bind pool that have been closed as
   // defunct.
-  private final Long nonBindPoolNumClosedDefunct;
+  @Nullable private final Long nonBindPoolNumClosedDefunct;
 
   // The number of connections in the non-bind pool that have been closed as
   // expired.
-  private final Long nonBindPoolNumClosedExpired;
+  @Nullable private final Long nonBindPoolNumClosedExpired;
 
   // The number of connections in the non-bind pool that have been closed as
   // unneeded.
-  private final Long nonBindPoolNumClosedUnneeded;
+  @Nullable private final Long nonBindPoolNumClosedUnneeded;
 
   // The number of available failed checkouts in the non-bind pool.
-  private final Long nonBindPoolNumFailedCheckouts;
+  @Nullable private final Long nonBindPoolNumFailedCheckouts;
 
   // The number of available failed connection attempts in the non-bind pool.
-  private final Long nonBindPoolNumFailedConnectionAttempts;
+  @Nullable private final Long nonBindPoolNumFailedConnectionAttempts;
 
   // The total number of connections released as valid back to the non-bind
   // pool.
-  private final Long nonBindPoolNumReleasedValid;
+  @Nullable private final Long nonBindPoolNumReleasedValid;
 
   // The total number of successful checkouts from the non-bind pool.
-  private final Long nonBindPoolNumSuccessfulCheckouts;
+  @Nullable private final Long nonBindPoolNumSuccessfulCheckouts;
 
   // The total number of successful checkouts from the non-bind pool after
   // waiting for a connection to become available.
-  private final Long nonBindPoolNumSuccessfulCheckoutsAfterWaiting;
+  @Nullable private final Long nonBindPoolNumSuccessfulCheckoutsAfterWaiting;
 
   // The total number of successful checkouts from the non-bind pool after
   // creating a new connection.
-  private final Long nonBindPoolNumSuccessfulCheckoutsNewConnection;
+  @Nullable private final Long nonBindPoolNumSuccessfulCheckoutsNewConnection;
 
   // The total number of successful checkouts from the non-bind pool without
   // waiting for a connection to become available.
-  private final Long nonBindPoolNumSuccessfulCheckoutsWithoutWaiting;
+  @Nullable private final Long nonBindPoolNumSuccessfulCheckoutsWithoutWaiting;
 
   // The number of successful connection attempts in the non-bind pool.
-  private final Long nonBindPoolNumSuccessfulConnectionAttempts;
+  @Nullable private final Long nonBindPoolNumSuccessfulConnectionAttempts;
 
   // The number of search operations attempted.
-  private final Long searchAttempts;
+  @Nullable private final Long searchAttempts;
 
   // The number of failed search operations.
-  private final Long searchFailures;
+  @Nullable private final Long searchFailures;
 
   // The number of successful search operations.
-  private final Long searchSuccesses;
+  @Nullable private final Long searchSuccesses;
 
   // The port of the server.
-  private final Long serverPort;
+  @Nullable private final Long serverPort;
 
   // The communication security mechanism used by the server.
-  private final String communicationSecurity;
+  @Nullable private final String communicationSecurity;
 
   // The DN of the load-balancing algorithm.
-  private final String loadBalancingAlgorithmDN;
+  @Nullable private final String loadBalancingAlgorithmDN;
 
   // The address of the server.
-  private final String serverAddress;
+  @Nullable private final String serverAddress;
 
 
 
@@ -693,7 +724,7 @@ public final class LDAPExternalServerMonitorEntry
    * @param  entry  The entry to be parsed as an LDAP external server monitor
    *                entry.  It must not be {@code null}.
    */
-  public LDAPExternalServerMonitorEntry(final Entry entry)
+  public LDAPExternalServerMonitorEntry(@NotNull final Entry entry)
   {
     super(entry);
 
@@ -831,6 +862,7 @@ public final class LDAPExternalServerMonitorEntry
    * @return  The address of the LDAP external server, or {@code null} if it was
    *          not included in the monitor entry.
    */
+  @Nullable()
   public String getServerAddress()
   {
     return serverAddress;
@@ -844,6 +876,7 @@ public final class LDAPExternalServerMonitorEntry
    * @return  The port of the LDAP external server, or {@code null} if it was
    *          not included in the monitor entry.
    */
+  @Nullable()
   public Long getServerPort()
   {
     return serverPort;
@@ -859,6 +892,7 @@ public final class LDAPExternalServerMonitorEntry
    *          the external server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public String getCommunicationSecurity()
   {
     return communicationSecurity;
@@ -874,6 +908,7 @@ public final class LDAPExternalServerMonitorEntry
    *          that uses the LDAP external server, or {@code null} if it was not
    *          included in the monitor entry.
    */
+  @Nullable()
   public String getLoadBalancingAlgorithmDN()
   {
     return loadBalancingAlgorithmDN;
@@ -887,6 +922,7 @@ public final class LDAPExternalServerMonitorEntry
    * @return  The health check state for the LDAP external server, or
    *          {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public HealthCheckState getHealthCheckState()
   {
     return healthCheckState;
@@ -900,6 +936,7 @@ public final class LDAPExternalServerMonitorEntry
    * @return  The health check score for the LDAP external server, or
    *          {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public Long getHealthCheckScore()
   {
     return healthCheckScore;
@@ -913,6 +950,7 @@ public final class LDAPExternalServerMonitorEntry
    * @return  The list of health check messages for the LDAP external server, or
    *          an empty list if it was not included in the monitor entry.
    */
+  @NotNull()
   public List<String> getHealthCheckMessages()
   {
     return healthCheckMessages;
@@ -928,6 +966,7 @@ public final class LDAPExternalServerMonitorEntry
    *          LDAP external server, or {@code null} if it was not included in
    *          the monitor entry.
    */
+  @Nullable()
   public Date getHealthCheckUpdateTime()
   {
     return healthCheckUpdateTime;
@@ -943,6 +982,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getAddAttempts()
   {
     return addAttempts;
@@ -958,6 +998,7 @@ public final class LDAPExternalServerMonitorEntry
    *          server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getAddFailures()
   {
     return addFailures;
@@ -973,6 +1014,7 @@ public final class LDAPExternalServerMonitorEntry
    *          server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getAddSuccesses()
   {
     return addSuccesses;
@@ -988,6 +1030,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getBindAttempts()
   {
     return bindAttempts;
@@ -1003,6 +1046,7 @@ public final class LDAPExternalServerMonitorEntry
    *          server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getBindFailures()
   {
     return bindFailures;
@@ -1018,6 +1062,7 @@ public final class LDAPExternalServerMonitorEntry
    *          server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getBindSuccesses()
   {
     return bindSuccesses;
@@ -1033,6 +1078,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getCompareAttempts()
   {
     return compareAttempts;
@@ -1048,6 +1094,7 @@ public final class LDAPExternalServerMonitorEntry
    *          server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getCompareFailures()
   {
     return compareFailures;
@@ -1063,6 +1110,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getCompareSuccesses()
   {
     return compareSuccesses;
@@ -1078,6 +1126,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getDeleteAttempts()
   {
     return deleteAttempts;
@@ -1093,6 +1142,7 @@ public final class LDAPExternalServerMonitorEntry
    *          server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getDeleteFailures()
   {
     return deleteFailures;
@@ -1108,6 +1158,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getDeleteSuccesses()
   {
     return deleteSuccesses;
@@ -1123,6 +1174,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getModifyAttempts()
   {
     return modifyAttempts;
@@ -1138,6 +1190,7 @@ public final class LDAPExternalServerMonitorEntry
    *          server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getModifyFailures()
   {
     return modifyFailures;
@@ -1153,6 +1206,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getModifySuccesses()
   {
     return modifySuccesses;
@@ -1168,6 +1222,7 @@ public final class LDAPExternalServerMonitorEntry
    *          LDAP external server, or {@code null} if it was not included in
    *          the monitor entry.
    */
+  @Nullable()
   public Long getModifyDNAttempts()
   {
     return modifyDNAttempts;
@@ -1183,6 +1238,7 @@ public final class LDAPExternalServerMonitorEntry
    *          server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getModifyDNFailures()
   {
     return modifyDNFailures;
@@ -1198,6 +1254,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getModifyDNSuccesses()
   {
     return modifyDNSuccesses;
@@ -1213,6 +1270,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getSearchAttempts()
   {
     return searchAttempts;
@@ -1228,6 +1286,7 @@ public final class LDAPExternalServerMonitorEntry
    *          server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getSearchFailures()
   {
     return searchFailures;
@@ -1243,6 +1302,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getSearchSuccesses()
   {
     return searchSuccesses;
@@ -1261,6 +1321,7 @@ public final class LDAPExternalServerMonitorEntry
    *          included in the monitor entry or if the external server uses
    *          separate pools for bind and non-bind operations.
    */
+  @Nullable()
   public Long getCommonPoolAvailableConnections()
   {
     return commonPoolAvailableConnections;
@@ -1279,6 +1340,7 @@ public final class LDAPExternalServerMonitorEntry
    *          included in the monitor entry or if the external server uses
    *          separate pools for bind and non-bind operations.
    */
+  @Nullable()
   public Long getCommonPoolMaxAvailableConnections()
   {
     return commonPoolMaxAvailableConnections;
@@ -1297,6 +1359,7 @@ public final class LDAPExternalServerMonitorEntry
    *          monitor entry or if the external server uses separate pools for
    *          bind and non-bind operations.
    */
+  @Nullable()
   public Long getCommonPoolNumSuccessfulConnectionAttempts()
   {
     return commonPoolNumSuccessfulConnectionAttempts;
@@ -1315,6 +1378,7 @@ public final class LDAPExternalServerMonitorEntry
    *          entry or if the external server uses separate pools for bind and
    *          non-bind operations.
    */
+  @Nullable()
   public Long getCommonPoolNumFailedConnectionAttempts()
   {
     return commonPoolNumFailedConnectionAttempts;
@@ -1333,6 +1397,7 @@ public final class LDAPExternalServerMonitorEntry
    *          included in the monitor entry or if the external server uses
    *          separate pools for bind and non-bind operations.
    */
+  @Nullable()
   public Long getCommonPoolNumClosedDefunct()
   {
     return commonPoolNumClosedDefunct;
@@ -1351,6 +1416,7 @@ public final class LDAPExternalServerMonitorEntry
    *          included in the monitor entry or if the external server uses
    *          separate pools for bind and non-bind operations.
    */
+  @Nullable()
   public Long getCommonPoolNumClosedExpired()
   {
     return commonPoolNumClosedExpired;
@@ -1369,6 +1435,7 @@ public final class LDAPExternalServerMonitorEntry
    *          included in the monitor entry or if the external server uses
    *          separate pools for bind and non-bind operations.
    */
+  @Nullable()
   public Long getCommonPoolNumClosedUnneeded()
   {
     return commonPoolNumClosedUnneeded;
@@ -1387,6 +1454,7 @@ public final class LDAPExternalServerMonitorEntry
    *          monitor entry or if the external server uses separate pools for
    *          bind and non-bind operations.
    */
+  @Nullable()
   public Long getCommonPoolTotalSuccessfulCheckouts()
   {
     return commonPoolNumSuccessfulCheckouts;
@@ -1406,6 +1474,7 @@ public final class LDAPExternalServerMonitorEntry
    *          monitor entry or if the external server uses separate pools for
    *          bind and non-bind operations.
    */
+  @Nullable()
   public Long getCommonPoolNumSuccessfulCheckoutsWithoutWaiting()
   {
     return commonPoolNumSuccessfulCheckoutsWithoutWaiting;
@@ -1426,6 +1495,7 @@ public final class LDAPExternalServerMonitorEntry
    *          it was not included in the monitor entry or if the external server
    *          uses separate pools for bind and non-bind operations.
    */
+  @Nullable()
   public Long getCommonPoolNumSuccessfulCheckoutsAfterWaiting()
   {
     return commonPoolNumSuccessfulCheckoutsAfterWaiting;
@@ -1446,6 +1516,7 @@ public final class LDAPExternalServerMonitorEntry
    *          in the monitor entry or if the external server uses separate pools
    *          for bind and non-bind operations.
    */
+  @Nullable()
   public Long getCommonPoolNumSuccessfulCheckoutsNewConnection()
   {
     return commonPoolNumSuccessfulCheckoutsNewConnection;
@@ -1464,6 +1535,7 @@ public final class LDAPExternalServerMonitorEntry
    *          entry or if the external server uses separate pools for bind and
    *          non-bind operations.
    */
+  @Nullable()
   public Long getCommonPoolNumFailedCheckouts()
   {
     return commonPoolNumFailedCheckouts;
@@ -1482,6 +1554,7 @@ public final class LDAPExternalServerMonitorEntry
    *          monitor entry or if the external server uses a separate pools for
    *          bind and non-bind operations.
    */
+  @Nullable()
   public Long getCommonPoolNumReleasedValid()
   {
     return commonPoolNumReleasedValid;
@@ -1498,6 +1571,7 @@ public final class LDAPExternalServerMonitorEntry
    *          if it was not included in the monitor entry or if the external
    *          server uses a common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getBindPoolAvailableConnections()
   {
     return bindPoolAvailableConnections;
@@ -1515,6 +1589,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server uses a common pool for bind and non-bind
    *          operations.
    */
+  @Nullable()
   public Long getBindPoolMaxAvailableConnections()
   {
     return bindPoolMaxAvailableConnections;
@@ -1531,6 +1606,7 @@ public final class LDAPExternalServerMonitorEntry
    *          if it was not included in the monitor entry or if the external
    *          server uses a common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getBindPoolNumSuccessfulConnectionAttempts()
   {
     return bindPoolNumSuccessfulConnectionAttempts;
@@ -1547,6 +1623,7 @@ public final class LDAPExternalServerMonitorEntry
    *          not included in the monitor entry or if the external server uses a
    *          common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getBindPoolNumFailedConnectionAttempts()
   {
     return bindPoolNumFailedConnectionAttempts;
@@ -1564,6 +1641,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server uses a common pool for bind and non-bind
    *          operations.
    */
+  @Nullable()
   public Long getBindPoolNumClosedDefunct()
   {
     return bindPoolNumClosedDefunct;
@@ -1581,6 +1659,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server uses a common pool for bind and non-bind
    *          operations.
    */
+  @Nullable()
   public Long getBindPoolNumClosedExpired()
   {
     return bindPoolNumClosedExpired;
@@ -1598,6 +1677,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server uses a common pool for bind and non-bind
    *          operations.
    */
+  @Nullable()
   public Long getBindPoolNumClosedUnneeded()
   {
     return bindPoolNumClosedUnneeded;
@@ -1614,6 +1694,7 @@ public final class LDAPExternalServerMonitorEntry
    *          not included in the monitor entry or if the external server uses a
    *          common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getBindPoolTotalSuccessfulCheckouts()
   {
     return bindPoolNumSuccessfulCheckouts;
@@ -1632,6 +1713,7 @@ public final class LDAPExternalServerMonitorEntry
    *          not included in the monitor entry or if the external server uses a
    *          common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getBindPoolNumSuccessfulCheckoutsWithoutWaiting()
   {
     return bindPoolNumSuccessfulCheckoutsWithoutWaiting;
@@ -1651,6 +1733,7 @@ public final class LDAPExternalServerMonitorEntry
    *          entry or if the external server uses a common pool for bind and
    *          non-bind operations.
    */
+  @Nullable()
   public Long getBindPoolNumSuccessfulCheckoutsAfterWaiting()
   {
     return bindPoolNumSuccessfulCheckoutsAfterWaiting;
@@ -1669,6 +1752,7 @@ public final class LDAPExternalServerMonitorEntry
    *          it was not included in the monitor entry or if the external server
    *          uses a common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getBindPoolNumSuccessfulCheckoutsNewConnection()
   {
     return bindPoolNumSuccessfulCheckoutsNewConnection;
@@ -1685,6 +1769,7 @@ public final class LDAPExternalServerMonitorEntry
    *          not included in the monitor entry or if the external server uses a
    *          common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getBindPoolNumFailedCheckouts()
   {
     return bindPoolNumFailedCheckouts;
@@ -1701,6 +1786,7 @@ public final class LDAPExternalServerMonitorEntry
    *          if it was not included in the monitor entry or if the external
    *          server uses a common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getBindPoolNumReleasedValid()
   {
     return bindPoolNumReleasedValid;
@@ -1717,6 +1803,7 @@ public final class LDAPExternalServerMonitorEntry
    *          if it was not included in the monitor entry or if the external
    *          server uses a common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getNonBindPoolAvailableConnections()
   {
     return nonBindPoolAvailableConnections;
@@ -1734,6 +1821,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server uses a common pool for bind and non-bind
    *          operations.
    */
+  @Nullable()
   public Long getNonBindPoolMaxAvailableConnections()
   {
     return nonBindPoolMaxAvailableConnections;
@@ -1750,6 +1838,7 @@ public final class LDAPExternalServerMonitorEntry
    *          if it was not included in the monitor entry or if the external
    *          server uses a common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getNonBindPoolNumSuccessfulConnectionAttempts()
   {
     return nonBindPoolNumSuccessfulConnectionAttempts;
@@ -1766,6 +1855,7 @@ public final class LDAPExternalServerMonitorEntry
    *          if it was not included in the monitor entry or if the external
    *          server uses a common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getNonBindPoolNumFailedConnectionAttempts()
   {
     return nonBindPoolNumFailedConnectionAttempts;
@@ -1783,6 +1873,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server uses a common pool for bind and non-bind
    *          operations.
    */
+  @Nullable()
   public Long getNonBindPoolNumClosedDefunct()
   {
     return nonBindPoolNumClosedDefunct;
@@ -1800,6 +1891,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server uses a common pool for bind and non-bind
    *          operations.
    */
+  @Nullable()
   public Long getNonBindPoolNumClosedExpired()
   {
     return nonBindPoolNumClosedExpired;
@@ -1817,6 +1909,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server uses a common pool for bind and non-bind
    *          operations.
    */
+  @Nullable()
   public Long getNonBindPoolNumClosedUnneeded()
   {
     return nonBindPoolNumClosedUnneeded;
@@ -1833,6 +1926,7 @@ public final class LDAPExternalServerMonitorEntry
    *          if it was not included in the monitor entry or if the external
    *          server uses a common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getNonBindPoolTotalSuccessfulCheckouts()
   {
     return nonBindPoolNumSuccessfulCheckouts;
@@ -1851,6 +1945,7 @@ public final class LDAPExternalServerMonitorEntry
    *          if it was not included in the monitor entry or if the external
    *          server uses a common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getNonBindPoolNumSuccessfulCheckoutsWithoutWaiting()
   {
     return nonBindPoolNumSuccessfulCheckoutsWithoutWaiting;
@@ -1870,6 +1965,7 @@ public final class LDAPExternalServerMonitorEntry
    *          monitor entry or if the external server uses a common pool for
    *          bind and non-bind operations.
    */
+  @Nullable()
   public Long getNonBindPoolNumSuccessfulCheckoutsAfterWaiting()
   {
     return nonBindPoolNumSuccessfulCheckoutsAfterWaiting;
@@ -1889,6 +1985,7 @@ public final class LDAPExternalServerMonitorEntry
    *          external server uses a common pool for bind and non-bind
    *          operations.
    */
+  @Nullable()
   public Long getNonBindPoolNumSuccessfulCheckoutsNewConnection()
   {
     return nonBindPoolNumSuccessfulCheckoutsNewConnection;
@@ -1905,6 +2002,7 @@ public final class LDAPExternalServerMonitorEntry
    *          if it was not included in the monitor entry or if the external
    *          server uses a common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getNonBindPoolNumFailedCheckouts()
   {
     return nonBindPoolNumFailedCheckouts;
@@ -1921,6 +2019,7 @@ public final class LDAPExternalServerMonitorEntry
    *          if it was not included in the monitor entry or if the external
    *          server uses a common pool for bind and non-bind operations.
    */
+  @Nullable()
   public Long getNonBindPoolNumReleasedValid()
   {
     return nonBindPoolNumReleasedValid;
@@ -1932,6 +2031,7 @@ public final class LDAPExternalServerMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDisplayName()
   {
     return INFO_LDAP_EXT_SERVER_MONITOR_DISPNAME.get();
@@ -1943,6 +2043,7 @@ public final class LDAPExternalServerMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDescription()
   {
     return INFO_LDAP_EXT_SERVER_MONITOR_DESC.get();
@@ -1954,6 +2055,7 @@ public final class LDAPExternalServerMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<String,MonitorAttribute> getMonitorAttributes()
   {
     final LinkedHashMap<String,MonitorAttribute> attrs =

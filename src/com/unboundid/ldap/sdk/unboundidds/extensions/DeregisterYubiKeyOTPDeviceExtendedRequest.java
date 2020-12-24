@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -82,8 +99,9 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    * The OID (1.3.6.1.4.1.30221.2.6.55) for the deregister YubiKey OTP device
    * extended request.
    */
-  public static final String DEREGISTER_YUBIKEY_OTP_DEVICE_REQUEST_OID =
-       "1.3.6.1.4.1.30221.2.6.55";
+  @NotNull public static final String
+       DEREGISTER_YUBIKEY_OTP_DEVICE_REQUEST_OID =
+            "1.3.6.1.4.1.30221.2.6.55";
 
 
 
@@ -117,13 +135,13 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
 
 
   // The static password for the request.
-  private final ASN1OctetString staticPassword;
+  @Nullable private final ASN1OctetString staticPassword;
 
   // The authentication ID for the request.
-  private final String authenticationID;
+  @Nullable private final String authenticationID;
 
   // The YubiKey OTP for the request.
-  private final String yubiKeyOTP;
+  @Nullable private final String yubiKeyOTP;
 
 
 
@@ -148,8 +166,9 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    *                           not be any request controls.
    */
   public DeregisterYubiKeyOTPDeviceExtendedRequest(
-              final String authenticationID, final String yubiKeyOTP,
-              final Control... controls)
+              @Nullable final String authenticationID,
+              @Nullable final String yubiKeyOTP,
+              @Nullable final Control... controls)
   {
     this(authenticationID, (ASN1OctetString) null, yubiKeyOTP, controls);
   }
@@ -182,8 +201,10 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    *                           not be any request controls.
    */
   public DeregisterYubiKeyOTPDeviceExtendedRequest(
-              final String authenticationID, final String staticPassword,
-              final String yubiKeyOTP, final Control... controls)
+              @Nullable final String authenticationID,
+              @Nullable final String staticPassword,
+              @Nullable final String yubiKeyOTP,
+              @Nullable final Control... controls)
   {
     this(authenticationID,
          RegisterYubiKeyOTPDeviceExtendedRequest.encodePassword(staticPassword),
@@ -218,8 +239,10 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    *                           not be any request controls.
    */
   public DeregisterYubiKeyOTPDeviceExtendedRequest(
-              final String authenticationID, final byte[] staticPassword,
-              final String yubiKeyOTP, final Control... controls)
+              @Nullable final String authenticationID,
+              @Nullable final byte[] staticPassword,
+              @Nullable final String yubiKeyOTP,
+              @Nullable final Control... controls)
   {
     this(authenticationID,
          RegisterYubiKeyOTPDeviceExtendedRequest.encodePassword(staticPassword),
@@ -254,9 +277,10 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    *                           not be any request controls.
    */
   private DeregisterYubiKeyOTPDeviceExtendedRequest(
-               final String authenticationID,
-               final ASN1OctetString staticPassword, final String yubiKeyOTP,
-               final Control... controls)
+               @Nullable final String authenticationID,
+               @Nullable final ASN1OctetString staticPassword,
+               @Nullable final String yubiKeyOTP,
+               @Nullable final Control... controls)
   {
     super(DEREGISTER_YUBIKEY_OTP_DEVICE_REQUEST_OID,
          encodeValue(authenticationID, staticPassword, yubiKeyOTP), controls);
@@ -279,7 +303,7 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    *                         decode the provided request.
    */
   public DeregisterYubiKeyOTPDeviceExtendedRequest(
-              final ExtendedRequest request)
+              @NotNull final ExtendedRequest request)
          throws LDAPException
   {
     super(request);
@@ -362,9 +386,11 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    *
    * @return  The ASN.1 octet string containing the encoded request value.
    */
-  private static ASN1OctetString encodeValue(final String authenticationID,
-                                      final ASN1OctetString staticPassword,
-                                      final String yubiKeyOTP)
+  @NotNull()
+  private static ASN1OctetString encodeValue(
+               @Nullable final String authenticationID,
+               @Nullable final ASN1OctetString staticPassword,
+               @Nullable final String yubiKeyOTP)
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(3);
 
@@ -397,6 +423,7 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    *          {@code null} if the device is to be deregistered for the user as
    *          whom the underlying connection is authenticated.
    */
+  @Nullable()
   public String getAuthenticationID()
   {
     return authenticationID;
@@ -411,6 +438,7 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    * @return  The string representation of the static password for the target
    *          user, or {@code null} if no static password was provided.
    */
+  @Nullable()
   public String getStaticPasswordString()
   {
     if (staticPassword == null)
@@ -432,6 +460,7 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    * @return  The bytes that comprise the static password for the target user,
    *          or {@code null} if no static password was provided.
    */
+  @Nullable()
   public byte[] getStaticPasswordBytes()
   {
     if (staticPassword == null)
@@ -454,6 +483,7 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    *          deregistered, or {@code null} if all devices associated with the
    *          target user should be deregistered.
    */
+  @Nullable()
   public String getYubiKeyOTP()
   {
     return yubiKeyOTP;
@@ -465,6 +495,7 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public DeregisterYubiKeyOTPDeviceExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -476,8 +507,9 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public DeregisterYubiKeyOTPDeviceExtendedRequest
-              duplicate(final Control[] controls)
+  @NotNull()
+  public DeregisterYubiKeyOTPDeviceExtendedRequest duplicate(
+              @Nullable final Control[] controls)
   {
     final DeregisterYubiKeyOTPDeviceExtendedRequest r =
          new DeregisterYubiKeyOTPDeviceExtendedRequest(authenticationID,
@@ -492,6 +524,7 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_DEREGISTER_YUBIKEY_OTP_REQUEST_NAME.get();
@@ -503,7 +536,7 @@ public final class DeregisterYubiKeyOTPDeviceExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("DeregisterYubiKeyOTPDeviceExtendedRequest(");
 

@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,6 +52,8 @@ import com.unboundid.ldap.sdk.Modification;
 import com.unboundid.ldap.sdk.ModificationType;
 import com.unboundid.ldap.sdk.ReadOnlyEntry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -69,7 +86,8 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold the previous values for all
    * attributes affected by the change.
    */
-  public static final String ATTR_BEFORE_VALUES = "ds-changelog-before-values";
+  @NotNull public static final String ATTR_BEFORE_VALUES =
+       "ds-changelog-before-values";
 
 
 
@@ -77,7 +95,8 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold the resulting values for all
    * attributes affected by the change.
    */
-  public static final String ATTR_AFTER_VALUES = "ds-changelog-after-values";
+  @NotNull public static final String ATTR_AFTER_VALUES =
+       "ds-changelog-after-values";
 
 
 
@@ -85,7 +104,7 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to indicate whether the operation represents
    * a change to a soft-deleted entry.
    */
-  public static final String ATTR_CHANGE_TO_SOFT_DELETED_ENTRY =
+  @NotNull public static final String ATTR_CHANGE_TO_SOFT_DELETED_ENTRY =
        "ds-change-to-soft-deleted-entry";
 
 
@@ -94,7 +113,7 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold the values of key attributes from
    * the entry after the change was applied.
    */
-  public static final String ATTR_KEY_VALUES =
+  @NotNull public static final String ATTR_KEY_VALUES =
        "ds-changelog-entry-key-attr-values";
 
 
@@ -104,7 +123,7 @@ public final class UnboundIDChangeLogEntry
    * which had more values (whether before the change, after the change, or
    * both) than allowed to be shown in the before/after values attributes.
    */
-  public static final String ATTR_EXCEEDED_MAX_VALUES =
+  @NotNull public static final String ATTR_EXCEEDED_MAX_VALUES =
        "ds-changelog-attr-exceeded-max-values-count";
 
 
@@ -114,7 +133,7 @@ public final class UnboundIDChangeLogEntry
    * user attributes that may have been excluded by access control and/or
    * sensitive attribute processing.
    */
-  public static final String ATTR_EXCLUDED_USER_ATTR_COUNT =
+  @NotNull public static final String ATTR_EXCLUDED_USER_ATTR_COUNT =
        "ds-changelog-num-excluded-user-attributes";
 
 
@@ -124,7 +143,7 @@ public final class UnboundIDChangeLogEntry
    * operational attributes that may have been excluded by access control and/or
    * sensitive attribute processing.
    */
-  public static final String ATTR_EXCLUDED_OPERATIONAL_ATTR_COUNT =
+  @NotNull public static final String ATTR_EXCLUDED_OPERATIONAL_ATTR_COUNT =
        "ds-changelog-num-excluded-operational-attributes";
 
 
@@ -134,7 +153,7 @@ public final class UnboundIDChangeLogEntry
    * user attributes that may have been excluded by access control and/or
    * sensitive attribute processing.
    */
-  public static final String ATTR_EXCLUDED_USER_ATTR_NAME =
+  @NotNull public static final String ATTR_EXCLUDED_USER_ATTR_NAME =
        "ds-changelog-excluded-user-attribute";
 
 
@@ -144,7 +163,7 @@ public final class UnboundIDChangeLogEntry
    * operational attributes that may have been excluded by access control and/or
    * sensitive attribute processing.
    */
-  public static final String ATTR_EXCLUDED_OPERATIONAL_ATTR_NAME =
+  @NotNull public static final String ATTR_EXCLUDED_OPERATIONAL_ATTR_NAME =
        "ds-changelog-excluded-operational-attribute";
 
 
@@ -153,7 +172,7 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold the entryUUID value for the entry
    * that was targeted by the change.
    */
-  public static final String ATTR_TARGET_UNIQUE_ID = "targetUniqueID";
+  @NotNull public static final String ATTR_TARGET_UNIQUE_ID = "targetUniqueID";
 
 
 
@@ -161,7 +180,7 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold a timestamp of the time the change
    * was processed.
    */
-  public static final String ATTR_CHANGE_TIME = "changeTime";
+  @NotNull public static final String ATTR_CHANGE_TIME = "changeTime";
 
 
 
@@ -169,7 +188,7 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold the local change sequence number
    * assigned to the change.
    */
-  public static final String ATTR_LOCAL_CSN = "localCSN";
+  @NotNull public static final String ATTR_LOCAL_CSN = "localCSN";
 
 
 
@@ -177,7 +196,8 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold the DN of the soft-deleted entry
    * resulting from a soft delete operation.
    */
-  public static final String ATTR_SOFT_DELETE_TO_DN = "ds-soft-delete-entry-dn";
+  @NotNull public static final String ATTR_SOFT_DELETE_TO_DN =
+       "ds-soft-delete-entry-dn";
 
 
 
@@ -185,7 +205,7 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold the names of the attributes targeted
    * by the change.
    */
-  public static final String ATTR_TARGET_ATTRIBUTE =
+  @NotNull public static final String ATTR_TARGET_ATTRIBUTE =
        "ds-changelog-target-attribute";
 
 
@@ -194,7 +214,8 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold the DN of the soft-deleted entry
    * from which the content of an undelete was obtained.
    */
-  public static final String ATTR_UNDELETE_FROM_DN = "ds-undelete-from-dn";
+  @NotNull public static final String ATTR_UNDELETE_FROM_DN =
+       "ds-undelete-from-dn";
 
 
 
@@ -202,7 +223,7 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold information about virtual values
    * for an add or delete operation.
    */
-  public static final String ATTR_VIRTUAL_ATTRS =
+  @NotNull public static final String ATTR_VIRTUAL_ATTRS =
        "ds-changelog-virtual-attributes";
 
 
@@ -211,7 +232,7 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold information about virtual values
    * for modified attributes before the change.
    */
-  public static final String ATTR_BEFORE_VIRTUAL_VALUES =
+  @NotNull public static final String ATTR_BEFORE_VIRTUAL_VALUES =
        "ds-changelog-before-virtual-values";
 
 
@@ -220,7 +241,7 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold information about virtual values
    * for modified attributes after the change.
    */
-  public static final String ATTR_AFTER_VIRTUAL_VALUES =
+  @NotNull public static final String ATTR_AFTER_VIRTUAL_VALUES =
        "ds-changelog-after-virtual-values";
 
 
@@ -229,7 +250,7 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold information about virtual values
    * for key attributes after the change.
    */
-  public static final String ATTR_KEY_VIRTUAL_VALUES =
+  @NotNull public static final String ATTR_KEY_VIRTUAL_VALUES =
        "ds-changelog-entry-key-virtual-values";
 
 
@@ -239,7 +260,7 @@ public final class UnboundIDChangeLogEntry
    * which had more virtual values (whether before the change, after the change,
    * or both) than allowed to be shown in the before/after values attributes.
    */
-  public static final String ATTR_VIRTUAL_EXCEEDED_MAX_VALUES =
+  @NotNull public static final String ATTR_VIRTUAL_EXCEEDED_MAX_VALUES =
        "ds-changelog-virtual-attr-exceeded-max-values-count";
 
 
@@ -248,7 +269,7 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold the entryUUID values for the
    * notification destinations matched by the change.
    */
-  public static final String ATTR_NOTIFICATION_DESTINATION_ENTRY_UUID =
+  @NotNull public static final String ATTR_NOTIFICATION_DESTINATION_ENTRY_UUID =
        "ds-notification-destination-entry-uuid";
 
 
@@ -257,7 +278,7 @@ public final class UnboundIDChangeLogEntry
    * The name of the attribute used to hold a number of properties related to
    * the notification matched by the change.
    */
-  public static final String ATTR_NOTIFICATION_PROPERTIES =
+  @NotNull public static final String ATTR_NOTIFICATION_PROPERTIES =
        "ds-changelog-notification-properties";
 
 
@@ -271,89 +292,89 @@ public final class UnboundIDChangeLogEntry
 
   // Indicates whether the changelog record represents a change to a
   // soft-deleted entry.
-  private final Boolean changeToSoftDeletedEntry;
+  @Nullable private final Boolean changeToSoftDeletedEntry;
 
   // The time that the change was processed.
-  private final Date changeTime;
+  @Nullable private final Date changeTime;
 
   // The number of user attributes excluded by access control and/or sensitive
   // attribute processing.
-  private final Integer numExcludedUserAttributes;
+  @Nullable private final Integer numExcludedUserAttributes;
 
   // The number of operational attributes excluded by access control and/or
   // sensitive attribute processing.
-  private final Integer numExcludedOperationalAttributes;
+  @Nullable private final Integer numExcludedOperationalAttributes;
 
   // The names of virtual attributes as they appeared in the entry after an add
   // or before a delete operation.
-  private final List<Attribute> entryVirtualAttributes;
+  @NotNull private final List<Attribute> entryVirtualAttributes;
 
   // The values of key attributes as they appeared in the entry after the change
   // was applied (or before the delete if the entry was removed).
-  private final List<Attribute> keyEntryAttributes;
+  @NotNull private final List<Attribute> keyEntryAttributes;
 
   // The virtual values of key attributes as they appeared in the entry after
   // the change was applied (or before the delete if the entry was removed).
-  private final List<Attribute> keyEntryVirtualAttributes;
+  @NotNull private final List<Attribute> keyEntryVirtualAttributes;
 
   // The updated attributes as they appeared in the entry after the change was
   // applied.
-  private final List<Attribute> updatedAttributesAfterChange;
+  @NotNull private final List<Attribute> updatedAttributesAfterChange;
 
   // The updated attributes as they appeared in the entry before the change was
   // applied.
-  private final List<Attribute> updatedAttributesBeforeChange;
+  @NotNull private final List<Attribute> updatedAttributesBeforeChange;
 
   // The virtual values of updated attributes as they appeared in the entry
   // after the change was applied.
-  private final List<Attribute> updatedVirtualAttributesAfterChange;
+  @NotNull private final List<Attribute> updatedVirtualAttributesAfterChange;
 
   // The virtual values of updated attributes as they appeared in the entry
   // before the change was applied.
-  private final List<Attribute> updatedVirtualAttributesBeforeChange;
+  @NotNull private final List<Attribute> updatedVirtualAttributesBeforeChange;
 
   // Information about updated attributes that had more values than are allowed
   // to be included in the ds-changelog-before-values or
   // ds-changelog-after-values attributes.
-  private final List<ChangeLogEntryAttributeExceededMaxValuesCount>
+  @NotNull private final List<ChangeLogEntryAttributeExceededMaxValuesCount>
        attributesThatExceededMaxValuesCount;
 
   // Information about updated attributes that had more virtual values than are
   // allowed to be included in the ds-changelog-before-virtual-values or
   // ds-changelog-after-virtual-values attributes.
-  private final List<ChangeLogEntryAttributeExceededMaxValuesCount>
+  @NotNull private final List<ChangeLogEntryAttributeExceededMaxValuesCount>
        virtualAttributesThatExceededMaxValuesCount;
 
   // The names of user attributes excluded by access control and/or sensitive
   // attribute processing.
-  private final List<String> excludedUserAttributeNames;
+  @NotNull private final List<String> excludedUserAttributeNames;
 
   // The names of operational attributes excluded by access control and/or
   // sensitive attribute processing.
-  private final List<String> excludedOperationalAttributeNames;
+  @NotNull private final List<String> excludedOperationalAttributeNames;
 
   // The entryUUID values for the notification destinations matched by the
   // change.
-  private final List<String> notificationDestinationEntryUUIDs;
+  @NotNull private final List<String> notificationDestinationEntryUUIDs;
 
   // The values of any notification properties for the change.
-  private final List<String> notificationProperties;
+  @NotNull private final List<String> notificationProperties;
 
   // The names of the attributes targeted by the change.
-  private final List<String> targetAttributeNames;
+  @NotNull private final List<String> targetAttributeNames;
 
   // The local change sequence number for the change.
-  private final String localCSN;
+  @Nullable private final String localCSN;
 
   // The DN of the soft-deleted entry resulting from a soft delete operation.
-  private final String softDeleteToDN;
+  @Nullable private final String softDeleteToDN;
 
   // The entryUUID value for the target entry.
-  private final String targetUniqueID;
+  @Nullable private final String targetUniqueID;
 
   // The DN of the soft-deleted entry from which the content of an undelete
   // operation was created.
-  private final String undeleteFromDN;
+  @Nullable private final String undeleteFromDN;
 
 
 
@@ -365,7 +386,7 @@ public final class UnboundIDChangeLogEntry
    * @throws  LDAPException  If the provided entry cannot be parsed as a
    *                         changelog entry.
    */
-  public UnboundIDChangeLogEntry(final Entry entry)
+  public UnboundIDChangeLogEntry(@NotNull final Entry entry)
          throws LDAPException
   {
     super(entry);
@@ -563,6 +584,7 @@ public final class UnboundIDChangeLogEntry
    * @return  The entryUUID value of the entry targeted by the change, or
    *          {@code null} if it was not included in the changelog entry.
    */
+  @Nullable()
   public String getTargetUniqueID()
   {
     return targetUniqueID;
@@ -577,6 +599,7 @@ public final class UnboundIDChangeLogEntry
    * @return  The local CSN for the change, or {@code null} if it was not
    *          included in the changelog entry.
    */
+  @Nullable()
   public String getLocalCSN()
   {
     return localCSN;
@@ -590,6 +613,7 @@ public final class UnboundIDChangeLogEntry
    * @return  The time that the change was processed, or {@code null} if it was
    *           not included in the changelog entry.
    */
+  @Nullable()
   public Date getChangeTime()
   {
     return changeTime;
@@ -609,6 +633,7 @@ public final class UnboundIDChangeLogEntry
    *          including virtual attributes, or {@code null} if this changelog
    *          entry does not represent an add operation.
    */
+  @Nullable()
   public List<Attribute> getAddAttributes(final boolean includeVirtual)
   {
     if (includeVirtual && (getChangeType() == ChangeType.ADD) &&
@@ -640,6 +665,7 @@ public final class UnboundIDChangeLogEntry
    *           but no virtual attribute information is available in the
    *           changelog entry.
    */
+  @Nullable()
   public List<Attribute> getAddVirtualAttributes()
   {
     if (getChangeType() == ChangeType.ADD)
@@ -668,6 +694,7 @@ public final class UnboundIDChangeLogEntry
    *           {@code null} if this changelog entry does not represent a delete
    *           operation or no deleted attribute information is available.
    */
+  @Nullable()
   public List<Attribute> getDeletedEntryAttributes(
        final boolean includeVirtual)
   {
@@ -709,6 +736,7 @@ public final class UnboundIDChangeLogEntry
    *          operation but no virtual attribute information is available in the
    *          changelog entry.
    */
+  @Nullable()
   public List<Attribute> getDeletedEntryVirtualAttributes()
   {
     if (getChangeType() == ChangeType.DELETE)
@@ -737,6 +765,7 @@ public final class UnboundIDChangeLogEntry
    *          configured to provide (or does not support providing) previous
    *          versions of updated attributes.
    */
+  @NotNull()
   public List<Attribute> getUpdatedAttributesBeforeChange()
   {
     return updatedAttributesBeforeChange;
@@ -762,6 +791,7 @@ public final class UnboundIDChangeLogEntry
    *          configured to provide (or does not support providing) previous
    *          versions of updated attributes.
    */
+  @NotNull()
   public List<Attribute> getUpdatedAttributesBeforeChange(
                               final boolean includeVirtual)
   {
@@ -796,6 +826,7 @@ public final class UnboundIDChangeLogEntry
    *          information about virtual attributes as they appeared before the
    *          change.
    */
+  @NotNull()
   public List<Attribute> getUpdatedVirtualAttributesBeforeChange()
   {
     return updatedVirtualAttributesBeforeChange;
@@ -817,6 +848,7 @@ public final class UnboundIDChangeLogEntry
    *          server is not configured to provide (or does not support
    *          providing) resulting versions of updated attributes.
    */
+  @NotNull()
   public List<Attribute> getUpdatedAttributesAfterChange()
   {
     return updatedAttributesAfterChange;
@@ -842,6 +874,7 @@ public final class UnboundIDChangeLogEntry
    *          configured to provide (or does not support providing) previous
    *          versions of updated attributes.
    */
+  @NotNull()
   public List<Attribute> getUpdatedAttributesAfterChange(
                               final boolean includeVirtual)
   {
@@ -876,6 +909,7 @@ public final class UnboundIDChangeLogEntry
    *          information about virtual attributes as they appeared after the
    *          change.
    */
+  @NotNull()
   public List<Attribute> getUpdatedVirtualAttributesAfterChange()
   {
     return updatedVirtualAttributesAfterChange;
@@ -897,6 +931,7 @@ public final class UnboundIDChangeLogEntry
    *          or the change was not the result of a modify or modify DN
    *          operation.
    */
+  @NotNull()
   public List<ChangeLogEntryAttributeExceededMaxValuesCount>
               getAttributesThatExceededMaxValuesCount()
   {
@@ -919,6 +954,7 @@ public final class UnboundIDChangeLogEntry
    *          attributes, or the change was not the result of a modify or modify
    *          DN operation.
    */
+  @NotNull()
   public List<ChangeLogEntryAttributeExceededMaxValuesCount>
               getVirtualAttributesThatExceededMaxValuesCount()
   {
@@ -940,6 +976,7 @@ public final class UnboundIDChangeLogEntry
    *          or there are no key attribute types defined in the server
    *          configuration.
    */
+  @NotNull()
   public List<Attribute> getKeyEntryAttributes()
   {
     return keyEntryAttributes;
@@ -964,6 +1001,7 @@ public final class UnboundIDChangeLogEntry
    *          or there are no key attribute types defined in the server
    *          configuration.
    */
+  @NotNull()
   public List<Attribute> getKeyEntryAttributes(final boolean includeVirtual)
   {
     if (includeVirtual && (! keyEntryVirtualAttributes.isEmpty()))
@@ -997,6 +1035,7 @@ public final class UnboundIDChangeLogEntry
    *          have any virtual values for key attributes or there are no key
    *          attribute types defined in the server configuration.
    */
+  @NotNull()
   public List<Attribute> getKeyEntryVirtualAttributes()
   {
     return keyEntryVirtualAttributes;
@@ -1062,6 +1101,7 @@ public final class UnboundIDChangeLogEntry
    *          sensitive attribute processing, or an empty list if that
    *          information was not included in the changelog entry.
    */
+  @NotNull()
   public List<String> getExcludedUserAttributeNames()
   {
     return excludedUserAttributeNames;
@@ -1079,6 +1119,7 @@ public final class UnboundIDChangeLogEntry
    *          sensitive processing, or an empty list if that information was not
    *          included in the changelog entry.
    */
+  @NotNull()
   public List<String> getExcludedOperationalAttributeNames()
   {
     return excludedOperationalAttributeNames;
@@ -1096,6 +1137,7 @@ public final class UnboundIDChangeLogEntry
    *          indicates that the operation did not target a soft-deleted
    *          entry).
    */
+  @Nullable()
   public Boolean getChangeToSoftDeletedEntry()
   {
     return changeToSoftDeletedEntry;
@@ -1112,6 +1154,7 @@ public final class UnboundIDChangeLogEntry
    *          included in the changelog entry (e.g., because it does not
    *          represent a soft delete operation).
    */
+  @Nullable()
   public String getSoftDeleteToDN()
   {
     return softDeleteToDN;
@@ -1129,6 +1172,7 @@ public final class UnboundIDChangeLogEntry
    *          not included in the changelog entry (e.g., because it does not
    *          represent an undelete operation).
    */
+  @Nullable()
   public String getUndeleteFromDN()
   {
     return undeleteFromDN;
@@ -1156,6 +1200,7 @@ public final class UnboundIDChangeLogEntry
    * @return  The names of any attributes targeted by the change, or an empty
    *          list if that information was not included in the changelog entry.
    */
+  @NotNull()
   public List<String> getTargetAttributeNames()
   {
     return targetAttributeNames;
@@ -1172,6 +1217,7 @@ public final class UnboundIDChangeLogEntry
    *          empty list if that information was not included in the changelog
    *          entry.
    */
+  @NotNull()
   public List<String> getNotificationDestinationEntryUUIDs()
   {
     return notificationDestinationEntryUUIDs;
@@ -1187,6 +1233,7 @@ public final class UnboundIDChangeLogEntry
    *          entry, or an empty list if that information was not included in
    *          the changelog entry.
    */
+  @NotNull()
   public List<String> getNotificationProperties()
   {
     return notificationProperties;
@@ -1210,7 +1257,8 @@ public final class UnboundIDChangeLogEntry
    *               specified attribute had more values before the change than
    *               may be included in a changelog entry.
    */
-  public Attribute getAttributeBeforeChange(final String name)
+  @Nullable()
+  public Attribute getAttributeBeforeChange(@NotNull final String name)
          throws ChangeLogEntryAttributeExceededMaxValuesException
   {
     return getAttributeBeforeChange(name, false);
@@ -1237,7 +1285,8 @@ public final class UnboundIDChangeLogEntry
    *               specified attribute had more values before the change than
    *               may be included in a changelog entry.
    */
-  public Attribute getAttributeBeforeChange(final String name,
+  @Nullable()
+  public Attribute getAttributeBeforeChange(@NotNull final String name,
                                             final boolean includeVirtual)
          throws ChangeLogEntryAttributeExceededMaxValuesException
   {
@@ -1330,7 +1379,8 @@ public final class UnboundIDChangeLogEntry
    *               specified attribute had more values before the change than
    *               may be included in a changelog entry.
    */
-  public Attribute getAttributeAfterChange(final String name)
+  @Nullable()
+  public Attribute getAttributeAfterChange(@NotNull final String name)
          throws ChangeLogEntryAttributeExceededMaxValuesException
   {
     return getAttributeAfterChange(name, false);
@@ -1357,7 +1407,8 @@ public final class UnboundIDChangeLogEntry
    *               specified attribute had more values before the change than
    *               may be included in a changelog entry.
    */
-  public Attribute getAttributeAfterChange(final String name,
+  @Nullable()
+  public Attribute getAttributeAfterChange(@NotNull final String name,
                                            final boolean includeVirtual)
          throws ChangeLogEntryAttributeExceededMaxValuesException
   {
@@ -1465,6 +1516,7 @@ public final class UnboundIDChangeLogEntry
    *          add operation and therefore the entry did not exist before the
    *          change.
    */
+  @Nullable()
   public ReadOnlyEntry constructPartialEntryBeforeChange()
   {
     return constructPartialEntryBeforeChange(false);
@@ -1491,6 +1543,7 @@ public final class UnboundIDChangeLogEntry
    *          add operation and therefore the entry did not exist before the
    *          change.
    */
+  @Nullable()
   public ReadOnlyEntry constructPartialEntryBeforeChange(
                             final boolean includeVirtual)
   {
@@ -1590,6 +1643,7 @@ public final class UnboundIDChangeLogEntry
    *          the change was processed, or {@code null} if the change was a
    *          delete operation and therefore did not exist after the change.
    */
+  @Nullable()
   public ReadOnlyEntry constructPartialEntryAfterChange()
   {
     return constructPartialEntryAfterChange(false);
@@ -1613,6 +1667,7 @@ public final class UnboundIDChangeLogEntry
    *          the change was processed, or {@code null} if the change was a
    *          delete operation and therefore did not exist after the change.
    */
+  @Nullable()
   public ReadOnlyEntry constructPartialEntryAfterChange(
                             final boolean includeVirtual)
   {

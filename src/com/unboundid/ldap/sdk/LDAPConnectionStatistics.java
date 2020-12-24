@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,7 @@ import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -64,99 +80,99 @@ public final class LDAPConnectionStatistics
 
 
   // The number of abandon requests sent over the associated connection.
-  private final AtomicLong numAbandonRequests;
+  @NotNull private final AtomicLong numAbandonRequests;
 
   // The number of add requests sent over the associated connection.
-  private final AtomicLong numAddRequests;
+  @NotNull private final AtomicLong numAddRequests;
 
   // The number of add responses received on the associated connection.
-  private final AtomicLong numAddResponses;
+  @NotNull private final AtomicLong numAddResponses;
 
   // The number of bind requests sent over the associated connection.
-  private final AtomicLong numBindRequests;
+  @NotNull private final AtomicLong numBindRequests;
 
   // The number of bind responses received on the associated connection.
-  private final AtomicLong numBindResponses;
+  @NotNull private final AtomicLong numBindResponses;
 
   // The number of compare requests sent over the associated connection.
-  private final AtomicLong numCompareRequests;
+  @NotNull private final AtomicLong numCompareRequests;
 
   // The number of compare responses received on the associated connection.
-  private final AtomicLong numCompareResponses;
+  @NotNull private final AtomicLong numCompareResponses;
 
   // The number of times the associated connection has been connected to a
   // server.
-  private final AtomicLong numConnects;
+  @NotNull private final AtomicLong numConnects;
 
   // The number of delete requests sent over the associated connection.
-  private final AtomicLong numDeleteRequests;
+  @NotNull private final AtomicLong numDeleteRequests;
 
   // The number of delete responses received on the associated connection.
-  private final AtomicLong numDeleteResponses;
+  @NotNull private final AtomicLong numDeleteResponses;
 
   // The number of times the associated connection has been disconnected from a
   // server.
-  private final AtomicLong numDisconnects;
+  @NotNull private final AtomicLong numDisconnects;
 
   // The number of extended requests sent over the associated connection.
-  private final AtomicLong numExtendedRequests;
+  @NotNull private final AtomicLong numExtendedRequests;
 
   // The number of extended responses received on the associated connection.
-  private final AtomicLong numExtendedResponses;
+  @NotNull private final AtomicLong numExtendedResponses;
 
   // The number of modify requests sent over the associated connection.
-  private final AtomicLong numModifyRequests;
+  @NotNull private final AtomicLong numModifyRequests;
 
   // The number of modify responses received on the associated connection.
-  private final AtomicLong numModifyResponses;
+  @NotNull private final AtomicLong numModifyResponses;
 
   // The number of modify DN requests sent over the associated connection.
-  private final AtomicLong numModifyDNRequests;
+  @NotNull private final AtomicLong numModifyDNRequests;
 
   // The number of modify DN responses received on the associated connection.
-  private final AtomicLong numModifyDNResponses;
+  @NotNull private final AtomicLong numModifyDNResponses;
 
   // The number of search requests sent over the associated connection.
-  private final AtomicLong numSearchRequests;
+  @NotNull private final AtomicLong numSearchRequests;
 
   // The number of search result entry responses received on the associated
   // connection.
-  private final AtomicLong numSearchEntryResponses;
+  @NotNull private final AtomicLong numSearchEntryResponses;
 
   // The number of search result reference responses received on the associated
   // connection.
-  private final AtomicLong numSearchReferenceResponses;
+  @NotNull private final AtomicLong numSearchReferenceResponses;
 
   // The number of search result done responses received on the associated
   // connection.
-  private final AtomicLong numSearchDoneResponses;
+  @NotNull private final AtomicLong numSearchDoneResponses;
 
   // The number of unbind requests sent over the associated connection.
-  private final AtomicLong numUnbindRequests;
+  @NotNull private final AtomicLong numUnbindRequests;
 
   // The total length of time spent waiting for add responses.
-  private final AtomicLong totalAddResponseTime;
+  @NotNull private final AtomicLong totalAddResponseTime;
 
   // The total length of time spent waiting for bind responses.
-  private final AtomicLong totalBindResponseTime;
+  @NotNull private final AtomicLong totalBindResponseTime;
 
   // The total length of time spent waiting for compare responses.
-  private final AtomicLong totalCompareResponseTime;
+  @NotNull private final AtomicLong totalCompareResponseTime;
 
   // The total length of time spent waiting for delete responses.
-  private final AtomicLong totalDeleteResponseTime;
+  @NotNull private final AtomicLong totalDeleteResponseTime;
 
   // The total length of time spent waiting for extended responses.
-  private final AtomicLong totalExtendedResponseTime;
+  @NotNull private final AtomicLong totalExtendedResponseTime;
 
   // The total length of time spent waiting for modify responses.
-  private final AtomicLong totalModifyResponseTime;
+  @NotNull private final AtomicLong totalModifyResponseTime;
 
   // The total length of time spent waiting for modify DN responses.
-  private final AtomicLong totalModifyDNResponseTime;
+  @NotNull private final AtomicLong totalModifyDNResponseTime;
 
   // The total length of time spent waiting for search done responses.
-  private final AtomicLong totalSearchResponseTime;
+  @NotNull private final AtomicLong totalSearchResponseTime;
 
 
 
@@ -1452,6 +1468,7 @@ public final class LDAPConnectionStatistics
    * @return  A string representation of this LDAP connection statistics object.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -1468,7 +1485,7 @@ public final class LDAPConnectionStatistics
    * @param  buffer  The buffer to which the string representation should be
    *                 appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     final long connects          = numConnects.get();
     final long disconnects       = numDisconnects.get();

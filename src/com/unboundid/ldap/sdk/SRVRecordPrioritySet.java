@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadLocalRandom;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -60,13 +76,13 @@ final class SRVRecordPrioritySet
   private final long totalWeight;
 
   // The set of all records in this set.
-  private final List<SRVRecord> allRecords;
+  @NotNull private final List<SRVRecord> allRecords;
 
   // The set of records with nonzero weights.
-  private final List<SRVRecord> nonzeroWeightRecords;
+  @NotNull private final List<SRVRecord> nonzeroWeightRecords;
 
   // The set of records with zero weights.
-  private final List<SRVRecord> zeroWeightRecords;
+  @NotNull private final List<SRVRecord> zeroWeightRecords;
 
 
 
@@ -77,7 +93,8 @@ final class SRVRecordPrioritySet
    * @param  records   The set of records with the same priority.  It must not
    *                   be {@code null} or empty.
    */
-  SRVRecordPrioritySet(final long priority, final List<SRVRecord> records)
+  SRVRecordPrioritySet(final long priority,
+                       @NotNull final List<SRVRecord> records)
   {
     this.priority = priority;
 
@@ -125,6 +142,7 @@ final class SRVRecordPrioritySet
    *
    * @return  A list of SRV records in the order that they should be accessed.
    */
+  @NotNull()
   List<SRVRecord> getOrderedRecords()
   {
     final ArrayList<SRVRecord> records = new ArrayList<>(allRecords.size());
@@ -175,6 +193,7 @@ final class SRVRecordPrioritySet
    * @return  A string representation of this priority server set.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -190,7 +209,7 @@ final class SRVRecordPrioritySet
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  private void toString(final StringBuilder buffer)
+  private void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("SRVRecordPrioritySet(records={");
 

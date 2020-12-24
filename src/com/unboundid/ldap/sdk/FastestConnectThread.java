@@ -1,9 +1,24 @@
 /*
- * Copyright 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2012-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.net.SocketFactory;
 
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -42,31 +59,31 @@ final class FastestConnectThread
 {
   // The flag that will be used to indicate whether a connection has already
   // been selected by the server set.
-  private final AtomicBoolean connectionSelected;
+  @NotNull private final AtomicBoolean connectionSelected;
 
   // The bind request to use to authenticate connections created by this
   // server set.
-  private final BindRequest bindRequest;
+  @Nullable private final BindRequest bindRequest;
 
   // The queue that should be used to return the result to the server set.
-  private final BlockingQueue<Object> resultQueue;
+  @NotNull private final BlockingQueue<Object> resultQueue;
 
   // The port to which the connection should be established.
   private final int port;
 
   // The LDAP connection to be established.
-  private final LDAPConnection connection;
+  @NotNull private final LDAPConnection connection;
 
   // The health check to use to evaluate the suitability of the established
   // connection.
-  private final LDAPConnectionPoolHealthCheck healthCheck;
+  @Nullable private final LDAPConnectionPoolHealthCheck healthCheck;
 
   // The post-connect processor to invoke against connections created by this
   // server set.
-  private final PostConnectProcessor postConnectProcessor;
+  @Nullable private final PostConnectProcessor postConnectProcessor;
 
   // The address to which the connection should be established.
-  private final String address;
+  @NotNull private final String address;
 
 
 
@@ -100,14 +117,14 @@ final class FastestConnectThread
    *                               a connection has already been selected by the
    *                               associated server set.
    */
-  FastestConnectThread(final String address, final int port,
-                       final SocketFactory socketFactory,
-                       final LDAPConnectionOptions connectionOptions,
-                       final BindRequest bindRequest,
-                       final PostConnectProcessor postConnectProcessor,
-                       final LDAPConnectionPoolHealthCheck healthCheck,
-                       final BlockingQueue<Object> resultQueue,
-                       final AtomicBoolean connectionSelected)
+  FastestConnectThread(@NotNull final String address, final int port,
+       @NotNull final SocketFactory socketFactory,
+       @NotNull final LDAPConnectionOptions connectionOptions,
+       @Nullable final BindRequest bindRequest,
+       @Nullable final PostConnectProcessor postConnectProcessor,
+       @Nullable final LDAPConnectionPoolHealthCheck healthCheck,
+       @NotNull final BlockingQueue<Object> resultQueue,
+       @NotNull final AtomicBoolean connectionSelected)
   {
     super("Fastest Connect Thread for " + address + ':' + port);
     setDaemon(true);

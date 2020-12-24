@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,8 @@ import com.unboundid.util.Debug;
 import com.unboundid.util.LDAPSDKException;
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -54,31 +71,33 @@ public class LDAPException
   /**
    * An empty array that will be used when no controls were provided.
    */
-  protected static final Control[] NO_CONTROLS = StaticUtils.NO_CONTROLS;
+  @NotNull protected static final Control[] NO_CONTROLS =
+       StaticUtils.NO_CONTROLS;
 
 
 
   /**
    * An empty array that will be used when no referrals were provided.
    */
-  protected static final String[] NO_REFERRALS = StaticUtils.NO_STRINGS;
+  @NotNull protected static final String[] NO_REFERRALS =
+       StaticUtils.NO_STRINGS;
 
 
 
   // The set of response controls for this LDAP exception.
-  private final Control[] responseControls;
+  @NotNull private final Control[] responseControls;
 
   // The result code for this LDAP exception.
-  private final ResultCode resultCode;
+  @NotNull private final ResultCode resultCode;
 
   // The set of referral URLs for this LDAP exception.
-  private final String[] referralURLs;
+  @NotNull private final String[] referralURLs;
 
   // The diagnostic message returned by the directory server.
-  private final String diagnosticMessage;
+  @Nullable private final String diagnosticMessage;
 
   // The matched DN for this LDAP exception.
-  private final String matchedDN;
+  @Nullable private final String matchedDN;
 
 
 
@@ -88,7 +107,7 @@ public class LDAPException
    *
    * @param  resultCode  The result code for this LDAP exception.
    */
-  public LDAPException(final ResultCode resultCode)
+  public LDAPException(@NotNull final ResultCode resultCode)
   {
     super(resultCode.getName());
 
@@ -109,7 +128,8 @@ public class LDAPException
    * @param  resultCode  The result code for this LDAP exception.
    * @param  cause       The underlying exception that triggered this exception.
    */
-  public LDAPException(final ResultCode resultCode, final Throwable cause)
+  public LDAPException(@NotNull final ResultCode resultCode,
+                       @Nullable final Throwable cause)
   {
     super(resultCode.getName(), cause);
 
@@ -129,7 +149,8 @@ public class LDAPException
    * @param  resultCode    The result code for this LDAP exception.
    * @param  errorMessage  The error message for this LDAP exception.
    */
-  public LDAPException(final ResultCode resultCode, final String errorMessage)
+  public LDAPException(@NotNull final ResultCode resultCode,
+                       @NotNull final String errorMessage)
   {
     super(errorMessage);
 
@@ -151,8 +172,9 @@ public class LDAPException
    * @param  cause         The underlying exception that triggered this
    *                       exception.
    */
-  public LDAPException(final ResultCode resultCode, final String errorMessage,
-                       final Throwable cause)
+  public LDAPException(@NotNull final ResultCode resultCode,
+                       @NotNull final String errorMessage,
+                       @Nullable final Throwable cause)
   {
     super(errorMessage, cause);
 
@@ -174,8 +196,10 @@ public class LDAPException
    * @param  matchedDN     The matched DN for this LDAP exception.
    * @param  referralURLs  The set of referral URLs for this LDAP exception.
    */
-  public LDAPException(final ResultCode resultCode, final String errorMessage,
-                       final String matchedDN, final String[] referralURLs)
+  public LDAPException(@NotNull final ResultCode resultCode,
+                       @NotNull final String errorMessage,
+                       @Nullable final String matchedDN,
+                       @Nullable final String[] referralURLs)
   {
     super(errorMessage);
 
@@ -207,9 +231,11 @@ public class LDAPException
    * @param  cause         The underlying exception that triggered this
    *                       exception.
    */
-  public LDAPException(final ResultCode resultCode, final String errorMessage,
-                       final String matchedDN, final String[] referralURLs,
-                       final Throwable cause)
+  public LDAPException(@NotNull final ResultCode resultCode,
+                       @NotNull final String errorMessage,
+                       @Nullable final String matchedDN,
+                       @Nullable final String[] referralURLs,
+                       @Nullable final Throwable cause)
   {
     super(errorMessage, cause);
 
@@ -240,9 +266,11 @@ public class LDAPException
    * @param  referralURLs  The set of referral URLs for this LDAP exception.
    * @param  controls      The set of response controls for this LDAP exception.
    */
-  public LDAPException(final ResultCode resultCode, final String errorMessage,
-                       final String matchedDN, final String[] referralURLs,
-                       final Control[] controls)
+  public LDAPException(@NotNull final ResultCode resultCode,
+                       @NotNull final String errorMessage,
+                       @Nullable final String matchedDN,
+                       @Nullable final String[] referralURLs,
+                       @Nullable final Control[] controls)
   {
     super(errorMessage);
 
@@ -283,9 +311,12 @@ public class LDAPException
    * @param  cause         The underlying exception that triggered this
    *                       exception.
    */
-  public LDAPException(final ResultCode resultCode, final String errorMessage,
-                       final String matchedDN, final String[] referralURLs,
-                       final Control[] controls, final Throwable cause)
+  public LDAPException(@NotNull final ResultCode resultCode,
+                       @NotNull final String errorMessage,
+                       @Nullable final String matchedDN,
+                       @Nullable final String[] referralURLs,
+                       @Nullable final Control[] controls,
+                       @Nullable final Throwable cause)
   {
     super(errorMessage, cause);
 
@@ -322,7 +353,7 @@ public class LDAPException
    * @param  ldapResult  The LDAP result object containing the information to
    *                     use for this LDAP exception.
    */
-  public LDAPException(final LDAPResult ldapResult)
+  public LDAPException(@NotNull final LDAPResult ldapResult)
   {
     super((ldapResult.getDiagnosticMessage() == null)
           ? ldapResult.getResultCode().getName()
@@ -345,7 +376,8 @@ public class LDAPException
    *                     use for this LDAP exception.
    * @param  cause       The underlying exception that triggered this exception.
    */
-  public LDAPException(final LDAPResult ldapResult, final Throwable cause)
+  public LDAPException(@NotNull final LDAPResult ldapResult,
+                       @Nullable final Throwable cause)
   {
     super(((ldapResult.getDiagnosticMessage() == null)
            ? ldapResult.getResultCode().getName()
@@ -367,7 +399,7 @@ public class LDAPException
    *
    * @param  e  The LDAP exception to use to create this exception.
    */
-  public LDAPException(final LDAPException e)
+  public LDAPException(@NotNull final LDAPException e)
   {
     super(e.getMessage(), e.getCause());
 
@@ -385,6 +417,7 @@ public class LDAPException
    *
    * @return  The result code for this LDAP exception.
    */
+  @NotNull()
   public final ResultCode getResultCode()
   {
     return resultCode;
@@ -398,6 +431,7 @@ public class LDAPException
    * @return  The matched DN for this LDAP exception, or {@code null} if there
    *          is none.
    */
+  @Nullable()
   public final String getMatchedDN()
   {
     return matchedDN;
@@ -411,6 +445,7 @@ public class LDAPException
    * @return  The diagnostic message returned by the directory server, or
    *          {@code null} if there is none.
    */
+  @Nullable()
   public final String getDiagnosticMessage()
   {
     return diagnosticMessage;
@@ -424,6 +459,7 @@ public class LDAPException
    * @return  The set of referral URLs for this LDAP exception, or an empty
    *          array if there are none.
    */
+  @NotNull()
   public final String[] getReferralURLs()
   {
     return referralURLs;
@@ -454,7 +490,7 @@ public class LDAPException
    * @return  {@code true} if this result contains at least one control with
    *          the specified OID, or {@code false} if not.
    */
-  public final boolean hasResponseControl(final String oid)
+  public final boolean hasResponseControl(@NotNull final String oid)
   {
     for (final Control c : responseControls)
     {
@@ -479,6 +515,7 @@ public class LDAPException
    * @return  The set of response controls for this LDAP exception, or an empty
    *          array if there are none.
    */
+  @NotNull()
   public final Control[] getResponseControls()
   {
     return responseControls;
@@ -494,7 +531,8 @@ public class LDAPException
    * @return  The response control with the specified OID, or {@code null} if
    *          there is no such control.
    */
-  public final Control getResponseControl(final String oid)
+  @Nullable()
+  public final Control getResponseControl(@NotNull final String oid)
   {
     for (final Control c : responseControls)
     {
@@ -514,6 +552,7 @@ public class LDAPException
    *
    * @return  The {@code LDAPResult} object created from this exception.
    */
+  @NotNull()
   public LDAPResult toLDAPResult()
   {
     if ((diagnosticMessage == null) && (getMessage() != null))
@@ -537,6 +576,7 @@ public class LDAPException
    *
    * @return  A string representation of this LDAP result.
    */
+  @NotNull()
   public String getResultString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -586,7 +626,7 @@ public class LDAPException
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     final boolean includeCause =
          Boolean.getBoolean(Debug.PROPERTY_INCLUDE_CAUSE_IN_EXCEPTION_MESSAGES);
@@ -613,7 +653,8 @@ public class LDAPException
    *                            automatically be included, regardless of the
    *                            value of the {@code includeCause} argument.
    */
-  public void toString(final StringBuilder buffer, final boolean includeCause,
+  public void toString(@NotNull final StringBuilder buffer,
+                       final boolean includeCause,
                        final boolean includeStackTrace)
   {
     buffer.append("LDAPException(resultCode=");
@@ -711,6 +752,7 @@ public class LDAPException
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public final String getExceptionMessage()
   {
     return toString();
@@ -722,6 +764,7 @@ public class LDAPException
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public final String getExceptionMessage(final boolean includeCause,
                                           final boolean includeStackTrace)
   {

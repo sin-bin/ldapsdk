@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,6 +53,7 @@ import com.unboundid.ldap.protocol.LDAPMessage;
 import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.Extensible;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -65,8 +81,9 @@ public abstract class LDAPListenerRequestHandler
    *
    * @throws  LDAPException  If the connection should not be accepted.
    */
+  @NotNull()
   public abstract LDAPListenerRequestHandler newInstance(
-                       LDAPListenerClientConnection connection)
+                       @NotNull LDAPListenerClientConnection connection)
          throws LDAPException;
 
 
@@ -95,8 +112,8 @@ public abstract class LDAPListenerRequestHandler
    *                    {@code null}.
    */
   public void processAbandonRequest(final int messageID,
-                                    final AbandonRequestProtocolOp request,
-                                    final List<Control> controls)
+                   @NotNull final AbandonRequestProtocolOp request,
+                   @NotNull  final List<Control> controls)
   {
     // No implementation provided by default.
   }
@@ -118,9 +135,10 @@ public abstract class LDAPListenerRequestHandler
    *          client.  The protocol op in the {@code LDAPMessage} must be an
    *          {@code AddResponseProtocolOp}.
    */
+  @NotNull()
   public abstract LDAPMessage processAddRequest(int messageID,
-                                   AddRequestProtocolOp request,
-                                   List<Control> controls);
+                                   @NotNull AddRequestProtocolOp request,
+                                   @NotNull  List<Control> controls);
 
 
 
@@ -139,9 +157,10 @@ public abstract class LDAPListenerRequestHandler
    *          client.  The protocol op in the {@code LDAPMessage} must be a
    *          {@code BindResponseProtocolOp}.
    */
+  @NotNull()
   public abstract LDAPMessage processBindRequest(int messageID,
-                                   BindRequestProtocolOp request,
-                                   List<Control> controls);
+                                   @NotNull BindRequestProtocolOp request,
+                                   @NotNull  List<Control> controls);
 
 
 
@@ -160,9 +179,10 @@ public abstract class LDAPListenerRequestHandler
    *          client.  The protocol op in the {@code LDAPMessage} must be a
    *          {@code CompareResponseProtocolOp}.
    */
+  @NotNull()
   public abstract LDAPMessage processCompareRequest(int messageID,
-                                   CompareRequestProtocolOp request,
-                                   List<Control> controls);
+                                   @NotNull CompareRequestProtocolOp request,
+                                   @NotNull  List<Control> controls);
 
 
 
@@ -181,9 +201,10 @@ public abstract class LDAPListenerRequestHandler
    *          client.  The protocol op in the {@code LDAPMessage} must be a
    *          {@code DeleteResponseProtocolOp}.
    */
+  @NotNull()
   public abstract LDAPMessage processDeleteRequest(int messageID,
-                                   DeleteRequestProtocolOp request,
-                                   List<Control> controls);
+                                   @NotNull DeleteRequestProtocolOp request,
+                                   @NotNull List<Control> controls);
 
 
 
@@ -202,9 +223,10 @@ public abstract class LDAPListenerRequestHandler
    *          client.  The protocol op in the {@code LDAPMessage} must be an
    *          {@code ExtendedResponseProtocolOp}.
    */
+  @NotNull()
   public abstract LDAPMessage processExtendedRequest(int messageID,
-                                   ExtendedRequestProtocolOp request,
-                                   List<Control> controls);
+                                   @NotNull ExtendedRequestProtocolOp request,
+                                   @NotNull List<Control> controls);
 
 
 
@@ -223,9 +245,10 @@ public abstract class LDAPListenerRequestHandler
    *          client.  The protocol op in the {@code LDAPMessage} must be an
    *          {@code ModifyResponseProtocolOp}.
    */
+  @NotNull()
   public abstract LDAPMessage processModifyRequest(int messageID,
-                                   ModifyRequestProtocolOp request,
-                                   List<Control> controls);
+                                   @NotNull ModifyRequestProtocolOp request,
+                                   @NotNull List<Control> controls);
 
 
 
@@ -244,9 +267,10 @@ public abstract class LDAPListenerRequestHandler
    *          client.  The protocol op in the {@code LDAPMessage} must be an
    *          {@code ModifyDNResponseProtocolOp}.
    */
+  @NotNull()
   public abstract LDAPMessage processModifyDNRequest(int messageID,
-                                   ModifyDNRequestProtocolOp request,
-                                   List<Control> controls);
+                                   @NotNull ModifyDNRequestProtocolOp request,
+                                   @NotNull List<Control> controls);
 
 
 
@@ -265,9 +289,10 @@ public abstract class LDAPListenerRequestHandler
    *          client.  The protocol op in the {@code LDAPMessage} must be an
    *          {@code SearchResultDoneProtocolOp}.
    */
+  @NotNull()
   public abstract LDAPMessage processSearchRequest(int messageID,
-                                   SearchRequestProtocolOp request,
-                                   List<Control> controls);
+                                   @NotNull SearchRequestProtocolOp request,
+                                   @NotNull List<Control> controls);
 
 
 
@@ -283,8 +308,8 @@ public abstract class LDAPListenerRequestHandler
    *                    {@code null}.
    */
   public void processUnbindRequest(final int messageID,
-                                   final UnbindRequestProtocolOp request,
-                                   final List<Control> controls)
+                   @NotNull final UnbindRequestProtocolOp request,
+                   @NotNull final List<Control> controls)
   {
     // No implementation provided by default.
   }

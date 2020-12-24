@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.controls.TransactionSpecificationRequestControl;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -155,7 +172,8 @@ public final class StartTransactionExtendedRequest
   /**
    * The OID (1.3.6.1.1.21.1) for the start transaction extended request.
    */
-  public static final String START_TRANSACTION_REQUEST_OID = "1.3.6.1.1.21.1";
+  @NotNull public static final String START_TRANSACTION_REQUEST_OID =
+       "1.3.6.1.1.21.1";
 
 
   /**
@@ -180,7 +198,7 @@ public final class StartTransactionExtendedRequest
    *
    * @param  controls  The set of controls to include in the request.
    */
-  public StartTransactionExtendedRequest(final Control[] controls)
+  public StartTransactionExtendedRequest(@Nullable final Control[] controls)
   {
     super(START_TRANSACTION_REQUEST_OID, controls);
   }
@@ -196,7 +214,8 @@ public final class StartTransactionExtendedRequest
    *
    * @throws  LDAPException  If a problem occurs while decoding the request.
    */
-  public StartTransactionExtendedRequest(final ExtendedRequest extendedRequest)
+  public StartTransactionExtendedRequest(
+              @NotNull final ExtendedRequest extendedRequest)
          throws LDAPException
   {
     super(extendedRequest);
@@ -214,8 +233,9 @@ public final class StartTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public StartTransactionExtendedResult process(
-              final LDAPConnection connection, final int depth)
+              @NotNull final LDAPConnection connection, final int depth)
          throws LDAPException
   {
     final ExtendedResult extendedResponse = super.process(connection, depth);
@@ -228,6 +248,7 @@ public final class StartTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public StartTransactionExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -239,7 +260,9 @@ public final class StartTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public StartTransactionExtendedRequest duplicate(final Control[] controls)
+  @NotNull()
+  public StartTransactionExtendedRequest duplicate(
+              @Nullable final Control[] controls)
   {
     final StartTransactionExtendedRequest r =
          new StartTransactionExtendedRequest(controls);
@@ -253,6 +276,7 @@ public final class StartTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_EXTENDED_REQUEST_NAME_START_TXN.get();
@@ -264,7 +288,7 @@ public final class StartTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("StartTransactionExtendedRequest(");
 

@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,8 @@ import java.util.List;
 
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -54,20 +71,20 @@ public final class DIGESTMD5BindRequestProperties
 
 
   // The password for the DIGEST-MD5 bind request.
-  private ASN1OctetString password;
+  @NotNull private ASN1OctetString password;
 
   // The SASL quality of protection value(s) allowed for the DIGEST-MD5 bind
   // request.
-  private List<SASLQualityOfProtection> allowedQoP;
+  @NotNull private List<SASLQualityOfProtection> allowedQoP;
 
   // The authentication ID string for the DIGEST-MD5 bind request.
-  private String authenticationID;
+  @NotNull private String authenticationID;
 
   // The authorization ID string for the DIGEST-MD5 bind request, if available.
-  private String authorizationID;
+  @Nullable private String authorizationID;
 
   // The realm for the DIGEST-MD5 bind request, if available.
-  private String realm;
+  @Nullable private String realm;
 
 
 
@@ -81,8 +98,8 @@ public final class DIGESTMD5BindRequestProperties
    *                           may be {@code null} if anonymous authentication
    *                           is to be performed.
    */
-  public DIGESTMD5BindRequestProperties(final String authenticationID,
-                                        final String password)
+  public DIGESTMD5BindRequestProperties(@NotNull final String authenticationID,
+                                        @Nullable final String password)
   {
     this(authenticationID, new ASN1OctetString(password));
   }
@@ -99,8 +116,8 @@ public final class DIGESTMD5BindRequestProperties
    *                           may be {@code null} if anonymous authentication
    *                           is to be performed.
    */
-  public DIGESTMD5BindRequestProperties(final String authenticationID,
-                                        final byte[] password)
+  public DIGESTMD5BindRequestProperties(@NotNull final String authenticationID,
+                                        @Nullable final byte[] password)
   {
     this(authenticationID, new ASN1OctetString(password));
   }
@@ -117,8 +134,8 @@ public final class DIGESTMD5BindRequestProperties
    *                           may be {@code null} if anonymous authentication
    *                           is to be performed.
    */
-  public DIGESTMD5BindRequestProperties(final String authenticationID,
-                                        final ASN1OctetString password)
+  public DIGESTMD5BindRequestProperties(@NotNull final String authenticationID,
+              @Nullable final ASN1OctetString password)
   {
     Validator.ensureNotNull(authenticationID);
 
@@ -145,6 +162,7 @@ public final class DIGESTMD5BindRequestProperties
    *
    * @return  The authentication ID for the DIGEST-MD5 bind request.
    */
+  @NotNull()
   public String getAuthenticationID()
   {
     return authenticationID;
@@ -161,7 +179,7 @@ public final class DIGESTMD5BindRequestProperties
    * @param  authenticationID  The authentication ID for the DIGEST-MD5 bind
    *                           request.  It must not be {@code null}.
    */
-  public void setAuthenticationID(final String authenticationID)
+  public void setAuthenticationID(@NotNull final String authenticationID)
   {
     Validator.ensureNotNull(authenticationID);
     this.authenticationID = authenticationID;
@@ -176,6 +194,7 @@ public final class DIGESTMD5BindRequestProperties
    *          {@code null} if no authorization ID should be included in the
    *          bind request.
    */
+  @Nullable()
   public String getAuthorizationID()
   {
     return authorizationID;
@@ -193,7 +212,7 @@ public final class DIGESTMD5BindRequestProperties
    * @param  authorizationID  The authorization ID for the DIGEST-MD5 bind
    *                          request.
    */
-  public void setAuthorizationID(final String authorizationID)
+  public void setAuthorizationID(@Nullable final String authorizationID)
   {
     this.authorizationID = authorizationID;
   }
@@ -205,6 +224,7 @@ public final class DIGESTMD5BindRequestProperties
    *
    * @return  The password for the DIGEST-MD5 bind request.
    */
+  @NotNull()
   public ASN1OctetString getPassword()
   {
     return password;
@@ -220,7 +240,7 @@ public final class DIGESTMD5BindRequestProperties
    *                   {@code null} or empty when authenticating as the
    *                   anonymous user.
    */
-  public void setPassword(final String password)
+  public void setPassword(@NotNull final String password)
   {
     setPassword(new ASN1OctetString(password));
   }
@@ -235,7 +255,7 @@ public final class DIGESTMD5BindRequestProperties
    *                   {@code null} or empty when authenticating as the
    *                   anonymous user.
    */
-  public void setPassword(final byte[] password)
+  public void setPassword(@NotNull final byte[] password)
   {
     setPassword(new ASN1OctetString(password));
   }
@@ -250,7 +270,7 @@ public final class DIGESTMD5BindRequestProperties
    *                   {@code null} or empty when authenticating as the
    *                   anonymous user.
    */
-  public void setPassword(final ASN1OctetString password)
+  public void setPassword(@Nullable final ASN1OctetString password)
   {
     if (password == null)
     {
@@ -270,6 +290,7 @@ public final class DIGESTMD5BindRequestProperties
    * @return  The realm for the DIGEST-MD5 bind request, or {@code null} if no
    *          realm should be included in the bind request.
    */
+  @Nullable()
   public String getRealm()
   {
     return realm;
@@ -285,7 +306,7 @@ public final class DIGESTMD5BindRequestProperties
    *                {@code null} if no realm should be included in the bind
    *                request.
    */
-  public void setRealm(final String realm)
+  public void setRealm(@Nullable final String realm)
   {
     this.realm = realm;
   }
@@ -302,6 +323,7 @@ public final class DIGESTMD5BindRequestProperties
    *          authentication has completed, in order from most preferred to
    *          least preferred.
    */
+  @NotNull()
   public List<SASLQualityOfProtection> getAllowedQoP()
   {
     return allowedQoP;
@@ -322,7 +344,8 @@ public final class DIGESTMD5BindRequestProperties
    *                     {@link SASLQualityOfProtection#AUTH} quality of
    *                     protection value will be used.
    */
-  public void setAllowedQoP(final List<SASLQualityOfProtection> allowedQoP)
+  public void setAllowedQoP(
+                   @Nullable final List<SASLQualityOfProtection> allowedQoP)
   {
     if ((allowedQoP == null) || allowedQoP.isEmpty())
     {
@@ -350,7 +373,8 @@ public final class DIGESTMD5BindRequestProperties
    *                     {@link SASLQualityOfProtection#AUTH} quality of
    *                     protection value will be used.
    */
-  public void setAllowedQoP(final SASLQualityOfProtection... allowedQoP)
+  public void setAllowedQoP(
+                   @Nullable final SASLQualityOfProtection... allowedQoP)
   {
     setAllowedQoP(StaticUtils.toList(allowedQoP));
   }
@@ -364,6 +388,7 @@ public final class DIGESTMD5BindRequestProperties
    * @return  A string representation of the DIGEST-MD5 bind request properties.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -379,7 +404,7 @@ public final class DIGESTMD5BindRequestProperties
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("DIGESTMD5BindRequestProperties(authenticationID='");
     buffer.append(authenticationID);

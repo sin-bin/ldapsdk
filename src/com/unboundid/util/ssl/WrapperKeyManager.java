@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,6 +49,8 @@ import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509KeyManager;
 
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -51,10 +68,10 @@ public abstract class WrapperKeyManager
        extends X509ExtendedKeyManager
 {
   // The nickname of the certificate that should be selected.
-  private final String certificateAlias;
+  @Nullable private final String certificateAlias;
 
   // The set of key managers that will be used to perform the processing.
-  private final X509KeyManager[] keyManagers;
+  @NotNull private final X509KeyManager[] keyManagers;
 
 
 
@@ -69,8 +86,8 @@ public abstract class WrapperKeyManager
    *                           selected.  It may be {@code null} if any
    *                           acceptable certificate found may be used.
    */
-  protected WrapperKeyManager(final KeyManager[] keyManagers,
-                              final String certificateAlias)
+  protected WrapperKeyManager(@NotNull final KeyManager[] keyManagers,
+                              @Nullable final String certificateAlias)
   {
     this.certificateAlias = certificateAlias;
 
@@ -93,8 +110,8 @@ public abstract class WrapperKeyManager
    *                           selected.  It may be {@code null} if any
    *                           acceptable certificate found may be used.
    */
-  protected WrapperKeyManager(final X509KeyManager[] keyManagers,
-                              final String certificateAlias)
+  protected WrapperKeyManager(@NotNull final X509KeyManager[] keyManagers,
+                              @Nullable final String certificateAlias)
   {
     this.keyManagers      = keyManagers;
     this.certificateAlias = certificateAlias;
@@ -109,6 +126,7 @@ public abstract class WrapperKeyManager
    *          {@code null} if any acceptable certificate found in the key store
    *          may be used.
    */
+  @Nullable()
   public String getCertificateAlias()
   {
     return certificateAlias;
@@ -129,8 +147,10 @@ public abstract class WrapperKeyManager
    *          were found in the key store.
    */
   @Override()
-  public final synchronized String[] getClientAliases(final String keyType,
-                                          final Principal[] issuers)
+  @Nullable()
+  public final synchronized String[] getClientAliases(
+                                          @NotNull final String keyType,
+                                          @Nullable final Principal[] issuers)
   {
     final LinkedHashSet<String> clientAliases =
          new LinkedHashSet<>(StaticUtils.computeMapCapacity(10));
@@ -171,9 +191,11 @@ public abstract class WrapperKeyManager
    *          appropriate certificate is found.
    */
   @Override()
-  public final synchronized String chooseClientAlias(final String[] keyType,
-                                        final Principal[] issuers,
-                                        final Socket socket)
+  @Nullable()
+  public final synchronized String chooseClientAlias(
+                                        @NotNull final String[] keyType,
+                                        @Nullable final Principal[] issuers,
+                                        @Nullable final Socket socket)
   {
     if (certificateAlias == null)
     {
@@ -228,10 +250,11 @@ public abstract class WrapperKeyManager
    *          appropriate certificate is found.
    */
   @Override()
+  @Nullable()
   public final synchronized String chooseEngineClientAlias(
-                                        final String[] keyType,
-                                        final Principal[] issuers,
-                                        final SSLEngine engine)
+                                        @NotNull final String[] keyType,
+                                        @Nullable final Principal[] issuers,
+                                        @Nullable final SSLEngine engine)
   {
     if (certificateAlias == null)
     {
@@ -298,8 +321,10 @@ public abstract class WrapperKeyManager
    *          were found in the key store.
    */
   @Override()
-  public final synchronized String[] getServerAliases(final String keyType,
-                                          final Principal[] issuers)
+  @Nullable()
+  public final synchronized String[] getServerAliases(
+                                          @NotNull final String keyType,
+                                          @Nullable final Principal[] issuers)
   {
     final LinkedHashSet<String> serverAliases =
          new LinkedHashSet<>(StaticUtils.computeMapCapacity(10));
@@ -340,9 +365,11 @@ public abstract class WrapperKeyManager
    *          appropriate certificate is found.
    */
   @Override()
-  public final synchronized String chooseServerAlias(final String keyType,
-                                        final Principal[] issuers,
-                                        final Socket socket)
+  @Nullable()
+  public final synchronized String chooseServerAlias(
+                                        @NotNull final String keyType,
+                                        @Nullable final Principal[] issuers,
+                                        @Nullable final Socket socket)
   {
     if (certificateAlias == null)
     {
@@ -394,9 +421,11 @@ public abstract class WrapperKeyManager
    *          appropriate certificate is found.
    */
   @Override()
-  public final synchronized String chooseEngineServerAlias(final String keyType,
-                                        final Principal[] issuers,
-                                        final SSLEngine engine)
+  @Nullable()
+  public final synchronized String chooseEngineServerAlias(
+                                        @NotNull final String keyType,
+                                        @Nullable final Principal[] issuers,
+                                        @Nullable final SSLEngine engine)
   {
     if (certificateAlias == null)
     {
@@ -458,8 +487,9 @@ public abstract class WrapperKeyManager
    *          or {@code null} if the requested certificate cannot be found.
    */
   @Override()
+  @Nullable()
   public final synchronized X509Certificate[] getCertificateChain(
-                                                   final String alias)
+                                                   @NotNull  final String alias)
   {
     for (final X509KeyManager m : keyManagers)
     {
@@ -485,7 +515,9 @@ public abstract class WrapperKeyManager
    *          the requested certificate cannot be found.
    */
   @Override()
-  public final synchronized PrivateKey getPrivateKey(final String alias)
+  @Nullable()
+  public final synchronized PrivateKey getPrivateKey(
+                                            @NotNull final String alias)
   {
     for (final X509KeyManager m : keyManagers)
     {

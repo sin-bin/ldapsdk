@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -235,7 +250,6 @@ public class SearchRateTestCase
       "-p", String.valueOf(getTestPort()),
       "-D", getTestBindDN(),
       "-w", getTestBindPassword(),
-      "-b", getTestBaseDN(),
       "-s", "sub",
       "-f", "(uid=user.[1-10])",
       "-t", "10",
@@ -636,10 +650,8 @@ public class SearchRateTestCase
       "-p", String.valueOf(getTestPort()),
       "-D", getTestBindDN(),
       "-w", getTestBindPassword(),
-      "-b", "uid=user.[1-10]," + getTestBaseDN(),
-      "-s", "base",
-      "-A", "1.1",
-      "-f", "(objectClass=*)",
+      "--ldapURL", "ldap:///uid=user.[1-10]," + getTestBaseDN() +
+           "?1.1?base?(objectClass=*)",
       "-t", "10",
       "-i", "1",
       "-I", "2",
@@ -729,6 +741,41 @@ public class SearchRateTestCase
 
 
   /**
+   * Performs a test using asynchronous mode with a malformed LDAP URL pattern.
+   * <BR><BR>
+   * Access to a Directory Server instance is required for complete processing.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testAsynchronousModeMalformedLDAPURL()
+         throws Exception
+  {
+    if (! isDirectoryInstanceAvailable())
+    {
+      return;
+    }
+
+    String[] args =
+    {
+      "-h", getTestHost(),
+      "-p", String.valueOf(getTestPort()),
+      "-D", getTestBindDN(),
+      "-w", getTestBindPassword(),
+      "--ldapURL", "ldap:///uid=user.[1-10]," + getTestBaseDN() +
+           "?1.1?base?(uid=user.[1-10000)", // Missing a closing bracket
+      "-t", "10",
+      "-i", "1",
+      "-I", "2",
+      "--asynchronous",
+      "--maxOutstandingRequests", "100"
+    };
+    assertFalse(SearchRate.main(args, null, null).equals(ResultCode.SUCCESS));
+  }
+
+
+
+  /**
    * Performs a test of --variableRate without the rates repeating.  The command
    * should complete when all of the rates have been processed.
    * <BR><BR>
@@ -758,10 +805,8 @@ public class SearchRateTestCase
       "-p", String.valueOf(getTestPort()),
       "-D", getTestBindDN(),
       "-w", getTestBindPassword(),
-      "-b", "uid=user.[1-10]," + getTestBaseDN(),
-      "-s", "base",
-      "-A", "1.1",
-      "-f", "(objectClass=*)",
+      "--ldapURL", "ldap:///uid=user.[1-10]," + getTestBaseDN() +
+           "?1.1?base?(objectClass=*)",
       "-t", "10",
       "-i", "1",
       "--variableRateData", repeatingRatesFile.getAbsolutePath()

@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,8 @@ import java.math.BigInteger;
 import com.unboundid.asn1.ASN1BitString;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -57,10 +74,10 @@ public final class EllipticCurvePublicKey
   private final boolean yCoordinateIsEven;
 
   // The x coordinate for the public key.
-  private final BigInteger xCoordinate;
+  @NotNull private final BigInteger xCoordinate;
 
   // The y coordinate for the public key.
-  private final BigInteger yCoordinate;
+  @Nullable private final BigInteger yCoordinate;
 
 
 
@@ -72,8 +89,8 @@ public final class EllipticCurvePublicKey
    * @param  yCoordinate  The y coordinate for the public key.  This must not be
    *                      {@code null}.
    */
-  EllipticCurvePublicKey(final BigInteger xCoordinate,
-                         final BigInteger yCoordinate)
+  EllipticCurvePublicKey(@NotNull final BigInteger xCoordinate,
+                         @NotNull final BigInteger yCoordinate)
   {
     this.xCoordinate = xCoordinate;
     this.yCoordinate = yCoordinate;
@@ -91,7 +108,7 @@ public final class EllipticCurvePublicKey
    * @param  yCoordinateIsEven  Indicates whether the y coordinate for the
    *                            public key is even.
    */
-  EllipticCurvePublicKey(final BigInteger xCoordinate,
+  EllipticCurvePublicKey(@NotNull final BigInteger xCoordinate,
                          final boolean yCoordinateIsEven)
   {
     this.xCoordinate = xCoordinate;
@@ -111,55 +128,97 @@ public final class EllipticCurvePublicKey
    * @throws  CertException  If the provided public key cannot be decoded as an
    *                         elliptic curve public key.
    */
-  EllipticCurvePublicKey(final ASN1BitString subjectPublicKey)
+  EllipticCurvePublicKey(@NotNull final ASN1BitString subjectPublicKey)
        throws CertException
   {
     try
     {
+      final byte[] xBytes;
+      final byte[] yBytes;
       final byte[] keyBytes = subjectPublicKey.getBytes();
-      if (keyBytes.length == 65)
+      switch (keyBytes.length)
       {
-        if (keyBytes[0] != 0x04)
-        {
-          throw new CertException(
-               ERR_EC_PUBLIC_KEY_PARSE_UNEXPECTED_UNCOMPRESSED_FIRST_BYTE.get(
-                    StaticUtils.toHex(keyBytes[0])));
-        }
+        case 33:
+          yCoordinate = null;
+          if (keyBytes[0] == 0x02)
+          {
+            yCoordinateIsEven = true;
+          }
+          else if (keyBytes[0] == 0x03)
+          {
+            yCoordinateIsEven = false;
+          }
+          else
+          {
+            throw new CertException(
+                 ERR_EC_PUBLIC_KEY_PARSE_UNEXPECTED_COMPRESSED_FIRST_BYTE.get(
+                      keyBytes.length, StaticUtils.toHex(keyBytes[0])));
+          }
 
-        final byte[] xBytes = new byte[32];
-        final byte[] yBytes = new byte[32];
-        System.arraycopy(keyBytes, 1, xBytes, 0, 32);
-        System.arraycopy(keyBytes, 33, yBytes, 0, 32);
-        xCoordinate = new BigInteger(xBytes);
-        yCoordinate = new BigInteger(yBytes);
-        yCoordinateIsEven = ((keyBytes[64] & 0x01) == 0x00);
-      }
-      else if (keyBytes.length == 33)
-      {
-        yCoordinate = null;
-        if (keyBytes[0] == 0x02)
-        {
-          yCoordinateIsEven = true;
-        }
-        else if (keyBytes[0] == 0x03)
-        {
-          yCoordinateIsEven = false;
-        }
-        else
-        {
-          throw new CertException(
-               ERR_EC_PUBLIC_KEY_PARSE_UNEXPECTED_COMPRESSED_FIRST_BYTE.get(
-                    StaticUtils.toHex(keyBytes[0])));
-        }
+          xBytes = new byte[32];
+          System.arraycopy(keyBytes, 1, xBytes, 0, 32);
+          xCoordinate = new BigInteger(xBytes);
+          break;
 
-        final byte[] xBytes = new byte[32];
-        System.arraycopy(keyBytes, 1, xBytes, 0, 32);
-        xCoordinate = new BigInteger(xBytes);
-      }
-      else
-      {
-        throw new CertException(
-             ERR_EC_PUBLIC_KEY_PARSE_UNEXPECTED_SIZE.get(keyBytes.length));
+        case 49:
+          yCoordinate = null;
+          if (keyBytes[0] == 0x02)
+          {
+            yCoordinateIsEven = true;
+          }
+          else if (keyBytes[0] == 0x03)
+          {
+            yCoordinateIsEven = false;
+          }
+          else
+          {
+            throw new CertException(
+                 ERR_EC_PUBLIC_KEY_PARSE_UNEXPECTED_COMPRESSED_FIRST_BYTE.get(
+                      keyBytes.length, StaticUtils.toHex(keyBytes[0])));
+          }
+
+          xBytes = new byte[48];
+          System.arraycopy(keyBytes, 1, xBytes, 0, 48);
+          xCoordinate = new BigInteger(xBytes);
+          break;
+
+        case 65:
+          if (keyBytes[0] != 0x04)
+          {
+            throw new CertException(
+                 ERR_EC_PUBLIC_KEY_PARSE_UNEXPECTED_UNCOMPRESSED_FIRST_BYTE.get(
+                      keyBytes.length, StaticUtils.toHex(keyBytes[0])));
+          }
+
+          xBytes = new byte[32];
+          yBytes = new byte[32];
+          System.arraycopy(keyBytes, 1, xBytes, 0, 32);
+          System.arraycopy(keyBytes, 33, yBytes, 0, 32);
+          xCoordinate = new BigInteger(xBytes);
+          yCoordinate = new BigInteger(yBytes);
+          yCoordinateIsEven = ((keyBytes[64] & 0x01) == 0x00);
+          break;
+
+        case 97:
+          if (keyBytes[0] != 0x04)
+          {
+            throw new CertException(
+                 ERR_EC_PUBLIC_KEY_PARSE_UNEXPECTED_UNCOMPRESSED_FIRST_BYTE.get(
+                      keyBytes.length, StaticUtils.toHex(keyBytes[0])));
+          }
+
+          xBytes = new byte[48];
+          yBytes = new byte[48];
+          System.arraycopy(keyBytes, 1, xBytes, 0, 48);
+          System.arraycopy(keyBytes, 49, yBytes, 0, 48);
+          xCoordinate = new BigInteger(xBytes);
+          yCoordinate = new BigInteger(yBytes);
+          yCoordinateIsEven = ((keyBytes[96] & 0x01) == 0x00);
+          break;
+
+        default:
+          throw new CertException(
+               ERR_EC_PUBLIC_KEY_PARSE_UNEXPECTED_SIZE.get(keyBytes.length));
       }
     }
     catch (final CertException e)
@@ -187,6 +246,7 @@ public final class EllipticCurvePublicKey
    * @throws  CertException  If a problem is encountered while encoding this
    *                         public key.
    */
+  @NotNull()
   ASN1BitString encode()
        throws CertException
   {
@@ -261,6 +321,7 @@ public final class EllipticCurvePublicKey
    *
    * @return  The value of the x coordinate.
    */
+  @NotNull()
   public BigInteger getXCoordinate()
   {
     return xCoordinate;
@@ -275,6 +336,7 @@ public final class EllipticCurvePublicKey
    * @return  The value of the y coordinate, or {@code null} if the key was
    *          encoded in the compressed form.
    */
+  @Nullable()
   public BigInteger getYCoordinate()
   {
     return yCoordinate;
@@ -299,7 +361,7 @@ public final class EllipticCurvePublicKey
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("EllipticCurvePublicKey(usesCompressedForm=");
     buffer.append(yCoordinate == null);

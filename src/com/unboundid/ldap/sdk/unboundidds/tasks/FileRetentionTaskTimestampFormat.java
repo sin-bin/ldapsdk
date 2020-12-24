@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,6 +37,8 @@ package com.unboundid.ldap.sdk.unboundidds.tasks;
 
 
 
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -166,49 +183,52 @@ public enum FileRetentionTaskTimestampFormat
   /**
    * A regular expression fragment that begins a capture group.
    */
-  private static final String REGEX_FRAGMENT_BEGIN_CAPTURE_GROUP = "(";
+  @NotNull private static final String REGEX_FRAGMENT_BEGIN_CAPTURE_GROUP = "(";
 
 
 
   /**
    * A regular expression fragment that matches a year between 1900 and 2199.
    */
-  private static final String REGEX_FRAGMENT_YEAR = "(19|20|21)[0-9][0-9]";
+  @NotNull private static final String REGEX_FRAGMENT_YEAR =
+       "(19|20|21)[0-9][0-9]";
 
 
 
   /**
    * A regular expression fragment that matches a month between 01 and 12.
    */
-  private static final String REGEX_FRAGMENT_MONTH = "(0[1-9]|1[0-2])";
+  @NotNull private static final String REGEX_FRAGMENT_MONTH = "(0[1-9]|1[0-2])";
 
 
 
   /**
    * A regular expression fragment that matches a day between 01 and 31.
    */
-  private static final String REGEX_FRAGMENT_DAY = "(0[1-9]|[1-2][0-9]|3[0-1])";
+  @NotNull private static final String REGEX_FRAGMENT_DAY =
+       "(0[1-9]|[1-2][0-9]|3[0-1])";
 
 
 
   /**
    * A regular expression fragment that matches an hour between 00 and 23.
    */
-  private static final String REGEX_FRAGMENT_HOUR = "([0-1][0-9]|2[0-3])";
+  @NotNull private static final String REGEX_FRAGMENT_HOUR =
+       "([0-1][0-9]|2[0-3])";
 
 
 
   /**
    * A regular expression fragment that matches a minute between 00 and 59.
    */
-  private static final String REGEX_FRAGMENT_MINUTE = "[0-5][0-9]";
+  @NotNull private static final String REGEX_FRAGMENT_MINUTE = "[0-5][0-9]";
 
 
 
   /**
    * A regular expression fragment that matches a second between 00 and 59.
    */
-  private static final String REGEX_FRAGMENT_SECOND = "[0-5][0-9]";
+  @NotNull private static final String REGEX_FRAGMENT_SECOND = "[0-5][0-9]";
 
 
 
@@ -216,7 +236,8 @@ public enum FileRetentionTaskTimestampFormat
    * A regular expression fragment that matches a millisecond between 000 and
    * 999, preceded by a literal period character.
    */
-  private static final String REGEX_FRAGMENT_MILLISECOND = "\\.[0-9][0-9][0-9]";
+  @NotNull private static final String REGEX_FRAGMENT_MILLISECOND =
+       "\\.[0-9][0-9][0-9]";
 
 
 
@@ -224,14 +245,14 @@ public enum FileRetentionTaskTimestampFormat
    * A regular expression fragment that matches a literal 'Z' character (to
    * serve as a time zone indicator).
    */
-  private static final String REGEX_FRAGMENT_LITERAL_Z = "Z";
+  @NotNull private static final String REGEX_FRAGMENT_LITERAL_Z = "Z";
 
 
 
   /**
    * A regular expression fragment that ends a capture group.
    */
-  private static final String REGEX_FRAGMENT_END_CAPTURE_GROUP = ")";
+  @NotNull private static final String REGEX_FRAGMENT_END_CAPTURE_GROUP = ")";
 
 
 
@@ -241,11 +262,11 @@ public enum FileRetentionTaskTimestampFormat
 
   // A format string that can be used to create a SimpleDateFormat object
   // capable of parsing timestamps in this format.
-  private final String simpleDateFormatString;
+  @NotNull private final String simpleDateFormatString;
 
   // A regular expression string that can be used to match timestamps in this
   // format.
-  private final String regexString;
+  @NotNull private final String regexString;
 
 
 
@@ -264,8 +285,8 @@ public enum FileRetentionTaskTimestampFormat
    *                                 It must not be {@code null}.
    */
   FileRetentionTaskTimestampFormat(final boolean isInUTCTimeZone,
-                                   final String simpleDateFormatString,
-                                   final String regexString)
+                                   @NotNull final String simpleDateFormatString,
+                                   @NotNull final String regexString)
   {
     this.isInUTCTimeZone = isInUTCTimeZone;
     this.simpleDateFormatString = simpleDateFormatString;
@@ -298,6 +319,7 @@ public enum FileRetentionTaskTimestampFormat
    *          {@code SimpleDateFormat} object capable of parsing timestamps in
    *          this format.
    */
+  @NotNull()
   public String getSimpleDateFormatString()
   {
     return simpleDateFormatString;
@@ -313,6 +335,7 @@ public enum FileRetentionTaskTimestampFormat
    * @return  A regular expression string that can be used to match timestamps
    *          in this format.
    */
+  @NotNull()
   public String getRegexString()
   {
     return regexString;
@@ -328,7 +351,9 @@ public enum FileRetentionTaskTimestampFormat
    * @return  The timestamp format value with the specified name, or
    *          {@code null} if there is no value with that name.
    */
-  public static FileRetentionTaskTimestampFormat forName(final String name)
+  @Nullable()
+  public static FileRetentionTaskTimestampFormat forName(
+                     @NotNull final String name)
   {
     final String upperName = StaticUtils.toUpperCase(name).replace('-', '_');
     for (final FileRetentionTaskTimestampFormat f : values())

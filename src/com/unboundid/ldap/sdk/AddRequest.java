@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -49,6 +64,8 @@ import com.unboundid.ldif.LDIFReader;
 import com.unboundid.util.Debug;
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -97,17 +114,17 @@ public final class AddRequest
 
 
   // The queue that will be used to receive response messages from the server.
-  private final LinkedBlockingQueue<LDAPResponse> responseQueue =
+  @NotNull private final LinkedBlockingQueue<LDAPResponse> responseQueue =
        new LinkedBlockingQueue<>();
 
   // The set of attributes to include in the entry to add.
-  private ArrayList<Attribute> attributes;
+  @NotNull private ArrayList<Attribute> attributes;
 
   // The message ID from the last LDAP message sent from this request.
   private int messageID = -1;
 
   // The DN of the entry to be added.
-  private String dn;
+  @NotNull private String dn;
 
 
 
@@ -119,7 +136,8 @@ public final class AddRequest
    * @param  attributes  The set of attributes to include in the entry to add.
    *                     It must not be {@code null}.
    */
-  public AddRequest(final String dn, final Attribute... attributes)
+  public AddRequest(@NotNull final String dn,
+                    @NotNull final Attribute... attributes)
   {
     super(null);
 
@@ -142,8 +160,9 @@ public final class AddRequest
    *                     It must not be {@code null}.
    * @param  controls    The set of controls to include in the request.
    */
-  public AddRequest(final String dn, final Attribute[] attributes,
-                    final Control[] controls)
+  public AddRequest(@NotNull final String dn,
+                    @NotNull final Attribute[] attributes,
+                    @Nullable final Control[] controls)
   {
     super(controls);
 
@@ -165,7 +184,8 @@ public final class AddRequest
    * @param  attributes  The set of attributes to include in the entry to add.
    *                     It must not be {@code null}.
    */
-  public AddRequest(final String dn, final Collection<Attribute> attributes)
+  public AddRequest(@NotNull final String dn,
+                    @NotNull final Collection<Attribute> attributes)
   {
     super(null);
 
@@ -186,8 +206,9 @@ public final class AddRequest
    *                     It must not be {@code null}.
    * @param  controls    The set of controls to include in the request.
    */
-  public AddRequest(final String dn, final Collection<Attribute> attributes,
-                    final Control[] controls)
+  public AddRequest(@NotNull final String dn,
+                    @NotNull final Collection<Attribute> attributes,
+                    @Nullable final Control[] controls)
   {
     super(controls);
 
@@ -207,7 +228,8 @@ public final class AddRequest
    * @param  attributes  The set of attributes to include in the entry to add.
    *                     It must not be {@code null}.
    */
-  public AddRequest(final DN dn, final Attribute... attributes)
+  public AddRequest(@NotNull final DN dn,
+                    @NotNull final Attribute... attributes)
   {
     super(null);
 
@@ -230,8 +252,8 @@ public final class AddRequest
    *                     It must not be {@code null}.
    * @param  controls    The set of controls to include in the request.
    */
-  public AddRequest(final DN dn, final Attribute[] attributes,
-                    final Control[] controls)
+  public AddRequest(@NotNull final DN dn, @NotNull final Attribute[] attributes,
+                    @Nullable final Control[] controls)
   {
     super(controls);
 
@@ -253,7 +275,8 @@ public final class AddRequest
    * @param  attributes  The set of attributes to include in the entry to add.
    *                     It must not be {@code null}.
    */
-  public AddRequest(final DN dn, final Collection<Attribute> attributes)
+  public AddRequest(@NotNull final DN dn,
+                    @NotNull final Collection<Attribute> attributes)
   {
     super(null);
 
@@ -274,8 +297,9 @@ public final class AddRequest
    *                     It must not be {@code null}.
    * @param  controls    The set of controls to include in the request.
    */
-  public AddRequest(final DN dn, final Collection<Attribute> attributes,
-                    final Control[] controls)
+  public AddRequest(@NotNull final DN dn,
+                    @NotNull final Collection<Attribute> attributes,
+                    @Nullable final Control[] controls)
   {
     super(controls);
 
@@ -292,7 +316,7 @@ public final class AddRequest
    *
    * @param  entry  The entry to be added.  It must not be {@code null}.
    */
-  public AddRequest(final Entry entry)
+  public AddRequest(@NotNull final Entry entry)
   {
     super(null);
 
@@ -310,7 +334,8 @@ public final class AddRequest
    * @param  entry     The entry to be added.  It must not be {@code null}.
    * @param  controls  The set of controls to include in the request.
    */
-  public AddRequest(final Entry entry, final Control[] controls)
+  public AddRequest(@NotNull final Entry entry,
+                    @Nullable final Control[] controls)
   {
     super(controls);
 
@@ -334,7 +359,7 @@ public final class AddRequest
    * @throws  LDIFException  If the provided LDIF data cannot be decoded as an
    *                         entry.
    */
-  public AddRequest(final String... ldifLines)
+  public AddRequest(@NotNull final String... ldifLines)
          throws LDIFException
   {
     super(null);
@@ -363,6 +388,7 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getDN()
   {
     return dn;
@@ -375,7 +401,7 @@ public final class AddRequest
    *
    * @param  dn  The DN for this add request.  It must not be {@code null}.
    */
-  public void setDN(final String dn)
+  public void setDN(@NotNull final String dn)
   {
     Validator.ensureNotNull(dn);
 
@@ -389,7 +415,7 @@ public final class AddRequest
    *
    * @param  dn  The DN for this add request.  It must not be {@code null}.
    */
-  public void setDN(final DN dn)
+  public void setDN(@NotNull final DN dn)
   {
     Validator.ensureNotNull(dn);
 
@@ -402,6 +428,7 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<Attribute> getAttributes()
   {
     return Collections.unmodifiableList(attributes);
@@ -413,7 +440,8 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
-  public Attribute getAttribute(final String attributeName)
+  @Nullable()
+  public Attribute getAttribute(@NotNull final String attributeName)
   {
     Validator.ensureNotNull(attributeName);
 
@@ -434,7 +462,7 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
-  public boolean hasAttribute(final String attributeName)
+  public boolean hasAttribute(@NotNull final String attributeName)
   {
     return (getAttribute(attributeName) != null);
   }
@@ -445,7 +473,7 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
-  public boolean hasAttribute(final Attribute attribute)
+  public boolean hasAttribute(@NotNull final Attribute attribute)
   {
     Validator.ensureNotNull(attribute);
 
@@ -459,8 +487,8 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
-  public boolean hasAttributeValue(final String attributeName,
-                                   final String attributeValue)
+  public boolean hasAttributeValue(@NotNull final String attributeName,
+                                   @NotNull final String attributeValue)
   {
     Validator.ensureNotNull(attributeName, attributeValue);
 
@@ -474,9 +502,9 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
-  public boolean hasAttributeValue(final String attributeName,
-                                   final String attributeValue,
-                                   final MatchingRule matchingRule)
+  public boolean hasAttributeValue(@NotNull final String attributeName,
+                                   @NotNull final String attributeValue,
+                                   @NotNull final MatchingRule matchingRule)
   {
     Validator.ensureNotNull(attributeName, attributeValue);
 
@@ -490,8 +518,8 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
-  public boolean hasAttributeValue(final String attributeName,
-                                   final byte[] attributeValue)
+  public boolean hasAttributeValue(@NotNull final String attributeName,
+                                   @NotNull final byte[] attributeValue)
   {
     Validator.ensureNotNull(attributeName, attributeValue);
 
@@ -505,9 +533,9 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
-  public boolean hasAttributeValue(final String attributeName,
-                                   final byte[] attributeValue,
-                                   final MatchingRule matchingRule)
+  public boolean hasAttributeValue(@NotNull final String attributeName,
+                                   @NotNull final byte[] attributeValue,
+                                   @NotNull final MatchingRule matchingRule)
   {
     Validator.ensureNotNull(attributeName, attributeValue);
 
@@ -521,7 +549,7 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
-  public boolean hasObjectClass(final String objectClassName)
+  public boolean hasObjectClass(@NotNull final String objectClassName)
   {
     return hasAttributeValue("objectClass", objectClassName);
   }
@@ -532,6 +560,7 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Entry toEntry()
   {
     return new Entry(dn, attributes);
@@ -545,7 +574,7 @@ public final class AddRequest
    *
    * @param  attributes  The set of attributes for this add request.
    */
-  public void setAttributes(final Attribute[] attributes)
+  public void setAttributes(@NotNull final Attribute[] attributes)
   {
     Validator.ensureNotNull(attributes);
 
@@ -561,7 +590,7 @@ public final class AddRequest
    *
    * @param  attributes  The set of attributes for this add request.
    */
-  public void setAttributes(final Collection<Attribute> attributes)
+  public void setAttributes(@NotNull final Collection<Attribute> attributes)
   {
     Validator.ensureNotNull(attributes);
 
@@ -577,7 +606,7 @@ public final class AddRequest
    * @param  attribute  The attribute to be added to the entry to add.  It must
    *                    not be {@code null}.
    */
-  public void addAttribute(final Attribute attribute)
+  public void addAttribute(@NotNull final Attribute attribute)
   {
     Validator.ensureNotNull(attribute);
 
@@ -604,7 +633,8 @@ public final class AddRequest
    * @param  value  The value for the attribute to add.  It must not be
    *                {@code null}.
    */
-  public void addAttribute(final String name, final String value)
+  public void addAttribute(@NotNull final String name,
+                           @NotNull final String value)
   {
     Validator.ensureNotNull(name, value);
     addAttribute(new Attribute(name, value));
@@ -620,7 +650,8 @@ public final class AddRequest
    * @param  value  The value for the attribute to add.  It must not be
    *                {@code null}.
    */
-  public void addAttribute(final String name, final byte[] value)
+  public void addAttribute(@NotNull final String name,
+                           @NotNull final byte[] value)
   {
     Validator.ensureNotNull(name, value);
     addAttribute(new Attribute(name, value));
@@ -636,7 +667,8 @@ public final class AddRequest
    * @param  values  The set of values for the attribute to add.  It must not be
    *                 {@code null}.
    */
-  public void addAttribute(final String name, final String... values)
+  public void addAttribute(@NotNull final String name,
+                           @NotNull final String... values)
   {
     Validator.ensureNotNull(name, values);
     addAttribute(new Attribute(name, values));
@@ -652,7 +684,8 @@ public final class AddRequest
    * @param  values  The set of values for the attribute to add.  It must not be
    *                 {@code null}.
    */
-  public void addAttribute(final String name, final byte[]... values)
+  public void addAttribute(@NotNull final String name,
+                           @NotNull final byte[]... values)
   {
     Validator.ensureNotNull(name, values);
     addAttribute(new Attribute(name, values));
@@ -670,7 +703,7 @@ public final class AddRequest
    *          or {@code false} if the add request did not include the specified
    *          attribute.
    */
-  public boolean removeAttribute(final String attributeName)
+  public boolean removeAttribute(@NotNull final String attributeName)
   {
     Validator.ensureNotNull(attributeName);
 
@@ -702,7 +735,8 @@ public final class AddRequest
    *          request, or {@code false} if the add request did not include the
    *          specified attribute value.
    */
-  public boolean removeAttributeValue(final String name, final String value)
+  public boolean removeAttributeValue(@NotNull final String name,
+                                      @NotNull final String value)
   {
     Validator.ensureNotNull(name, value);
 
@@ -757,7 +791,8 @@ public final class AddRequest
    *          request, or {@code false} if the add request did not include the
    *          specified attribute value.
    */
-  public boolean removeAttribute(final String name, final byte[] value)
+  public boolean removeAttribute(@NotNull final String name,
+                                 @NotNull final byte[] value)
   {
     Validator.ensureNotNull(name, value);
 
@@ -807,7 +842,7 @@ public final class AddRequest
    * @param  attribute  The attribute to be replaced in this add request.  It
    *                    must not be {@code null}.
    */
-  public void replaceAttribute(final Attribute attribute)
+  public void replaceAttribute(@NotNull final Attribute attribute)
   {
     Validator.ensureNotNull(attribute);
 
@@ -834,7 +869,8 @@ public final class AddRequest
    * @param  value  The new value for the attribute.  It must not be
    *                {@code null}.
    */
-  public void replaceAttribute(final String name, final String value)
+  public void replaceAttribute(@NotNull final String name,
+                               @NotNull final String value)
   {
     Validator.ensureNotNull(name, value);
 
@@ -861,7 +897,8 @@ public final class AddRequest
    * @param  value  The new value for the attribute.  It must not be
    *                {@code null}.
    */
-  public void replaceAttribute(final String name, final byte[] value)
+  public void replaceAttribute(@NotNull final String name,
+                               @NotNull final byte[] value)
   {
     Validator.ensureNotNull(name, value);
 
@@ -888,7 +925,8 @@ public final class AddRequest
    * @param  values  The new set of values for the attribute.  It must not be
    *                 {@code null}.
    */
-  public void replaceAttribute(final String name, final String... values)
+  public void replaceAttribute(@NotNull final String name,
+                               @NotNull final String... values)
   {
     Validator.ensureNotNull(name, values);
 
@@ -915,7 +953,8 @@ public final class AddRequest
    * @param  values  The new set of values for the attribute.  It must not be
    *                 {@code null}.
    */
-  public void replaceAttribute(final String name, final byte[]... values)
+  public void replaceAttribute(@NotNull final String name,
+                               @NotNull final byte[]... values)
   {
     Validator.ensureNotNull(name, values);
 
@@ -948,7 +987,7 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
-  public void writeTo(final ASN1Buffer buffer)
+  public void writeTo(@NotNull final ASN1Buffer buffer)
   {
     final ASN1BufferSequence requestSequence =
          buffer.beginSequence(LDAPMessage.PROTOCOL_OP_TYPE_ADD_REQUEST);
@@ -972,6 +1011,7 @@ public final class AddRequest
    * @return  The ASN.1 element with the encoded add request protocol op.
    */
   @Override()
+  @NotNull()
   public ASN1Element encodeProtocolOp()
   {
     // Create the add request protocol op.
@@ -1010,7 +1050,9 @@ public final class AddRequest
    *                         reading the response.
    */
   @Override()
-  protected LDAPResult process(final LDAPConnection connection, final int depth)
+  @NotNull()
+  protected LDAPResult process(@NotNull final LDAPConnection connection,
+                               final int depth)
             throws LDAPException
   {
     if (connection.synchronousMode())
@@ -1075,8 +1117,9 @@ public final class AddRequest
    *
    * @throws  LDAPException  If a problem occurs while sending the request.
    */
-  AsyncRequestID processAsync(final LDAPConnection connection,
-                              final AsyncResultListener resultListener)
+  @NotNull()
+  AsyncRequestID processAsync(@NotNull final LDAPConnection connection,
+                      @Nullable final AsyncResultListener resultListener)
                  throws LDAPException
   {
     // Create the LDAP message.
@@ -1117,6 +1160,14 @@ public final class AddRequest
     try
     {
       Debug.debugLDAPRequest(Level.INFO, this, messageID, connection);
+
+      final LDAPConnectionLogger logger =
+           connection.getConnectionOptions().getConnectionLogger();
+      if (logger != null)
+      {
+        logger.logAddRequest(connection, messageID, this);
+      }
+
       connection.getConnectionStatistics().incrementNumAddRequests();
       connection.sendMessage(message, timeout);
       return asyncRequestID;
@@ -1152,7 +1203,8 @@ public final class AddRequest
    * @throws  LDAPException  If a problem occurs while sending the request or
    *                         reading the response.
    */
-  private LDAPResult processSync(final LDAPConnection connection,
+  @NotNull()
+  private LDAPResult processSync(@NotNull final LDAPConnection connection,
                                  final int depth, final boolean allowRetry)
           throws LDAPException
   {
@@ -1165,6 +1217,14 @@ public final class AddRequest
     // Send the request to the server.
     final long requestTime = System.nanoTime();
     Debug.debugLDAPRequest(Level.INFO, this, messageID, connection);
+
+    final LDAPConnectionLogger logger =
+         connection.getConnectionOptions().getConnectionLogger();
+    if (logger != null)
+    {
+      logger.logAddRequest(connection, messageID, this);
+    }
+
     connection.getConnectionStatistics().incrementNumAddRequests();
     try
     {
@@ -1255,8 +1315,9 @@ public final class AddRequest
    *
    * @throws  LDAPException  If a problem occurs.
    */
-  private LDAPResult handleResponse(final LDAPConnection connection,
-                                    final LDAPResponse response,
+  @NotNull()
+  private LDAPResult handleResponse(@NotNull final LDAPConnection connection,
+                                    @Nullable final LDAPResponse response,
                                     final long requestTime, final int depth,
                                     final boolean allowRetry)
           throws LDAPException
@@ -1353,9 +1414,10 @@ public final class AddRequest
    * @return  The result from re-trying the add, or {@code null} if it could not
    *          be re-tried.
    */
-  private LDAPResult reconnectAndRetry(final LDAPConnection connection,
+  @Nullable()
+  private LDAPResult reconnectAndRetry(@NotNull final LDAPConnection connection,
                                        final int depth,
-                                       final ResultCode resultCode)
+                                       @NotNull final ResultCode resultCode)
   {
     try
     {
@@ -1397,8 +1459,9 @@ public final class AddRequest
    *                         the referral connection, sending the request, or
    *                         reading the result.
    */
-  private LDAPResult followReferral(final LDAPResult referralResult,
-                                    final LDAPConnection connection,
+  @NotNull()
+  private LDAPResult followReferral(@NotNull final LDAPResult referralResult,
+                                    @NotNull final LDAPConnection connection,
                                     final int depth)
           throws LDAPException
   {
@@ -1466,6 +1529,7 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public OperationType getOperationType()
   {
     return OperationType.ADD;
@@ -1477,6 +1541,7 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public AddRequest duplicate()
   {
     return duplicate(getControls());
@@ -1488,7 +1553,8 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
-  public AddRequest duplicate(final Control[] controls)
+  @NotNull()
+  public AddRequest duplicate(@Nullable final Control[] controls)
   {
     final ArrayList<Attribute> attrs = new ArrayList<>(attributes);
     final AddRequest r = new AddRequest(dn, attrs, controls);
@@ -1515,7 +1581,7 @@ public final class AddRequest
    */
   @InternalUseOnly()
   @Override()
-  public void responseReceived(final LDAPResponse response)
+  public void responseReceived(@NotNull final LDAPResponse response)
          throws LDAPException
   {
     try
@@ -1544,6 +1610,7 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDIFAddChangeRecord toLDIFChangeRecord()
   {
     return new LDIFAddChangeRecord(this);
@@ -1555,6 +1622,7 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String[] toLDIF()
   {
     return toLDIFChangeRecord().toLDIF();
@@ -1566,6 +1634,7 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String toLDIFString()
   {
     return toLDIFChangeRecord().toLDIFString();
@@ -1577,7 +1646,7 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("AddRequest(dn='");
     buffer.append(dn);
@@ -1619,7 +1688,8 @@ public final class AddRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toCode(final List<String> lineList, final String requestID,
+  public void toCode(@NotNull final List<String> lineList,
+                     @NotNull final String requestID,
                      final int indentSpaces, final boolean includeProcessing)
   {
     // Create the request variable.

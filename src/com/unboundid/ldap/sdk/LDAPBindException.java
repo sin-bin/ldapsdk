@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,8 @@ package com.unboundid.ldap.sdk;
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -51,7 +68,7 @@ public class LDAPBindException
 
 
   // The bind result for this exception.
-  private final BindResult bindResult;
+  @NotNull private final BindResult bindResult;
 
 
 
@@ -60,7 +77,7 @@ public class LDAPBindException
    *
    * @param  bindResult  The bind result to use to create this exception.
    */
-  public LDAPBindException(final BindResult bindResult)
+  public LDAPBindException(@NotNull final BindResult bindResult)
   {
     super(bindResult);
 
@@ -73,6 +90,7 @@ public class LDAPBindException
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPResult toLDAPResult()
   {
     return bindResult;
@@ -85,6 +103,7 @@ public class LDAPBindException
    *
    * @return  The bind result that was returned by the server.
    */
+  @NotNull()
   public BindResult getBindResult()
   {
     return bindResult;
@@ -99,6 +118,7 @@ public class LDAPBindException
    *          {@code null} if the bind result did not include any server SASL
    *          credentials.
    */
+  @Nullable()
   public ASN1OctetString getServerSASLCredentials()
   {
     return bindResult.getServerSASLCredentials();

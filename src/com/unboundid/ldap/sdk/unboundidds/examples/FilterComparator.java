@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,8 @@ import java.util.TreeSet;
 
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -69,7 +86,8 @@ public final class FilterComparator
   /**
    * The singleton instance of this comparator.
    */
-  private static final FilterComparator INSTANCE = new FilterComparator();
+  @NotNull private static final FilterComparator INSTANCE =
+       new FilterComparator();
 
 
 
@@ -95,6 +113,7 @@ public final class FilterComparator
    *
    * @return  The singleton instance of this filter comparator.
    */
+  @NotNull()
   public static FilterComparator getInstance()
   {
     return INSTANCE;
@@ -116,7 +135,7 @@ public final class FilterComparator
    *          relative orders.
    */
   @Override()
-  public int compare(final Filter f1, final Filter f2)
+  public int compare(@NotNull final Filter f1, @NotNull final Filter f2)
   {
     if (f1 == f2)
     {
@@ -197,7 +216,8 @@ public final class FilterComparator
    *          after the second, or zero if there is no difference in their
    *          relative orders.
    */
-  private static int compareANDOrOR(final Filter f1, final Filter f2)
+  private static int compareANDOrOR(@NotNull final Filter f1,
+                                    @NotNull final Filter f2)
   {
     final TreeSet<Filter> set1 = new TreeSet<>(INSTANCE);
     final TreeSet<Filter> set2 = new TreeSet<>(INSTANCE);
@@ -254,7 +274,8 @@ public final class FilterComparator
    *          after the second, or zero if there is no difference in their
    *          relative orders.
    */
-  private static int compareSubstring(final Filter f1, final Filter f2)
+  private static int compareSubstring(@NotNull final Filter f1,
+                                      @NotNull final Filter f2)
   {
     final byte[] sI1 = f1.getSubInitialBytes();
     final byte[] sI2 = f2.getSubInitialBytes();
@@ -349,7 +370,8 @@ public final class FilterComparator
    *          after the second, or zero if there is no difference in their
    *          relative orders.
    */
-  private static int compareExtensible(final Filter f1, final Filter f2)
+  private static int compareExtensible(@NotNull final Filter f1,
+                                       @NotNull final Filter f2)
   {
     final String name1 = f1.getAttributeName();
     final String name2 = f2.getAttributeName();
@@ -418,7 +440,8 @@ public final class FilterComparator
    *
    * @return  An integer value denoting the comparison value.
    */
-  private static int compare(final byte[] a1, final byte[] a2)
+  private static int compare(@NotNull final byte[] a1,
+                             @NotNull final byte[] a2)
   {
     final int length = Math.min(a1.length, a2.length);
 
@@ -459,7 +482,7 @@ public final class FilterComparator
    *          comparator, or {@code false} if not.
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     return ((o != null) && (o instanceof FilterComparator));
   }

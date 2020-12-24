@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -59,5 +74,49 @@ public class VersionTestCase
       System.setOut(originalOut);
       newOut.close();
     }
+  }
+
+
+
+  /**
+   * Tests the methods that can be used to obtain version information.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testVersionMethods()
+         throws Exception
+  {
+    assertEquals(Version.getProductName(), Version.PRODUCT_NAME);
+
+    assertEquals(Version.getShortName(), Version.SHORT_NAME);
+
+    assertEquals(Version.getMajorVersion(), Version.MAJOR_VERSION);
+
+    assertEquals(Version.getMinorVersion(), Version.MINOR_VERSION);
+
+    assertEquals(Version.getPointVersion(), Version.POINT_VERSION);
+
+    assertEquals(Version.getVersionQualifier(), Version.VERSION_QUALIFIER);
+
+    assertEquals(Version.getBuildTimestamp(), Version.BUILD_TIMESTAMP);
+
+    assertEquals(Version.getRepositoryType(), Version.REPOSITORY_TYPE);
+
+    assertEquals(Version.getRepositoryURL(), Version.REPOSITORY_URL);
+
+    assertEquals(Version.getRepositoryPath(), Version.REPOSITORY_PATH);
+
+    assertEquals(Version.getRevisionID(), Version.REVISION_ID);
+
+    assertEquals(Version.getFullVersionString(), Version.FULL_VERSION_STRING);
+
+    assertEquals(Version.getShortVersionString(), Version.SHORT_VERSION_STRING);
+
+    assertEquals(Version.getNumericVersionString(),
+         Version.NUMERIC_VERSION_STRING);
+
+    assertNotNull(Version.getVersionLines());
+    assertFalse(Version.getVersionLines().isEmpty());
   }
 }

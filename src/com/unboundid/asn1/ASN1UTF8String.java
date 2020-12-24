@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,8 @@ package com.unboundid.asn1;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -49,7 +66,7 @@ public final class ASN1UTF8String
 
 
   // The string value for this element.
-  private final String stringValue;
+  @NotNull private final String stringValue;
 
 
 
@@ -60,7 +77,7 @@ public final class ASN1UTF8String
    * @param  stringValue  The string value to use for this element.  It may be
    *                      {@code null} or empty if the value should be empty.
    */
-  public ASN1UTF8String(final String stringValue)
+  public ASN1UTF8String(@Nullable final String stringValue)
   {
     this(ASN1Constants.UNIVERSAL_UTF_8_STRING_TYPE, stringValue);
   }
@@ -75,7 +92,7 @@ public final class ASN1UTF8String
    * @param  stringValue  The string value to use for this element.  It may be
    *                      {@code null} or empty if the value should be empty.
    */
-  public ASN1UTF8String(final byte type, final String stringValue)
+  public ASN1UTF8String(final byte type, @Nullable final String stringValue)
   {
     this(type, stringValue, StaticUtils.getBytes(stringValue));
   }
@@ -91,8 +108,8 @@ public final class ASN1UTF8String
    *                       {@code null} or empty if the value should be empty.
    * @param  encodedValue  The encoded representation of the value.
    */
-  private ASN1UTF8String(final byte type, final String stringValue,
-                         final byte[] encodedValue)
+  private ASN1UTF8String(final byte type, @Nullable final String stringValue,
+                         @NotNull final byte[] encodedValue)
   {
     super(type, encodedValue);
 
@@ -113,6 +130,7 @@ public final class ASN1UTF8String
    *
    * @return  The string value for this element.
    */
+  @NotNull()
   public String stringValue()
   {
     return stringValue;
@@ -131,7 +149,9 @@ public final class ASN1UTF8String
    * @throws  ASN1Exception  If the provided array cannot be decoded as a UTF-8
    *                         string element.
    */
-  public static ASN1UTF8String decodeAsUTF8String(final byte[] elementBytes)
+  @NotNull()
+  public static ASN1UTF8String decodeAsUTF8String(
+                                    @NotNull final byte[] elementBytes)
          throws ASN1Exception
   {
     try
@@ -191,7 +211,9 @@ public final class ASN1UTF8String
    * @throws  ASN1Exception  If the provided element cannot be decoded as a
    *                         UTF-8 string element.
    */
-  public static ASN1UTF8String decodeAsUTF8String(final ASN1Element element)
+  @NotNull()
+  public static ASN1UTF8String decodeAsUTF8String(
+                                    @NotNull final ASN1Element element)
          throws ASN1Exception
   {
     final byte[] elementValue = element.getValue();
@@ -210,7 +232,7 @@ public final class ASN1UTF8String
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append(stringValue);
   }

@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,7 @@ package com.unboundid.ldap.sdk.unboundidds.tools;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.ExtendedResult;
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPResult;
@@ -33,6 +49,7 @@ import com.unboundid.ldap.sdk.SearchResultReference;
 import com.unboundid.util.ColumnFormatter;
 import com.unboundid.util.FormattableColumn;
 import com.unboundid.util.HorizontalAlignment;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.OutputFormat;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -62,26 +79,29 @@ final class ColumnFormatterLDAPSearchOutputHandler
 {
   // A list used to hold the lines for a formatted representation of a search
   // result entry or reference.
-  private final ArrayList<String> formattedLines;
+  @NotNull private final ArrayList<String> formattedLines;
+
+  // Indicates whether to include all values of a multivalued attribute.
+  private final boolean includeAllValues;
 
   // The column formatter that will be used to generate the output.
-  private final ColumnFormatter formatter;
+  @NotNull private final ColumnFormatter formatter;
 
   // The maximum width to use for comments in the output.
   private final int maxCommentWidth;
 
   // The associated LDAPSearch tool instance.
-  private final LDAPSearch ldapSearch;
+  @NotNull private final LDAPSearch ldapSearch;
 
   // An array that holds the values for each of the columns to be output.
-  private final Object[] columnValues;
+  @NotNull private final Object[] columnValues;
 
   // The names of the requested attributes.
-  private final String[] attributes;
+  @NotNull private final String[] attributes;
 
   // A string builder used to hold the formatted representation of the lines
   // that comprise a search result entry or reference.
-  private final StringBuilder formattedLineBuffer;
+  @NotNull private final StringBuilder formattedLineBuffer;
 
 
 
@@ -95,14 +115,20 @@ final class ColumnFormatterLDAPSearchOutputHandler
    * @param  maxCommentWidth      The maximum width to use for comments in the
    *                              output.  This will be ignored for information
    *                              about search result entries.
+   * @param  includeAllValues     Indicates whether to include all values of a
+   *                              multivalued attribute.  If this is
+   *                              {@code true}, then a vertical bar (|) will be
+   *                              used to separate the values within each field.
    */
-  ColumnFormatterLDAPSearchOutputHandler(final LDAPSearch ldapSearch,
-                                         final OutputFormat outputFormat,
-                                         final List<String> requestedAttributes,
-                                         final int maxCommentWidth)
+  ColumnFormatterLDAPSearchOutputHandler(@NotNull final LDAPSearch ldapSearch,
+       @NotNull final OutputFormat outputFormat,
+       @NotNull final List<String> requestedAttributes,
+       final int maxCommentWidth,
+       final boolean includeAllValues)
   {
     this.ldapSearch = ldapSearch;
     this.maxCommentWidth = maxCommentWidth;
+    this.includeAllValues = includeAllValues;
 
     attributes = new String[requestedAttributes.size()];
     requestedAttributes.toArray(attributes);
@@ -145,21 +171,35 @@ final class ColumnFormatterLDAPSearchOutputHandler
    * {@inheritDoc}
    */
   @Override()
-  public void formatSearchResultEntry(final SearchResultEntry entry)
+  public void formatSearchResultEntry(@NotNull final SearchResultEntry entry)
   {
     columnValues[0] = entry.getDN();
 
     int i=1;
-    for (final String attribute : attributes)
+    for (final String attributeName : attributes)
     {
-      final String value = entry.getAttributeValue(attribute);
-      if (value == null)
+      final Attribute a = entry.getAttribute(attributeName);
+      if ((a ==  null) || (a.size() == 0))
       {
         columnValues[i] = "";
       }
+      else if (includeAllValues && (a.size() > 1))
+      {
+        final StringBuilder buffer = new StringBuilder();
+        for (final String v : a.getValues())
+        {
+          if (buffer.length() > 0)
+          {
+            buffer.append('|');
+          }
+          buffer.append(v);
+        }
+
+        columnValues[i] = buffer.toString();
+      }
       else
       {
-        columnValues[i] = value;
+        columnValues[i] = a.getValue();
       }
 
       i++;
@@ -174,7 +214,8 @@ final class ColumnFormatterLDAPSearchOutputHandler
    * {@inheritDoc}
    */
   @Override()
-  public void formatSearchResultReference(final SearchResultReference ref)
+  public void formatSearchResultReference(
+                   @NotNull final SearchResultReference ref)
   {
     formattedLines.clear();
     formattedLineBuffer.setLength(0);
@@ -196,7 +237,7 @@ final class ColumnFormatterLDAPSearchOutputHandler
    * {@inheritDoc}
    */
   @Override()
-  public void formatResult(final LDAPResult result)
+  public void formatResult(@NotNull final LDAPResult result)
   {
     formattedLines.clear();
     formattedLineBuffer.setLength(0);
@@ -217,8 +258,9 @@ final class ColumnFormatterLDAPSearchOutputHandler
    * {@inheritDoc}
    */
   @Override()
-  public void formatUnsolicitedNotification(final LDAPConnection connection,
-                                            final ExtendedResult notification)
+  public void formatUnsolicitedNotification(
+                   @NotNull final LDAPConnection connection,
+                   @NotNull final ExtendedResult notification)
   {
     formattedLines.clear();
     formattedLineBuffer.setLength(0);

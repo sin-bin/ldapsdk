@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,8 @@ import java.io.Serializable;
 
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -51,7 +68,7 @@ public final class BasicAsyncResultListener
 
 
   // The result that has been received for the associated operation.
-  private volatile LDAPResult ldapResult;
+  @Nullable private volatile LDAPResult ldapResult;
 
 
 
@@ -72,8 +89,8 @@ public final class BasicAsyncResultListener
    */
   @InternalUseOnly()
   @Override()
-  public void ldapResultReceived(final AsyncRequestID requestID,
-                                 final LDAPResult ldapResult)
+  public void ldapResultReceived(@NotNull final AsyncRequestID requestID,
+                                 @NotNull final LDAPResult ldapResult)
   {
     this.ldapResult = ldapResult;
   }
@@ -87,6 +104,7 @@ public final class BasicAsyncResultListener
    * @return  The result that has been received for the associated asynchronous
    *          operation, or {@code null} if no response has been received yet.
    */
+  @Nullable()
   public LDAPResult getLDAPResult()
   {
     return ldapResult;

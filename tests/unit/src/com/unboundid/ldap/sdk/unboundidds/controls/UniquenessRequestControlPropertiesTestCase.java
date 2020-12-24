@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -76,6 +91,10 @@ public final class UniquenessRequestControlPropertiesTestCase
     assertEquals(p.getPostCommitValidationLevel(),
          UniquenessValidationLevel.ALL_SUBTREE_VIEWS);
 
+    assertTrue(p.alertOnPostCommitConflictDetection());
+
+    assertFalse(p.createConflictPreventionDetailsEntry());
+
     assertNotNull(p.toString());
   }
 
@@ -117,6 +136,10 @@ public final class UniquenessRequestControlPropertiesTestCase
     assertNotNull(p.getPostCommitValidationLevel());
     assertEquals(p.getPostCommitValidationLevel(),
          UniquenessValidationLevel.ALL_SUBTREE_VIEWS);
+
+    assertTrue(p.alertOnPostCommitConflictDetection());
+
+    assertFalse(p.createConflictPreventionDetailsEntry());
 
     assertNotNull(p.toString());
   }
@@ -161,6 +184,10 @@ public final class UniquenessRequestControlPropertiesTestCase
     assertEquals(p.getPostCommitValidationLevel(),
          UniquenessValidationLevel.ALL_SUBTREE_VIEWS);
 
+    assertTrue(p.alertOnPostCommitConflictDetection());
+
+    assertFalse(p.createConflictPreventionDetailsEntry());
+
     assertNotNull(p.toString());
   }
 
@@ -203,6 +230,10 @@ public final class UniquenessRequestControlPropertiesTestCase
     assertEquals(p.getPostCommitValidationLevel(),
          UniquenessValidationLevel.ALL_SUBTREE_VIEWS);
 
+    assertTrue(p.alertOnPostCommitConflictDetection());
+
+    assertFalse(p.createConflictPreventionDetailsEntry());
+
     assertNotNull(p.toString());
   }
 
@@ -229,6 +260,8 @@ public final class UniquenessRequestControlPropertiesTestCase
     p.setPreCommitValidationLevel(UniquenessValidationLevel.ALL_BACKEND_SETS);
     p.setPostCommitValidationLevel(
          UniquenessValidationLevel.ALL_AVAILABLE_BACKEND_SERVERS);
+    p.setAlertOnPostCommitConflictDetection(false);
+    p.setCreateConflictPreventionDetailsEntry(true);
 
     assertNotNull(p.getAttributeTypes());
     assertFalse(p.getAttributeTypes().isEmpty());
@@ -255,6 +288,10 @@ public final class UniquenessRequestControlPropertiesTestCase
     assertNotNull(p.getPostCommitValidationLevel());
     assertEquals(p.getPostCommitValidationLevel(),
          UniquenessValidationLevel.ALL_AVAILABLE_BACKEND_SERVERS);
+
+    assertFalse(p.alertOnPostCommitConflictDetection());
+
+    assertTrue(p.createConflictPreventionDetailsEntry());
 
     assertNotNull(p.toString());
   }
@@ -296,6 +333,10 @@ public final class UniquenessRequestControlPropertiesTestCase
     assertNotNull(p.getPostCommitValidationLevel());
     assertEquals(p.getPostCommitValidationLevel(),
          UniquenessValidationLevel.ALL_SUBTREE_VIEWS);
+
+    assertTrue(p.alertOnPostCommitConflictDetection());
+
+    assertFalse(p.createConflictPreventionDetailsEntry());
 
     assertNotNull(p.toString());
 
@@ -645,5 +686,62 @@ public final class UniquenessRequestControlPropertiesTestCase
       assertEquals(p.getPostCommitValidationLevel(), l);
       assertNotNull(p.toString());
     }
+  }
+
+
+
+  /**
+   * Tests the behavior for the ability to get and set the flag used to
+   * determine whether to alert on un-prevented conflicts detected during
+   * post-commit processing.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testGetAndSetAlertOnPostCommitConflictDetection()
+         throws Exception
+  {
+    final UniquenessRequestControlProperties p =
+         new UniquenessRequestControlProperties(
+              Filter.createEqualityFilter("uid", "john.doe"));
+    assertNotNull(p.toString());
+
+    assertTrue(p.alertOnPostCommitConflictDetection());
+
+    p.setAlertOnPostCommitConflictDetection(false);
+    assertFalse(p.alertOnPostCommitConflictDetection());
+    assertNotNull(p.toString());
+
+    p.setAlertOnPostCommitConflictDetection(true);
+    assertTrue(p.alertOnPostCommitConflictDetection());
+    assertNotNull(p.toString());
+  }
+
+
+
+  /**
+   * Tests the behavior for the ability to get and set the flag used to
+   * determine whether to create a temporary conflict prevention details entry.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testGetAndSetCreateConflictPreventionDetailsEntry()
+         throws Exception
+  {
+    final UniquenessRequestControlProperties p =
+         new UniquenessRequestControlProperties(
+              Filter.createEqualityFilter("uid", "john.doe"));
+    assertNotNull(p.toString());
+
+    assertFalse(p.createConflictPreventionDetailsEntry());
+
+    p.setCreateConflictPreventionDetailsEntry(true);
+    assertTrue(p.createConflictPreventionDetailsEntry());
+    assertNotNull(p.toString());
+
+    p.setCreateConflictPreventionDetailsEntry(false);
+    assertFalse(p.createConflictPreventionDetailsEntry());
+    assertNotNull(p.toString());
   }
 }

@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,7 +49,13 @@ import com.unboundid.asn1.ASN1Element;
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.asn1.ASN1StreamReader;
 import com.unboundid.ldap.sdk.schema.Schema;
+import com.unboundid.ldap.sdk.unboundidds.jsonfilter.EqualsJSONObjectFilter;
+import com.unboundid.ldap.sdk.unboundidds.jsonfilter.JSONObjectFilter;
 import com.unboundid.util.LDAPSDKUsageException;
+import com.unboundid.util.json.JSONField;
+import com.unboundid.util.json.JSONObject;
+
+import static com.unboundid.util.StaticUtils.toUTF8String;
 
 
 
@@ -1070,7 +1091,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -1176,7 +1197,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -1282,7 +1303,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -1467,7 +1488,7 @@ public class FilterTestCase
     assertEquals(f.getSubInitialString(), "bar");
 
     assertNotNull(f.getSubInitialBytes());
-    assertEquals(new String(f.getSubInitialBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubInitialBytes()), "bar");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "bar");
@@ -1542,7 +1563,7 @@ public class FilterTestCase
     assertEquals(f.getSubInitialString(), "bar");
 
     assertNotNull(f.getSubInitialBytes());
-    assertEquals(new String(f.getSubInitialBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubInitialBytes()), "bar");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "bar");
@@ -1902,7 +1923,7 @@ public class FilterTestCase
     assertEquals(f.getSubFinalString(), "bar");
 
     assertNotNull(f.getSubFinalBytes());
-    assertEquals(new String(f.getSubFinalBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubFinalBytes()), "bar");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "bar");
@@ -1977,7 +1998,7 @@ public class FilterTestCase
     assertEquals(f.getSubFinalString(), "bar");
 
     assertNotNull(f.getSubFinalBytes());
-    assertEquals(new String(f.getSubFinalBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubFinalBytes()), "bar");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "bar");
@@ -2055,7 +2076,7 @@ public class FilterTestCase
     assertEquals(f.getSubInitialString(), "bar");
 
     assertNotNull(f.getSubInitialBytes());
-    assertEquals(new String(f.getSubInitialBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubInitialBytes()), "bar");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "bar");
@@ -2064,7 +2085,7 @@ public class FilterTestCase
     assertEquals(f.getSubFinalString(), "bat");
 
     assertNotNull(f.getSubFinalBytes());
-    assertEquals(new String(f.getSubFinalBytes()), "bat");
+    assertEquals(toUTF8String(f.getSubFinalBytes()), "bat");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "bat");
@@ -2138,7 +2159,7 @@ public class FilterTestCase
     assertEquals(f.getSubInitialString(), "a");
 
     assertNotNull(f.getSubInitialBytes());
-    assertEquals(new String(f.getSubInitialBytes()), "a");
+    assertEquals(toUTF8String(f.getSubInitialBytes()), "a");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "a");
@@ -2147,7 +2168,7 @@ public class FilterTestCase
     assertEquals(f.getSubFinalString(), "c");
 
     assertNotNull(f.getSubFinalBytes());
-    assertEquals(new String(f.getSubFinalBytes()), "c");
+    assertEquals(toUTF8String(f.getSubFinalBytes()), "c");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "c");
@@ -2267,7 +2288,7 @@ public class FilterTestCase
     assertEquals(f.getSubInitialString(), "bar");
 
     assertNotNull(f.getSubInitialBytes());
-    assertEquals(new String(f.getSubInitialBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubInitialBytes()), "bar");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "bar");
@@ -2343,7 +2364,7 @@ public class FilterTestCase
     assertEquals(f.getSubInitialString(), "bar");
 
     assertNotNull(f.getSubInitialBytes());
-    assertEquals(new String(f.getSubInitialBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubInitialBytes()), "bar");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "bar");
@@ -2705,7 +2726,7 @@ public class FilterTestCase
     assertEquals(f.getSubFinalString(), "bar");
 
     assertNotNull(f.getSubFinalBytes());
-    assertEquals(new String(f.getSubFinalBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubFinalBytes()), "bar");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "bar");
@@ -2781,7 +2802,7 @@ public class FilterTestCase
     assertEquals(f.getSubFinalString(), "bar");
 
     assertNotNull(f.getSubFinalBytes());
-    assertEquals(new String(f.getSubFinalBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubFinalBytes()), "bar");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "bar");
@@ -2861,7 +2882,7 @@ public class FilterTestCase
     assertEquals(f.getSubInitialString(), "bar");
 
     assertNotNull(f.getSubInitialBytes());
-    assertEquals(new String(f.getSubInitialBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubInitialBytes()), "bar");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "bar");
@@ -2870,7 +2891,7 @@ public class FilterTestCase
     assertEquals(f.getSubFinalString(), "bat");
 
     assertNotNull(f.getSubFinalBytes());
-    assertEquals(new String(f.getSubFinalBytes()), "bat");
+    assertEquals(toUTF8String(f.getSubFinalBytes()), "bat");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "bat");
@@ -2947,7 +2968,7 @@ public class FilterTestCase
     assertEquals(f.getSubInitialString(), "a");
 
     assertNotNull(f.getSubInitialBytes());
-    assertEquals(new String(f.getSubInitialBytes()), "a");
+    assertEquals(toUTF8String(f.getSubInitialBytes()), "a");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "a");
@@ -2956,7 +2977,7 @@ public class FilterTestCase
     assertEquals(f.getSubFinalString(), "c");
 
     assertNotNull(f.getSubFinalBytes());
-    assertEquals(new String(f.getSubFinalBytes()), "c");
+    assertEquals(toUTF8String(f.getSubFinalBytes()), "c");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "c");
@@ -3076,7 +3097,7 @@ public class FilterTestCase
     assertEquals(f.getSubInitialString(), "bar");
 
     assertNotNull(f.getSubInitialBytes());
-    assertEquals(new String(f.getSubInitialBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubInitialBytes()), "bar");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "bar");
@@ -3302,7 +3323,7 @@ public class FilterTestCase
     assertEquals(f.getSubFinalString(), "bar");
 
     assertNotNull(f.getSubFinalBytes());
-    assertEquals(new String(f.getSubFinalBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubFinalBytes()), "bar");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "bar");
@@ -3382,7 +3403,7 @@ public class FilterTestCase
     assertEquals(f.getSubInitialString(), "bar");
 
     assertNotNull(f.getSubInitialBytes());
-    assertEquals(new String(f.getSubInitialBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubInitialBytes()), "bar");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "bar");
@@ -3391,7 +3412,7 @@ public class FilterTestCase
     assertEquals(f.getSubFinalString(), "bat");
 
     assertNotNull(f.getSubFinalBytes());
-    assertEquals(new String(f.getSubFinalBytes()), "bat");
+    assertEquals(toUTF8String(f.getSubFinalBytes()), "bat");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "bat");
@@ -3473,7 +3494,7 @@ public class FilterTestCase
     assertEquals(f.getSubInitialString(), "a");
 
     assertNotNull(f.getSubInitialBytes());
-    assertEquals(new String(f.getSubInitialBytes()), "a");
+    assertEquals(toUTF8String(f.getSubInitialBytes()), "a");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "a");
@@ -3482,7 +3503,7 @@ public class FilterTestCase
     assertEquals(f.getSubFinalString(), "c");
 
     assertNotNull(f.getSubFinalBytes());
-    assertEquals(new String(f.getSubFinalBytes()), "c");
+    assertEquals(toUTF8String(f.getSubFinalBytes()), "c");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "c");
@@ -3617,7 +3638,7 @@ public class FilterTestCase
     assertEquals(f.getSubInitialString(), subInitial);
 
     assertNotNull(f.getSubInitialBytes());
-    assertEquals(new String(f.getSubInitialBytes(), "UTF-8"), subInitial);
+    assertEquals(toUTF8String(f.getSubInitialBytes()), subInitial);
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), subInitial);
@@ -3626,7 +3647,7 @@ public class FilterTestCase
     assertEquals(f.getSubFinalString(), subFinal);
 
     assertNotNull(f.getSubFinalBytes());
-    assertEquals(new String(f.getSubFinalBytes(), "UTF-8"), subFinal);
+    assertEquals(toUTF8String(f.getSubFinalBytes()), subFinal);
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), subFinal);
@@ -3701,7 +3722,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -3811,7 +3832,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -3918,7 +3939,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -4025,7 +4046,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), valueString);
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), valueString);
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), valueString);
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), valueString);
@@ -4110,7 +4131,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -4216,7 +4237,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -4323,7 +4344,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -4430,7 +4451,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), valueString);
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), valueString);
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), valueString);
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), valueString);
@@ -4599,7 +4620,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -4706,7 +4727,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -4813,7 +4834,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -4920,7 +4941,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), valueString);
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), valueString);
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), valueString);
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), valueString);
@@ -5006,7 +5027,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -5085,7 +5106,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -5164,7 +5185,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -5243,7 +5264,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -5322,7 +5343,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "baz");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "baz");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "baz");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "baz");
@@ -5403,7 +5424,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "baz");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "baz");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "baz");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "baz");
@@ -5510,7 +5531,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -5590,7 +5611,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -5670,7 +5691,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -5750,7 +5771,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -5830,7 +5851,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "baz");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "baz");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "baz");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "baz");
@@ -5912,7 +5933,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "baz");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "baz");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "baz");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "baz");
@@ -6023,7 +6044,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -6103,7 +6124,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -6183,7 +6204,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -6263,7 +6284,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -6343,7 +6364,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "baz");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "baz");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "baz");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "baz");
@@ -6425,7 +6446,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), "baz");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "baz");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "baz");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "baz");
@@ -6534,7 +6555,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), valueString);
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), valueString);
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), valueString);
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), valueString);
@@ -6617,7 +6638,7 @@ public class FilterTestCase
     assertEquals(f.getAssertionValue(), valueString);
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), valueString);
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), valueString);
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), valueString);
@@ -7723,6 +7744,74 @@ public class FilterTestCase
 
 
   /**
+   * Tests the behavior of the matchesEntry method when the provided filter uses
+   * the jsonObjectFilterExtensibleMatch matching rule.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testMatchesEntryJSONObjectExtensibleMatch()
+         throws Exception
+  {
+    final Entry entry = new Entry(
+         "dn: uid=test.user,ou=People,dc=example,dc=com",
+         "objectClass: top",
+         "objectClass: ubidPerson",
+         "uid: test.user",
+         "givenName: Test",
+         "sn: User",
+         "cn: Test User",
+         "ubidEmailJSON: not-a-valid-json-object",
+         "ubidEmailJSON: " +
+              new JSONObject(
+                   new JSONField("type", "personal"),
+                   new JSONField("value", "test.user@example.com"),
+                   new JSONField("primary", true)).toSingleLineString());
+
+    JSONObjectFilter jsonObjectFilter = new EqualsJSONObjectFilter(
+         "value", "test.user@example.com");
+    Filter filter = jsonObjectFilter.toLDAPFilter("ubidEmailJSON");
+    assertTrue(filter.matchesEntry(entry));
+
+    jsonObjectFilter = new EqualsJSONObjectFilter(
+         "value", "different.user@example.com");
+    filter = jsonObjectFilter.toLDAPFilter("ubidEmailJSON");
+    assertFalse(filter.matchesEntry(entry));
+
+    filter = jsonObjectFilter.toLDAPFilter("nonexistentAttribute");
+    assertFalse(filter.matchesEntry(entry));
+
+    try
+    {
+      filter = Filter.createExtensibleMatchFilter("ubidEmailJSON",
+           "1.3.6.1.4.1.30221.2.4.13", false, "not-a-valid-json-object");
+      filter.matchesEntry(entry);
+      fail("Expected an exception when trying to use a JSON object filter " +
+           "whose assertion value is not a valid JSON object");
+    }
+    catch (final LDAPException e)
+    {
+      assertEquals(e.getResultCode(), ResultCode.INAPPROPRIATE_MATCHING);
+    }
+
+    try
+    {
+      filter = Filter.createExtensibleMatchFilter("ubidEmailJSON",
+           "1.3.6.1.4.1.30221.2.4.13", false, "{}");
+      filter.matchesEntry(entry);
+      fail("Expected an exception when trying to use a JSON object filter " +
+           "whose assertion value is a valid JSON object but not a valid " +
+           "JSON object filter");
+    }
+    catch (final LDAPException e)
+    {
+      assertEquals(e.getResultCode(), ResultCode.INAPPROPRIATE_MATCHING);
+    }
+  }
+
+
+
+  /**
    * Tests the behavior of the simplifyFilter method, with and without filter
    * reordering.
    *
@@ -8039,14 +8128,43 @@ public class FilterTestCase
         "(&(eq1=1)(objectClass=ocEq1)(pr1=*)(objectClass=*)(si1=1*)(sa1=*1*)" +
              "(sf1=*1)(ge1>=1)(le1<=1)(am1~=1)(em1:=1)(eq2=2)" +
              "(objectClass=ocEq2)(pr2=*)(ss2=2*2*2)(!(eq3=3))(!(eq4=4))" +
-             "(!(|(objectClass=ocEq3)(eq5=5)))(|(&)(eq2=2)(objectClass=ocEq1)" +
-             "(objectClass=ocEq2)(pr1=*)(pr2=*)(objectClass=*)(ss2=2*2*2)))",
-        "(&(eq1=1)(eq2=2)(|(eq2=2)(objectClass=ocEq1)(objectClass=ocEq2)" +
-             "(pr1=*)(pr2=*)(ss2=2*2*2)(objectClass=*)(&))" +
-             "(objectClass=ocEq1)(objectClass=ocEq2)(am1~=1)(pr1=*)(pr2=*)" +
-             "(si1=1*)(ss2=2*2*2)(sa1=*1*)(sf1=*1)(ge1>=1)(le1<=1)(em1:=1)" +
-             "(objectClass=*)(!(eq3=3))(!(eq4=4))(!(|(eq5=5)" +
-             "(objectClass=ocEq3))))"
+             "(!(|(objectClass=ocEq3)(eq5=5))))",
+        "(&(eq1=1)(eq2=2)(objectClass=ocEq1)(objectClass=ocEq2)(am1~=1)" +
+             "(pr1=*)(pr2=*)(si1=1*)(ss2=2*2*2)(sa1=*1*)(sf1=*1)(ge1>=1)" +
+             "(le1<=1)(em1:=1)(objectClass=*)(!(eq3=3))(!(eq4=4))" +
+             "(!(|(eq5=5)(objectClass=ocEq3))))"
+      },
+
+      // AND that contains an LDAP false filter in the top level.
+      new String[]
+      {
+        "(&(objectClass=*)(|))",
+        "(|)",
+        "(|)"
+      },
+
+      // AND that contains an LDAP false filter in a nested level.
+      new String[]
+      {
+        "(&(objectClass=*)(&(objectClass=top)(|)))",
+        "(|)",
+        "(|)"
+      },
+
+      // OR that contains an LDAP true filter in the top level.
+      new String[]
+      {
+        "(|(objectClass=*)(&))",
+        "(&)",
+        "(&)"
+      },
+
+      // OR that contains an LDAP true filter in a nested level.
+      new String[]
+      {
+        "(|(objectClass=*)(|(objectClass=top)(&)))",
+        "(&)",
+        "(&)"
       },
     };
   }

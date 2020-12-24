@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -47,7 +62,7 @@ public final class ReverseComparator<T>
 
 
   // The comparator that will be used to make the underlying determination.
-  private final Comparator<T> baseComparator;
+  @Nullable private final Comparator<T> baseComparator;
 
 
 
@@ -70,7 +85,7 @@ public final class ReverseComparator<T>
    * @param  baseComparator  The base comparator that will be used to make the
    *                         determination.
    */
-  public ReverseComparator(final Comparator<T> baseComparator)
+  public ReverseComparator(@NotNull final Comparator<T> baseComparator)
   {
     this.baseComparator = baseComparator;
   }
@@ -91,7 +106,7 @@ public final class ReverseComparator<T>
    */
   @SuppressWarnings("unchecked")
   @Override()
-  public int compare(final T o1, final T o2)
+  public int compare(@NotNull final T o1, @NotNull final T o2)
   {
     final int baseValue;
     if (baseComparator == null)
@@ -150,7 +165,7 @@ public final class ReverseComparator<T>
    */
   @Override()
   @SuppressWarnings("unchecked")
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == null)
     {

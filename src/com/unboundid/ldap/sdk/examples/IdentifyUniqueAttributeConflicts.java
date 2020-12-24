@@ -1,9 +1,24 @@
 /*
- * Copyright 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2013-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -55,6 +70,8 @@ import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
 import com.unboundid.ldap.sdk.extensions.CancelExtendedRequest;
 import com.unboundid.util.Debug;
 import com.unboundid.util.LDAPCommandLineTool;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -108,7 +125,7 @@ public final class IdentifyUniqueAttributeConflicts
    * The unique attribute behavior value that indicates uniqueness should only
    * be ensured within each attribute.
    */
-  private static final String BEHAVIOR_UNIQUE_WITHIN_ATTR =
+  @NotNull private static final String BEHAVIOR_UNIQUE_WITHIN_ATTR =
        "unique-within-each-attribute";
 
 
@@ -118,8 +135,9 @@ public final class IdentifyUniqueAttributeConflicts
    * ensured across all attributes, and conflicts will not be allowed across
    * attributes in the same entry.
    */
-  private static final String BEHAVIOR_UNIQUE_ACROSS_ATTRS_INCLUDING_SAME =
-       "unique-across-all-attributes-including-in-same-entry";
+  @NotNull private static final String
+       BEHAVIOR_UNIQUE_ACROSS_ATTRS_INCLUDING_SAME =
+            "unique-across-all-attributes-including-in-same-entry";
 
 
 
@@ -128,8 +146,9 @@ public final class IdentifyUniqueAttributeConflicts
    * ensured across all attributes, except that conflicts will not be allowed
    * across attributes in the same entry.
    */
-  private static final String BEHAVIOR_UNIQUE_ACROSS_ATTRS_EXCEPT_SAME =
-       "unique-across-all-attributes-except-in-same-entry";
+  @NotNull private static final String
+       BEHAVIOR_UNIQUE_ACROSS_ATTRS_EXCEPT_SAME =
+            "unique-across-all-attributes-except-in-same-entry";
 
 
 
@@ -137,7 +156,7 @@ public final class IdentifyUniqueAttributeConflicts
    * The unique attribute behavior value that indicates uniqueness should be
    * ensured for the combination of attribute values.
    */
-  private static final String BEHAVIOR_UNIQUE_IN_COMBINATION =
+  @NotNull private static final String BEHAVIOR_UNIQUE_IN_COMBINATION =
        "unique-in-combination";
 
 
@@ -158,13 +177,13 @@ public final class IdentifyUniqueAttributeConflicts
 
   // Indicates whether a TIME_LIMIT_EXCEEDED result has been encountered during
   // processing.
-  private final AtomicBoolean timeLimitExceeded;
+  @NotNull private final AtomicBoolean timeLimitExceeded;
 
   // The number of entries examined so far.
-  private final AtomicLong entriesExamined;
+  @NotNull private final AtomicLong entriesExamined;
 
   // The number of conflicts found from a combination of attributes.
-  private final AtomicLong combinationConflictCounts;
+  @NotNull private final AtomicLong combinationConflictCounts;
 
   // Indicates whether cross-attribute uniqueness conflicts should be allowed
   // in the same entry.
@@ -179,37 +198,37 @@ public final class IdentifyUniqueAttributeConflicts
   private boolean uniqueInCombination;
 
   // The argument used to specify the base DNs to use for searches.
-  private DNArgument baseDNArgument;
+  @Nullable private DNArgument baseDNArgument;
 
   // The argument used to specify a filter indicating which entries to examine.
-  private FilterArgument filterArgument;
+  @Nullable private FilterArgument filterArgument;
 
   // The argument used to specify the search page size.
-  private IntegerArgument pageSizeArgument;
+  @Nullable private IntegerArgument pageSizeArgument;
 
   // The argument used to specify the time limit for the searches used to find
   // conflicting entries.
-  private IntegerArgument timeLimitArgument;
+  @Nullable private IntegerArgument timeLimitArgument;
 
   // The connection to use for finding unique attribute conflicts.
-  private LDAPConnectionPool findConflictsPool;
+  @Nullable private LDAPConnectionPool findConflictsPool;
 
   // A map with counts of unique attribute conflicts by attribute type.
-  private final Map<String, AtomicLong> conflictCounts;
+  @NotNull private final Map<String, AtomicLong> conflictCounts;
 
   // The names of the attributes for which to find uniqueness conflicts.
-  private String[] attributes;
+  @Nullable private String[] attributes;
 
   // The set of base DNs to use for the searches.
-  private String[] baseDNs;
+  @Nullable private String[] baseDNs;
 
   // The argument used to specify the attributes for which to find uniqueness
   // conflicts.
-  private StringArgument attributeArgument;
+  @Nullable private StringArgument attributeArgument;
 
   // The argument used to specify the behavior that should be exhibited if
   // multiple attributes are specified.
-  private StringArgument multipleAttributeBehaviorArgument;
+  @Nullable private StringArgument multipleAttributeBehaviorArgument;
 
 
   /**
@@ -218,7 +237,7 @@ public final class IdentifyUniqueAttributeConflicts
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String... args)
+  public static void main(@NotNull final String... args)
   {
     final ResultCode resultCode = main(args, System.out, System.err);
     if (resultCode != ResultCode.SUCCESS)
@@ -243,9 +262,10 @@ public final class IdentifyUniqueAttributeConflicts
    *
    * @return A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args,
-                                final OutputStream outStream,
-                                final OutputStream errStream)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream)
   {
     final IdentifyUniqueAttributeConflicts tool =
          new IdentifyUniqueAttributeConflicts(outStream, errStream);
@@ -264,8 +284,9 @@ public final class IdentifyUniqueAttributeConflicts
    *                    written.  It may be {@code null} if error messages
    *                    should be suppressed.
    */
-  public IdentifyUniqueAttributeConflicts(final OutputStream outStream,
-                                          final OutputStream errStream)
+  public IdentifyUniqueAttributeConflicts(
+              @Nullable final OutputStream outStream,
+              @Nullable final OutputStream errStream)
   {
     super(outStream, errStream);
 
@@ -297,6 +318,7 @@ public final class IdentifyUniqueAttributeConflicts
    * @return The name for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "identify-unique-attribute-conflicts";
@@ -310,6 +332,7 @@ public final class IdentifyUniqueAttributeConflicts
    * @return A human-readable description for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return "This tool may be used to identify unique attribute conflicts.  " +
@@ -327,6 +350,7 @@ public final class IdentifyUniqueAttributeConflicts
    *          available.
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -443,6 +467,24 @@ public final class IdentifyUniqueAttributeConflicts
 
 
   /**
+   * Indicates whether this tool should provide a command-line argument that
+   * allows for low-level SSL debugging.  If this returns {@code true}, then an
+   * "--enableSSLDebugging}" argument will be added that sets the
+   * "javax.net.debug" system property to "all" before attempting any
+   * communication.
+   *
+   * @return  {@code true} if this tool should offer an "--enableSSLDebugging"
+   *          argument, or {@code false} if not.
+   */
+  @Override()
+  protected boolean supportsSSLDebugging()
+  {
+    return true;
+  }
+
+
+
+  /**
    * Adds the arguments needed by this command-line tool to the provided
    * argument parser which are not related to connecting or authenticating to
    * the directory server.
@@ -452,7 +494,7 @@ public final class IdentifyUniqueAttributeConflicts
    * @throws ArgumentException  If a problem occurs while adding the arguments.
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
        throws ArgumentException
   {
     String description = "The search base DN(s) to use to find entries with " +
@@ -546,6 +588,7 @@ public final class IdentifyUniqueAttributeConflicts
    *          are created with this command line tool.
    */
   @Override()
+  @NotNull()
   public LDAPConnectionOptions getConnectionOptions()
   {
     final LDAPConnectionOptions options = new LDAPConnectionOptions();
@@ -565,6 +608,7 @@ public final class IdentifyUniqueAttributeConflicts
    *          successfully.
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     // Determine the multi-attribute behavior that we should exhibit.
@@ -845,6 +889,7 @@ public final class IdentifyUniqueAttributeConflicts
    * @return  A map that correlates the number of uniqueness conflicts found by
    *          attribute type.
    */
+  @NotNull()
   public Map<String,AtomicLong> getConflictCounts()
   {
     return Collections.unmodifiableMap(conflictCounts);
@@ -863,6 +908,7 @@ public final class IdentifyUniqueAttributeConflicts
    *          information is available.
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> exampleMap =
@@ -895,7 +941,8 @@ public final class IdentifyUniqueAttributeConflicts
    *                      server.
    */
   @Override()
-  public void searchEntryReturned(final SearchResultEntry searchEntry)
+  public void searchEntryReturned(
+                   @NotNull final SearchResultEntry searchEntry)
   {
     // If we have encountered a "time limit exceeded" error, then don't even
     // bother processing any more entries.
@@ -1108,7 +1155,8 @@ baseDNLoop:
    *
    * @param  entry  The entry to examine.
    */
-  private void checkForConflictsInCombination(final SearchResultEntry entry)
+  private void checkForConflictsInCombination(
+                    @NotNull final SearchResultEntry entry)
   {
     // Construct a filter used to identify conflicting entries as an AND for
     // each attribute.  Handle the possibility of multivalued attributes by
@@ -1261,7 +1309,7 @@ baseDNLoop:
    */
   @Override()
   public void searchReferenceReturned(
-                   final SearchResultReference searchReference)
+                   @NotNull final SearchResultReference searchReference)
   {
     // No implementation is required.  This tool will not follow referrals.
   }

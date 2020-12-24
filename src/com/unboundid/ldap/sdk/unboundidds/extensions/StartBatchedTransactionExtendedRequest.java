@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -36,6 +51,8 @@ import com.unboundid.ldap.sdk.unboundidds.controls.
             IntermediateClientRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.PasswordPolicyRequestControl;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -216,7 +233,7 @@ public final class StartBatchedTransactionExtendedRequest
    * The OID (1.3.6.1.4.1.30221.2.6.1) for the start batched transaction
    * extended request.
    */
-  public static final String START_BATCHED_TRANSACTION_REQUEST_OID =
+  @NotNull public static final String START_BATCHED_TRANSACTION_REQUEST_OID =
        "1.3.6.1.4.1.30221.2.6.1";
 
 
@@ -243,7 +260,8 @@ public final class StartBatchedTransactionExtendedRequest
    *
    * @param  controls  The set of controls to include in the request.
    */
-  public StartBatchedTransactionExtendedRequest(final Control[] controls)
+  public StartBatchedTransactionExtendedRequest(
+              @Nullable final Control[] controls)
   {
     super(START_BATCHED_TRANSACTION_REQUEST_OID, controls);
   }
@@ -260,7 +278,7 @@ public final class StartBatchedTransactionExtendedRequest
    * @throws  LDAPException  If a problem occurs while decoding the request.
    */
   public StartBatchedTransactionExtendedRequest(
-              final ExtendedRequest extendedRequest)
+              @NotNull final ExtendedRequest extendedRequest)
          throws LDAPException
   {
     super(extendedRequest);
@@ -278,8 +296,9 @@ public final class StartBatchedTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public StartBatchedTransactionExtendedResult process(
-              final LDAPConnection connection, final int depth)
+              @NotNull final LDAPConnection connection, final int depth)
          throws LDAPException
   {
     final ExtendedResult extendedResponse = super.process(connection, depth);
@@ -292,6 +311,7 @@ public final class StartBatchedTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public StartBatchedTransactionExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -303,8 +323,9 @@ public final class StartBatchedTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public StartBatchedTransactionExtendedRequest duplicate(
-              final Control[] controls)
+              @Nullable final Control[] controls)
   {
     final StartBatchedTransactionExtendedRequest r =
          new StartBatchedTransactionExtendedRequest(controls);
@@ -318,6 +339,7 @@ public final class StartBatchedTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_EXTENDED_REQUEST_NAME_START_BATCHED_TXN.get();
@@ -329,7 +351,7 @@ public final class StartBatchedTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("StartBatchedTransactionExtendedRequest(");
 

@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -86,9 +101,10 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateDomainEntry(final String name,
-                           final String parentDN,
-                           final Attribute... additionalAttributes)
+  @NotNull()
+  public static Entry generateDomainEntry(@NotNull final String name,
+                           @Nullable final String parentDN,
+                           @Nullable final Attribute... additionalAttributes)
   {
     return generateDomainEntry(name, parentDN,
          StaticUtils.toList(additionalAttributes));
@@ -115,9 +131,10 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateDomainEntry(final String name,
-                           final String parentDN,
-                           final Collection<Attribute> additionalAttributes)
+  @NotNull()
+  public static Entry generateDomainEntry(@NotNull final String name,
+              @Nullable final String parentDN,
+              @Nullable final Collection<Attribute> additionalAttributes)
   {
     return generateEntry("dc", name, parentDN, new String[] { "top", "domain" },
          additionalAttributes);
@@ -144,8 +161,10 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateOrgEntry(final String name, final String parentDN,
-                           final Attribute... additionalAttributes)
+  @NotNull()
+  public static Entry generateOrgEntry(@NotNull final String name,
+                           @Nullable final String parentDN,
+                           @Nullable final Attribute... additionalAttributes)
   {
     return generateOrgEntry(name, parentDN,
          StaticUtils.toList(additionalAttributes));
@@ -172,8 +191,10 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateOrgEntry(final String name, final String parentDN,
-                           final Collection<Attribute> additionalAttributes)
+  @NotNull()
+  public static Entry generateOrgEntry(@NotNull final String name,
+              @Nullable final String parentDN,
+              @Nullable final Collection<Attribute> additionalAttributes)
   {
     return generateEntry("o", name, parentDN,
          new String[] { "top", "organization" },
@@ -201,9 +222,10 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateOrgUnitEntry(final String name,
-                           final String parentDN,
-                           final Attribute... additionalAttributes)
+  @NotNull()
+  public static Entry generateOrgUnitEntry(@NotNull final String name,
+                           @Nullable final String parentDN,
+                           @Nullable final Attribute... additionalAttributes)
   {
     return generateOrgUnitEntry(name, parentDN,
          StaticUtils.toList(additionalAttributes));
@@ -230,9 +252,10 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateOrgUnitEntry(final String name,
-                           final String parentDN,
-                           final Collection<Attribute> additionalAttributes)
+  @NotNull()
+  public static Entry generateOrgUnitEntry(@NotNull final String name,
+              @Nullable final String parentDN,
+              @Nullable final Collection<Attribute> additionalAttributes)
   {
     return generateEntry("ou", name, parentDN,
          new String[] { "top", "organizationalUnit" },
@@ -261,9 +284,10 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateCountryEntry(final String name,
-                           final String parentDN,
-                           final Attribute... additionalAttributes)
+  @NotNull()
+  public static Entry generateCountryEntry(@NotNull final String name,
+                           @Nullable final String parentDN,
+                           @Nullable final Attribute... additionalAttributes)
   {
     return generateCountryEntry(name, parentDN,
          StaticUtils.toList(additionalAttributes));
@@ -291,9 +315,10 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateCountryEntry(final String name,
-                           final String parentDN,
-                           final Collection<Attribute> additionalAttributes)
+  @NotNull()
+  public static Entry generateCountryEntry(@NotNull final String name,
+              @Nullable final String parentDN,
+              @Nullable final Collection<Attribute> additionalAttributes)
   {
     return generateEntry("c", name, parentDN,
          new String[] { "top", "country" },
@@ -328,10 +353,11 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateUserEntry(final String uid, final String parentDN,
-                           final String firstName, final String lastName,
-                           final String password,
-                           final Attribute... additionalAttributes)
+  @NotNull()
+  public static Entry generateUserEntry(@NotNull final String uid,
+              @Nullable final String parentDN, @NotNull final String firstName,
+              @NotNull final String lastName, @Nullable final String password,
+              @Nullable final Attribute... additionalAttributes)
   {
     return generateUserEntry(uid, parentDN, firstName, lastName, password,
          StaticUtils.toList(additionalAttributes));
@@ -365,10 +391,13 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateUserEntry(final String uid, final String parentDN,
-                           final String firstName, final String lastName,
-                           final String password,
-                           final Collection<Attribute> additionalAttributes)
+  @NotNull()
+  public static Entry generateUserEntry(@NotNull final String uid,
+              @Nullable final String parentDN,
+              @NotNull final String firstName,
+              @NotNull final String lastName,
+              @Nullable final String password,
+              @Nullable final Collection<Attribute> additionalAttributes)
   {
     final List<Attribute> attrList = new ArrayList<>(4);
     attrList.add(new Attribute("givenName", firstName));
@@ -413,9 +442,10 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateGroupOfNamesEntry(final String name,
-                                                final String parentDN,
-                                                final String... memberDNs)
+  @NotNull()
+  public static Entry generateGroupOfNamesEntry(@NotNull final String name,
+                           @Nullable final String parentDN,
+                           @NotNull final String... memberDNs)
   {
     return generateGroupOfNamesEntry(name, parentDN,
          StaticUtils.toList(memberDNs));
@@ -438,9 +468,10 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateGroupOfNamesEntry(final String name,
-                           final String parentDN,
-                           final Collection<String> memberDNs)
+  @NotNull()
+  public static Entry generateGroupOfNamesEntry(@NotNull final String name,
+                           @Nullable final String parentDN,
+                           @NotNull final Collection<String> memberDNs)
   {
     final ArrayList<Attribute> attrList = new ArrayList<>(1);
     attrList.add(new Attribute("member",
@@ -467,9 +498,11 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateGroupOfUniqueNamesEntry(final String name,
-                                                      final String parentDN,
-                                                      final String... memberDNs)
+  @NotNull()
+  public static Entry generateGroupOfUniqueNamesEntry(
+                           @NotNull final String name,
+                           @Nullable final String parentDN,
+                           @NotNull final String... memberDNs)
   {
     return generateGroupOfUniqueNamesEntry(name, parentDN,
          StaticUtils.toList(memberDNs));
@@ -492,9 +525,11 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  public static Entry generateGroupOfUniqueNamesEntry(final String name,
-                           final String parentDN,
-                           final Collection<String> memberDNs)
+  @NotNull()
+  public static Entry generateGroupOfUniqueNamesEntry(
+                           @NotNull final String name,
+                           @Nullable final String parentDN,
+                           @NotNull final Collection<String> memberDNs)
   {
     final ArrayList<Attribute> attrList = new ArrayList<>(1);
     attrList.add(new Attribute("uniqueMember",
@@ -525,10 +560,12 @@ public final class LDAPTestUtils
    *
    * @return  The generated entry.
    */
-  private static Entry generateEntry(final String rdnAttr,
-                            final String rdnValue, final String parentDN,
-                            final String[] objectClasses,
-                            final Collection<Attribute> additionalAttributes)
+  @NotNull()
+  private static Entry generateEntry(@NotNull final String rdnAttr,
+               @NotNull final String rdnValue,
+               @Nullable final String parentDN,
+               @NotNull final String[] objectClasses,
+               @Nullable final Collection<Attribute> additionalAttributes)
   {
     final RDN rdn = new RDN(rdnAttr, rdnValue);
 
@@ -571,7 +608,8 @@ public final class LDAPTestUtils
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public static boolean entryExists(final LDAPInterface conn, final String dn)
+  public static boolean entryExists(@NotNull final LDAPInterface conn,
+                                    @NotNull final String dn)
          throws LDAPException
   {
     return (conn.getEntry(dn, "1.1") != null);
@@ -594,8 +632,9 @@ public final class LDAPTestUtils
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public static boolean entryExists(final LDAPInterface conn, final String dn,
-                                    final String filter)
+  public static boolean entryExists(@NotNull final LDAPInterface conn,
+                                    @NotNull final String dn,
+                                    @NotNull final String filter)
          throws LDAPException
   {
     try
@@ -635,7 +674,8 @@ public final class LDAPTestUtils
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public static boolean entryExists(final LDAPInterface conn, final Entry entry)
+  public static boolean entryExists(@NotNull final LDAPInterface conn,
+                                    @NotNull final Entry entry)
          throws LDAPException
   {
     final Collection<Attribute> attrs = entry.getAttributes();
@@ -682,8 +722,8 @@ public final class LDAPTestUtils
    *
    * @throws  AssertionError  If the target entry does not exist.
    */
-  public static void assertEntryExists(final LDAPInterface conn,
-                                       final String dn)
+  public static void assertEntryExists(@NotNull final LDAPInterface conn,
+                                       @NotNull final String dn)
          throws LDAPException, AssertionError
   {
     if (conn.getEntry(dn, "1.1") == null)
@@ -708,8 +748,9 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the target entry does not exist or does not
    *                          match the provided filter.
    */
-  public static void assertEntryExists(final LDAPInterface conn,
-                                       final String dn, final String filter)
+  public static void assertEntryExists(@NotNull final LDAPInterface conn,
+                                       @NotNull final String dn,
+                                       @NotNull final String filter)
          throws LDAPException, AssertionError
   {
     try
@@ -753,8 +794,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the target entry does not exist or does not
    *                          match the provided filter.
    */
-  public static void assertEntryExists(final LDAPInterface conn,
-                                       final Entry entry)
+  public static void assertEntryExists(@NotNull final LDAPInterface conn,
+                                       @NotNull final Entry entry)
          throws LDAPException, AssertionError
   {
     // First, try to make the determination with a single search.  Only if
@@ -828,8 +869,10 @@ public final class LDAPTestUtils
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public static List<String> getMissingEntryDNs(final LDAPInterface conn,
-                                                final String... dns)
+  @NotNull()
+  public static List<String> getMissingEntryDNs(
+                                  @NotNull final LDAPInterface conn,
+                                  @NotNull final String... dns)
          throws LDAPException
   {
     return getMissingEntryDNs(conn, StaticUtils.toList(dns));
@@ -851,8 +894,10 @@ public final class LDAPTestUtils
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public static List<String> getMissingEntryDNs(final LDAPInterface conn,
-                                                final Collection<String> dns)
+  @NotNull()
+  public static List<String> getMissingEntryDNs(
+                                  @NotNull final LDAPInterface conn,
+                                  @NotNull final Collection<String> dns)
          throws LDAPException
   {
     final List<String> missingDNs = new ArrayList<>(dns.size());
@@ -883,8 +928,8 @@ public final class LDAPTestUtils
    *
    * @throws  AssertionError  If any of the target entries does not exist.
    */
-  public static void assertEntriesExist(final LDAPInterface conn,
-                                        final String... dns)
+  public static void assertEntriesExist(@NotNull final LDAPInterface conn,
+                                        @NotNull final String... dns)
          throws LDAPException, AssertionError
   {
     assertEntriesExist(conn, StaticUtils.toList(dns));
@@ -905,8 +950,8 @@ public final class LDAPTestUtils
    *
    * @throws  AssertionError  If any of the target entries does not exist.
    */
-  public static void assertEntriesExist(final LDAPInterface conn,
-                                        final Collection<String> dns)
+  public static void assertEntriesExist(@NotNull final LDAPInterface conn,
+                                        @NotNull final Collection<String> dns)
          throws LDAPException, AssertionError
   {
     final List<String> missingDNs = getMissingEntryDNs(conn, dns);
@@ -944,9 +989,11 @@ public final class LDAPTestUtils
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public static List<String> getMissingAttributeNames(final LDAPInterface conn,
-                                  final String dn,
-                                  final String... attributeNames)
+  @Nullable()
+  public static List<String> getMissingAttributeNames(
+                                  @NotNull final LDAPInterface conn,
+                                  @NotNull final String dn,
+                                  @NotNull final String... attributeNames)
          throws LDAPException
   {
     return getMissingAttributeNames(conn, dn,
@@ -973,9 +1020,11 @@ public final class LDAPTestUtils
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public static List<String> getMissingAttributeNames(final LDAPInterface conn,
-                                  final String dn,
-                                  final Collection<String> attributeNames)
+  @Nullable()
+  public static List<String> getMissingAttributeNames(
+                     @NotNull final LDAPInterface conn,
+                     @NotNull final String dn,
+                     @NotNull final Collection<String> attributeNames)
          throws LDAPException
   {
     final List<String> missingAttrs = new ArrayList<>(attributeNames.size());
@@ -1028,9 +1077,10 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the target entry does not exist or does not
    *                          contain all of the specified attributes.
    */
-  public static void assertAttributeExists(final LDAPInterface conn,
-                                           final String dn,
-                                           final String... attributeNames)
+  public static void assertAttributeExists(
+                          @NotNull final LDAPInterface conn,
+                          @NotNull final String dn,
+                          @NotNull final String... attributeNames)
         throws LDAPException, AssertionError
   {
     assertAttributeExists(conn, dn, StaticUtils.toList(attributeNames));
@@ -1054,9 +1104,9 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the target entry does not exist or does not
    *                          contain all of the specified attributes.
    */
-  public static void assertAttributeExists(final LDAPInterface conn,
-                          final String dn,
-                          final Collection<String> attributeNames)
+  public static void assertAttributeExists(@NotNull final LDAPInterface conn,
+                          @NotNull final String dn,
+                          @NotNull final Collection<String> attributeNames)
         throws LDAPException, AssertionError
   {
     final List<String> missingAttrs =
@@ -1101,9 +1151,12 @@ public final class LDAPTestUtils
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public static List<String> getMissingAttributeValues(final LDAPInterface conn,
-                                  final String dn, final String attributeName,
-                                  final String... attributeValues)
+  @Nullable()
+  public static List<String> getMissingAttributeValues(
+                                  @NotNull final LDAPInterface conn,
+                                  @NotNull final String dn,
+                                  @NotNull final String attributeName,
+                                  @NotNull final String... attributeValues)
          throws LDAPException
   {
     return getMissingAttributeValues(conn, dn, attributeName,
@@ -1132,9 +1185,12 @@ public final class LDAPTestUtils
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public static List<String> getMissingAttributeValues(final LDAPInterface conn,
-                                  final String dn, final String attributeName,
-                                  final Collection<String> attributeValues)
+  @Nullable()
+  public static List<String> getMissingAttributeValues(
+                     @NotNull final LDAPInterface conn,
+                     @NotNull final String dn,
+                     @NotNull final String attributeName,
+                     @NotNull final Collection<String> attributeValues)
        throws LDAPException
   {
     final List<String> missingValues = new ArrayList<>(attributeValues.size());
@@ -1187,10 +1243,10 @@ public final class LDAPTestUtils
    *                          contain the specified attribute, or that attribute
    *                          does not have all of the specified values.
    */
-  public static void assertValueExists(final LDAPInterface conn,
-                                       final String dn,
-                                       final String attributeName,
-                                       final String... attributeValues)
+  public static void assertValueExists(@NotNull final LDAPInterface conn,
+                                       @NotNull final String dn,
+                                       @NotNull final String attributeName,
+                                       @NotNull final String... attributeValues)
         throws LDAPException, AssertionError
   {
     assertValueExists(conn, dn, attributeName,
@@ -1218,10 +1274,10 @@ public final class LDAPTestUtils
    *                          contain the specified attribute, or that attribute
    *                          does not have all of the specified values.
    */
-  public static void assertValueExists(final LDAPInterface conn,
-                                       final String dn,
-                                       final String attributeName,
-                                       final Collection<String> attributeValues)
+  public static void assertValueExists(@NotNull final LDAPInterface conn,
+                          @NotNull final String dn,
+                          @NotNull final String attributeName,
+                          @NotNull final Collection<String> attributeValues)
         throws LDAPException, AssertionError
   {
     final List<String> missingValues =
@@ -1268,8 +1324,8 @@ public final class LDAPTestUtils
    *
    * @throws  AssertionError  If the target entry is found in the server.
    */
-  public static void assertEntryMissing(final LDAPInterface conn,
-                                        final String dn)
+  public static void assertEntryMissing(@NotNull final LDAPInterface conn,
+                                        @NotNull final String dn)
          throws LDAPException, AssertionError
   {
     if (conn.getEntry(dn, "1.1") != null)
@@ -1296,9 +1352,9 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the target entry is missing from the server, or
    *                          if it contains any of the target attributes.
    */
-  public static void assertAttributeMissing(final LDAPInterface conn,
-                                            final String dn,
-                                            final String... attributeNames)
+  public static void assertAttributeMissing(@NotNull final LDAPInterface conn,
+                          @NotNull final String dn,
+                          @NotNull final String... attributeNames)
          throws LDAPException, AssertionError
   {
     assertAttributeMissing(conn, dn, StaticUtils.toList(attributeNames));
@@ -1322,9 +1378,9 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the target entry is missing from the server, or
    *                          if it contains any of the target attributes.
    */
-  public static void assertAttributeMissing(final LDAPInterface conn,
-                          final String dn,
-                          final Collection<String> attributeNames)
+  public static void assertAttributeMissing(@NotNull final LDAPInterface conn,
+                          @NotNull final String dn,
+                          @NotNull final Collection<String> attributeNames)
          throws LDAPException, AssertionError
   {
     final List<String> messages = new ArrayList<>(attributeNames.size());
@@ -1388,9 +1444,10 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the target entry is missing from the server, or
    *                          if it contains any of the target attribute values.
    */
-  public static void assertValueMissing(final LDAPInterface conn,
-                          final String dn, final String attributeName,
-                          final String... attributeValues)
+  public static void assertValueMissing(@NotNull final LDAPInterface conn,
+                          @NotNull final String dn,
+                          @NotNull final String attributeName,
+                          @NotNull final String... attributeValues)
          throws LDAPException, AssertionError
   {
     assertValueMissing(conn, dn, attributeName,
@@ -1416,9 +1473,10 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the target entry is missing from the server, or
    *                          if it contains any of the target attribute values.
    */
-  public static void assertValueMissing(final LDAPInterface conn,
-                          final String dn, final String attributeName,
-                          final Collection<String> attributeValues)
+  public static void assertValueMissing(@NotNull final LDAPInterface conn,
+                          @NotNull final String dn,
+                          @NotNull final String attributeName,
+                          @NotNull final Collection<String> attributeValues)
          throws LDAPException, AssertionError
   {
     final List<String> messages = new ArrayList<>(attributeValues.size());
@@ -1465,8 +1523,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the result code from the provided result did
    *                          not match any of the acceptable values.
    */
-  public static void assertResultCodeEquals(final LDAPResult result,
-                          final ResultCode... acceptableResultCodes)
+  public static void assertResultCodeEquals(@NotNull final LDAPResult result,
+                          @NotNull final ResultCode... acceptableResultCodes)
          throws AssertionError
   {
     for (final ResultCode rc : acceptableResultCodes)
@@ -1502,8 +1560,9 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the result code from the provided exception did
    *                          not match any of the acceptable values.
    */
-  public static void assertResultCodeEquals(final LDAPException exception,
-                          final ResultCode... acceptableResultCodes)
+  public static void assertResultCodeEquals(
+                          @NotNull final LDAPException exception,
+                          @NotNull final ResultCode... acceptableResultCodes)
          throws AssertionError
   {
     for (final ResultCode rc : acceptableResultCodes)
@@ -1545,9 +1604,11 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the result code returned by the server did not
    *                          match any acceptable values.
    */
-  public static LDAPResult assertResultCodeEquals(final LDAPConnection conn,
-                                final LDAPRequest request,
-                                final ResultCode... acceptableResultCodes)
+  @NotNull()
+  public static LDAPResult assertResultCodeEquals(
+                     @NotNull final LDAPConnection conn,
+                     @NotNull final LDAPRequest request,
+                     @NotNull final ResultCode... acceptableResultCodes)
          throws AssertionError
   {
     LDAPResult result;
@@ -1594,8 +1655,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the result code from the provided result
    *                          matched any of the unacceptable values.
    */
-  public static void assertResultCodeNot(final LDAPResult result,
-                          final ResultCode... unacceptableResultCodes)
+  public static void assertResultCodeNot(@NotNull final LDAPResult result,
+                          @NotNull final ResultCode... unacceptableResultCodes)
          throws AssertionError
   {
     for (final ResultCode rc : unacceptableResultCodes)
@@ -1631,8 +1692,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the result code from the provided result
    *                          matched any of the unacceptable values.
    */
-  public static void assertResultCodeNot(final LDAPException exception,
-                          final ResultCode... unacceptableResultCodes)
+  public static void assertResultCodeNot(@NotNull final LDAPException exception,
+                          @NotNull final ResultCode... unacceptableResultCodes)
          throws AssertionError
   {
     for (final ResultCode rc : unacceptableResultCodes)
@@ -1672,9 +1733,11 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the result code from the provided result
    *                          matched any of the unacceptable values.
    */
-  public static LDAPResult assertResultCodeNot(final LDAPConnection conn,
-                                final LDAPRequest request,
-                                final ResultCode... unacceptableResultCodes)
+  @NotNull()
+  public static LDAPResult assertResultCodeNot(
+                     @NotNull final LDAPConnection conn,
+                     @NotNull final LDAPRequest request,
+                     @NotNull final ResultCode... unacceptableResultCodes)
          throws AssertionError
   {
     LDAPResult result;
@@ -1720,7 +1783,7 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided result did not contain a matched
    *                          DN value.
    */
-  public static void assertContainsMatchedDN(final LDAPResult result)
+  public static void assertContainsMatchedDN(@NotNull final LDAPResult result)
          throws AssertionError
   {
     if (result.getMatchedDN() == null)
@@ -1740,7 +1803,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided exception did not contain a
    *                          matched DN value.
    */
-  public static void assertContainsMatchedDN(final LDAPException exception)
+  public static void assertContainsMatchedDN(
+                          @NotNull final LDAPException exception)
          throws AssertionError
   {
     if (exception.getMatchedDN() == null)
@@ -1760,7 +1824,7 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided result contained a matched DN
    *                          value.
    */
-  public static void assertMissingMatchedDN(final LDAPResult result)
+  public static void assertMissingMatchedDN(@NotNull final LDAPResult result)
          throws AssertionError
   {
     if (result.getMatchedDN() != null)
@@ -1781,7 +1845,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided exception contained a matched DN
    *                          value.
    */
-  public static void assertMissingMatchedDN(final LDAPException exception)
+  public static void assertMissingMatchedDN(
+                          @NotNull final LDAPException exception)
          throws AssertionError
   {
     if (exception.getMatchedDN() != null)
@@ -1808,8 +1873,8 @@ public final class LDAPTestUtils
    *                          matched DN, or if it had a matched DN that
    *                          differed from the expected value.
    */
-  public static void assertMatchedDNEquals(final LDAPResult result,
-                                           final String matchedDN)
+  public static void assertMatchedDNEquals(@NotNull final LDAPResult result,
+                                           @NotNull final String matchedDN)
          throws LDAPException, AssertionError
   {
     if (result.getMatchedDN() == null)
@@ -1843,8 +1908,9 @@ public final class LDAPTestUtils
    *                          matched DN, or if it had a matched DN that
    *                          differed from the expected value.
    */
-  public static void assertMatchedDNEquals(final LDAPException exception,
-                                           final String matchedDN)
+  public static void assertMatchedDNEquals(
+                          @NotNull final LDAPException exception,
+                          @NotNull final String matchedDN)
          throws LDAPException, AssertionError
   {
     if (exception.getMatchedDN() == null)
@@ -1873,7 +1939,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided result did not contain a
    *                          diagnostic message.
    */
-  public static void assertContainsDiagnosticMessage(final LDAPResult result)
+  public static void assertContainsDiagnosticMessage(
+                          @NotNull final LDAPResult result)
          throws AssertionError
   {
     if (result.getDiagnosticMessage() == null)
@@ -1894,7 +1961,7 @@ public final class LDAPTestUtils
    *                          diagnostic message.
    */
   public static void assertContainsDiagnosticMessage(
-                          final LDAPException exception)
+                          @NotNull final LDAPException exception)
          throws AssertionError
   {
     if (exception.getDiagnosticMessage() == null)
@@ -1915,7 +1982,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided result contained a diagnostic
    *                          message.
    */
-  public static void assertMissingDiagnosticMessage(final LDAPResult result)
+  public static void assertMissingDiagnosticMessage(
+                          @NotNull final LDAPResult result)
          throws AssertionError
   {
     if (result.getDiagnosticMessage() != null)
@@ -1937,7 +2005,7 @@ public final class LDAPTestUtils
    *                          message.
    */
   public static void assertMissingDiagnosticMessage(
-                          final LDAPException exception)
+                          @NotNull final LDAPException exception)
          throws AssertionError
   {
     if (exception.getDiagnosticMessage() != null)
@@ -1962,8 +2030,9 @@ public final class LDAPTestUtils
    *                          diagnostic message, or if it had a diagnostic
    *                          message that differed from the expected value.
    */
-  public static void assertDiagnosticMessageEquals(final LDAPResult result,
-                          final String diagnosticMessage)
+  public static void assertDiagnosticMessageEquals(
+                          @NotNull final LDAPResult result,
+                          @NotNull final String diagnosticMessage)
          throws AssertionError
   {
     if (result.getDiagnosticMessage() == null)
@@ -1996,8 +2065,8 @@ public final class LDAPTestUtils
    *                          message that differed from the expected value.
    */
   public static void assertDiagnosticMessageEquals(
-                          final LDAPException exception,
-                          final String diagnosticMessage)
+                          @NotNull final LDAPException exception,
+                          @NotNull final String diagnosticMessage)
          throws AssertionError
   {
     if (exception.getDiagnosticMessage() == null)
@@ -2025,7 +2094,7 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided result does not have any referral
    *                          URLs.
    */
-  public static void assertHasReferral(final LDAPResult result)
+  public static void assertHasReferral(@NotNull final LDAPResult result)
          throws AssertionError
   {
     final String[] referralURLs = result.getReferralURLs();
@@ -2046,7 +2115,7 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided exception does not have any
    *                          referral URLs.
    */
-  public static void assertHasReferral(final LDAPException exception)
+  public static void assertHasReferral(@NotNull final LDAPException exception)
          throws AssertionError
   {
     final String[] referralURLs = exception.getReferralURLs();
@@ -2067,7 +2136,7 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided result has one or more referral
    *                          URLs.
    */
-  public static void assertMissingReferral(final LDAPResult result)
+  public static void assertMissingReferral(@NotNull final LDAPResult result)
          throws AssertionError
   {
     final String[] referralURLs = result.getReferralURLs();
@@ -2088,7 +2157,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided exception has one or more referral
    *                          URLs.
    */
-  public static void assertMissingReferral(final LDAPException exception)
+  public static void assertMissingReferral(
+                          @NotNull final LDAPException exception)
          throws AssertionError
   {
     final String[] referralURLs = exception.getReferralURLs();
@@ -2114,8 +2184,9 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided LDAP result does not include any
    *                          control with the specified OID.
    */
-  public static Control assertHasControl(final LDAPResult result,
-                                         final String oid)
+  @NotNull()
+  public static Control assertHasControl(@NotNull final LDAPResult result,
+                                         @NotNull final String oid)
          throws AssertionError
   {
     for (final Control c : result.getResponseControls())
@@ -2145,8 +2216,9 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided LDAP exception does not include
    *                          any control with the specified OID.
    */
-  public static Control assertHasControl(final LDAPException exception,
-                                         final String oid)
+  @NotNull()
+  public static Control assertHasControl(@NotNull final LDAPException exception,
+                                         @NotNull final String oid)
          throws AssertionError
   {
     for (final Control c : exception.getResponseControls())
@@ -2176,8 +2248,9 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided search result entry does not
    *                          include any control with the specified OID.
    */
-  public static Control assertHasControl(final SearchResultEntry entry,
-                                         final String oid)
+  @NotNull()
+  public static Control assertHasControl(@NotNull final SearchResultEntry entry,
+                                         @NotNull final String oid)
          throws AssertionError
   {
     for (final Control c : entry.getControls())
@@ -2207,8 +2280,10 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided search result reference does not
    *                          include any control with the specified OID.
    */
-  public static Control assertHasControl(final SearchResultReference reference,
-                                         final String oid)
+  @NotNull()
+  public static Control assertHasControl(
+                             @NotNull final SearchResultReference reference,
+                             @NotNull final String oid)
          throws AssertionError
   {
     for (final Control c : reference.getControls())
@@ -2236,8 +2311,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided LDAP result includes any control
    *                          with the specified OID.
    */
-  public static void assertMissingControl(final LDAPResult result,
-                                          final String oid)
+  public static void assertMissingControl(@NotNull final LDAPResult result,
+                                          @NotNull final String oid)
          throws AssertionError
   {
     for (final Control c : result.getResponseControls())
@@ -2263,8 +2338,9 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided LDAP exception includes any
    *                          control with the specified OID.
    */
-  public static void assertMissingControl(final LDAPException exception,
-                                          final String oid)
+  public static void assertMissingControl(
+                          @NotNull final LDAPException exception,
+                          @NotNull final String oid)
          throws AssertionError
   {
     for (final Control c : exception.getResponseControls())
@@ -2290,8 +2366,9 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided search result entry includes any
    *                          control with the specified OID.
    */
-  public static void assertMissingControl(final SearchResultEntry entry,
-                                          final String oid)
+  public static void assertMissingControl(
+                          @NotNull final SearchResultEntry entry,
+                          @NotNull final String oid)
          throws AssertionError
   {
     for (final Control c : entry.getControls())
@@ -2317,8 +2394,9 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided search result reference includes
    *                          any control with the specified OID.
    */
-  public static void assertMissingControl(final SearchResultReference reference,
-                                          final String oid)
+  public static void assertMissingControl(
+                          @NotNull final SearchResultReference reference,
+                          @NotNull final String oid)
          throws AssertionError
   {
     for (final Control c : reference.getControls())
@@ -2344,7 +2422,7 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided search result indicates that no
    *                          entries were returned.
    */
-  public static int assertEntryReturned(final SearchResult result)
+  public static int assertEntryReturned(@NotNull final SearchResult result)
          throws AssertionError
   {
     if (result.getEntryCount() == 0)
@@ -2369,7 +2447,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided search exception indicates that no
    *                          entries were returned.
    */
-  public static int assertEntryReturned(final LDAPSearchException exception)
+  public static int assertEntryReturned(
+                         @NotNull final LDAPSearchException exception)
          throws AssertionError
   {
     if (exception.getEntryCount() == 0)
@@ -2401,8 +2480,10 @@ public final class LDAPTestUtils
    *                          result listener was used which makes the
    *                          determination impossible.
    */
-  public static SearchResultEntry assertEntryReturned(final SearchResult result,
-                                                      final String dn)
+  @NotNull()
+  public static SearchResultEntry assertEntryReturned(
+                                       @NotNull final SearchResult result,
+                                       @NotNull final String dn)
          throws LDAPException, AssertionError
   {
     final DN parsedDN = new DN(dn);
@@ -2443,9 +2524,10 @@ public final class LDAPTestUtils
    *                          result listener was used which makes the
    *                          determination impossible.
    */
+  @NotNull()
   public static SearchResultEntry assertEntryReturned(
-                                       final LDAPSearchException exception,
-                                       final String dn)
+                     @NotNull final LDAPSearchException exception,
+                     @NotNull final String dn)
          throws LDAPException, AssertionError
   {
     final DN parsedDN = new DN(dn);
@@ -2477,7 +2559,7 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided search result indicates that one
    *                          or more entries were returned.
    */
-  public static void assertNoEntriesReturned(final SearchResult result)
+  public static void assertNoEntriesReturned(@NotNull final SearchResult result)
          throws AssertionError
   {
     if (result.getEntryCount() > 0)
@@ -2499,7 +2581,7 @@ public final class LDAPTestUtils
    *                          one or more entries were returned.
    */
   public static void assertNoEntriesReturned(
-                          final LDAPSearchException exception)
+                          @NotNull final LDAPSearchException exception)
          throws AssertionError
   {
     if (exception.getEntryCount() > 0)
@@ -2522,8 +2604,9 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the number of entries returned does not match
    *                          the expected value.
    */
-  public static void assertEntriesReturnedEquals(final SearchResult result,
-                                                 final int expectedEntryCount)
+  public static void assertEntriesReturnedEquals(
+                          @NotNull final SearchResult result,
+                          final int expectedEntryCount)
          throws AssertionError
   {
     if (result.getEntryCount() != expectedEntryCount)
@@ -2557,7 +2640,7 @@ public final class LDAPTestUtils
    *                          the expected value.
    */
   public static void assertEntriesReturnedEquals(
-                          final LDAPSearchException exception,
+                          @NotNull final LDAPSearchException exception,
                           final int expectedEntryCount)
          throws AssertionError
   {
@@ -2594,7 +2677,7 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided search result indicates that no
    *                          references were returned.
    */
-  public static int assertReferenceReturned(final SearchResult result)
+  public static int assertReferenceReturned(@NotNull final SearchResult result)
          throws AssertionError
   {
     if (result.getReferenceCount() == 0)
@@ -2619,7 +2702,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided search exception indicates that no
    *                          references were returned.
    */
-  public static int assertReferenceReturned(final LDAPSearchException exception)
+  public static int assertReferenceReturned(
+                         @NotNull final LDAPSearchException exception)
          throws AssertionError
   {
     if (exception.getReferenceCount() == 0)
@@ -2642,7 +2726,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the provided search result indicates that one
    *                          or more references were returned.
    */
-  public static void assertNoReferencesReturned(final SearchResult result)
+  public static void assertNoReferencesReturned(
+                          @NotNull final SearchResult result)
          throws AssertionError
   {
     if (result.getReferenceCount() > 0)
@@ -2664,7 +2749,7 @@ public final class LDAPTestUtils
    *                          one or more references were returned.
    */
   public static void assertNoReferencesReturned(
-                          final LDAPSearchException exception)
+                          @NotNull final LDAPSearchException exception)
          throws AssertionError
   {
     if (exception.getReferenceCount() > 0)
@@ -2688,7 +2773,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If the number of references returned does not
    *                          match the expected value.
    */
-  public static void assertReferencesReturnedEquals(final SearchResult result,
+  public static void assertReferencesReturnedEquals(
+                          @NotNull final SearchResult result,
                           final int expectedReferenceCount)
          throws AssertionError
   {
@@ -2724,7 +2810,7 @@ public final class LDAPTestUtils
    *                          match the expected value.
    */
   public static void assertReferencesReturnedEquals(
-                          final LDAPSearchException exception,
+                          @NotNull final LDAPSearchException exception,
                           final int expectedReferenceCount)
          throws AssertionError
   {
@@ -2759,7 +2845,8 @@ public final class LDAPTestUtils
    * @throws  AssertionError  If either string doesn't represent a valid DN, or
    *                          if they do not represent the same DN.
    */
-  public static void assertDNsEqual(final String s1, final String s2)
+  public static void assertDNsEqual(@NotNull final String s1,
+                                    @NotNull final String s2)
          throws AssertionError
   {
     final DN dn1;

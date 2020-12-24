@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,22 +46,31 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.net.ssl.X509TrustManager;
 
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
+import com.unboundid.util.ssl.cert.AuthorityKeyIdentifierExtension;
+import com.unboundid.util.ssl.cert.SubjectKeyIdentifierExtension;
+import com.unboundid.util.ssl.cert.X509CertificateExtension;
 
 import static com.unboundid.util.ssl.SSLMessages.*;
 
@@ -68,8 +92,8 @@ public final class JVMDefaultTrustManager
   /**
    * A reference to the singleton instance of this class.
    */
-  private static final AtomicReference<JVMDefaultTrustManager> INSTANCE =
-       new AtomicReference<>();
+  @NotNull private static final AtomicReference<JVMDefaultTrustManager>
+       INSTANCE = new AtomicReference<>();
 
 
 
@@ -77,14 +101,14 @@ public final class JVMDefaultTrustManager
    * The name of the system property that specifies the path to the Java
    * installation for the currently-running JVM.
    */
-  private static final String PROPERTY_JAVA_HOME = "java.home";
+  @NotNull private static final String PROPERTY_JAVA_HOME = "java.home";
 
 
 
   /**
    * A set of alternate file extensions that may be used by Java keystores.
    */
-  static final String[] FILE_EXTENSIONS  =
+  @NotNull static final String[] FILE_EXTENSIONS  =
   {
     ".jks",
     ".p12",
@@ -97,7 +121,7 @@ public final class JVMDefaultTrustManager
   /**
    * A pre-allocated empty certificate array.
    */
-  private static final X509Certificate[] NO_CERTIFICATES =
+  @NotNull private static final X509Certificate[] NO_CERTIFICATES =
        new X509Certificate[0];
 
 
@@ -111,16 +135,21 @@ public final class JVMDefaultTrustManager
 
   // A certificate exception that should be thrown for any attempt to use this
   // trust store.
-  private final CertificateException certificateException;
+  @Nullable private final CertificateException certificateException;
 
   // The file from which they keystore was loaded.
-  private final File caCertsFile;
+  @Nullable private final File caCertsFile;
 
   // The keystore instance containing the JVM's default set of trusted issuers.
-  private final KeyStore keystore;
+  @Nullable private final KeyStore keystore;
 
   // A map of the certificates in the keystore, indexed by signature.
-  private final Map<ASN1OctetString,X509Certificate> trustedCertificateMap;
+  @NotNull private final Map<ASN1OctetString,X509Certificate>
+       trustedCertsBySignature;
+
+  // A map of the certificates in the keystore, indexed by key ID.
+  @NotNull private final Map<ASN1OctetString,
+       com.unboundid.util.ssl.cert.X509Certificate> trustedCertsByKeyID;
 
 
 
@@ -130,10 +159,11 @@ public final class JVMDefaultTrustManager
    * @param  javaHomePropertyName  The name of the system property that should
    *                               specify the path to the Java installation.
    */
-  JVMDefaultTrustManager(final String javaHomePropertyName)
+  JVMDefaultTrustManager(@NotNull final String javaHomePropertyName)
   {
     // Determine the path to the root of the Java installation.
-    final String javaHomePath = System.getProperty(javaHomePropertyName);
+    final String javaHomePath =
+         StaticUtils.getSystemProperty(javaHomePropertyName);
     if (javaHomePath == null)
     {
       certificateException = new CertificateException(
@@ -141,7 +171,8 @@ public final class JVMDefaultTrustManager
                 javaHomePropertyName));
       caCertsFile = null;
       keystore = null;
-      trustedCertificateMap = Collections.emptyMap();
+      trustedCertsBySignature = Collections.emptyMap();
+      trustedCertsByKeyID = Collections.emptyMap();
       return;
     }
 
@@ -153,7 +184,8 @@ public final class JVMDefaultTrustManager
                 javaHomePropertyName, javaHomePath));
       caCertsFile = null;
       keystore = null;
-      trustedCertificateMap = Collections.emptyMap();
+      trustedCertsBySignature = Collections.emptyMap();
+      trustedCertsByKeyID = Collections.emptyMap();
       return;
     }
 
@@ -171,7 +203,8 @@ public final class JVMDefaultTrustManager
       certificateException = ce;
       caCertsFile = null;
       keystore = null;
-      trustedCertificateMap = Collections.emptyMap();
+      trustedCertsBySignature = Collections.emptyMap();
+      trustedCertsByKeyID = Collections.emptyMap();
       return;
     }
 
@@ -181,7 +214,10 @@ public final class JVMDefaultTrustManager
 
     // Iterate through the certificates in the keystore and load them into a
     // map for faster and more reliable access.
-    final LinkedHashMap<ASN1OctetString,X509Certificate> certificateMap =
+    final LinkedHashMap<ASN1OctetString,X509Certificate> certsBySignature =
+         new LinkedHashMap<>(StaticUtils.computeMapCapacity(50));
+    final LinkedHashMap<ASN1OctetString,
+         com.unboundid.util.ssl.cert.X509Certificate> certsByKeyID =
          new LinkedHashMap<>(StaticUtils.computeMapCapacity(50));
     try
     {
@@ -196,8 +232,31 @@ public final class JVMDefaultTrustManager
                (X509Certificate) keystore.getCertificate(alias);
           if (certificate != null)
           {
-            certificateMap.put(new ASN1OctetString(certificate.getSignature()),
+            certsBySignature.put(
+                 new ASN1OctetString(certificate.getSignature()),
                  certificate);
+
+            try
+            {
+              final com.unboundid.util.ssl.cert.X509Certificate c =
+                   new com.unboundid.util.ssl.cert.X509Certificate(
+                        certificate.getEncoded());
+              for (final X509CertificateExtension e : c.getExtensions())
+              {
+                if (e instanceof SubjectKeyIdentifierExtension)
+                {
+                  final SubjectKeyIdentifierExtension skie =
+                       (SubjectKeyIdentifierExtension) e;
+                  certsByKeyID.put(
+                       new ASN1OctetString(skie.getKeyIdentifier().getValue()),
+                       c);
+                }
+              }
+            }
+            catch (final Exception e)
+            {
+              Debug.debugException(e);
+            }
           }
         }
         catch (final Exception e)
@@ -214,11 +273,13 @@ public final class JVMDefaultTrustManager
                 caCertsFile.getAbsolutePath(),
                 StaticUtils.getExceptionMessage(e)),
            e);
-      trustedCertificateMap = Collections.emptyMap();
+      trustedCertsBySignature = Collections.emptyMap();
+      trustedCertsByKeyID = Collections.emptyMap();
       return;
     }
 
-    trustedCertificateMap = Collections.unmodifiableMap(certificateMap);
+    trustedCertsBySignature = Collections.unmodifiableMap(certsBySignature);
+    trustedCertsByKeyID = Collections.unmodifiableMap(certsByKeyID);
     certificateException = null;
   }
 
@@ -229,6 +290,7 @@ public final class JVMDefaultTrustManager
    *
    * @return  The singleton instance of this trust manager.
    */
+  @NotNull()
   public static JVMDefaultTrustManager getInstance()
   {
     final JVMDefaultTrustManager existingInstance = INSTANCE.get();
@@ -259,6 +321,7 @@ public final class JVMDefaultTrustManager
    * @throws  CertificateException  If a problem was encountered while
    *                                initializing this trust manager.
    */
+  @NotNull()
   KeyStore getKeyStore()
            throws CertificateException
   {
@@ -282,6 +345,7 @@ public final class JVMDefaultTrustManager
    * @throws  CertificateException  If a problem was encountered while
    *                                initializing this trust manager.
    */
+  @NotNull()
   public File getCACertsFile()
          throws CertificateException
   {
@@ -303,6 +367,7 @@ public final class JVMDefaultTrustManager
    * @throws  CertificateException  If a problem was encountered while
    *                                initializing this trust manager.
    */
+  @NotNull()
   public Collection<X509Certificate> getTrustedIssuerCertificates()
          throws CertificateException
   {
@@ -311,7 +376,7 @@ public final class JVMDefaultTrustManager
       throw certificateException;
     }
 
-    return trustedCertificateMap.values();
+    return trustedCertsBySignature.values();
   }
 
 
@@ -328,8 +393,8 @@ public final class JVMDefaultTrustManager
    *                                should not be trusted.
    */
   @Override()
-  public void checkClientTrusted(final X509Certificate[] chain,
-                                 final String authType)
+  public void checkClientTrusted(@NotNull final X509Certificate[] chain,
+                                 @NotNull final String authType)
          throws CertificateException
   {
     checkTrusted(chain);
@@ -349,8 +414,8 @@ public final class JVMDefaultTrustManager
    *                                should not be trusted.
    */
   @Override()
-  public void checkServerTrusted(final X509Certificate[] chain,
-                                 final String authType)
+  public void checkServerTrusted(@NotNull final X509Certificate[] chain,
+                                 @NotNull final String authType)
          throws CertificateException
   {
     checkTrusted(chain);
@@ -366,6 +431,7 @@ public final class JVMDefaultTrustManager
    *          initializing this trust manager.
    */
   @Override()
+  @NotNull()
   public X509Certificate[] getAcceptedIssuers()
   {
     if (certificateException != null)
@@ -374,8 +440,8 @@ public final class JVMDefaultTrustManager
     }
 
     final X509Certificate[] acceptedIssuers =
-         new X509Certificate[trustedCertificateMap.size()];
-    return trustedCertificateMap.values().toArray(acceptedIssuers);
+         new X509Certificate[trustedCertsBySignature.size()];
+    return trustedCertsBySignature.values().toArray(acceptedIssuers);
   }
 
 
@@ -392,8 +458,9 @@ public final class JVMDefaultTrustManager
    * @throws  CertificateException  If the keystore could not be found or
    *                                loaded.
    */
+  @NotNull()
   private static ObjectPair<KeyStore,File> getJVMDefaultKeyStore(
-                                                final File javaHomeDirectory)
+                      @NotNull final File javaHomeDirectory)
           throws CertificateException
   {
     final File libSecurityCACerts = StaticUtils.constructPath(javaHomeDirectory,
@@ -485,9 +552,10 @@ public final class JVMDefaultTrustManager
    * @return  The first valid keystore found that meets all the necessary
    *          criteria, or {@code null} if no such keystore could be found.
    */
+  @Nullable()
   private static ObjectPair<KeyStore,File> searchForKeyStore(
-                      final File directory,
-                      final Map<File,CertificateException> exceptions)
+                      @NotNull final File directory,
+                      @NotNull final Map<File,CertificateException> exceptions)
   {
 filesInDirectoryLoop:
     for (final File f : directory.listFiles())
@@ -554,7 +622,8 @@ filesInDirectoryLoop:
    * @throws  CertificateException  If a problem occurs while trying to load the
    *
    */
-  private static KeyStore loadKeyStore(final File f)
+  @Nullable()
+  private static KeyStore loadKeyStore(@NotNull final File f)
           throws CertificateException
   {
     if ((! f.exists()) || (! f.isFile()))
@@ -623,7 +692,7 @@ filesInDirectoryLoop:
    * @throws  CertificateException  If the provided certificate chain should not
    *                                be considered trusted.
    */
-  void checkTrusted(final X509Certificate[] chain)
+  void checkTrusted(@NotNull final X509Certificate[] chain)
        throws CertificateException
   {
     if (certificateException != null)
@@ -637,33 +706,38 @@ filesInDirectoryLoop:
            ERR_JVM_DEFAULT_TRUST_MANAGER_NO_CERTS_IN_CHAIN.get());
     }
 
+
+    // It is possible that the chain could rely on cross-signed certificates,
+    // and that we need to use a different path than the one presented in the
+    // provided chain.  This could happen if the presented chain relies includes
+    // an issuer certificate that is expired, but the JVM-default trust store
+    // includes a non-expired alternate version of that issuer certificate (with
+    // the same public key, but signed by a different issuer).  Check for that,
+    // which will also involve checking validity dates for certificates in that
+    // chain.  If the chain we get back is different from the one that was
+    // provided to this method, then we should not need to perform any further
+    // validation.
+    final X509Certificate[] chainToValidate = getChainToValidate(chain);
+    if (chainToValidate != chain)
+    {
+      return;
+    }
+
+
     boolean foundIssuer = false;
     final Date currentTime = new Date();
-    for (final X509Certificate cert : chain)
+    for (final X509Certificate cert : chainToValidate)
     {
-      // Make sure that the certificate is currently within its validity window.
-      final Date notBefore = cert.getNotBefore();
-      if (currentTime.before(notBefore))
-      {
-        throw new CertificateNotYetValidException(
-             ERR_JVM_DEFAULT_TRUST_MANAGER_CERT_NOT_YET_VALID.get(
-                  chainToString(chain), String.valueOf(cert.getSubjectDN()),
-                  String.valueOf(notBefore)));
-      }
-
-      final Date notAfter = cert.getNotAfter();
-      if (currentTime.after(notAfter))
-      {
-        throw new CertificateExpiredException(
-             ERR_JVM_DEFAULT_TRUST_MANAGER_CERT_EXPIRED.get(
-                  chainToString(chain),
-                  String.valueOf(cert.getSubjectDN()),
-                  String.valueOf(notAfter)));
-      }
-
       final ASN1OctetString signature =
            new ASN1OctetString(cert.getSignature());
-      foundIssuer |= (trustedCertificateMap.get(signature) != null);
+      foundIssuer |= (trustedCertsBySignature.get(signature) != null);
+    }
+
+    if (! foundIssuer)
+    {
+      // It's possible that the server sent an incomplete chain.  Handle that
+      // possibility.
+      foundIssuer = checkIncompleteChain(chain);
     }
 
     if (! foundIssuer)
@@ -677,6 +751,366 @@ filesInDirectoryLoop:
 
 
   /**
+   * Retrieves a list containing the certificates in the chain that should
+   * actually be validated.  All certificates in the chain will have been
+   * confirmed to be in their validity window.
+   *
+   * @param  chain  The chain for which to obtain the path to validate.  It
+   *                must not be {@code null} or empty.
+   *
+   * @return  The chain to be validated.  It may be the same as the provided
+   *          chain, or an alternate chain if any certificate in the provided
+   *          chain was outside of its validity window but an alternative trust
+   *          path could be found.
+   *
+   * @throws  CertificateException  If the presented certificate chain included
+   *                                a certificate that is outside of its
+   *                                current validity window and no alternate
+   *                                path could be found.
+   */
+  @NotNull()
+  private X509Certificate[] getChainToValidate(
+                                 @NotNull final X509Certificate[] chain)
+          throws CertificateException
+  {
+    final Date currentDate = new Date();
+
+    // Check to see if any certificate in the provided chain is outside the
+    // current validity window.  If not, then just use the provided chain.
+    CertificateException firstException = null;
+    for (int i=0; i < chain.length; i++)
+    {
+      final X509Certificate cert = chain[i];
+
+      final Date notBefore = cert.getNotBefore();
+      if (currentDate.before(notBefore))
+      {
+        if (firstException == null)
+        {
+          firstException = new CertificateNotYetValidException(
+               ERR_JVM_DEFAULT_TRUST_MANAGER_CERT_NOT_YET_VALID.get(
+                    chainToString(chain), String.valueOf(cert.getSubjectDN()),
+                    String.valueOf(notBefore)));
+        }
+
+        if (i == 0)
+        {
+          // If the peer certificate is not yet valid, then the entire chain
+          // must be considered invalid.
+          throw firstException;
+        }
+        else
+        {
+          break;
+        }
+      }
+
+      final Date notAfter = cert.getNotAfter();
+      if (currentDate.after(notAfter))
+      {
+        if (firstException == null)
+        {
+          firstException = new CertificateExpiredException(
+               ERR_JVM_DEFAULT_TRUST_MANAGER_CERT_EXPIRED.get(
+                    chainToString(chain),
+                    String.valueOf(cert.getSubjectDN()),
+                    String.valueOf(notAfter)));
+        }
+
+        if (i == 0)
+        {
+          // If the peer certificate is expired, then the entire chain must be
+          // considered invalid.
+          throw firstException;
+        }
+        else
+        {
+          break;
+        }
+      }
+    }
+
+
+    // If all the certificates in the chain were within their validity window,
+    // then just use the provided chain.
+    if (firstException == null)
+    {
+      return chain;
+    }
+
+
+    // Try to find an alternate trusted chain.
+    final Set<X509Certificate> alreadyExamined = new HashSet<>();
+    final List<X509Certificate> alternateChain = new ArrayList<>();
+    for (int i=0; i < chain.length; i++)
+    {
+      if (isCurrentlyValid(chain[i], currentDate))
+      {
+        alternateChain.add(chain[i]);
+      }
+      else
+      {
+        final List<X509Certificate> alt = findAlternateChain(chain[i],
+             chain[i-1], currentDate, alreadyExamined);
+        if (alt == null)
+        {
+          throw firstException;
+        }
+        else
+        {
+          alternateChain.addAll(alt);
+          break;
+        }
+      }
+    }
+
+    return alternateChain.toArray(NO_CERTIFICATES);
+  }
+
+
+
+  /**
+   * Attempts to find an alternate chain that can be used in place of the
+   * provided certificate and its issuers.
+   *
+   * @param  cert             The certificate that should be at the head of the
+   *                          chain that is returned.  It must not be
+   *                          {@code null}.
+   * @param  certIsIssuerOf   A certificate that was issued by the provided
+   *                          certificate.
+   * @param  currentDate      The current date to use when validating
+   *                          timestamps.
+   * @param  alreadyExamined  A set of certificates that have already been
+   *                          examined and should not be re-examined.  It must
+   *                          not be {@code null} (but may be empty) and it must
+   *                          be updatable.
+   *
+   * @return  An alternate chain for the provided certificate, or {@code null}
+   *          if no alternate chain could be found.
+   */
+  @Nullable()
+  private List<X509Certificate> findAlternateChain(
+               @NotNull final X509Certificate cert,
+               @NotNull final X509Certificate certIsIssuerOf,
+               @NotNull final Date currentDate,
+               @NotNull final Set<X509Certificate> alreadyExamined)
+  {
+    final byte[] publicKeyBytes = cert.getPublicKey().getEncoded();
+    for (final X509Certificate c : trustedCertsBySignature.values())
+    {
+      if (! isCurrentlyValid(c, currentDate))
+      {
+        continue;
+      }
+
+      if (Arrays.equals(publicKeyBytes, c.getPublicKey().getEncoded()))
+      {
+        if (alreadyExamined.contains(c))
+        {
+          continue;
+        }
+        else
+        {
+          alreadyExamined.add(c);
+        }
+
+        try
+        {
+          final com.unboundid.util.ssl.cert.X509Certificate issued =
+               new com.unboundid.util.ssl.cert.X509Certificate(
+                    certIsIssuerOf.getEncoded());
+          final com.unboundid.util.ssl.cert.X509Certificate issuer =
+               new com.unboundid.util.ssl.cert.X509Certificate(
+                    cert.getEncoded());
+          issued.verifySignature(issuer);
+        }
+        catch (final Exception e)
+        {
+          Debug.debugException(e);
+          continue;
+        }
+
+        final List<X509Certificate> altChain = new ArrayList<>();
+        altChain.add(c);
+
+        try
+        {
+          X509Certificate issuer = findIssuer(c, currentDate);
+          while (issuer != null)
+          {
+            altChain.add(issuer);
+            issuer = findIssuer(issuer, currentDate);
+          }
+
+          return altChain;
+        }
+        catch (final Exception e)
+        {
+          Debug.debugException(e);
+          continue;
+        }
+      }
+    }
+
+    return null;
+  }
+
+
+
+  /**
+   * Indicates whether the provided certificate is currently considered valid.
+   *
+   * @param  cert         The certificate to validate.
+   * @param  currentDate  The date to use for validation.
+   *
+   * @return  {@code true} if the certificate is currently valid, or
+   *          {@code false} if not.
+   */
+  private static boolean isCurrentlyValid(@NotNull final X509Certificate cert,
+                                          @NotNull final Date currentDate)
+  {
+    final Date notBefore = cert.getNotBefore();
+    if (currentDate.before(notBefore))
+    {
+      return false;
+    }
+
+    final Date notAfter = cert.getNotAfter();
+    if (currentDate.after(notAfter))
+    {
+      return false;
+    }
+
+    return true;
+  }
+
+
+
+  /**
+   * Finds the issuer for the provided certificate, if it is in the JVM-default
+   * trust store.
+   *
+   * @param  cert         The certificate for which to find the issuer.  It must
+   *                      have already been retrieved from the JVM-default trust
+   *                      store.
+   * @param  currentDate  The current date to use when verifying validity.
+   *
+   * @return  The issuer for the provided certificate, or {@code null} if the
+   *          provided certificate is self-signed.
+   *
+   * @throws  CertificateException  If the provided certificate is not
+   *                                self-signed but its issuer could not be
+   *                                found, or if the issuer certificate is
+   *                                not currently valid.
+   */
+  @Nullable()
+  private X509Certificate findIssuer(@NotNull final X509Certificate cert,
+                                     @NotNull final Date currentDate)
+          throws CertificateException
+  {
+    try
+    {
+      // More fully decode the provided certificate so that we can better
+      // examine it.
+      final com.unboundid.util.ssl.cert.X509Certificate c =
+           new com.unboundid.util.ssl.cert.X509Certificate(
+                cert.getEncoded());
+
+      // If the certificate is self-signed, then it doesn't have an issuer.
+      if (c.isSelfSigned())
+      {
+        return null;
+      }
+
+      // See if the certificate has an authority key identifier extension.  If
+      // so, then use it to try to find the issuer.
+      for (final X509CertificateExtension e : c.getExtensions())
+      {
+        if (e instanceof AuthorityKeyIdentifierExtension)
+        {
+          final AuthorityKeyIdentifierExtension akie =
+               (AuthorityKeyIdentifierExtension) e;
+          final ASN1OctetString authorityKeyID =
+               new ASN1OctetString(akie.getKeyIdentifier().getValue());
+          final com.unboundid.util.ssl.cert.X509Certificate issuer =
+               trustedCertsByKeyID.get(authorityKeyID);
+          if ((issuer != null) && issuer.isWithinValidityWindow(currentDate))
+          {
+            c.verifySignature(issuer);
+            return (X509Certificate) issuer.toCertificate();
+          }
+        }
+      }
+    }
+    catch (final Exception e)
+    {
+      Debug.debugException(e);
+    }
+
+    throw new CertificateException(
+         ERR_JVM_DEFAULT_TRUST_MANAGER_CANNOT_FIND_ISSUER.get(
+              String.valueOf(cert.getSubjectDN())));
+  }
+
+
+
+  /**
+   * Checks to determine whether the provided certificate chain may be
+   * incomplete, and if so, whether we can find and trust the issuer of the last
+   * certificate in the chain.
+   *
+   * @param  chain  The chain to validate.
+   *
+   * @return  {@code true} if the chain could be validated, or {@code false} if
+   *          not.
+   */
+  private boolean checkIncompleteChain(@NotNull final X509Certificate[] chain)
+  {
+    try
+    {
+      // Get the last certificate in the chain and decode it as one that we can
+      // more fully inspect.
+      final com.unboundid.util.ssl.cert.X509Certificate c =
+           new com.unboundid.util.ssl.cert.X509Certificate(
+                chain[chain.length - 1].getEncoded());
+
+      // If the certificate is self-signed, then it can't be trusted.
+      if (c.isSelfSigned())
+      {
+        return false;
+      }
+
+      // See if the certificate has an authority key identifier extension.  If
+      // so, then use it to try to find the issuer.
+      for (final X509CertificateExtension e : c.getExtensions())
+      {
+        if (e instanceof AuthorityKeyIdentifierExtension)
+        {
+          final AuthorityKeyIdentifierExtension akie =
+               (AuthorityKeyIdentifierExtension) e;
+          final ASN1OctetString authorityKeyID =
+               new ASN1OctetString(akie.getKeyIdentifier().getValue());
+          final com.unboundid.util.ssl.cert.X509Certificate issuer =
+               trustedCertsByKeyID.get(authorityKeyID);
+          if ((issuer != null) && issuer.isWithinValidityWindow())
+          {
+            c.verifySignature(issuer);
+            return true;
+          }
+        }
+      }
+    }
+    catch (final Exception e)
+    {
+      Debug.debugException(e);
+    }
+
+    return false;
+  }
+
+
+
+  /**
    * Constructs a string representation of the certificates in the provided
    * chain.  It will consist of a comma-delimited list of their subject DNs,
    * with each subject DN surrounded by single quotes.
@@ -685,7 +1119,8 @@ filesInDirectoryLoop:
    *
    * @return  A string representation of the provided certificate chain.
    */
-  static String chainToString(final X509Certificate[] chain)
+  @NotNull()
+  static String chainToString(@NotNull final X509Certificate[] chain)
   {
     final StringBuilder buffer = new StringBuilder();
 

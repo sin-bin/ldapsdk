@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -35,9 +50,9 @@ import com.unboundid.ldap.sdk.DecodeableControl;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.ldap.sdk.ResultCode;
-import com.unboundid.ldap.sdk.unboundidds.extensions.
-            StartInteractiveTransactionExtendedRequest;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -47,6 +62,25 @@ import static com.unboundid.ldap.sdk.unboundidds.controls.ControlMessages.*;
 
 
 /**
+ * <BLOCKQUOTE>
+ *   <B>NOTE:</B>  The use of interactive transactions is strongly discouraged
+ *   because it can create conditions which are prone to deadlocks between
+ *   operations that may significantly affect performance and will result in the
+ *   cancellation of one or both operations.  It is strongly recommended that
+ *   standard LDAP transactions (which may be started using a
+ *   {@link com.unboundid.ldap.sdk.extensions.StartTransactionExtendedRequest})
+ *   or a {@code MultiUpdateExtendedRequest} be used instead.  Although they
+ *   cannot include arbitrary read operations, LDAP transactions and
+ *   multi-update operations may be used in conjunction with the
+ *   {@link com.unboundid.ldap.sdk.controls.AssertionRequestControl},
+ *   {@link com.unboundid.ldap.sdk.controls.PreReadRequestControl}, and
+ *   {@link com.unboundid.ldap.sdk.controls.PostReadRequestControl} to
+ *   incorporate some read capability into a transaction, and in conjunction
+ *   with the {@link com.unboundid.ldap.sdk.ModificationType#INCREMENT}
+ *   modification type to increment integer values without the need to know the
+ *   precise value before or after the operation (although the pre-read and/or
+ *   post-read controls may be used to determine that).
+ * </BLOCKQUOTE>
  * This class defines an interactive transaction specification response control,
  * which will be included in the server's response to an operation that included
  * the {@link InteractiveTransactionSpecificationRequestControl}.
@@ -74,9 +108,16 @@ import static com.unboundid.ldap.sdk.unboundidds.controls.ControlMessages.*;
  *       response within this transaction.</LI>
  * </UL>
  * See the documentation in the
- * {@link StartInteractiveTransactionExtendedRequest} class for an example of
+ * {@code StartInteractiveTransactionExtendedRequest} class for an example of
  * processing interactive transactions.
+ *
+ * @deprecated  The use of interactive transactions is strongly discouraged
+ *              because it can create conditions which are prone to deadlocks
+ *              between operations that may significantly affect performance and
+ *              will result in the cancellation of one or both operations.
  */
+@Deprecated()
+@SuppressWarnings("deprecation")
 @NotMutable()
 @ThreadSafety(level=ThreadSafetyLevel.COMPLETELY_THREADSAFE)
 public final class InteractiveTransactionSpecificationResponseControl
@@ -87,9 +128,9 @@ public final class InteractiveTransactionSpecificationResponseControl
    * The OID (1.3.6.1.4.1.30221.2.5.4) for the interactive transaction
    * specification response control.
    */
-  public static final String
+  @NotNull public static final String
        INTERACTIVE_TRANSACTION_SPECIFICATION_RESPONSE_OID =
-       "1.3.6.1.4.1.30221.2.5.4";
+            "1.3.6.1.4.1.30221.2.5.4";
 
 
 
@@ -118,7 +159,7 @@ public final class InteractiveTransactionSpecificationResponseControl
   private final boolean transactionValid;
 
   // The set of base DNs that may be targeted by this transaction.
-  private final List<String> baseDNs;
+  @Nullable private final List<String> baseDNs;
 
 
 
@@ -147,7 +188,8 @@ public final class InteractiveTransactionSpecificationResponseControl
    *                           last response.
    */
   public InteractiveTransactionSpecificationResponseControl(
-              final boolean transactionValid, final List<String> baseDNs)
+              final boolean transactionValid,
+              @Nullable final List<String> baseDNs)
   {
     super(INTERACTIVE_TRANSACTION_SPECIFICATION_RESPONSE_OID, false,
           encodeValue(transactionValid, baseDNs));
@@ -181,8 +223,10 @@ public final class InteractiveTransactionSpecificationResponseControl
    *                         interactive transaction specification response
    *                         control.
    */
-  public InteractiveTransactionSpecificationResponseControl(final String oid,
-              final boolean isCritical, final ASN1OctetString value)
+  public InteractiveTransactionSpecificationResponseControl(
+              @NotNull final String oid,
+              final boolean isCritical,
+              @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     super(oid, isCritical, value);
@@ -284,8 +328,9 @@ public final class InteractiveTransactionSpecificationResponseControl
    *
    * @return  The ASN1 octet string that may be used as the control value.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(final boolean transactionValid,
-                                             final List<String> baseDNs)
+                      @Nullable final List<String> baseDNs)
   {
     final ASN1Element[] elements;
     if (baseDNs == null)
@@ -319,9 +364,10 @@ public final class InteractiveTransactionSpecificationResponseControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public InteractiveTransactionSpecificationResponseControl decodeControl(
-              final String oid, final boolean isCritical,
-              final ASN1OctetString value)
+              @NotNull final String oid, final boolean isCritical,
+              @Nullable final ASN1OctetString value)
           throws LDAPException
   {
     return new InteractiveTransactionSpecificationResponseControl(oid,
@@ -346,8 +392,9 @@ public final class InteractiveTransactionSpecificationResponseControl
    *                         decode the interactive transaction specification
    *                         response control contained in the provided result.
    */
-  public static InteractiveTransactionSpecificationResponseControl
-                     get(final LDAPResult result)
+  @Nullable()
+  public static InteractiveTransactionSpecificationResponseControl get(
+                     @NotNull final LDAPResult result)
          throws LDAPException
   {
     final Control c = result.getResponseControl(
@@ -393,6 +440,7 @@ public final class InteractiveTransactionSpecificationResponseControl
    *          restrictions or if the set of restrictions has not changed since
    *          the last response.
    */
+  @Nullable()
   public List<String> getBaseDNs()
   {
     return baseDNs;
@@ -404,6 +452,7 @@ public final class InteractiveTransactionSpecificationResponseControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_INTERACTIVE_TXN_RESPONSE.get();
@@ -415,7 +464,7 @@ public final class InteractiveTransactionSpecificationResponseControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("InteractiveTransactionSpecificationResponseControl(");
     buffer.append("transactionValid=");

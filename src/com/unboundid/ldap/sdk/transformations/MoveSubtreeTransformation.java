@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,6 +52,8 @@ import com.unboundid.ldif.LDIFChangeRecord;
 import com.unboundid.ldif.LDIFDeleteChangeRecord;
 import com.unboundid.ldif.LDIFModifyChangeRecord;
 import com.unboundid.ldif.LDIFModifyDNChangeRecord;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -54,10 +71,10 @@ public final class MoveSubtreeTransformation
        implements EntryTransformation, LDIFChangeRecordTransformation
 {
   // The source base DN to be replaced.
-  private final DN sourceDN;
+  @NotNull private final DN sourceDN;
 
   // A list of the RDNs in the target base DN.
-  private final List<RDN> targetRDNs;
+  @NotNull private final List<RDN> targetRDNs;
 
 
 
@@ -69,7 +86,8 @@ public final class MoveSubtreeTransformation
    * @param  targetDN  The target base DN to use to replace the source base DN.
    *                   It must not be {@code null}.
    */
-  public MoveSubtreeTransformation(final DN sourceDN, final DN targetDN)
+  public MoveSubtreeTransformation(@NotNull final DN sourceDN,
+                                   @NotNull final DN targetDN)
   {
     this.sourceDN = sourceDN;
 
@@ -82,7 +100,8 @@ public final class MoveSubtreeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry transformEntry(final Entry e)
+  @Nullable()
+  public Entry transformEntry(@NotNull final Entry e)
   {
     if (e == null)
     {
@@ -116,7 +135,9 @@ public final class MoveSubtreeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public LDIFChangeRecord transformChangeRecord(final LDIFChangeRecord r)
+  @Nullable()
+  public LDIFChangeRecord transformChangeRecord(
+                               @NotNull final LDIFChangeRecord r)
   {
     if (r == null)
     {
@@ -193,7 +214,8 @@ public final class MoveSubtreeTransformation
    *          source DN, or the original string if it was not a valid DN or was
    *          not below the source DN.
    */
-  String processString(final String s)
+  @Nullable()
+  String processString(@Nullable final String s)
   {
     if (s == null)
     {
@@ -233,7 +255,9 @@ public final class MoveSubtreeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry translate(final Entry original, final long firstLineNumber)
+  @Nullable()
+  public Entry translate(@NotNull final Entry original,
+                         final long firstLineNumber)
   {
     return transformEntry(original);
   }
@@ -244,7 +268,8 @@ public final class MoveSubtreeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public LDIFChangeRecord translate(final LDIFChangeRecord original,
+  @Nullable()
+  public LDIFChangeRecord translate(@NotNull final LDIFChangeRecord original,
                                     final long firstLineNumber)
   {
     return transformChangeRecord(original);
@@ -256,7 +281,8 @@ public final class MoveSubtreeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry translateEntryToWrite(final Entry original)
+  @Nullable()
+  public Entry translateEntryToWrite(@NotNull final Entry original)
   {
     return transformEntry(original);
   }
@@ -267,8 +293,9 @@ public final class MoveSubtreeTransformation
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public LDIFChangeRecord translateChangeRecordToWrite(
-                               final LDIFChangeRecord original)
+                               @NotNull final LDIFChangeRecord original)
   {
     return transformChangeRecord(original);
   }

@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -61,6 +76,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.unboundid.asn1.ASN1BitString;
 import com.unboundid.asn1.ASN1Element;
 import com.unboundid.ldap.sdk.DN;
+import com.unboundid.ldap.sdk.LDAPConnectionOptions;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.Version;
@@ -68,6 +84,8 @@ import com.unboundid.util.Base64;
 import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.CommandLineTool;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.OID;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.PasswordReader;
@@ -81,6 +99,7 @@ import com.unboundid.util.args.BooleanArgument;
 import com.unboundid.util.args.BooleanValueArgument;
 import com.unboundid.util.args.DNArgument;
 import com.unboundid.util.args.FileArgument;
+import com.unboundid.util.args.IA5StringArgumentValueValidator;
 import com.unboundid.util.args.IPAddressArgumentValueValidator;
 import com.unboundid.util.args.IntegerArgument;
 import com.unboundid.util.args.OIDArgumentValueValidator;
@@ -105,7 +124,7 @@ public final class ManageCertificates
    * The path to the keystore with the JVM's set of default trusted issuer
    * certificates.
    */
-  private static final File JVM_DEFAULT_CACERTS_FILE;
+  @Nullable private static final File JVM_DEFAULT_CACERTS_FILE;
   static
   {
     File caCertsFile;
@@ -128,7 +147,7 @@ public final class ManageCertificates
    * The name of a system property that can be used to specify the default
    * keystore type for new keystores.
    */
-  private static final String PROPERTY_DEFAULT_KEYSTORE_TYPE =
+  @NotNull private static final String PROPERTY_DEFAULT_KEYSTORE_TYPE =
        ManageCertificates.class.getName() + ".defaultKeystoreType";
 
 
@@ -137,11 +156,11 @@ public final class ManageCertificates
    * The default keystore type that will be used for new keystores when the
    * type is not specified.
    */
-  private static final String DEFAULT_KEYSTORE_TYPE;
+  @NotNull private static final String DEFAULT_KEYSTORE_TYPE;
   static
   {
     final String propertyValue =
-         System.getProperty(PROPERTY_DEFAULT_KEYSTORE_TYPE);
+         StaticUtils.getSystemProperty(PROPERTY_DEFAULT_KEYSTORE_TYPE);
     if ((propertyValue != null) &&
         (propertyValue.equalsIgnoreCase("PKCS12") ||
          propertyValue.equalsIgnoreCase("PKCS#12") ||
@@ -166,13 +185,13 @@ public final class ManageCertificates
 
 
   // The global argument parser used by this tool.
-  private volatile ArgumentParser globalParser = null;
+  @Nullable private volatile ArgumentParser globalParser = null;
 
   // The argument parser for the selected subcommand.
-  private volatile ArgumentParser subCommandParser = null;
+  @Nullable private volatile ArgumentParser subCommandParser = null;
 
   // The input stream to use for standard input.
-  private final InputStream in;
+  @NotNull private final InputStream in;
 
 
 
@@ -182,7 +201,7 @@ public final class ManageCertificates
    *
    * @param  args  The command-line arguments provided to this program.
    */
-  public static void main(final String... args)
+  public static void main(@NotNull final String... args)
   {
     final ResultCode resultCode = main(System.in, System.out, System.err, args);
     if (resultCode != ResultCode.SUCCESS)
@@ -207,12 +226,32 @@ public final class ManageCertificates
    *
    * @return  The result code obtained from tool processing.
    */
-  public static ResultCode main(final InputStream in, final OutputStream out,
-                                final OutputStream err, final String... args)
+  @NotNull()
+  public static ResultCode main(@Nullable final InputStream in,
+                                @Nullable final OutputStream out,
+                                @Nullable final OutputStream err,
+                                @NotNull final String... args)
   {
     final ManageCertificates manageCertificates =
          new ManageCertificates(in, out, err);
     return manageCertificates.runTool(args);
+  }
+
+
+
+  /**
+   * Creates a new instance of this tool with the provided output and error
+   * streams.  Standard input will bot be available.
+   *
+   * @param  out  The output stream to use for standard output.  It may be
+   *              {@code null} if standard output should be suppressed.
+   * @param  err  The output stream to use for standard error.  It may be
+   *              {@code null} if standard error should be suppressed.
+   */
+  public ManageCertificates(@Nullable final OutputStream out,
+                            @Nullable final OutputStream err)
+  {
+    this(null, out, err);
   }
 
 
@@ -228,8 +267,9 @@ public final class ManageCertificates
    * @param  err  The output stream to use for standard error.  It may be
    *              {@code null} if standard error should be suppressed.
    */
-  public ManageCertificates(final InputStream in, final OutputStream out,
-                            final OutputStream err)
+  public ManageCertificates(@Nullable final InputStream in,
+                            @Nullable final OutputStream out,
+                            @Nullable final OutputStream err)
   {
     super(out, err);
 
@@ -252,6 +292,7 @@ public final class ManageCertificates
    * @return  The name for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "manage-certificates";
@@ -265,6 +306,7 @@ public final class ManageCertificates
    * @return  A human-readable description for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return INFO_MANAGE_CERTS_TOOL_DESC.get();
@@ -279,6 +321,7 @@ public final class ManageCertificates
    *          available.
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -398,7 +441,7 @@ public final class ManageCertificates
    *                             argument parser.
    */
   @Override()
-  public void addToolArguments(final ArgumentParser parser)
+  public void addToolArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     globalParser = parser;
@@ -409,13 +452,31 @@ public final class ManageCertificates
          "list-certificates", INFO_MANAGE_CERTS_SC_LIST_CERTS_DESC.get());
 
     final FileArgument listCertsKeystore = new FileArgument(null, "keystore",
-         true, 1, null, INFO_MANAGE_CERTS_SC_LIST_CERTS_ARG_KS_DESC.get(),
-         true, true,  true, false);
+         (JVM_DEFAULT_CACERTS_FILE == null), 1, null,
+         INFO_MANAGE_CERTS_SC_LIST_CERTS_ARG_KS_DESC.get(), true, true,  true,
+         false);
     listCertsKeystore.addLongIdentifier("keystore-path", true);
     listCertsKeystore.addLongIdentifier("keystorePath", true);
     listCertsKeystore.addLongIdentifier("keystore-file", true);
     listCertsKeystore.addLongIdentifier("keystoreFile", true);
     listCertsParser.addArgument(listCertsKeystore);
+
+    if (JVM_DEFAULT_CACERTS_FILE != null)
+    {
+      final BooleanArgument listCertsUseJVMDefault = new BooleanArgument(null,
+           "use-jvm-default-trust-store", 1,
+           INFO_MANAGE_CERTS_SC_LIST_CERTS_ARG_JVM_DEFAULT_DESC.get(
+                JVM_DEFAULT_CACERTS_FILE.getAbsolutePath()));
+      listCertsUseJVMDefault.addLongIdentifier("useJVMDefaultTrustStore", true);
+      listCertsUseJVMDefault.addLongIdentifier("jvm-default", true);
+      listCertsUseJVMDefault.addLongIdentifier("jvmDefault", true);
+      listCertsParser.addArgument(listCertsUseJVMDefault);
+
+      listCertsParser.addRequiredArgumentSet(listCertsUseJVMDefault,
+           listCertsKeystore);
+      listCertsParser.addExclusiveArgumentSet(listCertsUseJVMDefault,
+           listCertsKeystore);
+    }
 
     final StringArgument listCertsKeystorePassword = new StringArgument(null,
          "keystore-password", false, 1,
@@ -526,7 +587,7 @@ public final class ManageCertificates
            new String[]
            {
              "list-certificates",
-             "--keystore", JVM_DEFAULT_CACERTS_FILE.getAbsolutePath()
+             "--use-jvm-default-trust-store"
            },
            INFO_MANAGE_CERTS_SC_LIST_CERTS_EXAMPLE_3.get());
     }
@@ -547,13 +608,32 @@ public final class ManageCertificates
          "export-certificate", INFO_MANAGE_CERTS_SC_EXPORT_CERT_DESC.get());
 
     final FileArgument exportCertKeystore = new FileArgument(null, "keystore",
-         true, 1, null, INFO_MANAGE_CERTS_SC_EXPORT_CERT_ARG_KS_DESC.get(),
-         true, true,  true, false);
+         (JVM_DEFAULT_CACERTS_FILE == null), 1, null,
+         INFO_MANAGE_CERTS_SC_EXPORT_CERT_ARG_KS_DESC.get(), true, true,  true,
+         false);
     exportCertKeystore.addLongIdentifier("keystore-path", true);
     exportCertKeystore.addLongIdentifier("keystorePath", true);
     exportCertKeystore.addLongIdentifier("keystore-file", true);
     exportCertKeystore.addLongIdentifier("keystoreFile", true);
     exportCertParser.addArgument(exportCertKeystore);
+
+    if (JVM_DEFAULT_CACERTS_FILE != null)
+    {
+      final BooleanArgument exportCertUseJVMDefault = new BooleanArgument(null,
+           "use-jvm-default-trust-store", 1,
+           INFO_MANAGE_CERTS_SC_EXPORT_CERTS_ARG_JVM_DEFAULT_DESC.get(
+                JVM_DEFAULT_CACERTS_FILE.getAbsolutePath()));
+      exportCertUseJVMDefault.addLongIdentifier("useJVMDefaultTrustStore",
+           true);
+      exportCertUseJVMDefault.addLongIdentifier("jvm-default", true);
+      exportCertUseJVMDefault.addLongIdentifier("jvmDefault", true);
+      exportCertParser.addArgument(exportCertUseJVMDefault);
+
+      exportCertParser.addRequiredArgumentSet(exportCertUseJVMDefault,
+           exportCertKeystore);
+      exportCertParser.addExclusiveArgumentSet(exportCertUseJVMDefault,
+           exportCertKeystore);
+    }
 
     final StringArgument exportCertKeystorePassword = new StringArgument(null,
          "keystore-password", false, 1,
@@ -621,7 +701,7 @@ public final class ManageCertificates
          "output-format", false, 1, INFO_MANAGE_CERTS_PLACEHOLDER_FORMAT.get(),
          INFO_MANAGE_CERTS_SC_EXPORT_CERT_ARG_FORMAT_DESC.get(),
          exportCertOutputFormatAllowedValues, "PEM");
-    exportCertOutputFormat.addLongIdentifier("outputFormat");
+    exportCertOutputFormat.addLongIdentifier("outputFormat", true);
     exportCertParser.addArgument(exportCertOutputFormat);
 
     final FileArgument exportCertOutputFile = new FileArgument(null,
@@ -692,7 +772,7 @@ public final class ManageCertificates
     exportCertSubCommand.addName("exportCertificate", true);
     exportCertSubCommand.addName("export-cert", true);
     exportCertSubCommand.addName("exportCert", true);
-    exportCertSubCommand.addName("export", false);
+    exportCertSubCommand.addName("export", true);
 
     parser.addSubCommand(exportCertSubCommand);
 
@@ -832,7 +912,7 @@ public final class ManageCertificates
          "output-format", false, 1, INFO_MANAGE_CERTS_PLACEHOLDER_FORMAT.get(),
          INFO_MANAGE_CERTS_SC_EXPORT_KEY_ARG_FORMAT_DESC.get(),
          exportKeyOutputFormatAllowedValues, "PEM");
-    exportKeyOutputFormat.addLongIdentifier("outputFormat");
+    exportKeyOutputFormat.addLongIdentifier("outputFormat", true);
     exportKeyParser.addArgument(exportKeyOutputFormat);
 
     final FileArgument exportKeyOutputFile = new FileArgument(null,
@@ -1222,10 +1302,10 @@ public final class ManageCertificates
          INFO_MANAGE_CERTS_SC_DELETE_CERT_DESC.get(), deleteCertParser,
          deleteCertExamples);
     deleteCertSubCommand.addName("deleteCertificate", true);
-    deleteCertSubCommand.addName("remove-certificate", false);
+    deleteCertSubCommand.addName("remove-certificate", true);
     deleteCertSubCommand.addName("removeCertificate", true);
-    deleteCertSubCommand.addName("delete", false);
-    deleteCertSubCommand.addName("remove", false);
+    deleteCertSubCommand.addName("delete", true);
+    deleteCertSubCommand.addName("remove", true);
 
     parser.addSubCommand(deleteCertSubCommand);
 
@@ -1421,7 +1501,7 @@ public final class ManageCertificates
 
     final IntegerArgument genCertKeySizeBits = new IntegerArgument(null,
          "key-size-bits", false, 1, INFO_MANAGE_CERTS_PLACEHOLDER_BITS.get(),
-         INFO_MANAGE_CERTS_SC_GEN_CERT_ARG_KEY_ALGORITHM_DESC.get(), 1,
+         INFO_MANAGE_CERTS_SC_GEN_CERT_ARG_KEY_SIZE_BITS_DESC.get(), 1,
          Integer.MAX_VALUE);
     genCertKeySizeBits.addLongIdentifier("keySizeBits", true);
     genCertKeySizeBits.addLongIdentifier("key-length-bits", true);
@@ -1462,6 +1542,8 @@ public final class ManageCertificates
     genCertSubjectAltDNS.addLongIdentifier("subjectAltDNS", true);
     genCertSubjectAltDNS.addLongIdentifier("san-dns", true);
     genCertSubjectAltDNS.addLongIdentifier("sanDNS", true);
+    genCertSubjectAltDNS.addValueValidator(
+         new IA5StringArgumentValueValidator(false));
     genCertParser.addArgument(genCertSubjectAltDNS);
 
     final StringArgument genCertSubjectAltIP = new StringArgument(null,
@@ -1523,6 +1605,8 @@ public final class ManageCertificates
     genCertSubjectAltEmail.addLongIdentifier("sanEmailAddress", true);
     genCertSubjectAltEmail.addLongIdentifier("san-email", true);
     genCertSubjectAltEmail.addLongIdentifier("sanEmail", true);
+    genCertSubjectAltEmail.addValueValidator(
+         new IA5StringArgumentValueValidator(false));
     genCertParser.addArgument(genCertSubjectAltEmail);
 
     final StringArgument genCertSubjectAltURI = new StringArgument(null,
@@ -1704,7 +1788,7 @@ public final class ManageCertificates
          INFO_MANAGE_CERTS_SC_GEN_CERT_DESC.get(), genCertParser,
          genCertExamples);
     genCertSubCommand.addName("generateSelfSignedCertificate", true);
-    genCertSubCommand.addName("generate-certificate", false);
+    genCertSubCommand.addName("generate-certificate", true);
     genCertSubCommand.addName("generateCertificate", true);
     genCertSubCommand.addName("self-signed-certificate", true);
     genCertSubCommand.addName("selfSignedCertificate", true);
@@ -1725,7 +1809,7 @@ public final class ManageCertificates
          "output-format", false, 1, INFO_MANAGE_CERTS_PLACEHOLDER_FORMAT.get(),
          INFO_MANAGE_CERTS_SC_GEN_CSR_ARG_FORMAT_DESC.get(),
          genCSROutputFormatAllowedValues, "PEM");
-    genCSROutputFormat.addLongIdentifier("outputFormat");
+    genCSROutputFormat.addLongIdentifier("outputFormat", true);
     genCSRParser.addArgument(genCSROutputFormat);
 
     final FileArgument genCSROutputFile = new FileArgument(null, "output-file",
@@ -1904,7 +1988,7 @@ public final class ManageCertificates
 
     final IntegerArgument genCSRKeySizeBits = new IntegerArgument(null,
          "key-size-bits", false, 1, INFO_MANAGE_CERTS_PLACEHOLDER_BITS.get(),
-         INFO_MANAGE_CERTS_SC_GEN_CSR_ARG_KEY_ALGORITHM_DESC.get(), 1,
+         INFO_MANAGE_CERTS_SC_GEN_CSR_ARG_KEY_SIZE_BITS_DESC.get(), 1,
          Integer.MAX_VALUE);
     genCSRKeySizeBits.addLongIdentifier("keySizeBits", true);
     genCSRKeySizeBits.addLongIdentifier("key-length-bits", true);
@@ -1945,6 +2029,8 @@ public final class ManageCertificates
     genCSRSubjectAltDNS.addLongIdentifier("subjectAltDNS", true);
     genCSRSubjectAltDNS.addLongIdentifier("san-dns", true);
     genCSRSubjectAltDNS.addLongIdentifier("sanDNS", true);
+    genCSRSubjectAltDNS.addValueValidator(
+         new IA5StringArgumentValueValidator(false));
     genCSRParser.addArgument(genCSRSubjectAltDNS);
 
     final StringArgument genCSRSubjectAltIP = new StringArgument(null,
@@ -2006,6 +2092,8 @@ public final class ManageCertificates
     genCSRSubjectAltEmail.addLongIdentifier("sanEmailAddress", true);
     genCSRSubjectAltEmail.addLongIdentifier("san-email", true);
     genCSRSubjectAltEmail.addLongIdentifier("sanEmail", true);
+    genCSRSubjectAltEmail.addValueValidator(
+         new IA5StringArgumentValueValidator(false));
     genCSRParser.addArgument(genCSRSubjectAltEmail);
 
     final StringArgument genCSRSubjectAltURI = new StringArgument(null,
@@ -2166,7 +2254,7 @@ public final class ManageCertificates
          INFO_MANAGE_CERTS_SC_GEN_CSR_DESC.get(), genCSRParser,
          genCSRExamples);
     genCSRSubCommand.addName("generateCertificateSigningRequest", true);
-    genCSRSubCommand.addName("generate-certificate-request", false);
+    genCSRSubCommand.addName("generate-certificate-request", true);
     genCSRSubCommand.addName("generateCertificateRequest", true);
     genCSRSubCommand.addName("generate-csr", true);
     genCSRSubCommand.addName("generateCSR", true);
@@ -2213,7 +2301,7 @@ public final class ManageCertificates
          "output-format", false, 1, INFO_MANAGE_CERTS_PLACEHOLDER_FORMAT.get(),
          INFO_MANAGE_CERTS_SC_SIGN_CSR_ARG_FORMAT_DESC.get(),
          signCSROutputFormatAllowedValues, "PEM");
-    signCSROutputFormat.addLongIdentifier("outputFormat");
+    signCSROutputFormat.addLongIdentifier("outputFormat", true);
     signCSRParser.addArgument(signCSROutputFormat);
 
     final FileArgument signCSRKeystore = new FileArgument(null, "keystore",
@@ -2403,6 +2491,8 @@ public final class ManageCertificates
     signCSRSubjectAltDNS.addLongIdentifier("subjectAltDNS", true);
     signCSRSubjectAltDNS.addLongIdentifier("san-dns", true);
     signCSRSubjectAltDNS.addLongIdentifier("sanDNS", true);
+    signCSRSubjectAltDNS.addValueValidator(
+         new IA5StringArgumentValueValidator(false));
     signCSRParser.addArgument(signCSRSubjectAltDNS);
 
     final StringArgument signCSRSubjectAltIP = new StringArgument(null,
@@ -2464,6 +2554,8 @@ public final class ManageCertificates
     signCSRSubjectAltEmail.addLongIdentifier("sanEmailAddress", true);
     signCSRSubjectAltEmail.addLongIdentifier("san-email", true);
     signCSRSubjectAltEmail.addLongIdentifier("sanEmail", true);
+    signCSRSubjectAltEmail.addValueValidator(
+         new IA5StringArgumentValueValidator(false));
     signCSRParser.addArgument(signCSRSubjectAltEmail);
 
     final StringArgument signCSRSubjectAltURI = new StringArgument(null,
@@ -2510,6 +2602,8 @@ public final class ManageCertificates
     signCSRIssuerAltDNS.addLongIdentifier("issuerAltDNS", true);
     signCSRIssuerAltDNS.addLongIdentifier("ian-dns", true);
     signCSRIssuerAltDNS.addLongIdentifier("ianDNS", true);
+    signCSRIssuerAltDNS.addValueValidator(
+         new IA5StringArgumentValueValidator(false));
     signCSRParser.addArgument(signCSRIssuerAltDNS);
 
     final StringArgument signCSRIssuerAltIP = new StringArgument(null,
@@ -2571,6 +2665,8 @@ public final class ManageCertificates
     signCSRIssuerAltEmail.addLongIdentifier("ianEmailAddress", true);
     signCSRIssuerAltEmail.addLongIdentifier("ian-email", true);
     signCSRIssuerAltEmail.addLongIdentifier("ianEmail", true);
+    signCSRIssuerAltEmail.addValueValidator(
+         new IA5StringArgumentValueValidator(false));
     signCSRParser.addArgument(signCSRIssuerAltEmail);
 
     final StringArgument signCSRIssuerAltURI = new StringArgument(null,
@@ -2718,13 +2814,13 @@ public final class ManageCertificates
          INFO_MANAGE_CERTS_SC_SIGN_CSR_DESC.get(), signCSRParser,
          signCSRExamples);
     signCSRSubCommand.addName("signCertificateSigningRequest", true);
-    signCSRSubCommand.addName("sign-certificate-request", false);
+    signCSRSubCommand.addName("sign-certificate-request", true);
     signCSRSubCommand.addName("signCertificateRequest", true);
-    signCSRSubCommand.addName("sign-certificate", false);
+    signCSRSubCommand.addName("sign-certificate", true);
     signCSRSubCommand.addName("signCertificate", true);
     signCSRSubCommand.addName("sign-csr", true);
     signCSRSubCommand.addName("signCSR", true);
-    signCSRSubCommand.addName("sign", false);
+    signCSRSubCommand.addName("sign", true);
     signCSRSubCommand.addName("gencert", true);
 
     parser.addSubCommand(signCSRSubCommand);
@@ -2923,11 +3019,11 @@ public final class ManageCertificates
          INFO_MANAGE_CERTS_SC_CHANGE_ALIAS_DESC.get(), changeAliasParser,
          changeAliasExamples);
     changeAliasSubCommand.addName("changeCertificateAlias", true);
-    changeAliasSubCommand.addName("change-alias", false);
+    changeAliasSubCommand.addName("change-alias", true);
     changeAliasSubCommand.addName("changeAlias", true);
     changeAliasSubCommand.addName("rename-certificate", true);
     changeAliasSubCommand.addName("renameCertificate", true);
-    changeAliasSubCommand.addName("rename", false);
+    changeAliasSubCommand.addName("rename", true);
 
     parser.addSubCommand(changeAliasSubCommand);
 
@@ -3295,7 +3391,7 @@ public final class ManageCertificates
     changePKPWSubCommand.addName("changePrivateKeyPassphrase", true);
     changePKPWSubCommand.addName("change-private-key-pin", true);
     changePKPWSubCommand.addName("changePrivateKeyPIN", true);
-    changePKPWSubCommand.addName("change-key-password", false);
+    changePKPWSubCommand.addName("change-key-password", true);
     changePKPWSubCommand.addName("changeKeyPassword", true);
     changePKPWSubCommand.addName("change-key-passphrase", true);
     changePKPWSubCommand.addName("changeKeyPassphrase", true);
@@ -3304,6 +3400,141 @@ public final class ManageCertificates
     changePKPWSubCommand.addName("keypasswd", true);
 
     parser.addSubCommand(changePKPWSubCommand);
+
+
+    // Define the "retrieve-server-certificate" subcommand and all of its
+    // arguments.
+    final ArgumentParser retrieveCertParser = new ArgumentParser(
+         "retrieve-server-certificate",
+         INFO_MANAGE_CERTS_SC_RETRIEVE_CERT_DESC.get());
+
+    final StringArgument retrieveCertHostname = new StringArgument('h',
+         "hostname", true, 1, INFO_MANAGE_CERTS_PLACEHOLDER_HOST.get(),
+         INFO_MANAGE_CERTS_SC_RETRIEVE_CERT_ARG_HOSTNAME_DESC.get());
+    retrieveCertHostname.addLongIdentifier("server-address", true);
+    retrieveCertHostname.addLongIdentifier("serverAddress", true);
+    retrieveCertHostname.addLongIdentifier("address", true);
+    retrieveCertParser.addArgument(retrieveCertHostname);
+
+    final IntegerArgument retrieveCertPort = new IntegerArgument('p',
+         "port", true, 1, INFO_MANAGE_CERTS_PLACEHOLDER_PORT.get(),
+         INFO_MANAGE_CERTS_SC_RETRIEVE_CERT_ARG_PORT_DESC.get(), 1, 65_535);
+    retrieveCertPort.addLongIdentifier("server-port", true);
+    retrieveCertPort.addLongIdentifier("serverPort", true);
+    retrieveCertParser.addArgument(retrieveCertPort);
+
+    final BooleanArgument retrieveCertUseStartTLS = new BooleanArgument('q',
+         "use-ldap-start-tls", 1,
+         INFO_MANAGE_CERTS_SC_RETRIEVE_CERT_ARG_USE_START_TLS_DESC.get());
+    retrieveCertUseStartTLS.addLongIdentifier("use-ldap-starttls", true);
+    retrieveCertUseStartTLS.addLongIdentifier("useLDAPStartTLS", true);
+    retrieveCertUseStartTLS.addLongIdentifier("use-start-tls", true);
+    retrieveCertUseStartTLS.addLongIdentifier("use-starttls", true);
+    retrieveCertUseStartTLS.addLongIdentifier("useStartTLS", true);
+    retrieveCertParser.addArgument(retrieveCertUseStartTLS);
+
+    final FileArgument retrieveCertOutputFile = new FileArgument(null,
+         "output-file", false, 1, null,
+         INFO_MANAGE_CERTS_SC_RETRIEVE_CERT_ARG_FILE_DESC.get(), false, true,
+         true, false);
+    retrieveCertOutputFile.addLongIdentifier("outputFile", true);
+    retrieveCertOutputFile.addLongIdentifier("export-file", true);
+    retrieveCertOutputFile.addLongIdentifier("exportFile", true);
+    retrieveCertOutputFile.addLongIdentifier("certificate-file", true);
+    retrieveCertOutputFile.addLongIdentifier("certificateFile", true);
+    retrieveCertOutputFile.addLongIdentifier("file", true);
+    retrieveCertOutputFile.addLongIdentifier("filename", true);
+    retrieveCertParser.addArgument(retrieveCertOutputFile);
+
+    final Set<String> retrieveCertOutputFormatAllowedValues = StaticUtils.setOf(
+         "PEM", "text", "txt", "RFC", "DER", "binary", "bin");
+    final StringArgument retrieveCertOutputFormat = new StringArgument(null,
+         "output-format", false, 1, INFO_MANAGE_CERTS_PLACEHOLDER_FORMAT.get(),
+         INFO_MANAGE_CERTS_SC_RETRIEVE_CERT_ARG_FORMAT_DESC.get(),
+         retrieveCertOutputFormatAllowedValues, "PEM");
+    retrieveCertOutputFormat.addLongIdentifier("outputFormat", true);
+    retrieveCertParser.addArgument(retrieveCertOutputFormat);
+
+    final BooleanArgument retrieveCertOnlyPeer = new BooleanArgument(null,
+         "only-peer-certificate", 1,
+         INFO_MANAGE_CERTS_SC_RETRIEVE_CERT_ARG_ONLY_PEER_DESC.get());
+    retrieveCertOnlyPeer.addLongIdentifier("onlyPeerCertificate", true);
+    retrieveCertOnlyPeer.addLongIdentifier("only-peer", true);
+    retrieveCertOnlyPeer.addLongIdentifier("onlyPeer", true);
+    retrieveCertOnlyPeer.addLongIdentifier("peer-certificate-only", true);
+    retrieveCertOnlyPeer.addLongIdentifier("peerCertificateOnly", true);
+    retrieveCertOnlyPeer.addLongIdentifier("peer-only", true);
+    retrieveCertOnlyPeer.addLongIdentifier("peerOnly", true);
+    retrieveCertParser.addArgument(retrieveCertOnlyPeer);
+
+    final BooleanArgument retrieveCertEnableSSLDebugging = new BooleanArgument(
+         null, "enableSSLDebugging", 1,
+         INFO_MANAGE_CERTS_SC_RETRIEVE_CERT_ARG_ENABLE_SSL_DEBUGGING_DESC.
+              get());
+    retrieveCertEnableSSLDebugging.addLongIdentifier("enableTLSDebugging",
+         true);
+    retrieveCertEnableSSLDebugging.addLongIdentifier("enableStartTLSDebugging",
+         true);
+    retrieveCertEnableSSLDebugging.addLongIdentifier("enable-ssl-debugging",
+         true);
+    retrieveCertEnableSSLDebugging.addLongIdentifier("enable-tls-debugging",
+         true);
+    retrieveCertEnableSSLDebugging.addLongIdentifier(
+         "enable-starttls-debugging", true);
+    retrieveCertEnableSSLDebugging.addLongIdentifier(
+         "enable-start-tls-debugging", true);
+    retrieveCertParser.addArgument(retrieveCertEnableSSLDebugging);
+    addEnableSSLDebuggingArgument(retrieveCertEnableSSLDebugging);
+
+    final BooleanArgument retrieveCertVerbose = new BooleanArgument(null,
+         "verbose", 1,
+         INFO_MANAGE_CERTS_SC_RETRIEVE_CERT_ARG_VERBOSE_DESC.get());
+    retrieveCertParser.addArgument(retrieveCertVerbose);
+
+    retrieveCertParser.addDependentArgumentSet(retrieveCertOutputFormat,
+         retrieveCertOutputFile);
+
+    final LinkedHashMap<String[],String> retrieveCertExamples =
+         new LinkedHashMap<>(StaticUtils.computeMapCapacity(2));
+    retrieveCertExamples.put(
+         new String[]
+         {
+           "retrieve-server-certificate",
+           "--hostname", "ds.example.com",
+           "--port", "636"
+         },
+         INFO_MANAGE_CERTS_SC_RETRIEVE_CERT_EXAMPLE_1.get(
+              getPlatformSpecificPath("config", "truststore")));
+    retrieveCertExamples.put(
+         new String[]
+         {
+           "retrieve-server-certificate",
+           "--hostname", "ds.example.com",
+           "--port", "389",
+           "--use-ldap-start-tls",
+           "--only-peer-certificate",
+           "--output-file", "ds-cert.pem",
+           "--output-format", "PEM",
+           "--verbose"
+         },
+         INFO_MANAGE_CERTS_SC_RETRIEVE_CERT_EXAMPLE_2.get(
+              getPlatformSpecificPath("config", "truststore")));
+
+    final SubCommand retrieveCertSubCommand = new SubCommand(
+         "retrieve-server-certificate",
+         INFO_MANAGE_CERTS_SC_RETRIEVE_CERT_DESC.get(), retrieveCertParser,
+         retrieveCertExamples);
+    retrieveCertSubCommand.addName("retrieveServerCertificate", true);
+    retrieveCertSubCommand.addName("retrieve-certificate", true);
+    retrieveCertSubCommand.addName("retrieveCertificate", true);
+    retrieveCertSubCommand.addName("get-server-certificate", true);
+    retrieveCertSubCommand.addName("getServerCertificate", true);
+    retrieveCertSubCommand.addName("get-certificate", true);
+    retrieveCertSubCommand.addName("getCertificate", true);
+    retrieveCertSubCommand.addName("display-server-certificate", true);
+    retrieveCertSubCommand.addName("displayServerCertificate", true);
+
+    parser.addSubCommand(retrieveCertSubCommand);
 
 
     // Define the "trust-server-certificate" subcommand and all of its
@@ -3417,6 +3648,23 @@ public final class ManageCertificates
     trustServerIssuersOnly.addLongIdentifier("onlyIssuerCertificates", true);
     trustServerParser.addArgument(trustServerIssuersOnly);
 
+    final BooleanArgument trustServerEnableSSLDebugging = new BooleanArgument(
+         null, "enableSSLDebugging", 1,
+         INFO_MANAGE_CERTS_SC_TRUST_SERVER_ARG_ENABLE_SSL_DEBUGGING_DESC.get());
+    trustServerEnableSSLDebugging.addLongIdentifier("enableTLSDebugging", true);
+    trustServerEnableSSLDebugging.addLongIdentifier("enableStartTLSDebugging",
+         true);
+    trustServerEnableSSLDebugging.addLongIdentifier("enable-ssl-debugging",
+         true);
+    trustServerEnableSSLDebugging.addLongIdentifier("enable-tls-debugging",
+         true);
+    trustServerEnableSSLDebugging.addLongIdentifier("enable-starttls-debugging",
+         true);
+    trustServerEnableSSLDebugging.addLongIdentifier(
+         "enable-start-tls-debugging", true);
+    trustServerParser.addArgument(trustServerEnableSSLDebugging);
+    addEnableSSLDebuggingArgument(trustServerEnableSSLDebugging);
+
     final BooleanArgument trustServerVerbose = new BooleanArgument(null,
          "verbose", 1,
          INFO_MANAGE_CERTS_SC_TRUST_SERVER_ARG_VERBOSE_DESC.get());
@@ -3470,7 +3718,7 @@ public final class ManageCertificates
          INFO_MANAGE_CERTS_SC_TRUST_SERVER_DESC.get(), trustServerParser,
          trustServerExamples);
     trustServerSubCommand.addName("trustServerCertificate", true);
-    trustServerSubCommand.addName("trust-server", false);
+    trustServerSubCommand.addName("trust-server", true);
     trustServerSubCommand.addName("trustServer", true);
 
     parser.addSubCommand(trustServerSubCommand);
@@ -3641,7 +3889,7 @@ public final class ManageCertificates
          INFO_MANAGE_CERTS_SC_DISPLAY_CERT_DESC.get(), displayCertParser,
          displayCertExamples);
     displayCertSubCommand.addName("displayCertificateFile", true);
-    displayCertSubCommand.addName("display-certificate", false);
+    displayCertSubCommand.addName("display-certificate", true);
     displayCertSubCommand.addName("displayCertificate", true);
     displayCertSubCommand.addName("display-certificates", true);
     displayCertSubCommand.addName("displayCertificates", true);
@@ -3651,9 +3899,9 @@ public final class ManageCertificates
     displayCertSubCommand.addName("showCertificateFile", true);
     displayCertSubCommand.addName("show-certificates", true);
     displayCertSubCommand.addName("showCertificates", true);
-    displayCertSubCommand.addName("print-certificate-file", false);
+    displayCertSubCommand.addName("print-certificate-file", true);
     displayCertSubCommand.addName("printCertificateFile", true);
-    displayCertSubCommand.addName("print-certificate", false);
+    displayCertSubCommand.addName("print-certificate", true);
     displayCertSubCommand.addName("printCertificate", true);
     displayCertSubCommand.addName("print-certificates", true);
     displayCertSubCommand.addName("printCertificates", true);
@@ -3673,7 +3921,7 @@ public final class ManageCertificates
          INFO_MANAGE_CERTS_SC_DISPLAY_CSR_ARG_FILE_DESC.get(), true, true,
          true, false);
     displayCSRFile.addLongIdentifier("certificateSigningRequestFile", true);
-    displayCSRFile.addLongIdentifier("request-file", false);
+    displayCSRFile.addLongIdentifier("request-file", true);
     displayCSRFile.addLongIdentifier("requestFile", true);
     displayCSRFile.addLongIdentifier("input-file", true);
     displayCSRFile.addLongIdentifier("inputFile", true);
@@ -3714,7 +3962,7 @@ public final class ManageCertificates
     displayCSRSubCommand.addName("displayCertificateSigningRequest", true);
     displayCSRSubCommand.addName("display-certificate-request-file", true);
     displayCSRSubCommand.addName("displayCertificateRequestFile", true);
-    displayCSRSubCommand.addName("display-certificate-request", false);
+    displayCSRSubCommand.addName("display-certificate-request", true);
     displayCSRSubCommand.addName("displayCertificateRequest", true);
     displayCSRSubCommand.addName("display-csr-file", true);
     displayCSRSubCommand.addName("displayCSRFile", true);
@@ -3733,13 +3981,13 @@ public final class ManageCertificates
     displayCSRSubCommand.addName("show-csr", true);
     displayCSRSubCommand.addName("showCSR", true);
     displayCSRSubCommand.addName("print-certificate-signing-request-file",
-         false);
+         true);
     displayCSRSubCommand.addName("printCertificateSigningRequestFile", true);
     displayCSRSubCommand.addName("print-certificate-signing-request", true);
     displayCSRSubCommand.addName("printCertificateSigningRequest", true);
     displayCSRSubCommand.addName("print-certificate-request-file", true);
     displayCSRSubCommand.addName("printCertificateRequestFile", true);
-    displayCSRSubCommand.addName("print-certificate-request", false);
+    displayCSRSubCommand.addName("print-certificate-request", true);
     displayCSRSubCommand.addName("printCertificateRequest", true);
     displayCSRSubCommand.addName("print-csr-file", true);
     displayCSRSubCommand.addName("printCSRFile", true);
@@ -3760,7 +4008,9 @@ public final class ManageCertificates
    *
    * @return  The constructed path.
    */
-  private static String getPlatformSpecificPath(final String... pathElements)
+  @NotNull()
+  private static String getPlatformSpecificPath(
+                             @NotNull final String... pathElements)
   {
     final StringBuilder buffer = new StringBuilder();
     for (int i=0; i < pathElements.length; i++)
@@ -3785,6 +4035,7 @@ public final class ManageCertificates
    *          successfully.
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     final SubCommand selectedSubCommand = globalParser.getSelectedSubCommand();
@@ -3841,6 +4092,10 @@ public final class ManageCertificates
     {
       return doChangePrivateKeyPassword();
     }
+    else if (selectedSubCommand.hasName("retrieve-server-certificate"))
+    {
+      return doRetrieveServerCertificate();
+    }
     else if (selectedSubCommand.hasName("trust-server-certificate"))
     {
       return doTrustServerCertificate();
@@ -3876,6 +4131,7 @@ public final class ManageCertificates
    * @return  A result code that indicates whether the processing completed
    *          successfully.
    */
+  @NotNull()
   private ResultCode doListCertificates()
   {
     // Get the values of a number of configured arguments.
@@ -4204,6 +4460,7 @@ public final class ManageCertificates
    * @return  A result code that indicates whether the processing completed
    *          successfully.
    */
+  @NotNull()
   private ResultCode doExportCertificate()
   {
     // Get the values of a number of configured arguments.
@@ -4493,6 +4750,7 @@ public final class ManageCertificates
    * @return  A result code that indicates whether the processing completed
    *          successfully.
    */
+  @NotNull()
   private ResultCode doExportPrivateKey()
   {
     // Get the values of a number of configured arguments.
@@ -4690,6 +4948,7 @@ public final class ManageCertificates
    * @return  A result code that indicates whether the processing completed
    *          successfully.
    */
+  @NotNull()
   private ResultCode doImportCertificate()
   {
     // Get the values of a number of configured arguments.
@@ -5436,6 +5695,7 @@ public final class ManageCertificates
    * @return  A result code that indicates whether the processing completed
    *          successfully.
    */
+  @NotNull()
   private ResultCode doDeleteCertificate()
   {
     // Get the values of a number of configured arguments.
@@ -5651,6 +5911,7 @@ public final class ManageCertificates
    * @return  A result code that indicates whether the processing completed
    *          successfully.
    */
+  @NotNull()
   private ResultCode doGenerateOrSignCertificateOrCSR()
   {
     // Figure out which subcommand we're processing.
@@ -5877,7 +6138,8 @@ public final class ManageCertificates
       {
         try
         {
-          sanBuilder.addIPAddress(InetAddress.getByName(value));
+          sanBuilder.addIPAddress(LDAPConnectionOptions.DEFAULT_NAME_RESOLVER.
+               getByName(value));
           sanValues.add("IP:" + value);
         }
         catch (final Exception e)
@@ -5960,7 +6222,8 @@ public final class ManageCertificates
       {
         try
         {
-          ianBuilder.addIPAddress(InetAddress.getByName(value));
+          ianBuilder.addIPAddress(LDAPConnectionOptions.DEFAULT_NAME_RESOLVER.
+               getByName(value));
           ianValues.add("IP:" + value);
         }
         catch (final Exception e)
@@ -7378,6 +7641,7 @@ public final class ManageCertificates
    * @return  A result code that indicates whether the processing completed
    *          successfully.
    */
+  @NotNull()
   private ResultCode doChangeCertificateAlias()
   {
     // Get the values of a number of configured arguments.
@@ -7559,6 +7823,7 @@ public final class ManageCertificates
    * @return  A result code that indicates whether the processing completed
    *          successfully.
    */
+  @NotNull()
   private ResultCode doChangeKeystorePassword()
   {
     // Get the values of a number of configured arguments.
@@ -7663,6 +7928,7 @@ public final class ManageCertificates
    * @return  A result code that indicates whether the processing completed
    *          successfully.
    */
+  @NotNull()
   private ResultCode doChangePrivateKeyPassword()
   {
     // Get the values of a number of configured arguments.
@@ -7828,12 +8094,191 @@ public final class ManageCertificates
 
 
   /**
+   * Performs the necessary processing for the retrieve-server-certificate
+   * subcommand.
+   *
+   * @return  A result code that indicates whether the processing completed
+   *          successfully.
+   */
+  @NotNull()
+  private ResultCode doRetrieveServerCertificate()
+  {
+    // Get the values of a number of configured arguments.
+    final StringArgument hostnameArgument =
+         subCommandParser.getStringArgument("hostname");
+    final String hostname = hostnameArgument.getValue();
+
+    final IntegerArgument portArgument =
+         subCommandParser.getIntegerArgument("port");
+    final int port = portArgument.getValue();
+
+    final BooleanArgument useLDAPStartTLSArgument =
+         subCommandParser.getBooleanArgument("use-ldap-start-tls");
+    final boolean useLDAPStartTLS =
+         ((useLDAPStartTLSArgument != null) &&
+          useLDAPStartTLSArgument.isPresent());
+
+    final BooleanArgument onlyPeerArgument =
+         subCommandParser.getBooleanArgument("only-peer-certificate");
+    final boolean onlyPeer =
+         ((onlyPeerArgument != null) && onlyPeerArgument.isPresent());
+
+    final BooleanArgument verboseArgument =
+         subCommandParser.getBooleanArgument("verbose");
+    final boolean verbose =
+         ((verboseArgument != null) && verboseArgument.isPresent());
+
+    boolean outputPEM = true;
+    final StringArgument outputFormatArgument =
+         subCommandParser.getStringArgument("output-format");
+    if ((outputFormatArgument != null) && outputFormatArgument.isPresent())
+    {
+      final String format = outputFormatArgument.getValue().toLowerCase();
+      if (format.equals("der") || format.equals("binary") ||
+          format.equals("bin"))
+      {
+        outputPEM = false;
+      }
+    }
+
+    File outputFile = null;
+    final FileArgument outputFileArgument =
+         subCommandParser.getFileArgument("output-file");
+    if ((outputFileArgument != null) && outputFileArgument.isPresent())
+    {
+      outputFile = outputFileArgument.getValue();
+    }
+
+
+    // Spawn a background thread to establish a connection and get the
+    // certificate chain from the target server.
+    final LinkedBlockingQueue<Object> responseQueue =
+         new LinkedBlockingQueue<>(10);
+    final ManageCertificatesServerCertificateCollector certificateCollector =
+         new ManageCertificatesServerCertificateCollector(this, hostname, port,
+              useLDAPStartTLS, verbose, responseQueue);
+    certificateCollector.start();
+
+    Object responseObject =
+         ERR_MANAGE_CERTS_RETRIEVE_CERT_NO_CERT_CHAIN_RECEIVED.get(
+              hostname + ':' + port);
+    try
+    {
+      responseObject = responseQueue.poll(90L, TimeUnit.SECONDS);
+    }
+    catch (final Exception e)
+    {
+      Debug.debugException(e);
+    }
+
+    final X509Certificate[] chain;
+    if (responseObject instanceof  X509Certificate[])
+    {
+      chain = (X509Certificate[]) responseObject;
+      if (chain.length == 0)
+      {
+        wrapErr(0, WRAP_COLUMN,
+             ERR_MANAGE_CERTS_RETRIEVE_CERT_EMPTY_CHAIN.get());
+        return ResultCode.NO_RESULTS_RETURNED;
+      }
+    }
+    else if (responseObject instanceof CertException)
+    {
+      // The error message will have already been recorded by the collector
+      // thread, so we can just return a non-success result.
+      return ResultCode.LOCAL_ERROR;
+    }
+    else
+    {
+      wrapErr(0, WRAP_COLUMN, String.valueOf(responseObject));
+      return ResultCode.LOCAL_ERROR;
+    }
+
+    try
+    {
+      certificateCollector.join(10_000L);
+    }
+    catch (final Exception e)
+    {
+      Debug.debugException(e);
+    }
+
+
+    // If the certificates should be written to a file, then do that now.
+    if (outputFile != null)
+    {
+      try (PrintStream s = new PrintStream(outputFile))
+      {
+        for (final X509Certificate c : chain)
+        {
+          if (outputPEM)
+          {
+            writePEMCertificate(s, c.getX509CertificateBytes());
+          }
+          else
+          {
+            s.write(c.getX509CertificateBytes());
+          }
+
+          if (onlyPeer)
+          {
+            break;
+          }
+        }
+      }
+      catch (final Exception e)
+      {
+        Debug.debugException(e);
+        wrapErr(0, WRAP_COLUMN,
+             ERR_MANAGE_CERTS_RETRIEVE_CERT_CANNOT_WRITE_TO_FILE.get(
+                  outputFile.getAbsolutePath(),
+                  StaticUtils.getExceptionMessage(e)));
+        return ResultCode.LOCAL_ERROR;
+      }
+    }
+
+
+    // Display information about the certificates.
+    for (int i=0; i < chain.length; i++)
+    {
+      if (verbose || (i > 0))
+      {
+        out();
+        out();
+      }
+
+      if ((! onlyPeer) && (chain.length > 1))
+      {
+        wrapOut(0, WRAP_COLUMN,
+             INFO_MANAGE_CERTS_RETRIEVE_CERT_DISPLAY_HEADER.get((i+1),
+                  chain.length));
+        out();
+      }
+
+      final X509Certificate c = chain[i];
+      writePEMCertificate(getOut(), c.getX509CertificateBytes());
+      out();
+      printCertificate(c, "", verbose);
+
+      if (onlyPeer)
+      {
+        break;
+      }
+    }
+
+    return ResultCode.SUCCESS;
+  }
+
+
+
+  /**
    * Performs the necessary processing for the trust-server-certificate
    * subcommand.
    *
    * @return  A result code that indicates whether the processing completed
    *          successfully.
    */
+  @NotNull()
   private ResultCode doTrustServerCertificate()
   {
     // Get the values of a number of configured arguments.
@@ -7965,6 +8410,15 @@ public final class ManageCertificates
     {
       wrapErr(0, WRAP_COLUMN, String.valueOf(responseObject));
       return ResultCode.LOCAL_ERROR;
+    }
+
+    try
+    {
+      certificateCollector.join(10_000L);
+    }
+    catch (final Exception e)
+    {
+      Debug.debugException(e);
     }
 
 
@@ -8112,6 +8566,7 @@ public final class ManageCertificates
    * @return  A result code that indicates whether the processing completed
    *          successfully.
    */
+  @NotNull()
   private ResultCode doCheckCertificateUsability()
   {
     // Get the values of a number of configured arguments.
@@ -8254,6 +8709,73 @@ public final class ManageCertificates
         out();
         wrapOut(0, WRAP_COLUMN,
              INFO_MANAGE_CERTS_CHECK_USABILITY_CHAIN_COMPLETE.get());
+      }
+    }
+
+
+    // If there are multiple certificates in the chain, and if the last
+    // certificate in the chain is self-signed, then check to see if it is
+    // contained in the JVM-default trust manager.  If it isn't, then we'll
+    // display a notice, but we won't consider it a warning in and of itself.
+    if ((chain.length > 1) && chain[chain.length-1].isSelfSigned())
+    {
+      final X509Certificate caCert = chain[chain.length-1];
+
+      try
+      {
+        final String jvmDefaultTrustStoreType =
+             inferKeystoreType(JVM_DEFAULT_CACERTS_FILE);
+        final KeyStore jvmDefaultTrustStore =
+             KeyStore.getInstance(jvmDefaultTrustStoreType);
+        try (FileInputStream inputStream =
+                  new FileInputStream(JVM_DEFAULT_CACERTS_FILE))
+        {
+          jvmDefaultTrustStore.load(inputStream, null);
+        }
+
+        boolean found = false;
+        final Enumeration<String> aliases = jvmDefaultTrustStore.aliases();
+        while (aliases.hasMoreElements())
+        {
+          final String jvmDefaultCertAlias = aliases.nextElement();
+          if (jvmDefaultTrustStore.isCertificateEntry(jvmDefaultCertAlias))
+          {
+            final Certificate c =
+                 jvmDefaultTrustStore.getCertificate(jvmDefaultCertAlias);
+            final X509Certificate xc = new X509Certificate(c.getEncoded());
+            if ((caCert.getSubjectDN().equals(xc.getSubjectDN())) &&
+                 Arrays.equals(caCert.getSignatureValue().getBits(),
+                      xc.getSignatureValue().getBits()))
+            {
+              found = true;
+              break;
+            }
+          }
+        }
+
+        if (found)
+        {
+          out();
+          wrapOut(0, WRAP_COLUMN,
+               INFO_MANAGE_CERTS_CHECK_USABILITY_CA_TRUSTED_OK.get(
+                    caCert.getSubjectDN()));
+        }
+        else
+        {
+          out();
+          wrapOut(0, WRAP_COLUMN,
+               INFO_MANAGE_CERTS_CHECK_USABILITY_CA_NOT_IN_JVM_DEFAULT_TS.get(
+                    caCert.getSubjectDN()));
+        }
+      }
+      catch (final Exception e)
+      {
+        Debug.debugException(e);
+        err();
+        wrapErr(0, WRAP_COLUMN,
+             WARN_MANAGE_CERTS_CHECK_USABILITY_CHECK_CA_IN_TS_ERROR.get(
+                  caCert.getSubjectDN(), StaticUtils.getExceptionMessage(e)));
+        numWarnings++;
       }
     }
 
@@ -8679,6 +9201,7 @@ public final class ManageCertificates
    * @return  A result code that indicates whether the processing completed
    *          successfully.
    */
+  @NotNull()
   private ResultCode doDisplayCertificateFile()
   {
     // Get the values of a number of configured arguments.
@@ -8751,6 +9274,7 @@ public final class ManageCertificates
    * @return  A result code that indicates whether the processing completed
    *          successfully.
    */
+  @NotNull()
   private ResultCode doDisplayCertificateSigningRequestFile()
   {
     // Get the values of a number of configured arguments.
@@ -8809,8 +9333,9 @@ public final class ManageCertificates
    * @param  verbose      Indicates whether to display verbose information about
    *                      the certificate.
    */
-  private void printCertificate(final X509Certificate certificate,
-                                final String indent, final boolean verbose)
+  private void printCertificate(@NotNull final X509Certificate certificate,
+                                @NotNull final String indent,
+                                final boolean verbose)
   {
     if (verbose)
     {
@@ -8988,8 +9513,8 @@ public final class ManageCertificates
    *                  indent that line.
    */
   private void printCertificateSigningRequest(
-                    final PKCS10CertificateSigningRequest csr,
-                    final boolean verbose, final String indent)
+                    @NotNull final PKCS10CertificateSigningRequest csr,
+                    final boolean verbose, @NotNull final String indent)
   {
     out(indent +
          INFO_MANAGE_CERTS_PRINT_CSR_LABEL_VERSION.get(
@@ -9057,10 +9582,10 @@ public final class ManageCertificates
    * @param  indent            The string to place at the beginning of each
    *                           line to indent that line.
    */
-  private void printPublicKey(final ASN1BitString encodedPublicKey,
-                              final DecodedPublicKey decodedPublicKey,
-                              final ASN1Element parameters,
-                              final String indent)
+  private void printPublicKey(@NotNull final ASN1BitString encodedPublicKey,
+                              @Nullable final DecodedPublicKey decodedPublicKey,
+                              @Nullable final ASN1Element parameters,
+                              @NotNull final String indent)
   {
     if (decodedPublicKey == null)
     {
@@ -9154,9 +9679,11 @@ public final class ManageCertificates
    * @return  A short summary of the provided public key, or {@code null} if
    *          no summary is available.
    */
-  private static String getPublicKeySummary(final OID publicKeyAlgorithmOID,
-                                            final DecodedPublicKey publicKey,
-                                            final ASN1Element parameters)
+  @NotNull()
+  private static String getPublicKeySummary(
+                             @NotNull final OID publicKeyAlgorithmOID,
+                             @Nullable final DecodedPublicKey publicKey,
+                             @Nullable final ASN1Element parameters)
   {
     if (publicKey instanceof RSAPublicKey)
     {
@@ -9199,8 +9726,8 @@ public final class ManageCertificates
    * @param  indent      The string to place at the beginning of each line to
    *                     indent that line.
    */
-  void printExtensions(final List<X509CertificateExtension> extensions,
-                       final String indent)
+  void printExtensions(@NotNull final List<X509CertificateExtension> extensions,
+                       @NotNull final String indent)
   {
     if (extensions.isEmpty())
     {
@@ -9413,6 +9940,12 @@ public final class ManageCertificates
                INFO_MANAGE_CERTS_PRINT_CERT_LABEL_EXT_KU_DE.get());
         }
 
+        if (kue.isKeyAgreementBitSet())
+        {
+          out(indent + "               " +
+               INFO_MANAGE_CERTS_PRINT_CERT_LABEL_EXT_KU_KA.get());
+        }
+
         if (kue.isKeyCertSignBitSet())
         {
           out(indent + "               " +
@@ -9503,8 +10036,8 @@ public final class ManageCertificates
    * @param  indent        The string to place at the beginning of each line to
    *                       indent that line.
    */
-  private void printGeneralNames(final GeneralNames generalNames,
-                                 final String indent)
+  private void printGeneralNames(@NotNull final GeneralNames generalNames,
+                                 @NotNull final String indent)
   {
     for (final String dnsName : generalNames.getDNSNames())
     {
@@ -9577,8 +10110,9 @@ public final class ManageCertificates
    * @param  encodedCertificate  The bytes that comprise the encoded
    *                             certificate.  It must not be {@code null}.
    */
-  private static void writePEMCertificate(final PrintStream printStream,
-                                          final byte[] encodedCertificate)
+  private static void writePEMCertificate(
+                           @NotNull final PrintStream printStream,
+                           @NotNull final byte[] encodedCertificate)
   {
     final String certBase64 = Base64.encode(encodedCertificate);
     printStream.println("-----BEGIN CERTIFICATE-----");
@@ -9602,8 +10136,8 @@ public final class ManageCertificates
    *                      signing request.  It must not be {@code null}.
    */
   private static void writePEMCertificateSigningRequest(
-                           final PrintStream printStream,
-                           final byte[] encodedCSR)
+                           @NotNull final PrintStream printStream,
+                           @NotNull final byte[] encodedCSR)
   {
     final String certBase64 = Base64.encode(encodedCSR);
     printStream.println("-----BEGIN CERTIFICATE REQUEST-----");
@@ -9626,8 +10160,9 @@ public final class ManageCertificates
    * @param  encodedPrivateKey  The bytes that comprise the encoded private key.
    *                            It must not be {@code null}.
    */
-  private static void writePEMPrivateKey(final PrintStream printStream,
-                                         final byte[] encodedPrivateKey)
+  private static void writePEMPrivateKey(
+                           @NotNull final PrintStream printStream,
+                           @NotNull final byte[] encodedPrivateKey)
   {
     final String certBase64 = Base64.encode(encodedPrivateKey);
     printStream.println("-----BEGIN PRIVATE KEY-----");
@@ -9646,7 +10181,7 @@ public final class ManageCertificates
    *
    * @param  keytoolArgs  The arguments to provide to the keytool command.
    */
-  private void displayKeytoolCommand(final List<String> keytoolArgs)
+  private void displayKeytoolCommand(@NotNull final List<String> keytoolArgs)
   {
     final StringBuilder buffer = new StringBuilder();
     buffer.append("#      keytool");
@@ -9656,7 +10191,8 @@ public final class ManageCertificates
     {
       if (arg.startsWith("-"))
       {
-        buffer.append(" \\");
+        buffer.append(' ');
+        buffer.append(StaticUtils.getCommandLineContinuationString());
         buffer.append(StaticUtils.EOL);
         buffer.append("#           ");
         buffer.append(arg);
@@ -9670,7 +10206,8 @@ public final class ManageCertificates
       }
       else
       {
-        buffer.append(" \\");
+        buffer.append(' ');
+        buffer.append(StaticUtils.getCommandLineContinuationString());
         buffer.append(StaticUtils.EOL);
         buffer.append("#           ");
         buffer.append(arg);
@@ -9692,13 +10229,22 @@ public final class ManageCertificates
    * @return  The path to the target keystore file, or {@code null} if no
    *          keystore path was configured.
    */
+  @Nullable()
   private File getKeystorePath()
   {
     final FileArgument keystoreArgument =
          subCommandParser.getFileArgument("keystore");
-    if (keystoreArgument != null)
+    if ((keystoreArgument != null) && keystoreArgument.isPresent())
     {
       return keystoreArgument.getValue();
+    }
+
+    final BooleanArgument useJVMDefaultTrustStoreArgument =
+         subCommandParser.getBooleanArgument("useJVMDefaultTrustStore");
+    if ((useJVMDefaultTrustStoreArgument != null) &&
+         useJVMDefaultTrustStoreArgument.isPresent())
+    {
+      return JVM_DEFAULT_CACERTS_FILE;
     }
 
     return null;
@@ -9718,7 +10264,8 @@ public final class ManageCertificates
    * @throws  LDAPException  If a problem is encountered while trying to get the
    *                         keystore password.
    */
-  private char[] getKeystorePassword(final File keystoreFile)
+  @Nullable()
+  private char[] getKeystorePassword(@NotNull final File keystoreFile)
           throws LDAPException
   {
     return getKeystorePassword(keystoreFile, null);
@@ -9740,8 +10287,9 @@ public final class ManageCertificates
    * @throws  LDAPException  If a problem is encountered while trying to get the
    *                         keystore password.
    */
-  private char[] getKeystorePassword(final File keystoreFile,
-                                     final String prefix)
+  @Nullable()
+  private char[] getKeystorePassword(@NotNull final File keystoreFile,
+                                     @Nullable final String prefix)
           throws LDAPException
   {
     final String prefixDash;
@@ -9889,7 +10437,8 @@ public final class ManageCertificates
    * @throws  LDAPException  If a problem is encountered while reading the
    *                         password.
    */
-  private char[] promptForPassword(final String prompt,
+  @NotNull()
+  private char[] promptForPassword(@NotNull final String prompt,
                                    final boolean allowEmpty)
           throws LDAPException
   {
@@ -9933,7 +10482,7 @@ public final class ManageCertificates
    * @throws  LDAPException  If a problem is encountered while reading data from
    *                         the client.
    */
-  private boolean promptForYesNo(final String prompt)
+  private boolean promptForYesNo(@NotNull final String prompt)
           throws LDAPException
   {
     while (true)
@@ -9996,6 +10545,7 @@ public final class ManageCertificates
    * @throws  IOException  If a problem is encountered while reading from
    *                       standard input.
    */
+  @NotNull()
   private String readLineFromIn()
           throws IOException
   {
@@ -10053,9 +10603,10 @@ public final class ManageCertificates
    * @throws  LDAPException  If a problem is encountered while trying to get the
    *                         private key password.
    */
-  private char[] getPrivateKeyPassword(final KeyStore keystore,
-                                       final String alias,
-                                       final char[] keystorePassword)
+  @Nullable()
+  private char[] getPrivateKeyPassword(@NotNull final KeyStore keystore,
+                                       @NotNull final String alias,
+                                       @Nullable final char[] keystorePassword)
           throws LDAPException
   {
     return getPrivateKeyPassword(keystore, alias, null, keystorePassword);
@@ -10082,9 +10633,11 @@ public final class ManageCertificates
    * @throws  LDAPException  If a problem is encountered while trying to get the
    *                         private key password.
    */
-  private char[] getPrivateKeyPassword(final KeyStore keystore,
-                                       final String alias, final String prefix,
-                                       final char[] keystorePassword)
+  @Nullable()
+  private char[] getPrivateKeyPassword(@NotNull final KeyStore keystore,
+                                       @NotNull final String alias,
+                                       @Nullable final String prefix,
+                                       @Nullable final char[] keystorePassword)
           throws LDAPException
   {
     final String prefixDash;
@@ -10248,13 +10801,13 @@ public final class ManageCertificates
    *
    * @param  keystorePath  The path to the file to examine.
    *
-   * @return  The keystore type inferred from the provided keystore file, or
-   *          {@code null} if the specified file does not exist.
+   * @return  The keystore type inferred from the provided keystore file.
    *
    * @throws  LDAPException  If a problem is encountered while trying to infer
    *                         the keystore type.
    */
-  private String inferKeystoreType(final File keystorePath)
+  @NotNull()
+  private String inferKeystoreType(@NotNull final File keystorePath)
           throws LDAPException
   {
     if (! keystorePath.exists())
@@ -10340,7 +10893,8 @@ public final class ManageCertificates
    *          keystore, or the provided string if it is for some other keystore
    *          type.
    */
-  static String getUserFriendlyKeystoreType(final String keystoreType)
+  @NotNull()
+  static String getUserFriendlyKeystoreType(@NotNull final String keystoreType)
   {
     if (keystoreType.equalsIgnoreCase("JKS"))
     {
@@ -10373,9 +10927,10 @@ public final class ManageCertificates
    *
    * @throws  LDAPException  If it is not possible to access the keystore.
    */
-  static KeyStore getKeystore(final String keystoreType,
-                              final File keystorePath,
-                              final char[] keystorePassword)
+  @NotNull()
+  static KeyStore getKeystore(@NotNull final String keystoreType,
+                              @NotNull final File keystorePath,
+                              @Nullable final char[] keystorePassword)
           throws LDAPException
   {
     // Instantiate a keystore instance of the desired keystore type.
@@ -10476,7 +11031,9 @@ public final class ManageCertificates
    * @throws  LDAPException  If a problem is encountered while reading
    *                         certificates from the specified file.
    */
-  static List<X509Certificate> readCertificatesFromFile(final File f)
+  @NotNull()
+  public static List<X509Certificate> readCertificatesFromFile(
+                                           @NotNull final File f)
          throws LDAPException
   {
     // Read the first byte of the file to see if it contains DER-formatted data,
@@ -10662,7 +11219,8 @@ public final class ManageCertificates
    * @throws  LDAPException  If a problem is encountered while reading the
    *                         private key.
    */
-  static PKCS8PrivateKey readPrivateKeyFromFile(final File f)
+  @NotNull()
+  static PKCS8PrivateKey readPrivateKeyFromFile(@NotNull final File f)
          throws LDAPException
   {
     // Read the first byte of the file to see if it contains DER-formatted data,
@@ -10895,8 +11453,10 @@ public final class ManageCertificates
    * @throws  LDAPException  If a problem is encountered while reading the
    *                         certificate signing request.
    */
-  static PKCS10CertificateSigningRequest
-              readCertificateSigningRequestFromFile(final File f)
+  @NotNull()
+  public static PKCS10CertificateSigningRequest
+                     readCertificateSigningRequestFromFile(
+                          @NotNull final File f)
          throws LDAPException
   {
     // Read the first byte of the file to see if it contains DER-formatted data,
@@ -11116,7 +11676,8 @@ public final class ManageCertificates
    * @return  A colon-delimited hexadecimal representation of the contents of
    *          the provided byte array.
    */
-  private static String toColonDelimitedHex(final byte... bytes)
+  @NotNull()
+  private static String toColonDelimitedHex(@NotNull final byte... bytes)
   {
     final StringBuilder buffer = new StringBuilder(bytes.length * 3);
     StaticUtils.toHex(bytes, ":", buffer);
@@ -11133,7 +11694,8 @@ public final class ManageCertificates
    *
    * @return  A formatted representation of the provided date.
    */
-  private static String formatDateAndTime(final Date d)
+  @NotNull()
+  private static String formatDateAndTime(@NotNull final Date d)
   {
     // Example:  Sunday, January 1, 2017
     final String dateFormatString = "EEEE, MMMM d, yyyy";
@@ -11176,7 +11738,8 @@ public final class ManageCertificates
    *
    * @return  A formatted representation of the provided date.
    */
-  private static String formatValidityStartTime(final Date d)
+  @NotNull()
+  private static String formatValidityStartTime(@NotNull final Date d)
   {
     // Example:  2017/01/01 01:23:45
     final String dateFormatString = "yyyy'/'MM'/'dd HH':'mm':'ss";
@@ -11207,9 +11770,11 @@ public final class ManageCertificates
    * @throws  LDAPException  If a problem is encountered while getting the
    *                         certificate chain.
    */
-  private static X509Certificate[] getCertificateChain(final String alias,
-                      final KeyStore keystore,
-                      final AtomicReference<DN> missingIssuerRef)
+  @NotNull()
+  private static X509Certificate[] getCertificateChain(
+                      @NotNull final String alias,
+                      @NotNull final KeyStore keystore,
+                      @NotNull final AtomicReference<DN> missingIssuerRef)
           throws LDAPException
   {
     try
@@ -11297,11 +11862,12 @@ public final class ManageCertificates
    * @throws  Exception   If a problem is encountered while trying to retrieve
    *                      the issuer certificate.
    */
+  @Nullable()
   private static X509Certificate getIssuerCertificate(
-                      final X509Certificate certificate,
-                      final KeyStore keystore,
-                      final AtomicReference<KeyStore> jvmDefaultTrustStoreRef,
-                      final AtomicReference<DN> missingIssuerRef)
+               @NotNull final X509Certificate certificate,
+               @NotNull final KeyStore keystore,
+               @NotNull final AtomicReference<KeyStore> jvmDefaultTrustStoreRef,
+               @NotNull final AtomicReference<DN> missingIssuerRef)
           throws Exception
   {
     final DN subjectDN = certificate.getSubjectDN();
@@ -11381,9 +11947,10 @@ public final class ManageCertificates
    * @throws  Exception   If a problem is encountered while trying to retrieve
    *                      the issuer certificate.
    */
+  @Nullable()
   private static X509Certificate getIssuerCertificate(
-                                      final X509Certificate certificate,
-                                      final KeyStore keystore)
+                      @NotNull final X509Certificate certificate,
+                      @NotNull final KeyStore keystore)
           throws Exception
   {
     final Enumeration<String> aliases = keystore.aliases();
@@ -11436,7 +12003,9 @@ public final class ManageCertificates
    *          or {@code null} if the certificate does not have an authority
    *          key identifier.
    */
-  private static byte[] getAuthorityKeyIdentifier(final X509Certificate c)
+  @Nullable()
+  private static byte[] getAuthorityKeyIdentifier(
+                             @NotNull final X509Certificate c)
   {
     for (final X509CertificateExtension extension : c.getExtensions())
     {
@@ -11470,8 +12039,9 @@ public final class ManageCertificates
    * @throws  LDAPException  If a problem is encountered while writing the
    *                         keystore.
    */
-  static void writeKeystore(final KeyStore keystore, final File keystorePath,
-                            final char[] keystorePassword)
+  static void writeKeystore(@NotNull final KeyStore keystore,
+                            @NotNull final File keystorePath,
+                            @Nullable final char[] keystorePassword)
           throws LDAPException
   {
     File copyOfExistingKeystore = null;
@@ -11555,8 +12125,8 @@ public final class ManageCertificates
    *          specified alias, or {@code false} if the alias doesn't exist or
    *          is associated with some other type of entry (like a key).
    */
-  private static boolean hasCertificateAlias(final KeyStore keystore,
-                                             final String alias)
+  private static boolean hasCertificateAlias(@NotNull final KeyStore keystore,
+                                             @NotNull final String alias)
   {
     try
     {
@@ -11584,8 +12154,8 @@ public final class ManageCertificates
    *          alias, or {@code false} if the alias doesn't exist or is
    *          associated with some other type of entry (like a certificate).
    */
-  private static boolean hasKeyAlias(final KeyStore keystore,
-                                     final String alias)
+  private static boolean hasKeyAlias(@NotNull final KeyStore keystore,
+                                     @NotNull final String alias)
   {
     try
     {
@@ -11625,13 +12195,14 @@ public final class ManageCertificates
    * @param  genericExtensions  The list of generic extensions to include.  It
    *                            must not be {@code null} but may be empty.
    */
-  private static void addExtensionArguments(final List<String> keytoolArguments,
-               final BasicConstraintsExtension basicConstraints,
-               final KeyUsageExtension keyUsage,
-               final ExtendedKeyUsageExtension extendedKeyUsage,
-               final Set<String> sanValues,
-               final Set<String> ianValues,
-               final List<X509CertificateExtension> genericExtensions)
+  private static void addExtensionArguments(
+               @NotNull final List<String> keytoolArguments,
+               @Nullable final BasicConstraintsExtension basicConstraints,
+               @Nullable final KeyUsageExtension keyUsage,
+               @Nullable final ExtendedKeyUsageExtension extendedKeyUsage,
+               @NotNull final Set<String> sanValues,
+               @NotNull final Set<String> ianValues,
+               @NotNull final List<X509CertificateExtension> genericExtensions)
   {
     if (basicConstraints != null)
     {
@@ -11796,8 +12367,8 @@ public final class ManageCertificates
    * @param  buffer  The buffer to which the value should be appended.
    * @param  value   The value to append to the buffer.
    */
-  private static void commaAppend(final StringBuilder buffer,
-                                  final String value)
+  private static void commaAppend(@NotNull final StringBuilder buffer,
+                                  @NotNull final String value)
   {
     if (buffer.length() > 0)
     {
@@ -11820,6 +12391,7 @@ public final class ManageCertificates
    *          information is available.
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final String keystorePath = getPlatformSpecificPath("config", "keystore");
@@ -12007,6 +12579,16 @@ public final class ManageCertificates
               getPlatformSpecificPath("config", "keystore"),
               getPlatformSpecificPath("config", "current.pin"),
               getPlatformSpecificPath("config", "new.pin")));
+
+    examples.put(
+         new String[]
+         {
+           "retrieve-server-certificate",
+           "--hostname", "ds.example.com",
+           "--port", "636"
+         },
+         INFO_MANAGE_CERTS_SC_RETRIEVE_CERT_EXAMPLE_1.get(
+              getPlatformSpecificPath("config", "truststore")));
 
     examples.put(
          new String[]

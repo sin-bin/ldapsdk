@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,6 +52,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -157,14 +174,14 @@ public final class PasswordQualityRequirement
   // A set of properties that may be used to indicate constraints that the
   // server will impose when validating the password in accordance with this
   // requirement.
-  private final Map<String,String> clientSideValidationProperties;
+  @NotNull private final Map<String,String> clientSideValidationProperties;
 
   // The name of the client-side validation type for this requirement, if any.
-  private final String clientSideValidationType;
+  @Nullable private final String clientSideValidationType;
 
   // A user-friendly description of the constraints that proposed passwords must
   // satisfy in order to be accepted by the server.
-  private final String description;
+  @NotNull private final String description;
 
 
 
@@ -177,7 +194,7 @@ public final class PasswordQualityRequirement
    *                      requirement and be accepted by the server.  This must
    *                      not be {@code null}.
    */
-  public PasswordQualityRequirement(final String description)
+  public PasswordQualityRequirement(@NotNull final String description)
   {
     this(description, null, null);
   }
@@ -222,9 +239,9 @@ public final class PasswordQualityRequirement
    *                                         associated type of client-side
    *                                         validation.
    */
-  public PasswordQualityRequirement(final String description,
-              final String clientSideValidationType,
-              final Map<String,String> clientSideValidationProperties)
+  public PasswordQualityRequirement(@NotNull final String description,
+              @Nullable final String clientSideValidationType,
+              @Nullable final Map<String,String> clientSideValidationProperties)
   {
     Validator.ensureNotNull(description);
 
@@ -257,6 +274,7 @@ public final class PasswordQualityRequirement
    *
    * @return  A user-friendly description for this password quality requirement.
    */
+  @NotNull()
   public String getDescription()
   {
     return description;
@@ -275,6 +293,7 @@ public final class PasswordQualityRequirement
    *          requirement, or {@code null} if client-side validation is not
    *          supported for this password quality requirement.
    */
+  @Nullable()
   public String getClientSideValidationType()
   {
     return clientSideValidationType;
@@ -293,6 +312,7 @@ public final class PasswordQualityRequirement
    *          additional properties required for the associated type of
    *          client-side validation.
    */
+  @NotNull()
   public Map<String,String> getClientSideValidationProperties()
   {
     return clientSideValidationProperties;
@@ -309,6 +329,7 @@ public final class PasswordQualityRequirement
    * @return  An ASN.1-encoded representation of this password quality
    *          requirement.
    */
+  @NotNull()
   public ASN1Element encode()
   {
     final ArrayList<ASN1Element> requirementElements = new ArrayList<>(2);
@@ -355,7 +376,9 @@ public final class PasswordQualityRequirement
    *                         decode the provided ASN.1 element as a password
    *                         quality requirement.
    */
-  public static PasswordQualityRequirement decode(final ASN1Element element)
+  @NotNull()
+  public static PasswordQualityRequirement decode(
+              @NotNull final ASN1Element element)
          throws LDAPException
   {
     try
@@ -444,6 +467,7 @@ public final class PasswordQualityRequirement
    * @return  A string representation of this password quality requirement.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -459,7 +483,7 @@ public final class PasswordQualityRequirement
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("PasswordQualityRequirement(description='");
     buffer.append(description);

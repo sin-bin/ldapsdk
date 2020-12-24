@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -35,6 +50,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -102,7 +119,7 @@ public final class AssertionRequestControl
   /**
    * The OID (1.3.6.1.1.12) for the assertion request control.
    */
-  public static final String ASSERTION_REQUEST_OID = "1.3.6.1.1.12";
+  @NotNull public static final String ASSERTION_REQUEST_OID = "1.3.6.1.1.12";
 
 
 
@@ -114,7 +131,7 @@ public final class AssertionRequestControl
 
 
   // The search filter for this assertion request control.
-  private final Filter filter;
+  @NotNull private final Filter filter;
 
 
 
@@ -128,7 +145,7 @@ public final class AssertionRequestControl
    * @throws  LDAPException  If the provided filter string cannot be decoded as
    *                         a search filter.
    */
-  public AssertionRequestControl(final String filter)
+  public AssertionRequestControl(@NotNull final String filter)
          throws LDAPException
   {
     this(Filter.create(filter), true);
@@ -143,7 +160,7 @@ public final class AssertionRequestControl
    * @param  filter  The filter for this assertion control.  It must not be
    *                 {@code null}.
    */
-  public AssertionRequestControl(final Filter filter)
+  public AssertionRequestControl(@NotNull final Filter filter)
   {
     this(filter, true);
   }
@@ -162,7 +179,8 @@ public final class AssertionRequestControl
    * @throws  LDAPException  If the provided filter string cannot be decoded as
    *                         a search filter.
    */
-  public AssertionRequestControl(final String filter, final boolean isCritical)
+  public AssertionRequestControl(@NotNull final String filter,
+                                 final boolean isCritical)
          throws LDAPException
   {
     this(Filter.create(filter), isCritical);
@@ -179,7 +197,8 @@ public final class AssertionRequestControl
    * @param  isCritical  Indicates whether this control should be marked
    *                     critical.
    */
-  public AssertionRequestControl(final Filter filter, final boolean isCritical)
+  public AssertionRequestControl(@NotNull final Filter filter,
+                                 final boolean isCritical)
   {
     super(ASSERTION_REQUEST_OID, isCritical, encodeValue(filter));
 
@@ -198,7 +217,7 @@ public final class AssertionRequestControl
    * @throws  LDAPException  If the provided control cannot be decoded as an
    *                         assertion request control.
    */
-  public AssertionRequestControl(final Control control)
+  public AssertionRequestControl(@NotNull final Control control)
          throws LDAPException
   {
     super(control);
@@ -242,8 +261,10 @@ public final class AssertionRequestControl
    *
    * @return  The generated assertion request control.
    */
-  public static AssertionRequestControl generate(final Entry sourceEntry,
-                                                 final String... attributes)
+  @NotNull()
+  public static AssertionRequestControl generate(
+                     @NotNull final Entry sourceEntry,
+                     @Nullable final String... attributes)
   {
     Validator.ensureNotNull(sourceEntry);
 
@@ -300,7 +321,8 @@ public final class AssertionRequestControl
    * @return  An ASN.1 octet string that can be used as the value for this
    *          control.
    */
-  private static ASN1OctetString encodeValue(final Filter filter)
+  @NotNull()
+  private static ASN1OctetString encodeValue(@NotNull final Filter filter)
   {
     return new ASN1OctetString(filter.encode().encode());
   }
@@ -312,6 +334,7 @@ public final class AssertionRequestControl
    *
    * @return  The filter for this assertion control.
    */
+  @NotNull()
   public Filter getFilter()
   {
     return filter;
@@ -323,6 +346,7 @@ public final class AssertionRequestControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_ASSERTION_REQUEST.get();
@@ -334,7 +358,7 @@ public final class AssertionRequestControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("AssertionRequestControl(filter='");
     filter.toString(buffer);

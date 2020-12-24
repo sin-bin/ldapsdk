@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,7 @@ import java.io.Serializable;
 
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -56,10 +72,10 @@ public class LDAPRebindAuth
 
 
   // The DN to use when authenticating.
-  private final String dn;
+  @Nullable private final String dn;
 
   // The password to use when authenticating.
-  private final String password;
+  @Nullable private final String password;
 
 
 
@@ -69,7 +85,8 @@ public class LDAPRebindAuth
    * @param  dn        The DN to use when authenticating.
    * @param  password  The password to use when authenticating.
    */
-  public LDAPRebindAuth(final String dn, final String password)
+  public LDAPRebindAuth(@Nullable final String dn,
+                        @Nullable final String password)
   {
     this.dn       = dn;
     this.password = password;
@@ -82,6 +99,7 @@ public class LDAPRebindAuth
    *
    * @return  The DN to use when authenticating.
    */
+  @Nullable()
   public String getDN()
   {
     return dn;
@@ -94,6 +112,7 @@ public class LDAPRebindAuth
    *
    * @return  The password to use when authenticating.
    */
+  @Nullable()
   public String getPassword()
   {
     return password;

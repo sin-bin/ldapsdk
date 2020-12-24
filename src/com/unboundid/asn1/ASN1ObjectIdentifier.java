@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,7 @@ import java.util.List;
 import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.OID;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -62,7 +78,7 @@ public final class ASN1ObjectIdentifier
 
 
   // The OID represented by this object identifier element.
-  private final OID oid;
+  @NotNull private final OID oid;
 
 
 
@@ -76,7 +92,7 @@ public final class ASN1ObjectIdentifier
    * @throws  ASN1Exception  If the provided OID does not strictly adhere to the
    *                         numeric OID format.
    */
-  public ASN1ObjectIdentifier(final OID oid)
+  public ASN1ObjectIdentifier(@NotNull final OID oid)
          throws ASN1Exception
   {
     this(ASN1Constants.UNIVERSAL_OBJECT_IDENTIFIER_TYPE, oid);
@@ -95,7 +111,7 @@ public final class ASN1ObjectIdentifier
    * @throws  ASN1Exception  If the provided OID does not strictly adhere to the
    *                         numeric OID format.
    */
-  public ASN1ObjectIdentifier(final byte type, final OID oid)
+  public ASN1ObjectIdentifier(final byte type, @NotNull final OID oid)
          throws ASN1Exception
   {
     this(type, oid, encodeValue(oid));
@@ -114,7 +130,7 @@ public final class ASN1ObjectIdentifier
    * @throws  ASN1Exception  If the provided OID does not strictly adhere to the
    *                         numeric OID format.
    */
-  public ASN1ObjectIdentifier(final String oidString)
+  public ASN1ObjectIdentifier(@NotNull final String oidString)
          throws ASN1Exception
   {
     this(ASN1Constants.UNIVERSAL_OBJECT_IDENTIFIER_TYPE, oidString);
@@ -134,7 +150,8 @@ public final class ASN1ObjectIdentifier
    * @throws  ASN1Exception  If the provided OID does not strictly adhere to the
    *                         numeric OID format.
    */
-  public ASN1ObjectIdentifier(final byte type, final String oidString)
+  public ASN1ObjectIdentifier(final byte type,
+                              @NotNull final String oidString)
          throws ASN1Exception
   {
     this(type, new OID(oidString));
@@ -150,8 +167,8 @@ public final class ASN1ObjectIdentifier
    * @param  oid           The OID to represent with this element.
    * @param  encodedValue  The encoded value for this element.
    */
-  private ASN1ObjectIdentifier(final byte type, final OID oid,
-                               final byte[] encodedValue)
+  private ASN1ObjectIdentifier(final byte type, @NotNull final OID oid,
+                               @NotNull final byte[] encodedValue)
   {
     super(type, encodedValue);
 
@@ -172,7 +189,8 @@ public final class ASN1ObjectIdentifier
    * @throws  ASN1Exception  If the provided OID does not strictly conform to
    *                         the requirements for ASN.1 OIDs.
    */
-  private static byte[] encodeValue(final OID oid)
+  @NotNull()
+  private static byte[] encodeValue(@NotNull final OID oid)
           throws ASN1Exception
   {
     // Make sure that the provided UID conforms to the necessary constraints.
@@ -241,7 +259,8 @@ public final class ASN1ObjectIdentifier
    * @param  b  The buffer to which the encoded representation should be
    *            appended.
    */
-  private static void encodeComponent(final int c, final ByteStringBuffer b)
+  private static void encodeComponent(final int c,
+                                      @NotNull final ByteStringBuffer b)
   {
     final int finalByte = c & 0b1111111;
     if (finalByte == c)
@@ -283,6 +302,7 @@ public final class ASN1ObjectIdentifier
    *
    * @return  The OID represented by this object identifier element.
    */
+  @NotNull()
   public OID getOID()
   {
     return oid;
@@ -302,8 +322,9 @@ public final class ASN1ObjectIdentifier
    * @throws  ASN1Exception  If the provided array cannot be decoded as an
    *                         object identifier element.
    */
+  @NotNull()
   public static ASN1ObjectIdentifier decodeAsObjectIdentifier(
-                                          final byte[] elementBytes)
+                                          @NotNull final byte[] elementBytes)
          throws ASN1Exception
   {
     try
@@ -357,8 +378,9 @@ public final class ASN1ObjectIdentifier
    * @throws  ASN1Exception  If the provided element cannot be decoded as an
    *                         object identifier element.
    */
+  @NotNull()
   public static ASN1ObjectIdentifier decodeAsObjectIdentifier(
-                                          final ASN1Element element)
+                                          @NotNull final ASN1Element element)
          throws ASN1Exception
   {
     final OID oid = decodeValue(element.getValue());
@@ -378,7 +400,8 @@ public final class ASN1ObjectIdentifier
    * @throws  ASN1Exception  If the provided value cannot be decoded as a valid
    *                         OID.
    */
-  private static OID decodeValue(final byte[] elementValue)
+  @NotNull()
+  private static OID decodeValue(@NotNull final byte[] elementValue)
           throws ASN1Exception
   {
     if (elementValue.length == 0)
@@ -436,7 +459,7 @@ public final class ASN1ObjectIdentifier
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append(oid.toString());
   }

@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.unboundid.ldap.sdk.Control;
@@ -50,6 +66,8 @@ import com.unboundid.util.FixedRateBarrier;
 import com.unboundid.util.FormattableColumn;
 import com.unboundid.util.HorizontalAlignment;
 import com.unboundid.util.LDAPCommandLineTool;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.OutputFormat;
 import com.unboundid.util.RateAdjustor;
@@ -170,102 +188,102 @@ public final class ModRate
 
 
   // Indicates whether a request has been made to stop running.
-  private final AtomicBoolean stopRequested;
+  @NotNull private final AtomicBoolean stopRequested;
+
+  // The number of modrate threads that are currently running.
+  @NotNull private final AtomicInteger runningThreads;
 
   // The argument used to indicate whether to generate output in CSV format.
-  private BooleanArgument csvFormat;
+  @Nullable private BooleanArgument csvFormat;
 
   // Indicates that the tool should use the increment modification type instead
   // of replace.
-  private BooleanArgument increment;
+  @Nullable private BooleanArgument increment;
 
   // Indicates that modify requests should include the permissive modify request
   // control.
-  private BooleanArgument permissiveModify;
+  @Nullable private BooleanArgument permissiveModify;
 
   // The argument used to indicate whether to suppress information about error
   // result codes.
-  private BooleanArgument suppressErrorsArgument;
+  @Nullable private BooleanArgument suppressErrorsArgument;
 
   // The argument used to indicate that a generic control should be included in
   // the request.
-  private ControlArgument control;
+  @Nullable private ControlArgument control;
 
   // The argument used to specify a variable rate file.
-  private FileArgument sampleRateFile;
+  @Nullable private FileArgument sampleRateFile;
 
   // The argument used to specify a variable rate file.
-  private FileArgument variableRateData;
+  @Nullable private FileArgument variableRateData;
 
   // Indicates that modify requests should include the assertion request control
   // with the specified filter.
-  private FilterArgument assertionFilter;
+  @Nullable private FilterArgument assertionFilter;
 
   // The argument used to specify the collection interval.
-  private IntegerArgument collectionInterval;
+  @Nullable private IntegerArgument collectionInterval;
 
   // The increment amount to use when performing an increment instead of a
   // replace.
-  private IntegerArgument incrementAmount;
+  @Nullable private IntegerArgument incrementAmount;
 
   // The argument used to specify the number of modify iterations on a
   // connection before it is closed and re-established.
-  private IntegerArgument iterationsBeforeReconnect;
+  @Nullable private IntegerArgument iterationsBeforeReconnect;
 
   // The argument used to specify the number of intervals.
-  private IntegerArgument numIntervals;
+  @Nullable private IntegerArgument numIntervals;
 
   // The argument used to specify the number of threads.
-  private IntegerArgument numThreads;
+  @Nullable private IntegerArgument numThreads;
 
   // The argument used to specify the seed to use for the random number
   // generator.
-  private IntegerArgument randomSeed;
+  @Nullable private IntegerArgument randomSeed;
 
   // The target rate of modifies per second.
-  private IntegerArgument ratePerSecond;
+  @Nullable private IntegerArgument ratePerSecond;
 
   // The number of values to include in the replace modification.
-  private IntegerArgument valueCount;
+  @Nullable private IntegerArgument valueCount;
 
   // The argument used to specify the length of the values to generate.
-  private IntegerArgument valueLength;
+  @Nullable private IntegerArgument valueLength;
 
   // The number of warm-up intervals to perform.
-  private IntegerArgument warmUpIntervals;
+  @Nullable private IntegerArgument warmUpIntervals;
 
   // The argument used to specify the name of the attribute to modify.
-  private StringArgument attribute;
+  @Nullable private StringArgument attribute;
 
   // The argument used to specify the set of characters to use when generating
   // values.
-  private StringArgument characterSet;
+  @Nullable private StringArgument characterSet;
 
   // The argument used to specify the DNs of the entries to modify.
-  private StringArgument entryDN;
+  @Nullable private StringArgument entryDN;
 
   // Indicates that modify requests should include the post-read request control
   // to request the specified attribute.
-  private StringArgument postReadAttribute;
+  @Nullable private StringArgument postReadAttribute;
 
   // Indicates that modify requests should include the pre-read request control
   // to request the specified attribute.
-  private StringArgument preReadAttribute;
+  @Nullable private StringArgument preReadAttribute;
 
   // The argument used to specify the proxied authorization identity.
-  private StringArgument proxyAs;
+  @Nullable private StringArgument proxyAs;
 
   // The argument used to specify the timestamp format.
-  private StringArgument timestampFormat;
+  @Nullable private StringArgument timestampFormat;
 
   // The argument used to specify the pattern to use to generate values.
-  private StringArgument valuePattern;
-
-  // The thread currently being used to run the searchrate tool.
-  private volatile Thread runningThread;
+  @Nullable private StringArgument valuePattern;
 
   // A wakeable sleeper that will be used to sleep between reporting intervals.
-  private final WakeableSleeper sleeper;
+  @NotNull private final WakeableSleeper sleeper;
 
 
 
@@ -275,7 +293,7 @@ public final class ModRate
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String[] args)
+  public static void main(@NotNull final String[] args)
   {
     final ResultCode resultCode = main(args, System.out, System.err);
     if (resultCode != ResultCode.SUCCESS)
@@ -300,9 +318,10 @@ public final class ModRate
    *
    * @return  A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args,
-                                final OutputStream outStream,
-                                final OutputStream errStream)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream)
   {
     final ModRate modRate = new ModRate(outStream, errStream);
     return modRate.runTool(args);
@@ -320,11 +339,13 @@ public final class ModRate
    *                    written.  It may be {@code null} if error messages
    *                    should be suppressed.
    */
-  public ModRate(final OutputStream outStream, final OutputStream errStream)
+  public ModRate(@Nullable final OutputStream outStream,
+                 @Nullable final OutputStream errStream)
   {
     super(outStream, errStream);
 
     stopRequested = new AtomicBoolean(false);
+    runningThreads = new AtomicInteger(0);
     sleeper = new WakeableSleeper();
   }
 
@@ -336,6 +357,7 @@ public final class ModRate
    * @return  The name for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "modrate";
@@ -349,6 +371,7 @@ public final class ModRate
    * @return  The description for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return "Perform repeated modifications against " +
@@ -363,6 +386,7 @@ public final class ModRate
    * @return  The version string for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -498,7 +522,7 @@ public final class ModRate
    * @throws  ArgumentException  If a problem occurs while adding the arguments.
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     String description = "The DN of the entry to modify.  It may be a simple " +
@@ -817,6 +841,7 @@ public final class ModRate
    *          for use with this tool.
    */
   @Override()
+  @NotNull()
   public LDAPConnectionOptions getConnectionOptions()
   {
     final LDAPConnectionOptions options = new LDAPConnectionOptions();
@@ -834,30 +859,8 @@ public final class ModRate
    * @return  The result code for the processing that was performed.
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
-  {
-    runningThread = Thread.currentThread();
-
-    try
-    {
-      return doToolProcessingInternal();
-    }
-    finally
-    {
-      runningThread = null;
-    }
-
-  }
-
-
-  /**
-   * Performs the actual processing for this tool.  In this case, it gets a
-   * connection to the directory server and uses it to perform the requested
-   * modifications.
-   *
-   * @return  The result code for the processing that was performed.
-   */
-  private ResultCode doToolProcessingInternal()
   {
     // If the sample rate file argument was specified, then generate the sample
     // variable rate data file and return.
@@ -1140,7 +1143,7 @@ public final class ModRate
       threads[i] = new ModRateThread(this, i, connection, dnPattern, attrs,
            parsedValuePattern, valueCount.getValue(), increment.isPresent(),
            incrementAmount.getValue(), controlArray, authzIDPattern,
-           iterationsBeforeReconnect.getValue(), barrier,
+           iterationsBeforeReconnect.getValue(), runningThreads, barrier,
            modCounter, modDurations, errorCounter, rcCounter, fixedRateBarrier);
       threads[i].start();
     }
@@ -1334,21 +1337,19 @@ public final class ModRate
     stopRequested.set(true);
     sleeper.wakeup();
 
-    final Thread t = runningThread;
-    if (t != null)
+    while (true)
     {
-      try
+      final int stillRunning = runningThreads.get();
+      if (stillRunning <= 0)
       {
-        t.join();
+        break;
       }
-      catch (final Exception e)
+      else
       {
-        Debug.debugException(e);
-
-        if (e instanceof InterruptedException)
+        try
         {
-          Thread.currentThread().interrupt();
-        }
+          Thread.sleep(1L);
+        } catch (final Exception e) {}
       }
     }
   }
@@ -1359,6 +1360,7 @@ public final class ModRate
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> examples =

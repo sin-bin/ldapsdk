@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,8 @@ import com.unboundid.ldap.sdk.DN;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -48,7 +65,7 @@ public final class DistinguishedNameMatchingRule
    * The singleton instance that will be returned from the {@code getInstance}
    * method.
    */
-  private static final DistinguishedNameMatchingRule INSTANCE =
+  @NotNull private static final DistinguishedNameMatchingRule INSTANCE =
        new DistinguishedNameMatchingRule();
 
 
@@ -56,7 +73,8 @@ public final class DistinguishedNameMatchingRule
   /**
    * The name for the distinguishedNameMatch equality matching rule.
    */
-  public static final String EQUALITY_RULE_NAME = "distinguishedNameMatch";
+  @NotNull public static final String EQUALITY_RULE_NAME =
+       "distinguishedNameMatch";
 
 
 
@@ -64,7 +82,7 @@ public final class DistinguishedNameMatchingRule
    * The name for the distinguishedNameMatch equality matching rule, formatted
    * in all lowercase characters.
    */
-  static final String LOWER_EQUALITY_RULE_NAME =
+  @NotNull static final String LOWER_EQUALITY_RULE_NAME =
        StaticUtils.toLowerCase(EQUALITY_RULE_NAME);
 
 
@@ -72,7 +90,7 @@ public final class DistinguishedNameMatchingRule
   /**
    * The OID for the distinguishedNameMatch equality matching rule.
    */
-  public static final String EQUALITY_RULE_OID = "2.5.13.1";
+  @NotNull public static final String EQUALITY_RULE_OID = "2.5.13.1";
 
 
 
@@ -98,6 +116,7 @@ public final class DistinguishedNameMatchingRule
    *
    * @return  A singleton instance of this matching rule.
    */
+  @NotNull()
   public static DistinguishedNameMatchingRule getInstance()
   {
     return INSTANCE;
@@ -109,6 +128,7 @@ public final class DistinguishedNameMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getEqualityMatchingRuleName()
   {
     return EQUALITY_RULE_NAME;
@@ -120,6 +140,7 @@ public final class DistinguishedNameMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getEqualityMatchingRuleOID()
   {
     return EQUALITY_RULE_OID;
@@ -131,6 +152,7 @@ public final class DistinguishedNameMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public String getOrderingMatchingRuleName()
   {
     return null;
@@ -142,6 +164,7 @@ public final class DistinguishedNameMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public String getOrderingMatchingRuleOID()
   {
     return null;
@@ -153,6 +176,7 @@ public final class DistinguishedNameMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public String getSubstringMatchingRuleName()
   {
     return null;
@@ -164,6 +188,7 @@ public final class DistinguishedNameMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public String getSubstringMatchingRuleOID()
   {
     return null;
@@ -175,8 +200,8 @@ public final class DistinguishedNameMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public boolean valuesMatch(final ASN1OctetString value1,
-                             final ASN1OctetString value2)
+  public boolean valuesMatch(@NotNull final ASN1OctetString value1,
+                             @NotNull final ASN1OctetString value2)
          throws LDAPException
   {
     final DN dn1;
@@ -212,8 +237,8 @@ public final class DistinguishedNameMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public boolean matchesAnyValue(final ASN1OctetString assertionValue,
-                                 final ASN1OctetString[] attributeValues)
+  public boolean matchesAnyValue(@NotNull final ASN1OctetString assertionValue,
+                      @NotNull final ASN1OctetString[] attributeValues)
          throws LDAPException
   {
     if ((assertionValue == null) || (attributeValues == null) ||
@@ -258,10 +283,10 @@ public final class DistinguishedNameMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public boolean matchesSubstring(final ASN1OctetString value,
-                                  final ASN1OctetString subInitial,
-                                  final ASN1OctetString[] subAny,
-                                  final ASN1OctetString subFinal)
+  public boolean matchesSubstring(@NotNull final ASN1OctetString value,
+                                  @Nullable final ASN1OctetString subInitial,
+                                  @Nullable final ASN1OctetString[] subAny,
+                                  @Nullable final ASN1OctetString subFinal)
          throws LDAPException
   {
     throw new LDAPException(ResultCode.INAPPROPRIATE_MATCHING,
@@ -274,8 +299,8 @@ public final class DistinguishedNameMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public int compareValues(final ASN1OctetString value1,
-                           final ASN1OctetString value2)
+  public int compareValues(@NotNull final ASN1OctetString value1,
+                           @NotNull final ASN1OctetString value2)
          throws LDAPException
   {
     throw new LDAPException(ResultCode.INAPPROPRIATE_MATCHING,
@@ -288,7 +313,8 @@ public final class DistinguishedNameMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public ASN1OctetString normalize(final ASN1OctetString value)
+  @NotNull()
+  public ASN1OctetString normalize(@NotNull final ASN1OctetString value)
          throws LDAPException
   {
     try
@@ -310,8 +336,10 @@ public final class DistinguishedNameMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public ASN1OctetString normalizeSubstring(final ASN1OctetString value,
-                                            final byte substringType)
+  @NotNull()
+  public ASN1OctetString normalizeSubstring(
+                              @NotNull final ASN1OctetString value,
+                              final byte substringType)
          throws LDAPException
   {
     throw new LDAPException(ResultCode.INAPPROPRIATE_MATCHING,

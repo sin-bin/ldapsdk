@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,8 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import com.unboundid.asn1.ASN1BitString;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -116,7 +133,7 @@ public enum CRLDistributionPointRevocationReason
   private final int bitPosition;
 
   // A human-readable name for this revocation reason.
-  private final String name;
+  @NotNull private final String name;
 
 
 
@@ -128,7 +145,7 @@ public enum CRLDistributionPointRevocationReason
    * @param  bitPosition  The bit string index of the bit that indicates whether
    *                      this reason applies.
    */
-  CRLDistributionPointRevocationReason(final String name,
+  CRLDistributionPointRevocationReason(@NotNull final String name,
                                        final int bitPosition)
   {
     this.name = name;
@@ -144,6 +161,7 @@ public enum CRLDistributionPointRevocationReason
    * @return  A human-readable name for this CRL distribution point revocation
    *          reason.
    */
+  @NotNull()
   public String getName()
   {
     return name;
@@ -174,8 +192,9 @@ public enum CRLDistributionPointRevocationReason
    * @return  A set that contains all of the revocation reasons that are set in
    *          the provided bit string.
    */
+  @NotNull()
   static Set<CRLDistributionPointRevocationReason>
-              getReasonSet(final ASN1BitString bitString)
+              getReasonSet(@NotNull final ASN1BitString bitString)
   {
     final boolean[] bits = bitString.getBits();
 
@@ -202,8 +221,9 @@ public enum CRLDistributionPointRevocationReason
    *
    * @return  The bit string that represents the encoded set of reasons.
    */
+  @NotNull()
   static ASN1BitString toBitString(final byte type,
-              final Set<CRLDistributionPointRevocationReason> reasons)
+              @NotNull final Set<CRLDistributionPointRevocationReason> reasons)
   {
     final CRLDistributionPointRevocationReason[] values = values();
     final boolean[] bits = new boolean[values.length];
@@ -227,7 +247,9 @@ public enum CRLDistributionPointRevocationReason
    * @return  The requested CRL distribution point revocation reason, or
    *          {@code null} if no such reason is defined.
    */
-  public static CRLDistributionPointRevocationReason forName(final String name)
+  @Nullable()
+  public static CRLDistributionPointRevocationReason
+                     forName(@NotNull final String name)
   {
     switch (StaticUtils.toLowerCase(name))
     {

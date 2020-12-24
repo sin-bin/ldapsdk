@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.ldap.sdk.controls.PasswordExpiringControl;
 import com.unboundid.ldap.sdk.experimental.
             DraftBeheraLDAPPasswordPolicy10ResponseControl;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -58,18 +75,18 @@ public final class PasswordExpirationLDAPConnectionPoolHealthCheck
        extends LDAPConnectionPoolHealthCheck
 {
   // The time that the last expiration warning message was written.
-  private final AtomicLong lastWarningTime = new AtomicLong(0L);
+  @NotNull private final AtomicLong lastWarningTime = new AtomicLong(0L);
 
   // The length of time in milliseconds that should elapse between warning
   // messages about a potential upcoming problem.
-  private final Long millisBetweenRepeatWarnings;
+  @Nullable private final Long millisBetweenRepeatWarnings;
 
   // The output stream to which the expiration message will be written, if
   // provided.
-  private final OutputStream outputStream;
+  @Nullable private final OutputStream outputStream;
 
   // The writer to which the expiration message will be written, if provided.
-  private final Writer writer;
+  @Nullable private final Writer writer;
 
 
 
@@ -95,7 +112,7 @@ public final class PasswordExpirationLDAPConnectionPoolHealthCheck
    *                       be written.
    */
   public PasswordExpirationLDAPConnectionPoolHealthCheck(
-              final OutputStream outputStream)
+              @Nullable final OutputStream outputStream)
   {
     this(outputStream, null, null);
   }
@@ -110,7 +127,8 @@ public final class PasswordExpirationLDAPConnectionPoolHealthCheck
    *
    * @param  writer  The writer to which a warning message should be written.
    */
-  public PasswordExpirationLDAPConnectionPoolHealthCheck(final Writer writer)
+  public PasswordExpirationLDAPConnectionPoolHealthCheck(
+              @Nullable final Writer writer)
   {
     this(null, writer, null);
   }
@@ -141,8 +159,8 @@ public final class PasswordExpirationLDAPConnectionPoolHealthCheck
    *                                      should be suppressed.
    */
   public PasswordExpirationLDAPConnectionPoolHealthCheck(
-              final OutputStream outputStream,
-              final Long millisBetweenRepeatWarnings)
+              @Nullable final OutputStream outputStream,
+              @Nullable final Long millisBetweenRepeatWarnings)
   {
     this(outputStream, null, millisBetweenRepeatWarnings);
   }
@@ -172,8 +190,9 @@ public final class PasswordExpirationLDAPConnectionPoolHealthCheck
    *                                      be written and all subsequent warnings
    *                                      should be suppressed.
    */
-  public PasswordExpirationLDAPConnectionPoolHealthCheck(final Writer writer,
-              final Long millisBetweenRepeatWarnings)
+  public PasswordExpirationLDAPConnectionPoolHealthCheck(
+              @Nullable final Writer writer,
+              @Nullable final Long millisBetweenRepeatWarnings)
   {
     this(null, writer, millisBetweenRepeatWarnings);
   }
@@ -208,8 +227,9 @@ public final class PasswordExpirationLDAPConnectionPoolHealthCheck
    *                                      should be suppressed.
    */
   private PasswordExpirationLDAPConnectionPoolHealthCheck(
-               final OutputStream outputStream, final Writer writer,
-               final Long millisBetweenRepeatWarnings)
+               @Nullable final OutputStream outputStream,
+               @Nullable final Writer writer,
+               @Nullable final Long millisBetweenRepeatWarnings)
   {
     this.outputStream                = outputStream;
     this.writer                      = writer;
@@ -223,8 +243,8 @@ public final class PasswordExpirationLDAPConnectionPoolHealthCheck
    */
   @Override()
   public void ensureConnectionValidAfterAuthentication(
-                   final LDAPConnection connection,
-                   final BindResult bindResult)
+                   @NotNull final LDAPConnection connection,
+                   @NotNull final BindResult bindResult)
          throws LDAPException
   {
     // See if the bind result includes a password expired control.  This will
@@ -365,7 +385,7 @@ public final class PasswordExpirationLDAPConnectionPoolHealthCheck
    *
    * @throws  LDAPException  If the warning should be treated as an error.
    */
-  private void warn(final String message)
+  private void warn(@NotNull final String message)
           throws LDAPException
   {
     if (outputStream != null)
@@ -407,7 +427,7 @@ public final class PasswordExpirationLDAPConnectionPoolHealthCheck
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("WarnAboutPasswordExpirationLDAPConnectionPoolHealthCheck(");
     buffer.append("throwExceptionOnWarning=");

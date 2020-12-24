@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,7 @@ import java.util.regex.Pattern;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -68,8 +84,8 @@ public final class RegularExpressionArgumentValueValidator
    * {@inheritDoc}
    */
   @Override()
-  public void validateArgumentValue(final Argument argument,
-                                    final String valueString)
+  public void validateArgumentValue(@NotNull final Argument argument,
+                                    @NotNull final String valueString)
          throws ArgumentException
   {
     try
@@ -81,7 +97,8 @@ public final class RegularExpressionArgumentValueValidator
       Debug.debugException(e);
       throw new ArgumentException(
            ERR_REGEX_VALIDATOR_VALUE_NOT_REGEX.get(valueString,
-                argument.getIdentifierString()));
+                argument.getIdentifierString()),
+           e);
     }
   }
 
@@ -93,6 +110,7 @@ public final class RegularExpressionArgumentValueValidator
    * @return  A string representation of this argument value validator.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -109,7 +127,7 @@ public final class RegularExpressionArgumentValueValidator
    * @param  buffer  The buffer to which the string representation should be
    *                 appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("RegularExpressionArgumentValueValidator()");
   }

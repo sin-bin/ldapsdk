@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,10 +37,13 @@ package com.unboundid.util.ssl;
 
 
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -39,11 +57,12 @@ import com.unboundid.util.ThreadSafetyLevel;
 @ThreadSafety(level=ThreadSafetyLevel.COMPLETELY_THREADSAFE)
 public final class TrustAllSSLSocketVerifier
        extends SSLSocketVerifier
+       implements HostnameVerifier
 {
   /**
    * A singleton instance of this SSL socket verifier.
    */
-  private static final TrustAllSSLSocketVerifier INSTANCE =
+  @NotNull private static final TrustAllSSLSocketVerifier INSTANCE =
        new TrustAllSSLSocketVerifier();
 
 
@@ -63,6 +82,7 @@ public final class TrustAllSSLSocketVerifier
    *
    * @return  A singleton instance of this SSL socket verifier.
    */
+  @NotNull()
   public static TrustAllSSLSocketVerifier getInstance()
   {
     return INSTANCE;
@@ -85,11 +105,28 @@ public final class TrustAllSSLSocketVerifier
    *                         established.
    */
   @Override()
-  public void verifySSLSocket(final String host, final int port,
-                              final SSLSocket sslSocket)
+  public void verifySSLSocket(@NotNull final String host, final int port,
+                              @NotNull final SSLSocket sslSocket)
        throws LDAPException
   {
     // No implementation is required.  The SSLSocket will be considered
     // acceptable as long as this method does not throw an exception.
+  }
+
+
+
+  /**
+   * Verifies that the provided hostname is acceptable for use with the
+   * negotiated SSL session.
+   *
+   * @param  hostname  The address to which the client intended the connection
+   *                   to be established.
+   * @param  session   The SSL session that was established.
+   */
+  @Override()
+  public boolean verify(@NotNull final String hostname,
+                        @NotNull final SSLSession session)
+  {
+    return true;
   }
 }

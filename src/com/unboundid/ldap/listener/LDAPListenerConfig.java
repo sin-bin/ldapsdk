@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,7 +40,10 @@ package com.unboundid.ldap.listener;
 import java.net.InetAddress;
 import javax.net.ServerSocketFactory;
 
+import com.unboundid.ldap.sdk.LDAPConnectionOptions;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -44,6 +62,23 @@ import com.unboundid.util.Validator;
 @ThreadSafety(level=ThreadSafetyLevel.NOT_THREADSAFE)
 public final class LDAPListenerConfig
 {
+  /**
+   * The default maximum message size that will be used if no other value is
+   * specified.
+   */
+  static final int DEFAULT_MAX_MESSAGE_SIZE_BYTES =
+       new LDAPConnectionOptions().getMaxMessageSize();
+
+
+
+  // Indicates whether the listener should request that the client provide a
+  // certificate.
+  private boolean requestClientCertificate;
+
+  // Indicates whether the listener should require that the client provide a
+  // certificate.
+  private boolean requireClientCertificate;
+
   // Indicates whether to use the SO_KEEPALIVE socket option for sockets
   // accepted by the listener.
   private boolean useKeepAlive;
@@ -61,7 +96,7 @@ public final class LDAPListenerConfig
   private boolean useTCPNoDelay;
 
   // The address on which to listen for client connections.
-  private InetAddress listenAddress;
+  @Nullable private InetAddress listenAddress;
 
   // The linger timeout in seconds to use for sockets accepted by the listener.
   private int lingerTimeout;
@@ -72,6 +107,10 @@ public final class LDAPListenerConfig
   // The maximum number of concurrent connections that will be allowed.
   private int maxConnections;
 
+  // The maximum size in bytes for encoded messages that the listener will
+  // accept.
+  private int maxMessageSizeBytes;
+
   // The receive buffer size to use for sockets accepted by the listener.
   private int receiveBufferSize;
 
@@ -79,14 +118,14 @@ public final class LDAPListenerConfig
   private int sendBufferSize;
 
   // The exception handler to use for the listener and associated connections.
-  private LDAPListenerExceptionHandler exceptionHandler;
+  @Nullable private LDAPListenerExceptionHandler exceptionHandler;
 
   // The request handler that will be used to process requests read from
   // clients.
-  private LDAPListenerRequestHandler requestHandler;
+  @NotNull private LDAPListenerRequestHandler requestHandler;
 
   // The factory that will be used to create server sockets.
-  private ServerSocketFactory serverSocketFactory;
+  @NotNull private ServerSocketFactory serverSocketFactory;
 
 
 
@@ -102,7 +141,7 @@ public final class LDAPListenerConfig
    *                         {@code null}.
    */
   public LDAPListenerConfig(final int listenPort,
-                            final LDAPListenerRequestHandler requestHandler)
+              @NotNull final LDAPListenerRequestHandler requestHandler)
   {
     Validator.ensureTrue((listenPort >= 0) && (listenPort <= 65_535));
     Validator.ensureNotNull(requestHandler);
@@ -110,17 +149,20 @@ public final class LDAPListenerConfig
     this.listenPort     = listenPort;
     this.requestHandler = requestHandler;
 
-    useKeepAlive        = true;
-    useLinger           = true;
-    useReuseAddress     = true;
-    useTCPNoDelay       = true;
-    lingerTimeout       = 5;
-    listenAddress       = null;
-    maxConnections      = 0;
-    receiveBufferSize   = 0;
-    sendBufferSize      = 0;
-    exceptionHandler    = null;
-    serverSocketFactory = ServerSocketFactory.getDefault();
+    requestClientCertificate = false;
+    requireClientCertificate = false;
+    useKeepAlive             = true;
+    useLinger                = true;
+    useReuseAddress          = true;
+    useTCPNoDelay            = true;
+    lingerTimeout            = 5;
+    listenAddress            = null;
+    maxConnections           = 0;
+    maxMessageSizeBytes      = DEFAULT_MAX_MESSAGE_SIZE_BYTES;
+    receiveBufferSize        = 0;
+    sendBufferSize           = 0;
+    exceptionHandler         = null;
+    serverSocketFactory      = ServerSocketFactory.getDefault();
   }
 
 
@@ -163,6 +205,7 @@ public final class LDAPListenerConfig
    * @return  The LDAP listener request handler that should be used to process
    *          requests read from clients.
    */
+  @NotNull()
   public LDAPListenerRequestHandler getRequestHandler()
   {
     return requestHandler;
@@ -178,7 +221,8 @@ public final class LDAPListenerConfig
    *                         used to process requests read from clients.  It
    *                         must not be {@code null}.
    */
-  public void setRequestHandler(final LDAPListenerRequestHandler requestHandler)
+  public void setRequestHandler(
+                   @NotNull final LDAPListenerRequestHandler requestHandler)
   {
     Validator.ensureNotNull(requestHandler);
 
@@ -307,6 +351,7 @@ public final class LDAPListenerConfig
    *          {@code null} if it should listen on all available addresses on all
    *          interfaces.
    */
+  @Nullable()
   public InetAddress getListenAddress()
   {
     return listenAddress;
@@ -322,7 +367,7 @@ public final class LDAPListenerConfig
    *                        that it should listen on all available addresses on
    *                        all interfaces.
    */
-  public void setListenAddress(final InetAddress listenAddress)
+  public void setListenAddress(@Nullable final InetAddress listenAddress)
   {
     this.listenAddress = listenAddress;
   }
@@ -395,6 +440,43 @@ public final class LDAPListenerConfig
     else
     {
       this.maxConnections = 0;
+    }
+  }
+
+
+
+  /**
+   * Retrieves the maximum size in bytes for LDAP messages that will be accepted
+   * by this listener.
+   *
+   * @return  The maximum size in bytes for LDAP messages that will be accepted
+   *          by this listener.
+   */
+  public int getMaxMessageSizeBytes()
+  {
+    return maxMessageSizeBytes;
+  }
+
+
+
+  /**
+   * Specifies the maximum size in bytes for LDAP messages that will be accepted
+   * by this listener.
+   *
+   * @param  maxMessageSizeBytes  The maximum size in bytes for LDAP messages
+   *                              that will be accepted by this listener.  A
+   *                              value that is less than or equal to zero will
+   *                              use the maximum allowed message size.
+   */
+  public void setMaxMessageSizeBytes(final int maxMessageSizeBytes)
+  {
+    if (maxMessageSizeBytes > 0)
+    {
+      this.maxMessageSizeBytes = maxMessageSizeBytes;
+    }
+    else
+    {
+      this.maxMessageSizeBytes = Integer.MAX_VALUE;
     }
   }
 
@@ -481,6 +563,7 @@ public final class LDAPListenerConfig
    *          caught while attempting to accept or interact with a client
    *          connection, or {@code null} if none is defined.
    */
+  @Nullable()
   public LDAPListenerExceptionHandler getExceptionHandler()
   {
     return exceptionHandler;
@@ -498,7 +581,7 @@ public final class LDAPListenerConfig
    *                           should be used.
    */
   public void setExceptionHandler(
-                   final LDAPListenerExceptionHandler exceptionHandler)
+              @Nullable final LDAPListenerExceptionHandler exceptionHandler)
   {
     this.exceptionHandler = exceptionHandler;
   }
@@ -512,6 +595,7 @@ public final class LDAPListenerConfig
    * @return  The factory that will be used to create the server socket that
    *          will listen for client connections.
    */
+  @NotNull()
   public ServerSocketFactory getServerSocketFactory()
   {
     return serverSocketFactory;
@@ -529,7 +613,7 @@ public final class LDAPListenerConfig
    *                              the JVM-default server socket factory.
    */
   public void setServerSocketFactory(
-                   final ServerSocketFactory serverSocketFactory)
+                   @Nullable final ServerSocketFactory serverSocketFactory)
   {
     if (serverSocketFactory == null)
     {
@@ -543,6 +627,77 @@ public final class LDAPListenerConfig
 
 
 
+  /**
+   * Indicates whether the listener should request that the client present its
+   * own certificate chain during TLS negotiation.  This will be ignored for
+   * non-TLS-based connections.
+   *
+   * @return  {@code true} if the listener should request that the client
+   *          present its own certificate chain during TLS negotiation, or
+   *          {@code false} if not.
+   */
+  public boolean requestClientCertificate()
+  {
+    return requestClientCertificate;
+  }
+
+
+
+  /**
+   * Specifies whether the listener should request that the client present its
+   * own certificate chain during TLS negotiation.  This will be ignored for
+   * non-TLS-based connections.
+   *
+   * @param  requestClientCertificate  Indicates whether the listener should
+   *                                   request that the client present its own
+   *                                   certificate chain during TLS negotiation.
+   */
+  public void setRequestClientCertificate(
+                   final boolean requestClientCertificate)
+  {
+    this.requestClientCertificate = requestClientCertificate;
+  }
+
+
+
+  /**
+   * Indicates whether the listener should require that the client present its
+   * own certificate chain during TLS negotiation and should fail negotiation
+   * if no certificate chain was provided.  This will be ignored for
+   * non-TLS-based connections, and it will also be ignored if
+   * {@link #requestClientCertificate} returns false.
+   *
+   * @return  {@code true} if the listener should require that the client
+   *          present its own certificate chain during TLS negotiation, or
+   *          {@code false} if TLS negotiation should continue even if the
+   *          client did not present a certificate chain when requested.
+   */
+  public boolean requireClientCertificate()
+  {
+    return requireClientCertificate;
+  }
+
+
+
+  /**
+   * Specifies whether the listener should require that the client present its
+   * own certificate chain during TLS negotiation and should fail negotiation
+   * if no certificate chain was provided.  This will be ignored for
+   * non-TLS-based connections, and it will also be ignored if
+   * {@link #requestClientCertificate} returns false.
+   *
+   * @param  requireClientCertificate  Indicates whether the listener should
+   *                                   require that the client present its own
+   *                                   certificate chain during TLS negotiation.
+   */
+  public void setRequireClientCertificate(
+                   final boolean requireClientCertificate)
+  {
+    this.requireClientCertificate = requireClientCertificate;
+  }
+
+
+
 /**
    * Creates a copy of this configuration that may be altered without impacting
    * this configuration, and which will not be altered by changes to this
@@ -552,22 +707,26 @@ public final class LDAPListenerConfig
    *          this configuration, and which will not be altered by changes to
    *          this configuration.
    */
+  @NotNull()
   public LDAPListenerConfig duplicate()
   {
     final LDAPListenerConfig copy =
          new LDAPListenerConfig(listenPort, requestHandler);
 
-    copy.useKeepAlive        = useKeepAlive;
-    copy.useLinger           = useLinger;
-    copy.useReuseAddress     = useReuseAddress;
-    copy.useTCPNoDelay       = useTCPNoDelay;
-    copy.listenAddress       = listenAddress;
-    copy.lingerTimeout       = lingerTimeout;
-    copy.maxConnections      = maxConnections;
-    copy.receiveBufferSize   = receiveBufferSize;
-    copy.sendBufferSize      = sendBufferSize;
-    copy.exceptionHandler    = exceptionHandler;
-    copy.serverSocketFactory = serverSocketFactory;
+    copy.requestClientCertificate = requestClientCertificate;
+    copy.requireClientCertificate = requireClientCertificate;
+    copy.useKeepAlive             = useKeepAlive;
+    copy.useLinger                = useLinger;
+    copy.useReuseAddress          = useReuseAddress;
+    copy.useTCPNoDelay            = useTCPNoDelay;
+    copy.listenAddress            = listenAddress;
+    copy.lingerTimeout            = lingerTimeout;
+    copy.maxConnections           = maxConnections;
+    copy.maxMessageSizeBytes      = maxMessageSizeBytes;
+    copy.receiveBufferSize        = receiveBufferSize;
+    copy.sendBufferSize           = sendBufferSize;
+    copy.exceptionHandler         = exceptionHandler;
+    copy.serverSocketFactory      = serverSocketFactory;
 
     return copy;
   }
@@ -580,6 +739,7 @@ public final class LDAPListenerConfig
    * @return  A string representation of this LDAP listener config.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -595,7 +755,7 @@ public final class LDAPListenerConfig
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("LDAPListenerConfig(listenAddress=");
 
@@ -642,12 +802,18 @@ public final class LDAPListenerConfig
 
     buffer.append(", maxConnections=");
     buffer.append(maxConnections);
+    buffer.append(", maxMessageSizeBytes=");
+    buffer.append(maxMessageSizeBytes);
     buffer.append(", useReuseAddress=");
     buffer.append(useReuseAddress);
     buffer.append(", receiveBufferSize=");
     buffer.append(receiveBufferSize);
     buffer.append(", sendBufferSize=");
     buffer.append(sendBufferSize);
+    buffer.append(", requestClientCertificate=");
+    buffer.append(requestClientCertificate);
+    buffer.append(", requireClientCertificate=");
+    buffer.append(requireClientCertificate);
     buffer.append(')');
   }
 }

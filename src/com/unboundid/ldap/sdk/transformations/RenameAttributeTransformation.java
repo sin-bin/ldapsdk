@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -43,6 +58,8 @@ import com.unboundid.ldif.LDIFDeleteChangeRecord;
 import com.unboundid.ldif.LDIFModifyChangeRecord;
 import com.unboundid.ldif.LDIFModifyDNChangeRecord;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -62,13 +79,13 @@ public final class RenameAttributeTransformation
   private final boolean renameInDNs;
 
   // The schema that will be used in processing.
-  private final Schema schema;
+  @Nullable private final Schema schema;
 
   // The names that will be replaced with the target name.
-  private final Set<String> baseSourceNames;
+  @NotNull private final Set<String> baseSourceNames;
 
   // The target name that will be used in place of the source name.
-  private final String baseTargetName;
+  @NotNull private final String baseTargetName;
 
 
 
@@ -90,9 +107,9 @@ public final class RenameAttributeTransformation
    *                          to be transformed, but also in the values of
    *                          attributes with a DN syntax.
    */
-  public RenameAttributeTransformation(final Schema schema,
-                                       final String sourceAttribute,
-                                       final String targetAttribute,
+  public RenameAttributeTransformation(@Nullable final Schema schema,
+                                       @NotNull final String sourceAttribute,
+                                       @NotNull final String targetAttribute,
                                        final boolean renameInDNs)
   {
     this.renameInDNs = renameInDNs;
@@ -146,7 +163,8 @@ public final class RenameAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry transformEntry(final Entry e)
+  @Nullable()
+  public Entry transformEntry(@NotNull final Entry e)
   {
     if (e == null)
     {
@@ -230,7 +248,9 @@ public final class RenameAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public LDIFChangeRecord transformChangeRecord(final LDIFChangeRecord r)
+  @Nullable()
+  public LDIFChangeRecord transformChangeRecord(
+                               @NotNull final LDIFChangeRecord r)
   {
     if (r == null)
     {
@@ -363,7 +383,8 @@ public final class RenameAttributeTransformation
    *
    * @return  The DN with any appropriate replacements.
    */
-  private String replaceDN(final String dn)
+  @NotNull()
+  private String replaceDN(@NotNull final String dn)
   {
     try
     {
@@ -405,7 +426,9 @@ public final class RenameAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry translate(final Entry original, final long firstLineNumber)
+  @Nullable()
+  public Entry translate(@NotNull final Entry original,
+                         final long firstLineNumber)
   {
     return transformEntry(original);
   }
@@ -416,7 +439,8 @@ public final class RenameAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public LDIFChangeRecord translate(final LDIFChangeRecord original,
+  @Nullable()
+  public LDIFChangeRecord translate(@NotNull final LDIFChangeRecord original,
                                     final long firstLineNumber)
   {
     return transformChangeRecord(original);
@@ -428,7 +452,8 @@ public final class RenameAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry translateEntryToWrite(final Entry original)
+  @Nullable()
+  public Entry translateEntryToWrite(@NotNull final Entry original)
   {
     return transformEntry(original);
   }
@@ -439,8 +464,9 @@ public final class RenameAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public LDIFChangeRecord translateChangeRecordToWrite(
-                               final LDIFChangeRecord original)
+                               @NotNull final LDIFChangeRecord original)
   {
     return transformChangeRecord(original);
   }

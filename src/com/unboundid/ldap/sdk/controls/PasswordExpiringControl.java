@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,8 @@ import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -64,7 +81,8 @@ public final class PasswordExpiringControl
    * The OID (2.16.840.1.113730.3.4.5) for the password expiring response
    * control.
    */
-  public static final String PASSWORD_EXPIRING_OID = "2.16.840.1.113730.3.4.5";
+  @NotNull public static final String PASSWORD_EXPIRING_OID =
+       "2.16.840.1.113730.3.4.5";
 
 
 
@@ -119,8 +137,9 @@ public final class PasswordExpiringControl
    * @throws  LDAPException  If the provided control cannot be decoded as a
    *                         password expiring response control.
    */
-  public PasswordExpiringControl(final String oid, final boolean isCritical,
-                                 final ASN1OctetString value)
+  public PasswordExpiringControl(@NotNull final String oid,
+                                 final boolean isCritical,
+                                 @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     super(oid, isCritical, value);
@@ -149,9 +168,10 @@ public final class PasswordExpiringControl
    * {@inheritDoc}
    */
   @Override()
-  public PasswordExpiringControl
-              decodeControl(final String oid, final boolean isCritical,
-                            final ASN1OctetString value)
+  @NotNull()
+  public PasswordExpiringControl decodeControl(
+              @NotNull final String oid, final boolean isCritical,
+              @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     return new PasswordExpiringControl(oid, isCritical, value);
@@ -173,7 +193,8 @@ public final class PasswordExpiringControl
    *                         decode the password expiring control contained in
    *                         the provided result.
    */
-  public static PasswordExpiringControl get(final LDAPResult result)
+  @Nullable()
+  public static PasswordExpiringControl get(@NotNull final LDAPResult result)
          throws LDAPException
   {
     final Control c = result.getResponseControl(PASSWORD_EXPIRING_OID);
@@ -211,6 +232,7 @@ public final class PasswordExpiringControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_PW_EXPIRING.get();
@@ -222,7 +244,7 @@ public final class PasswordExpiringControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("PasswordExpiringControl(secondsUntilExpiration=");
     buffer.append(secondsUntilExpiration);

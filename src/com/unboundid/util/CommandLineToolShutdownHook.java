@@ -1,9 +1,24 @@
 /*
- * Copyright 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2013-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -39,10 +54,10 @@ final class CommandLineToolShutdownHook
       extends Thread
 {
   // A reference to the result code that will be returned by the tool (if set).
-  private final AtomicReference<ResultCode> resultCodeRef;
+  @NotNull private final AtomicReference<ResultCode> resultCodeRef;
 
   // The tool whose doShutdownHookProcessing method will be invoked.
-  private final CommandLineTool tool;
+  @NotNull private final CommandLineTool tool;
 
 
 
@@ -55,8 +70,8 @@ final class CommandLineToolShutdownHook
    * @param  resultCodeRef  A reference to the result code that will be returned
    *                        by the tool.
    */
-  CommandLineToolShutdownHook(final CommandLineTool tool,
-                              final AtomicReference<ResultCode> resultCodeRef)
+  CommandLineToolShutdownHook(@NotNull final CommandLineTool tool,
+       @NotNull final AtomicReference<ResultCode> resultCodeRef)
   {
     this.tool          = tool;
     this.resultCodeRef = resultCodeRef;

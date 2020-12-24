@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,8 @@ package com.unboundid.util.json;
 
 import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -136,10 +153,10 @@ public final class JSONString
   // The JSON-formatted string representation for this JSON string.  It will be
   // surrounded by quotation marks and any necessary escaping will have been
   // performed.
-  private String jsonStringRepresentation;
+  @Nullable private String jsonStringRepresentation;
 
   // The string value for this object.
-  private final String value;
+  @NotNull private final String value;
 
 
 
@@ -149,7 +166,7 @@ public final class JSONString
    * @param  value  The string to represent in this JSON value.  It must not be
    *                {@code null}.
    */
-  public JSONString(final String value)
+  public JSONString(@NotNull final String value)
   {
     this.value = value;
     jsonStringRepresentation = null;
@@ -165,7 +182,7 @@ public final class JSONString
    * @param  jsonString  The JSON string representation to use for the Java
    *                     string.
    */
-  JSONString(final String javaString, final String jsonString)
+  JSONString(@NotNull final String javaString, @NotNull final String jsonString)
   {
     value = javaString;
     jsonStringRepresentation = jsonString;
@@ -179,6 +196,7 @@ public final class JSONString
    *
    * @return  The string value for this object.
    */
+  @NotNull()
   public String stringValue()
   {
     return value;
@@ -201,7 +219,7 @@ public final class JSONString
    * {@inheritDoc}
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == this)
     {
@@ -232,7 +250,7 @@ public final class JSONString
    *          the provided string (optionally ignoring differences in
    *          capitalization), or {@code false} if not.
    */
-  public boolean equals(final JSONString s, final boolean ignoreCase)
+  public boolean equals(@NotNull final JSONString s, final boolean ignoreCase)
   {
     if (ignoreCase)
     {
@@ -250,7 +268,8 @@ public final class JSONString
    * {@inheritDoc}
    */
   @Override()
-  public boolean equals(final JSONValue v, final boolean ignoreFieldNameCase,
+  public boolean equals(@NotNull final JSONValue v,
+                        final boolean ignoreFieldNameCase,
                         final boolean ignoreValueCase,
                         final boolean ignoreArrayOrder)
   {
@@ -275,6 +294,7 @@ public final class JSONString
    *          JSON object.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     if (jsonStringRepresentation == null)
@@ -303,7 +323,7 @@ public final class JSONString
    * @param  buffer  The buffer to which the information should be appended.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     if (jsonStringRepresentation != null)
     {
@@ -334,6 +354,7 @@ public final class JSONString
    *          a JSON object.
    */
   @Override()
+  @NotNull()
   public String toSingleLineString()
   {
     return toString();
@@ -351,7 +372,7 @@ public final class JSONString
    * @param  buffer  The buffer to which the information should be appended.
    */
   @Override()
-  public void toSingleLineString(final StringBuilder buffer)
+  public void toSingleLineString(@NotNull final StringBuilder buffer)
   {
     toString(buffer);
   }
@@ -367,7 +388,8 @@ public final class JSONString
    * @param  buffer  The buffer to which the encoded representation should be
    *                 appended.
    */
-  static void encodeString(final String s, final StringBuilder buffer)
+  static void encodeString(@NotNull final String s,
+                           @NotNull final StringBuilder buffer)
   {
     buffer.append('"');
 
@@ -424,7 +446,8 @@ public final class JSONString
    * @param  buffer  The buffer to which the encoded representation should be
    *                 appended.
    */
-  static void encodeString(final String s, final ByteStringBuffer buffer)
+  static void encodeString(@NotNull final String s,
+                           @NotNull final ByteStringBuffer buffer)
   {
     buffer.append('"');
 
@@ -502,6 +525,7 @@ public final class JSONString
    *          appear in a JSON object, including
    */
   @Override()
+  @NotNull()
   public String toNormalizedString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -541,7 +565,7 @@ public final class JSONString
    * @param  buffer  The buffer to which the information should be appended.
    */
   @Override()
-  public void toNormalizedString(final StringBuilder buffer)
+  public void toNormalizedString(@NotNull final StringBuilder buffer)
   {
     toNormalizedString(buffer, false, true, false);
   }
@@ -593,6 +617,7 @@ public final class JSONString
    *          appear in a JSON object, including
    */
   @Override()
+  @NotNull()
   public String toNormalizedString(final boolean ignoreFieldNameCase,
                                    final boolean ignoreValueCase,
                                    final boolean ignoreArrayOrder)
@@ -650,7 +675,7 @@ public final class JSONString
    *                              {@code true}).
    */
   @Override()
-  public void toNormalizedString(final StringBuilder buffer,
+  public void toNormalizedString(@NotNull final StringBuilder buffer,
                                  final boolean ignoreFieldNameCase,
                                  final boolean ignoreValueCase,
                                  final boolean ignoreArrayOrder)
@@ -689,7 +714,7 @@ public final class JSONString
    * {@inheritDoc}
    */
   @Override()
-  public void appendToJSONBuffer(final JSONBuffer buffer)
+  public void appendToJSONBuffer(@NotNull final JSONBuffer buffer)
   {
     buffer.appendString(value);
   }
@@ -700,8 +725,8 @@ public final class JSONString
    * {@inheritDoc}
    */
   @Override()
-  public void appendToJSONBuffer(final String fieldName,
-                                 final JSONBuffer buffer)
+  public void appendToJSONBuffer(@NotNull final String fieldName,
+                                 @NotNull final JSONBuffer buffer)
   {
     buffer.appendString(fieldName, value);
   }

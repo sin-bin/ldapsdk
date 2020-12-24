@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,8 @@ import java.util.List;
 
 import com.unboundid.util.LDAPSDKException;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -61,7 +78,7 @@ public final class AuditLogException
 
 
   // The malformed log message that triggered this exception.
-  private final List<String> logMessageLines;
+  @NotNull private final List<String> logMessageLines;
 
 
 
@@ -74,8 +91,8 @@ public final class AuditLogException
    * @param  explanation      A message explaining the problem that occurred.
    *                          It must not be {@code null}.
    */
-  public AuditLogException(final List<String> logMessageLines,
-                           final String explanation)
+  public AuditLogException(@NotNull final List<String> logMessageLines,
+                           @NotNull final String explanation)
   {
     this(logMessageLines, explanation, null);
   }
@@ -93,8 +110,9 @@ public final class AuditLogException
    * @param  cause            An underlying exception that triggered this
    *                          exception.
    */
-  public AuditLogException(final List<String> logMessageLines,
-                           final String explanation, final Throwable cause)
+  public AuditLogException(@NotNull final List<String> logMessageLines,
+                           @NotNull final String explanation,
+                           @Nullable final Throwable cause)
   {
     super(explanation, cause);
 
@@ -115,6 +133,7 @@ public final class AuditLogException
    *          triggered this exception, or an empty list if no log message lines
    *          are available.
    */
+  @NotNull()
   public List<String> getLogMessageLines()
   {
     return logMessageLines;

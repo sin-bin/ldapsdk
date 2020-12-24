@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,6 +37,8 @@ package com.unboundid.ldap.sdk.unboundidds.logs;
 
 
 
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -116,7 +133,7 @@ public enum AccessLogOperationType
 
 
   // The string that will be used to identify this message type in log files.
-  private final String logIdentifier;
+  @NotNull private final String logIdentifier;
 
 
 
@@ -126,7 +143,7 @@ public enum AccessLogOperationType
    * @param  logIdentifier  The string that will be used to identify this
    *                        operation type in log files.
    */
-  AccessLogOperationType(final String logIdentifier)
+  AccessLogOperationType(@NotNull final String logIdentifier)
   {
     this.logIdentifier = logIdentifier;
   }
@@ -140,6 +157,7 @@ public enum AccessLogOperationType
    * @return  The string that will be used to identify this operation type in
    *          log files.
    */
+  @NotNull()
   public String getLogIdentifier()
   {
     return logIdentifier;
@@ -156,7 +174,9 @@ public enum AccessLogOperationType
    * @return  The appropriate operation type, or {@code null} if there is no
    *          operation type associated with the provided identifier.
    */
-  public static AccessLogOperationType forName(final String logIdentifier)
+  @Nullable()
+  public static AccessLogOperationType forName(
+                     @NotNull final String logIdentifier)
   {
     for (final AccessLogOperationType t : values())
     {

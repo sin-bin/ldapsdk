@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -40,6 +55,8 @@ import com.unboundid.ldap.sdk.ServerSet;
 import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -408,8 +425,16 @@ import static com.unboundid.util.json.JSONMessages.*;
  *     susceptible to man-in-the-middle attacks.  If this field is present, then
  *     it should have a boolean value.  If it is not present, a default value
  *     of {@code false} will be assumed.  If it is present with a value of
- *     {@code true}, then the "trust-store-file", "trust-store-type",
- *     "trust-store-pin", and "trust-store-pin-file" fields should not be used.
+ *     {@code true}, then the "use-jvm-default-trust-store", "trust-store-file",
+ *     "trust-store-type", "trust-store-pin", and "trust-store-pin-file" fields
+ *     should not be used.
+ *   </LI>
+ *   <LI>
+ *     "use-jvm-default-trust-store" -- Indicates that certificates signed by an
+ *     authority listed in the JVM's default set of trusted issuers should be
+ *     trusted.  If this field is present, it should have a boolean value.  The
+ *     JVM-default trust store may be used on its own or in conjunction with a
+ *     trust store file.
  *   </LI>
  *   <LI>
  *     "trust-store-file" -- Specifies the path to a trust store file (in JKS
@@ -520,9 +545,11 @@ import static com.unboundid.util.json.JSONMessages.*;
  * present a certificate to the server.
  * <BR><BR>
  * The following example demonstrates a simple specification that can be used to
- * establish SSL-based connections to a single server.  The client will use a
- * trust store to determine whether to trust the certificate presented by the
- * server, and will not attempt to present its own certificate to the server.
+ * establish SSL-based connections to a single server.  The client will trust
+ * any certificates signed by one of the JVM's default issuers, or any
+ * certificate contained in or signed by a certificate contained in the
+ * specified trust store file.  As no key store is provided, the client will not
+ * attempt to present its own certificate to the server.
  * <PRE>
  *   {
  *     "server-details":
@@ -536,6 +563,7 @@ import static com.unboundid.util.json.JSONMessages.*;
  *     "communication-security":
  *     {
  *       "security-type":"SSL",
+ *       "use-jvm-default-trust-store":true,
  *       "trust-store-file":"/path/to/trust-store.jks",
  *       "trust-store-type":"JKS",
  *       "verify-address-in-certificate":true
@@ -828,6 +856,7 @@ import static com.unboundid.util.json.JSONMessages.*;
  *     "communication-security":
  *     {
  *       "security-type":"SSL",
+ *       "use-jvm-default-trust-store":true,
  *       "trust-store-file":"/path/to/trust-store.jks",
  *       "trust-store-type":"JKS",
  *       "verify-address-in-certificate":true
@@ -1153,7 +1182,8 @@ public final class LDAPConnectionDetailsJSONSpecification
    * The name of the top-level field that may be used to provide information to
    * use to authenticate connections to the server.
    */
-  static final String FIELD_AUTHENTICATION_DETAILS = "authentication-details";
+  @NotNull static final String FIELD_AUTHENTICATION_DETAILS =
+       "authentication-details";
 
 
 
@@ -1161,7 +1191,8 @@ public final class LDAPConnectionDetailsJSONSpecification
    * The name of the top-level field that may be used to provide information
    * about the type of communication security that should be used.
    */
-  static final String FIELD_COMMUNICATION_SECURITY = "communication-security";
+  @NotNull static final String FIELD_COMMUNICATION_SECURITY =
+       "communication-security";
 
 
 
@@ -1169,7 +1200,7 @@ public final class LDAPConnectionDetailsJSONSpecification
    * The name of the top-level field that may be used to provide information
    * about options that should be set when establishing connections.
    */
-  static final String FIELD_CONNECTION_OPTIONS = "connection-options";
+  @NotNull static final String FIELD_CONNECTION_OPTIONS = "connection-options";
 
 
 
@@ -1177,7 +1208,7 @@ public final class LDAPConnectionDetailsJSONSpecification
    * The name of the top-level field that may be used to provide information
    * about options that should be set when creating a connection pool.
    */
-  static final String FIELD_CONNECTION_POOL_OPTIONS =
+  @NotNull static final String FIELD_CONNECTION_POOL_OPTIONS =
        "connection-pool-options";
 
 
@@ -1187,21 +1218,21 @@ public final class LDAPConnectionDetailsJSONSpecification
    * about the directory server(s) to which the connection should be
    * established.
    */
-  static final String FIELD_SERVER_DETAILS = "server-details";
+  @NotNull static final String FIELD_SERVER_DETAILS = "server-details";
 
 
 
   // The bind request that will be used to authenticate connections.
-  private final BindRequest bindRequest;
+  @Nullable private final BindRequest bindRequest;
 
   // The processed connection pool options portion of the specification.
-  private final ConnectionPoolOptions connectionPoolOptionsSpec;
+  @NotNull private final ConnectionPoolOptions connectionPoolOptionsSpec;
 
   // The processed security options portion of the specification.
-  private final SecurityOptions securityOptionsSpec;
+  @NotNull private final SecurityOptions securityOptionsSpec;
 
   // The server set that will be used to create connections.
-  private final ServerSet serverSet;
+  @NotNull private final ServerSet serverSet;
 
 
 
@@ -1217,7 +1248,7 @@ public final class LDAPConnectionDetailsJSONSpecification
    *                         valid connection details specification.
    */
   public LDAPConnectionDetailsJSONSpecification(
-              final JSONObject connectionDetailsObject)
+              @NotNull final JSONObject connectionDetailsObject)
          throws LDAPException
   {
     validateTopLevelFields(connectionDetailsObject);
@@ -1314,8 +1345,9 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @throws  LDAPException  If the parsed JSON object does not contain a valid
    *                         connection details specification.
    */
+  @NotNull()
   public static LDAPConnectionDetailsJSONSpecification fromString(
-                     final String jsonString)
+                     @NotNull final String jsonString)
          throws JSONException, LDAPException
   {
     return new LDAPConnectionDetailsJSONSpecification(
@@ -1343,8 +1375,9 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @throws  LDAPException  If the parsed JSON object does not contain a valid
    *                         connection details specification.
    */
+  @NotNull()
   public static LDAPConnectionDetailsJSONSpecification fromFile(
-                                                            final String path)
+                     @NotNull final String path)
          throws IOException, JSONException, LDAPException
   {
     return fromFile(new File(path));
@@ -1371,7 +1404,9 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @throws  LDAPException  If the parsed JSON object does not contain a valid
    *                         connection details specification.
    */
-  public static LDAPConnectionDetailsJSONSpecification fromFile(final File file)
+  @NotNull()
+  public static LDAPConnectionDetailsJSONSpecification fromFile(
+                     @NotNull final File file)
          throws IOException, JSONException, LDAPException
   {
     return fromInputStream(new FileInputStream(file));
@@ -1404,8 +1439,9 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @throws  LDAPException  If the parsed JSON object does not contain a valid
    *                         connection details specification.
    */
+  @NotNull()
   public static LDAPConnectionDetailsJSONSpecification fromInputStream(
-                     final InputStream inputStream)
+                     @NotNull final InputStream inputStream)
          throws IOException, JSONException, LDAPException
   {
     try
@@ -1443,6 +1479,7 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @return  The server set that may be used to create new connections based on
    *          the JSON specification.
    */
+  @NotNull()
   public ServerSet getServerSet()
   {
     return serverSet;
@@ -1458,6 +1495,7 @@ public final class LDAPConnectionDetailsJSONSpecification
    *          created from the JSON specification, or {@code null} if the
    *          connections should be unauthenticated.
    */
+  @Nullable()
   public BindRequest getBindRequest()
   {
     return bindRequest;
@@ -1474,6 +1512,7 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         establish or authenticate the connection.
    */
+  @NotNull()
   public LDAPConnection createConnection()
          throws LDAPException
   {
@@ -1507,6 +1546,7 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         establish the connection.
    */
+  @NotNull()
   public LDAPConnection createUnauthenticatedConnection()
          throws LDAPException
   {
@@ -1529,6 +1569,7 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @throws  LDAPException  If a problem is encountered while attempting to
    *                         create the connection pool.
    */
+  @NotNull()
   public LDAPConnectionPool createConnectionPool(final int initialConnections,
                                                  final int maximumConnections)
          throws LDAPException
@@ -1559,6 +1600,7 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @throws  LDAPException  If a problem is encountered while attempting to
    *                         create the connection pool.
    */
+  @NotNull()
   public LDAPConnectionPool createUnauthenticatedConnectionPool(
                                  final int initialConnections,
                                  final int maximumConnections)
@@ -1585,7 +1627,7 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @throws  LDAPException  If there is a problem with the set of top-level
    *                         fields in the provided JSON object.
    */
-  private static void validateTopLevelFields(final JSONObject o)
+  private static void validateTopLevelFields(@NotNull final JSONObject o)
           throws LDAPException
   {
     boolean serverDetailsProvided = false;
@@ -1631,8 +1673,9 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @throws  LDAPException  If the provided JSON object contains any fields
    *                         that are not contained in the allowed set.
    */
-  static void validateAllowedFields(final JSONObject o, final String f,
-                                    final String... a)
+  static void validateAllowedFields(@NotNull final JSONObject o,
+                                    @NotNull final String f,
+                                    @NotNull final String... a)
          throws LDAPException
   {
     final HashSet<String> s = new HashSet<>(Arrays.asList(a));
@@ -1660,7 +1703,8 @@ public final class LDAPConnectionDetailsJSONSpecification
    *
    * @throws  LDAPException  If the specified field exists but is not a boolean.
    */
-  static boolean getBoolean(final JSONObject o, final String f, final boolean d)
+  static boolean getBoolean(@NotNull final JSONObject o,
+                            @NotNull final String f, final boolean d)
          throws LDAPException
   {
     final JSONValue v = o.getField(f);
@@ -1697,8 +1741,10 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @throws  LDAPException  If the specified field exists but is not an
    *                         integer.
    */
-  static Integer getInt(final JSONObject o, final String f, final Integer d,
-                        final Integer n, final Integer x)
+  @Nullable()
+  static Integer getInt(@NotNull final JSONObject o, @NotNull final String f,
+                        @Nullable final Integer d, @Nullable final Integer n,
+                        @Nullable final Integer x)
          throws LDAPException
   {
     final JSONValue v = o.getField(f);
@@ -1761,8 +1807,10 @@ public final class LDAPConnectionDetailsJSONSpecification
    *
    * @throws  LDAPException  If the specified field exists but is not a long.
    */
-  static Long getLong(final JSONObject o, final String f, final Long d,
-                      final Long n, final Long x)
+  @Nullable()
+  static Long getLong(@NotNull final JSONObject o, @NotNull final String f,
+                      @Nullable final Long d, @Nullable final Long n,
+                      @Nullable final Long x)
          throws LDAPException
   {
     final JSONValue v = o.getField(f);
@@ -1821,7 +1869,9 @@ public final class LDAPConnectionDetailsJSONSpecification
    *
    * @throws  LDAPException  If the specified field exists but is not an object.
    */
-  static JSONObject getObject(final JSONObject o, final String f)
+  @Nullable()
+  static JSONObject getObject(@NotNull final JSONObject o,
+                              @NotNull final String f)
          throws LDAPException
   {
     final JSONValue v = o.getField(f);
@@ -1855,7 +1905,9 @@ public final class LDAPConnectionDetailsJSONSpecification
    *
    * @throws  LDAPException  If the specified field exists but is not a string.
    */
-  static String getString(final JSONObject o, final String f, final String d)
+  @Nullable()
+  static String getString(@NotNull final JSONObject o, @NotNull final String f,
+                          @Nullable final String d)
          throws LDAPException
   {
     final JSONValue v = o.getField(f);
@@ -1891,7 +1943,9 @@ public final class LDAPConnectionDetailsJSONSpecification
    *                         exactly one line, or if the line contained in the
    *                         file is empty.
    */
-  static String getStringFromFile(final String path, final String fieldName)
+  @NotNull()
+  static String getStringFromFile(@NotNull final String path,
+                                  @NotNull final String fieldName)
          throws LDAPException
   {
     BufferedReader r = null;
@@ -1965,9 +2019,9 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @throws  LDAPException  If the provided JSON object has one or more fields
    *                         that conflict with the specified existing field.
    */
-  static void rejectConflictingFields(final JSONObject o,
-                                      final String existingField,
-                                      final String... conflictingFields)
+  static void rejectConflictingFields(@NotNull final JSONObject o,
+                   @NotNull final String existingField,
+                   @NotNull final String... conflictingFields)
          throws LDAPException
   {
     for (final String fieldName : conflictingFields)
@@ -1997,9 +2051,9 @@ public final class LDAPConnectionDetailsJSONSpecification
    * @throws  LDAPException  If the provided JSON object has one or more
    *                         unresolved dependencies.
    */
-  static void rejectUnresolvedDependency(final JSONObject o,
-                                         final String requiredField,
-                                         final String... dependentFields)
+  static void rejectUnresolvedDependency(@NotNull final JSONObject o,
+                   @NotNull final String requiredField,
+                   @NotNull final String... dependentFields)
          throws LDAPException
   {
     for (final String fieldName : dependentFields)

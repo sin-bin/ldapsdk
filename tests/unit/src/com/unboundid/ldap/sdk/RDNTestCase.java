@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -657,8 +672,8 @@ public class RDNTestCase
   public void testConstructor3MultiElementWithSchema()
          throws Exception
   {
-    RDN rdn = new RDN(new String[] { "givenName", "sn" },
-                      new String[] { "Test", "User" },
+    RDN rdn = new RDN(new String[] { "cn", "emailAddress" },
+                      new String[] { "Test User", "test.user@example.com" },
                       schema);
 
     assertTrue(rdn.isMultiValued());
@@ -671,51 +686,62 @@ public class RDNTestCase
     final Iterator<RDNNameValuePair> iterator =
          rdn.getNameValuePairs().iterator();
     assertEquals(iterator.next(),
-         new RDNNameValuePair("givenName", new ASN1OctetString("Test"), null));
+         new RDNNameValuePair("cn", new ASN1OctetString("Test User"), schema));
     assertEquals(iterator.next(),
-         new RDNNameValuePair("sn", new ASN1OctetString("User"), null));
+         new RDNNameValuePair("emailAddress",
+              new ASN1OctetString("test.user@example.com"), schema));
 
     Attribute[] attributes = rdn.getAttributes();
     assertNotNull(attributes);
     assertEquals(attributes.length, 2);
-    assertEquals(attributes[0], new Attribute("givenName", "Test"));
-    assertEquals(attributes[1], new Attribute("sn", "User"));
+    assertEquals(attributes[0], new Attribute("cn", schema, "Test User"));
+    assertEquals(attributes[1], new Attribute("emailAddress", schema,
+         "test.user@example.com"));
 
     String[] attrNames = rdn.getAttributeNames();
     assertNotNull(attrNames);
     assertEquals(attrNames.length, 2);
-    assertEquals(attrNames[0], "givenName");
-    assertEquals(attrNames[1], "sn");
+    assertEquals(attrNames[0], "cn");
+    assertEquals(attrNames[1], "emailAddress");
 
     String[] attrValues = rdn.getAttributeValues();
     assertNotNull(attrValues);
     assertEquals(attrValues.length, 2);
-    assertEquals(attrValues[0], "Test");
-    assertEquals(attrValues[1], "User");
+    assertEquals(attrValues[0], "Test User");
+    assertEquals(attrValues[1], "test.user@example.com");
 
     byte[][] byteArrayValues = rdn.getByteArrayAttributeValues();
     assertNotNull(byteArrayValues);
     assertEquals(byteArrayValues.length, 2);
     assertTrue(Arrays.equals(byteArrayValues[0],
-         "Test".getBytes("UTF-8")));
+         "Test User".getBytes("UTF-8")));
     assertTrue(Arrays.equals(byteArrayValues[1],
-         "User".getBytes("UTF-8")));
+         "test.user@example.com".getBytes("UTF-8")));
 
-    assertTrue(rdn.hasAttribute("givenName"));
-    assertTrue(rdn.hasAttribute("sn"));
-    assertFalse(rdn.hasAttribute("cn"));
+    assertTrue(rdn.hasAttribute("cn"));
+    assertTrue(rdn.hasAttribute("emailAddress"));
+    assertTrue(rdn.hasAttribute("emailaddress"));
+    assertTrue(rdn.hasAttribute("e"));
+    assertFalse(rdn.hasAttribute("givenName"));
 
-    assertTrue(rdn.hasAttributeValue("givenName", "Test"));
-    assertTrue(rdn.hasAttributeValue("sn", "User"));
-    assertFalse(rdn.hasAttributeValue("givenName", "User"));
-    assertFalse(rdn.hasAttributeValue("sn", "Test"));
-    assertFalse(rdn.hasAttributeValue("cn", "Test"));
+    assertTrue(rdn.hasAttributeValue("cn", "Test User"));
+    assertTrue(rdn.hasAttributeValue("cn", "test user"));
+    assertTrue(rdn.hasAttributeValue("CN", "test user"));
+    assertTrue(rdn.hasAttributeValue("emailAddress", "test.user@example.com"));
+    assertTrue(rdn.hasAttributeValue("emailaddress", "Test.User@Example.COM"));
+    assertTrue(rdn.hasAttributeValue("e", "test.user@example.com"));
+    assertFalse(rdn.hasAttributeValue("givenname", "Test"));
 
-    assertTrue(rdn.hasAttributeValue("givenName", "Test".getBytes("UTF-8")));
-    assertTrue(rdn.hasAttributeValue("sn", "User".getBytes("UTF-8")));
-    assertFalse(rdn.hasAttributeValue("givenName", "User".getBytes("UTF-8")));
-    assertFalse(rdn.hasAttributeValue("sn", "Test".getBytes("UTF-8")));
-    assertFalse(rdn.hasAttributeValue("cn", "Test".getBytes("UTF-8")));
+    assertTrue(rdn.hasAttributeValue("cn", "Test User".getBytes("UTF-8")));
+    assertTrue(rdn.hasAttributeValue("cn", "test user".getBytes("UTF-8")));
+    assertTrue(rdn.hasAttributeValue("CN", "test user".getBytes("UTF-8")));
+    assertTrue(rdn.hasAttributeValue("emailAddress",
+         "test.user@example.com".getBytes("UTF-8")));
+    assertTrue(rdn.hasAttributeValue("emailaddress",
+         "Test.User@Example.COM".getBytes("UTF-8")));
+    assertTrue(rdn.hasAttributeValue("e",
+         "test.user@example.com".getBytes("UTF-8")));
+    assertFalse(rdn.hasAttributeValue("givenname", "Test".getBytes("UTF-8")));
 
     RDN decodedRDN = new RDN(rdn.toString(), schema);
     assertNotNull(decodedRDN);
@@ -727,7 +753,8 @@ public class RDNTestCase
     assertEquals(decodedRDN.hashCode(), rdn.hashCode());
     assertEquals(decodedRDN, rdn);
 
-    assertEquals(rdn.toNormalizedString(), "givenname=test+sn=user");
+    assertEquals(rdn.toNormalizedString(),
+         "cn=test user+e=test.user@example.com");
     decodedRDN = new RDN(rdn.toNormalizedString(), schema);
     assertNotNull(decodedRDN);
     assertEquals(decodedRDN.hashCode(), rdn.hashCode());
@@ -2147,5 +2174,171 @@ public class RDNTestCase
          StaticUtils.byteArray(0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
               0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0xaa, 0xbb, 0xcc,
               0xdd, 0xee, 0xff));
+  }
+
+
+
+  /**
+   * Tests various forms of RDNs whose attribute values contain spaces.
+   *
+   * @param  attributeNames               The names of the attributes for use in
+   *                                      the RDN.
+   * @param  attributeValues              The string representations of the
+   *                                      values for the RDNs.
+   * @param  expectedNonNormalizedString  The expected non-normalized string
+   *                                      representation of the RDN.
+   * @param  expectedNormalizedString     The expected normalized string
+   *                                      representation of the RDN.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(dataProvider = "rdnsWithSpacesTestData")
+  public void testRDNsWithSpaces(final String[] attributeNames,
+                                 final String[] attributeValues,
+                                 final String expectedNonNormalizedString,
+                                 final String expectedNormalizedString)
+         throws Exception
+  {
+    final RDN rdn = new RDN(attributeNames, attributeValues);
+
+    assertEquals(rdn.getAttributeNames(), attributeNames);
+
+    assertEquals(rdn.getAttributeValues(), attributeValues);
+
+    assertEquals(rdn.toString(), expectedNonNormalizedString);
+
+    assertEquals(rdn.toNormalizedString(), expectedNormalizedString);
+
+    assertEquals(new RDN(rdn.toString()), rdn);
+
+    assertEquals(new RDN(rdn.toNormalizedString()), rdn);
+  }
+
+
+
+  /**
+   * Retrieves a set of test data for use in testing RDNs whose attribute
+   * values contain spaces.
+   *
+   * @return  A set of test data for use in testing RDNs whose attribute values
+   *          contain spaces.
+   */
+  @DataProvider(name = "rdnsWithSpacesTestData")
+  public Object[][] getRDNsWithSpacesTestData()
+  {
+    return new Object[][]
+    {
+      new Object[]
+      {
+        new String[] { "cn" },
+        new String[] { " " },
+        "cn=\\ ",
+        "cn=\\ "
+      },
+
+      new Object[]
+      {
+        new String[] { "cn" },
+        new String[] { " a" },
+        "cn=\\ a",
+        "cn=a"
+      },
+
+      new Object[]
+      {
+        new String[] { "cn" },
+        new String[] { "a " },
+        "cn=a\\ ",
+        "cn=a"
+      },
+
+      new Object[]
+      {
+        new String[] { "cn" },
+        new String[] { " a " },
+        "cn=\\ a\\ ",
+        "cn=a"
+      },
+
+      new Object[]
+      {
+        new String[] { "cn" },
+        new String[] { "  " },
+        "cn=\\ \\ ",
+        "cn=\\ "
+      },
+
+      new Object[]
+      {
+        new String[] { "cn" },
+        new String[] { "   " },
+        "cn=\\  \\ ",
+        "cn=\\ "
+      },
+
+      new Object[]
+      {
+        new String[] { "cn" },
+        new String[] { "a b" },
+        "cn=a b",
+        "cn=a b"
+      },
+
+      new Object[]
+      {
+        new String[] { "cn" },
+        new String[] { " a b " },
+        "cn=\\ a b\\ ",
+        "cn=a b"
+      },
+
+      new Object[]
+      {
+        new String[] { "givenName", "sn" },
+        new String[] { " ", " " },
+        "givenName=\\ +sn=\\ ",
+        "givenname=\\ +sn=\\ "
+      },
+
+      new Object[]
+      {
+        new String[] { "givenName", "sn" },
+        new String[] { "  ", "  " },
+        "givenName=\\ \\ +sn=\\ \\ ",
+        "givenname=\\ +sn=\\ "
+      },
+
+      new Object[]
+      {
+        new String[] { "givenName", "sn" },
+        new String[] { "   ", "   " },
+        "givenName=\\  \\ +sn=\\  \\ ",
+        "givenname=\\ +sn=\\ "
+      },
+
+      new Object[]
+      {
+        new String[] { "givenName", "sn" },
+        new String[] { " a", "b " },
+        "givenName=\\ a+sn=b\\ ",
+        "givenname=a+sn=b"
+      },
+
+      new Object[]
+      {
+        new String[] { "givenName", "sn" },
+        new String[] { "a ", " b" },
+        "givenName=a\\ +sn=\\ b",
+        "givenname=a+sn=b"
+      },
+
+      new Object[]
+      {
+        new String[] { "givenName", "sn" },
+        new String[] { " a ", " b " },
+        "givenName=\\ a\\ +sn=\\ b\\ ",
+        "givenname=a+sn=b"
+      },
+    };
   }
 }

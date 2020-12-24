@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -35,6 +50,8 @@ import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -72,9 +89,9 @@ public final class ModifyDNResponseProtocolOp
    *                            any.
    */
   public ModifyDNResponseProtocolOp(final int resultCode,
-                                    final String matchedDN,
-                                    final String diagnosticMessage,
-                                    final List<String> referralURLs)
+                                    @Nullable final String matchedDN,
+                                    @Nullable final String diagnosticMessage,
+                                    @Nullable final List<String> referralURLs)
   {
     super(LDAPMessage.PROTOCOL_OP_TYPE_MODIFY_DN_RESPONSE, resultCode,
           matchedDN, diagnosticMessage, referralURLs);
@@ -88,7 +105,7 @@ public final class ModifyDNResponseProtocolOp
    *
    * @param  result  The LDAP result object to use to create this protocol op.
    */
-  public ModifyDNResponseProtocolOp(final LDAPResult result)
+  public ModifyDNResponseProtocolOp(@NotNull final LDAPResult result)
   {
     super(LDAPMessage.PROTOCOL_OP_TYPE_MODIFY_DN_RESPONSE,
          result.getResultCode().intValue(), result.getMatchedDN(),
@@ -108,7 +125,7 @@ public final class ModifyDNResponseProtocolOp
    * @throws  LDAPException  If a problem occurs while reading or parsing the
    *                         modify DN response.
    */
-  ModifyDNResponseProtocolOp(final ASN1StreamReader reader)
+  ModifyDNResponseProtocolOp(@NotNull final ASN1StreamReader reader)
        throws LDAPException
   {
     super(reader);
@@ -120,6 +137,7 @@ public final class ModifyDNResponseProtocolOp
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ASN1Element encodeProtocolOp()
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(4);
@@ -173,8 +191,9 @@ public final class ModifyDNResponseProtocolOp
    * @throws  LDAPException  If the provided ASN.1 element cannot be decoded as
    *                         a modify DN response protocol op.
    */
+  @NotNull()
   public static ModifyDNResponseProtocolOp decodeProtocolOp(
-                                                final ASN1Element element)
+                     @NotNull final ASN1Element element)
          throws LDAPException
   {
     try

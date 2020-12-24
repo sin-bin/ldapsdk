@@ -1,9 +1,24 @@
 /*
- * Copyright 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2013-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -1032,7 +1047,7 @@ public final class ExampleUsagesTestCase
 
 
   /**
-   * Tests the example in the {@code SubentriesRequestControl} class.
+   * Tests the example in the {@code DraftLDUPSubentriesRequestControl} class.
    *
    * @throws  Exception  If an unexpected problem occurs.
    */
@@ -1064,7 +1079,7 @@ public final class ExampleUsagesTestCase
     // Update the search request to add a subentries request control so that
     // subentries should be included in search results.  This should cause the
     // subentry to be returned.
-    searchRequest.addControl(new SubentriesRequestControl());
+    searchRequest.addControl(new DraftLDUPSubentriesRequestControl());
     SearchResult resultWithControl = connection.search(searchRequest);
     LDAPTestUtils.assertResultCodeEquals(resultWithControl, ResultCode.SUCCESS);
     LDAPTestUtils.assertEntriesReturnedEquals(resultWithControl, 1);

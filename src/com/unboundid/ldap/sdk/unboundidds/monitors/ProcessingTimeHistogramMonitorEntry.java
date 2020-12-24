@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -101,7 +118,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The structural object class used in processing time histogram monitor
    * entries.
    */
-  static final String PROCESSING_TIME_HISTOGRAM_MONITOR_OC =
+  @NotNull static final String PROCESSING_TIME_HISTOGRAM_MONITOR_OC =
        "ds-processing-time-histogram-monitor-entry";
 
 
@@ -110,7 +127,8 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of add
    * operations performed in the server.
    */
-  private static final String ATTR_ADD_TOTAL_COUNT = "addOpsTotalCount";
+  @NotNull private static final String ATTR_ADD_TOTAL_COUNT =
+       "addOpsTotalCount";
 
 
 
@@ -118,7 +136,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the average response time in
    * milliseconds for add operations performed in the server.
    */
-  private static final String ATTR_ADD_AVERAGE_RESPONSE_TIME_MS =
+  @NotNull private static final String ATTR_ADD_AVERAGE_RESPONSE_TIME_MS =
        "addOpsAverageResponseTimeMillis";
 
 
@@ -127,7 +145,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the aggregate percentage of add
    * operations within each processing time bucket.
    */
-  private static final String ATTR_ADD_AGGREGATE_PERCENT =
+  @NotNull private static final String ATTR_ADD_AGGREGATE_PERCENT =
        "addOpsAggregatePercent";
 
 
@@ -136,7 +154,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of add operations
    * within each processing time bucket.
    */
-  private static final String ATTR_ADD_COUNT = "addOpsCount";
+  @NotNull private static final String ATTR_ADD_COUNT = "addOpsCount";
 
 
 
@@ -144,7 +162,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the percentage of add operations
    * within each processing time bucket.
    */
-  private static final String ATTR_ADD_PERCENT = "addOpsPercent";
+  @NotNull private static final String ATTR_ADD_PERCENT = "addOpsPercent";
 
 
 
@@ -152,7 +170,8 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of all
    * operations performed in the server.
    */
-  private static final String ATTR_ALL_TOTAL_COUNT = "allOpsTotalCount";
+  @NotNull private static final String ATTR_ALL_TOTAL_COUNT =
+       "allOpsTotalCount";
 
 
 
@@ -160,7 +179,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the average response time in
    * milliseconds for all operations performed in the server.
    */
-  private static final String ATTR_ALL_AVERAGE_RESPONSE_TIME_MS =
+  @NotNull private static final String ATTR_ALL_AVERAGE_RESPONSE_TIME_MS =
        "allOpsAverageResponseTimeMillis";
 
 
@@ -169,7 +188,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the aggregate percentage of
    * operations of all types within each processing time bucket.
    */
-  private static final String ATTR_ALL_AGGREGATE_PERCENT =
+  @NotNull private static final String ATTR_ALL_AGGREGATE_PERCENT =
        "allOpsAggregatePercent";
 
 
@@ -178,7 +197,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of operations of
    * all types within each processing time bucket.
    */
-  private static final String ATTR_ALL_COUNT = "allOpsCount";
+  @NotNull private static final String ATTR_ALL_COUNT = "allOpsCount";
 
 
 
@@ -186,7 +205,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the percentage of operations of all
    * types within each processing time bucket.
    */
-  private static final String ATTR_ALL_PERCENT = "allOpsPercent";
+  @NotNull private static final String ATTR_ALL_PERCENT = "allOpsPercent";
 
 
 
@@ -194,7 +213,8 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of bind
    * operations performed in the server.
    */
-  private static final String ATTR_BIND_TOTAL_COUNT = "bindOpsTotalCount";
+  @NotNull private static final String ATTR_BIND_TOTAL_COUNT =
+       "bindOpsTotalCount";
 
 
 
@@ -202,7 +222,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the average response time in
    * milliseconds for bind operations performed in the server.
    */
-  private static final String ATTR_BIND_AVERAGE_RESPONSE_TIME_MS =
+  @NotNull private static final String ATTR_BIND_AVERAGE_RESPONSE_TIME_MS =
        "bindOpsAverageResponseTimeMillis";
 
 
@@ -211,7 +231,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the aggregate percentage of bind
    * operations within each processing time bucket.
    */
-  private static final String ATTR_BIND_AGGREGATE_PERCENT =
+  @NotNull private static final String ATTR_BIND_AGGREGATE_PERCENT =
        "bindOpsAggregatePercent";
 
 
@@ -220,7 +240,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of bind operations
    * within each processing time bucket.
    */
-  private static final String ATTR_BIND_COUNT = "bindOpsCount";
+  @NotNull private static final String ATTR_BIND_COUNT = "bindOpsCount";
 
 
 
@@ -228,7 +248,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the percentage of bind operations
    * within each processing time bucket.
    */
-  private static final String ATTR_BIND_PERCENT = "bindOpsPercent";
+  @NotNull private static final String ATTR_BIND_PERCENT = "bindOpsPercent";
 
 
 
@@ -236,7 +256,8 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of compare
    * operations performed in the server.
    */
-  private static final String ATTR_COMPARE_TOTAL_COUNT = "compareOpsTotalCount";
+  @NotNull private static final String ATTR_COMPARE_TOTAL_COUNT =
+       "compareOpsTotalCount";
 
 
 
@@ -244,7 +265,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the average response time in
    * milliseconds for compare operations performed in the server.
    */
-  private static final String ATTR_COMPARE_AVERAGE_RESPONSE_TIME_MS =
+  @NotNull private static final String ATTR_COMPARE_AVERAGE_RESPONSE_TIME_MS =
        "compareOpsAverageResponseTimeMillis";
 
 
@@ -253,7 +274,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the aggregate percentage of compare
    * operations within each processing time bucket.
    */
-  private static final String ATTR_COMPARE_AGGREGATE_PERCENT =
+  @NotNull private static final String ATTR_COMPARE_AGGREGATE_PERCENT =
        "compareOpsAggregatePercent";
 
 
@@ -262,7 +283,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of compare
    * operations within each processing time bucket.
    */
-  private static final String ATTR_COMPARE_COUNT = "compareOpsCount";
+  @NotNull private static final String ATTR_COMPARE_COUNT = "compareOpsCount";
 
 
 
@@ -270,7 +291,8 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the percentage of compare
    * operations within each processing time bucket.
    */
-  private static final String ATTR_COMPARE_PERCENT = "compareOpsPercent";
+  @NotNull private static final String ATTR_COMPARE_PERCENT =
+       "compareOpsPercent";
 
 
 
@@ -278,7 +300,8 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of delete
    * operations performed in the server.
    */
-  private static final String ATTR_DELETE_TOTAL_COUNT = "deleteOpsTotalCount";
+  @NotNull private static final String ATTR_DELETE_TOTAL_COUNT =
+       "deleteOpsTotalCount";
 
 
 
@@ -286,7 +309,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the average response time in
    * milliseconds for delete operations performed in the server.
    */
-  private static final String ATTR_DELETE_AVERAGE_RESPONSE_TIME_MS =
+  @NotNull private static final String ATTR_DELETE_AVERAGE_RESPONSE_TIME_MS =
        "deleteOpsAverageResponseTimeMillis";
 
 
@@ -295,7 +318,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the aggregate percentage of delete
    * operations within each processing time bucket.
    */
-  private static final String ATTR_DELETE_AGGREGATE_PERCENT =
+  @NotNull private static final String ATTR_DELETE_AGGREGATE_PERCENT =
        "deleteOpsAggregatePercent";
 
 
@@ -304,7 +327,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of delete
    * operations within each processing time bucket.
    */
-  private static final String ATTR_DELETE_COUNT = "deleteOpsCount";
+  @NotNull private static final String ATTR_DELETE_COUNT = "deleteOpsCount";
 
 
 
@@ -312,7 +335,8 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the percentage of delete operations
    * within each processing time bucket.
    */
-  private static final String ATTR_DELETE_PERCENT = "deleteOpsPercent";
+  @NotNull private static final String ATTR_DELETE_PERCENT =
+       "deleteOpsPercent";
 
 
 
@@ -320,7 +344,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of extended
    * operations performed in the server.
    */
-  private static final String ATTR_EXTENDED_TOTAL_COUNT =
+  @NotNull private static final String ATTR_EXTENDED_TOTAL_COUNT =
        "extendedOpsTotalCount";
 
 
@@ -329,7 +353,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the average response time in
    * milliseconds for extended operations performed in the server.
    */
-  private static final String ATTR_EXTENDED_AVERAGE_RESPONSE_TIME_MS =
+  @NotNull private static final String ATTR_EXTENDED_AVERAGE_RESPONSE_TIME_MS =
        "extendedOpsAverageResponseTimeMillis";
 
 
@@ -338,7 +362,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the aggregate percentage of
    * extended operations within each processing time bucket.
    */
-  private static final String ATTR_EXTENDED_AGGREGATE_PERCENT =
+  @NotNull private static final String ATTR_EXTENDED_AGGREGATE_PERCENT =
        "extendedOpsAggregatePercent";
 
 
@@ -347,7 +371,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of extended
    * operations within each processing time bucket.
    */
-  private static final String ATTR_EXTENDED_COUNT = "extendedOpsCount";
+  @NotNull private static final String ATTR_EXTENDED_COUNT = "extendedOpsCount";
 
 
 
@@ -355,7 +379,8 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the percentage of extended
    * operations within each processing time bucket.
    */
-  private static final String ATTR_EXTENDED_PERCENT = "extendedOpsPercent";
+  @NotNull private static final String ATTR_EXTENDED_PERCENT =
+       "extendedOpsPercent";
 
 
 
@@ -363,7 +388,8 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of modify
    * operations performed in the server.
    */
-  private static final String ATTR_MODIFY_TOTAL_COUNT = "modifyOpsTotalCount";
+  @NotNull private static final String ATTR_MODIFY_TOTAL_COUNT =
+       "modifyOpsTotalCount";
 
 
 
@@ -371,7 +397,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the average response time in
    * milliseconds for modify operations performed in the server.
    */
-  private static final String ATTR_MODIFY_AVERAGE_RESPONSE_TIME_MS =
+  @NotNull private static final String ATTR_MODIFY_AVERAGE_RESPONSE_TIME_MS =
        "modifyOpsAverageResponseTimeMillis";
 
 
@@ -380,7 +406,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the aggregate percentage of modify
    * operations within each processing time bucket.
    */
-  private static final String ATTR_MODIFY_AGGREGATE_PERCENT =
+  @NotNull private static final String ATTR_MODIFY_AGGREGATE_PERCENT =
        "modifyOpsAggregatePercent";
 
 
@@ -389,7 +415,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of modify
    * operations within each processing time bucket.
    */
-  private static final String ATTR_MODIFY_COUNT = "modifyOpsCount";
+  @NotNull private static final String ATTR_MODIFY_COUNT = "modifyOpsCount";
 
 
 
@@ -397,7 +423,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the percentage of modify operations
    * within each processing time bucket.
    */
-  private static final String ATTR_MODIFY_PERCENT = "modifyOpsPercent";
+  @NotNull private static final String ATTR_MODIFY_PERCENT = "modifyOpsPercent";
 
 
 
@@ -405,7 +431,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of modify DN
    * operations performed in the server.
    */
-  private static final String ATTR_MODIFY_DN_TOTAL_COUNT =
+  @NotNull private static final String ATTR_MODIFY_DN_TOTAL_COUNT =
        "modifyDNOpsTotalCount";
 
 
@@ -414,7 +440,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the average response time in
    * milliseconds for modify DN operations performed in the server.
    */
-  private static final String ATTR_MODIFY_DN_AVERAGE_RESPONSE_TIME_MS =
+  @NotNull private static final String ATTR_MODIFY_DN_AVERAGE_RESPONSE_TIME_MS =
        "modifyDNOpsAverageResponseTimeMillis";
 
 
@@ -423,7 +449,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the aggregate percentage of modify
    * DN operations within each processing time bucket.
    */
-  private static final String ATTR_MODIFY_DN_AGGREGATE_PERCENT =
+  @NotNull private static final String ATTR_MODIFY_DN_AGGREGATE_PERCENT =
        "modifyDNOpsAggregatePercent";
 
 
@@ -432,7 +458,8 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of modify DN
    * operations within each processing time bucket.
    */
-  private static final String ATTR_MODIFY_DN_COUNT = "modifyDNOpsCount";
+  @NotNull private static final String ATTR_MODIFY_DN_COUNT =
+       "modifyDNOpsCount";
 
 
 
@@ -440,7 +467,8 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the percentage of modify DN
    * operations within each processing time bucket.
    */
-  private static final String ATTR_MODIFY_DN_PERCENT = "modifyDNOpsPercent";
+  @NotNull private static final String ATTR_MODIFY_DN_PERCENT =
+       "modifyDNOpsPercent";
 
 
 
@@ -448,7 +476,8 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of search
    * operations performed in the server.
    */
-  private static final String ATTR_SEARCH_TOTAL_COUNT = "searchOpsTotalCount";
+  @NotNull private static final String ATTR_SEARCH_TOTAL_COUNT =
+       "searchOpsTotalCount";
 
 
 
@@ -456,7 +485,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the average response time in
    * milliseconds for search operations performed in the server.
    */
-  private static final String ATTR_SEARCH_AVERAGE_RESPONSE_TIME_MS =
+  @NotNull private static final String ATTR_SEARCH_AVERAGE_RESPONSE_TIME_MS =
        "searchOpsAverageResponseTimeMillis";
 
 
@@ -465,7 +494,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the aggregate percentage of search
    * operations within each processing time bucket.
    */
-  private static final String ATTR_SEARCH_AGGREGATE_PERCENT =
+  @NotNull private static final String ATTR_SEARCH_AGGREGATE_PERCENT =
        "searchOpsAggregatePercent";
 
 
@@ -474,7 +503,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the total number of search
    * operations within each processing time bucket.
    */
-  private static final String ATTR_SEARCH_COUNT = "searchOpsCount";
+  @NotNull private static final String ATTR_SEARCH_COUNT = "searchOpsCount";
 
 
 
@@ -482,7 +511,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * The name of the attribute that contains the percentage of search operations
    * within each processing time bucket.
    */
-  private static final String ATTR_SEARCH_PERCENT = "searchOpsPercent";
+  @NotNull private static final String ATTR_SEARCH_PERCENT = "searchOpsPercent";
 
 
 
@@ -494,140 +523,139 @@ public class ProcessingTimeHistogramMonitorEntry
 
 
   // The percent of add operations in each bucket.
-  private final Map<Long,Double> addOpsPercent;
+  @NotNull private final Map<Long,Double> addOpsPercent;
 
   // The aggregate percent of add operations in each bucket.
-  private final Map<Long,Double> addOpsAggregatePercent;
+  @NotNull private final Map<Long,Double> addOpsAggregatePercent;
 
   // The percent of operations of all types in each bucket.
-  private final Map<Long,Double> allOpsPercent;
+  @NotNull private final Map<Long,Double> allOpsPercent;
 
   // The aggregate percent of operations of all types in each bucket.
-  private final Map<Long,Double> allOpsAggregatePercent;
+  @NotNull private final Map<Long,Double> allOpsAggregatePercent;
 
   // The percent of bind operations in each bucket.
-  private final Map<Long,Double> bindOpsPercent;
+  @NotNull private final Map<Long,Double> bindOpsPercent;
 
   // The aggregate percent of bind operations in each bucket.
-  private final Map<Long,Double> bindOpsAggregatePercent;
+  @NotNull private final Map<Long,Double> bindOpsAggregatePercent;
 
   // The percent of compare operations in each bucket.
-  private final Map<Long,Double> compareOpsPercent;
+  @NotNull private final Map<Long,Double> compareOpsPercent;
 
   // The aggregate percent of compare operations in each bucket.
-  private final Map<Long,Double> compareOpsAggregatePercent;
+  @NotNull private final Map<Long,Double> compareOpsAggregatePercent;
 
   // The percent of delete operations in each bucket.
-  private final Map<Long,Double> deleteOpsPercent;
+  @NotNull private final Map<Long,Double> deleteOpsPercent;
 
   // The aggregate percent of delete operations in each bucket.
-  private final Map<Long,Double> deleteOpsAggregatePercent;
+  @NotNull private final Map<Long,Double> deleteOpsAggregatePercent;
 
   // The percent of extended operations in each bucket.
-  private final Map<Long,Double> extendedOpsPercent;
+  @NotNull private final Map<Long,Double> extendedOpsPercent;
 
   // The aggregate percent of extended operations in each bucket.
-  private final Map<Long,Double> extendedOpsAggregatePercent;
+  @NotNull private final Map<Long,Double> extendedOpsAggregatePercent;
 
   // The percent of modify operations in each bucket.
-  private final Map<Long,Double> modifyOpsPercent;
+  @NotNull private final Map<Long,Double> modifyOpsPercent;
 
   // The aggregate percent of modify operations in each bucket.
-  private final Map<Long,Double> modifyOpsAggregatePercent;
+  @NotNull private final Map<Long,Double> modifyOpsAggregatePercent;
 
   // The percent of modify DN operations in each bucket.
-  private final Map<Long,Double> modifyDNOpsPercent;
+  @NotNull private final Map<Long,Double> modifyDNOpsPercent;
 
   // The aggregate percent of modify DN operations in each bucket.
-  private final Map<Long,Double> modifyDNOpsAggregatePercent;
+  @NotNull private final Map<Long,Double> modifyDNOpsAggregatePercent;
 
   // The percent of search operations in each bucket.
-  private final Map<Long,Double> searchOpsPercent;
+  @NotNull private final Map<Long,Double> searchOpsPercent;
 
   // The aggregate percent of search operations in each bucket.
-  private final Map<Long,Double> searchOpsAggregatePercent;
+  @NotNull private final Map<Long,Double> searchOpsAggregatePercent;
 
   // The number of add operations in each bucket.
-  private final Map<Long,Long> addOpsCount;
+  @NotNull private final Map<Long,Long> addOpsCount;
 
   // The number of operations of all types in each bucket.
-  private final Map<Long,Long> allOpsCount;
+  @NotNull private final Map<Long,Long> allOpsCount;
 
   // The number of bind operations in each bucket.
-  private final Map<Long,Long> bindOpsCount;
+  @NotNull private final Map<Long,Long> bindOpsCount;
 
   // The number of compare operations in each bucket.
-  private final Map<Long,Long> compareOpsCount;
+  @NotNull private final Map<Long,Long> compareOpsCount;
 
   // The number of delete operations in each bucket.
-  private final Map<Long,Long> deleteOpsCount;
+  @NotNull private final Map<Long,Long> deleteOpsCount;
 
   // The number of extended operations in each bucket.
-  private final Map<Long,Long> extendedOpsCount;
+  @NotNull private final Map<Long,Long> extendedOpsCount;
 
   // The number of modify operations in each bucket.
-  private final Map<Long,Long> modifyOpsCount;
+  @NotNull private final Map<Long,Long> modifyOpsCount;
 
   // The number of modifyDN operations in each bucket.
-  private final Map<Long,Long> modifyDNOpsCount;
+  @NotNull private final Map<Long,Long> modifyDNOpsCount;
 
   // The number of search operations in each bucket.
-  private final Map<Long,Long> searchOpsCount;
+  @NotNull private final Map<Long,Long> searchOpsCount;
 
   // The total number of add operations.
-  private final Long addOpsTotalCount;
+  @Nullable private final Long addOpsTotalCount;
 
   // The total number of all operations.
-  private final Long allOpsTotalCount;
+  @Nullable private final Long allOpsTotalCount;
 
   // The total number of bind operations.
-  private final Long bindOpsTotalCount;
+  @Nullable private final Long bindOpsTotalCount;
 
   // The total number of compare operations.
-  private final Long compareOpsTotalCount;
+  @Nullable private final Long compareOpsTotalCount;
 
   // The total number of delete operations.
-  private final Long deleteOpsTotalCount;
+  @Nullable private final Long deleteOpsTotalCount;
 
   // The total number of extended operations.
-  private final Long extendedOpsTotalCount;
+  @Nullable private final Long extendedOpsTotalCount;
 
   // The total number of modify operations.
-  private final Long modifyOpsTotalCount;
+  @Nullable private final Long modifyOpsTotalCount;
 
   // The total number of modify DN operations.
-  private final Long modifyDNOpsTotalCount;
+  @Nullable private final Long modifyDNOpsTotalCount;
 
   // The total number of search operations.
-  private final Long searchOpsTotalCount;
+  @Nullable private final Long searchOpsTotalCount;
 
   // The average response time in milliseconds for add operations.
-
-  private final Double addOpsAvgResponseTimeMillis;
+  @Nullable private final Double addOpsAvgResponseTimeMillis;
 
   // The average response time in milliseconds for all operations.
-  private final Double allOpsAvgResponseTimeMillis;
+  @Nullable private final Double allOpsAvgResponseTimeMillis;
 
   // The average response time in milliseconds for bind operations.
-  private final Double bindOpsAvgResponseTimeMillis;
+  @Nullable private final Double bindOpsAvgResponseTimeMillis;
 
   // The average response time in milliseconds for compare operations.
-  private final Double compareOpsAvgResponseTimeMillis;
+  @Nullable private final Double compareOpsAvgResponseTimeMillis;
 
   // The average response time in milliseconds for delete operations.
-  private final Double deleteOpsAvgResponseTimeMillis;
+  @Nullable private final Double deleteOpsAvgResponseTimeMillis;
 
   // The average response time in milliseconds for extended operations.
-  private final Double extendedOpsAvgResponseTimeMillis;
+  @Nullable private final Double extendedOpsAvgResponseTimeMillis;
 
   // The average response time in milliseconds for modify operations.
-  private final Double modifyOpsAvgResponseTimeMillis;
+  @Nullable private final Double modifyOpsAvgResponseTimeMillis;
 
   // The average response time in milliseconds for modify DN operations.
-  private final Double modifyDNOpsAvgResponseTimeMillis;
+  @Nullable private final Double modifyDNOpsAvgResponseTimeMillis;
 
   // The average response time in milliseconds for search operations.
-  private final Double searchOpsAvgResponseTimeMillis;
+  @Nullable private final Double searchOpsAvgResponseTimeMillis;
 
 
   /**
@@ -637,7 +665,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * @param  entry  The entry to be parsed as a processing time histogram
    *                monitor entry.  It must not be {@code null}.
    */
-  public ProcessingTimeHistogramMonitorEntry(final Entry entry)
+  public ProcessingTimeHistogramMonitorEntry(@NotNull final Entry entry)
   {
     super(entry);
 
@@ -724,8 +752,9 @@ public class ProcessingTimeHistogramMonitorEntry
    * @return  A map with the parsed information, or an empty map if the
    *          specified attribute did not exist or could not be parsed.
    */
-  private static Map<Long,Long> parseCountAttribute(final Entry entry,
-                                                    final String name)
+  @NotNull()
+  private static Map<Long,Long> parseCountAttribute(@NotNull final Entry entry,
+                                                    @NotNull final String name)
   {
     final String[] values = entry.getAttributeValues(name);
     if ((values == null) || (values.length == 0))
@@ -789,8 +818,10 @@ public class ProcessingTimeHistogramMonitorEntry
    * @return  A map with the parsed information, or an empty map if the
    *          specified attribute did not exist or could not be parsed.
    */
-  private static Map<Long,Double> parsePercentAttribute(final Entry entry,
-                                                        final String name)
+  @NotNull()
+  private static Map<Long,Double> parsePercentAttribute(
+               @NotNull final Entry entry,
+               @NotNull final String name)
   {
     final String[] values = entry.getAttributeValues(name);
     if ((values == null) || (values.length == 0))
@@ -874,6 +905,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public final Long getAllOpsTotalCount()
   {
     return allOpsTotalCount;
@@ -889,6 +921,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          types performed in the server, or {@code null} if it was not
    *          included in the monitor entry.
    */
+  @Nullable()
   public final Double getAllOpsAverageResponseTimeMillis()
   {
     return allOpsAvgResponseTimeMillis;
@@ -906,6 +939,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          types within each of the response time buckets, or an empty map if
    *          it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Long> getAllOpsCount()
   {
     return allOpsCount;
@@ -923,6 +957,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          types within each of the response time buckets, or an empty map if
    *          it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getAllOpsPercent()
   {
     return allOpsPercent;
@@ -942,6 +977,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations of all types within each of the response time buckets,
    *          or an empty map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getAllOpsAggregatePercent()
   {
     return allOpsAggregatePercent;
@@ -957,6 +993,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public final Long getAddOpsTotalCount()
   {
     return addOpsTotalCount;
@@ -972,6 +1009,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          that have been performed in the server, or {@code null} if it was
    *          not included in the monitor entry.
    */
+  @Nullable()
   public final Double getAddOpsAverageResponseTimeMillis()
   {
     return addOpsAvgResponseTimeMillis;
@@ -989,6 +1027,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          within each of the response time buckets, or an empty map if it
    *          was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Long> getAddOpsCount()
   {
     return addOpsCount;
@@ -1006,6 +1045,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          within each of the response time buckets, or an empty map if it
    *          was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getAddOpsPercent()
   {
     return addOpsPercent;
@@ -1025,6 +1065,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getAddOpsAggregatePercent()
   {
     return addOpsAggregatePercent;
@@ -1040,6 +1081,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          the server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public final Long getBindOpsTotalCount()
   {
     return bindOpsTotalCount;
@@ -1055,6 +1097,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          that have been performed in the server, or {@code null} if it was
    *          not included in the monitor entry.
    */
+  @Nullable()
   public final Double getBindOpsAverageResponseTimeMillis()
   {
     return bindOpsAvgResponseTimeMillis;
@@ -1072,6 +1115,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          within each of the response time buckets, or an empty map if it
    *          was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Long> getBindOpsCount()
   {
     return bindOpsCount;
@@ -1089,6 +1133,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          within each of the response time buckets, or an empty map if it
    *          was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getBindOpsPercent()
   {
     return bindOpsPercent;
@@ -1108,6 +1153,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getBindOpsAggregatePercent()
   {
     return bindOpsAggregatePercent;
@@ -1123,6 +1169,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          the server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public final Long getCompareOpsTotalCount()
   {
     return compareOpsTotalCount;
@@ -1138,6 +1185,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          that have been performed in the server, or {@code null} if it was
    *          not included in the monitor entry.
    */
+  @Nullable()
   public final Double getCompareOpsAverageResponseTimeMillis()
   {
     return compareOpsAvgResponseTimeMillis;
@@ -1155,6 +1203,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Long> getCompareOpsCount()
   {
     return compareOpsCount;
@@ -1172,6 +1221,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          within each of the response time buckets, or an empty map if it
    *          was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getCompareOpsPercent()
   {
     return compareOpsPercent;
@@ -1191,6 +1241,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getCompareOpsAggregatePercent()
   {
     return compareOpsAggregatePercent;
@@ -1206,6 +1257,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          the server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public final Long getDeleteOpsTotalCount()
   {
     return deleteOpsTotalCount;
@@ -1221,6 +1273,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          that have been performed in the server, or {@code null} if it was
    *          not included in the monitor entry.
    */
+  @Nullable()
   public final Double getDeleteOpsAverageResponseTimeMillis()
   {
     return deleteOpsAvgResponseTimeMillis;
@@ -1238,6 +1291,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Long> getDeleteOpsCount()
   {
     return deleteOpsCount;
@@ -1255,6 +1309,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          within each of the response time buckets, or an empty map if it
    *          was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getDeleteOpsPercent()
   {
     return deleteOpsPercent;
@@ -1274,6 +1329,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getDeleteOpsAggregatePercent()
   {
     return deleteOpsAggregatePercent;
@@ -1289,6 +1345,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          in the server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public final Long getExtendedOpsTotalCount()
   {
     return extendedOpsTotalCount;
@@ -1304,6 +1361,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          that have been performed in the server, or {@code null} if it was
    *          not included in the monitor entry.
    */
+  @Nullable()
   public final Double getExtendedOpsAverageResponseTimeMillis()
   {
     return extendedOpsAvgResponseTimeMillis;
@@ -1321,6 +1379,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Long> getExtendedOpsCount()
   {
     return extendedOpsCount;
@@ -1338,6 +1397,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          within each of the response time buckets, or an empty map if it
    *          was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getExtendedOpsPercent()
   {
     return extendedOpsPercent;
@@ -1357,6 +1417,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getExtendedOpsAggregatePercent()
   {
     return extendedOpsAggregatePercent;
@@ -1372,6 +1433,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          the server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public final Long getModifyOpsTotalCount()
   {
     return modifyOpsTotalCount;
@@ -1387,6 +1449,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          that have been performed in the server, or {@code null} if it was
    *          not included in the monitor entry.
    */
+  @Nullable()
   public final Double getModifyOpsAverageResponseTimeMillis()
   {
     return modifyOpsAvgResponseTimeMillis;
@@ -1404,6 +1467,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Long> getModifyOpsCount()
   {
     return modifyOpsCount;
@@ -1421,6 +1485,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          within each of the response time buckets, or an empty map if it
    *          was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getModifyOpsPercent()
   {
     return modifyOpsPercent;
@@ -1440,6 +1505,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getModifyOpsAggregatePercent()
   {
     return modifyOpsAggregatePercent;
@@ -1457,6 +1523,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Long> getModifyDNOpsCount()
   {
     return modifyDNOpsCount;
@@ -1472,6 +1539,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          in the server, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public final Long getModifyDNOpsTotalCount()
   {
     return modifyDNOpsTotalCount;
@@ -1487,6 +1555,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          that have been performed in the server, or {@code null} if it was
    *          not included in the monitor entry.
    */
+  @Nullable()
   public final Double getModifyDNOpsAverageResponseTimeMillis()
   {
     return modifyDNOpsAvgResponseTimeMillis;
@@ -1504,6 +1573,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getModifyDNOpsPercent()
   {
     return modifyDNOpsPercent;
@@ -1523,6 +1593,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getModifyDNOpsAggregatePercent()
   {
     return modifyDNOpsAggregatePercent;
@@ -1538,6 +1609,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          the server, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public final Long getSearchOpsTotalCount()
   {
     return searchOpsTotalCount;
@@ -1553,6 +1625,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          that have been performed in the server, or {@code null} if it was
    *          not included in the monitor entry.
    */
+  @Nullable()
   public final Double getSearchOpsAverageResponseTimeMillis()
   {
     return searchOpsAvgResponseTimeMillis;
@@ -1570,6 +1643,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Long> getSearchOpsCount()
   {
     return searchOpsCount;
@@ -1587,6 +1661,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          within each of the response time buckets, or an empty map if it
    *          was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getSearchOpsPercent()
   {
     return searchOpsPercent;
@@ -1606,6 +1681,7 @@ public class ProcessingTimeHistogramMonitorEntry
    *          operations within each of the response time buckets, or an empty
    *          map if it was not included in the monitor entry.
    */
+  @NotNull()
   public final Map<Long,Double> getSearchOpsAggregatePercent()
   {
     return searchOpsAggregatePercent;
@@ -1617,6 +1693,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDisplayName()
   {
     return INFO_PROCESSING_TIME_MONITOR_DISPNAME.get();
@@ -1628,6 +1705,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDescription()
   {
     return INFO_PROCESSING_TIME_MONITOR_DESC.get();
@@ -1639,6 +1717,7 @@ public class ProcessingTimeHistogramMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<String,MonitorAttribute> getMonitorAttributes()
   {
     final LinkedHashMap<String,MonitorAttribute> attrs =

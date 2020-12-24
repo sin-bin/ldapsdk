@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,6 +52,8 @@ import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -98,7 +115,7 @@ public final class CRAMMD5BindRequest
   /**
    * The name for the CRAM-MD5 SASL mechanism.
    */
-  public static final String CRAMMD5_MECHANISM_NAME = "CRAM-MD5";
+  @NotNull public static final String CRAMMD5_MECHANISM_NAME = "CRAM-MD5";
 
 
 
@@ -110,17 +127,17 @@ public final class CRAMMD5BindRequest
 
 
   // The password for this bind request.
-  private final ASN1OctetString password;
+  @NotNull private final ASN1OctetString password;
 
   // The message ID from the last LDAP message sent from this request.
   private int messageID = -1;
 
   // A list that will be updated with messages about any unhandled callbacks
   // encountered during processing.
-  private final List<String> unhandledCallbackMessages;
+  @NotNull private final List<String> unhandledCallbackMessages;
 
   // The authentication ID string for this bind request.
-  private final String authenticationID;
+  @NotNull private final String authenticationID;
 
 
 
@@ -133,8 +150,8 @@ public final class CRAMMD5BindRequest
    * @param  password          The password for this bind request.  It must not
    *                           be {@code null}.
    */
-  public CRAMMD5BindRequest(final String authenticationID,
-                            final String password)
+  public CRAMMD5BindRequest(@NotNull final String authenticationID,
+                            @NotNull final String password)
   {
     this(authenticationID, new ASN1OctetString(password), NO_CONTROLS);
 
@@ -152,8 +169,8 @@ public final class CRAMMD5BindRequest
    * @param  password          The password for this bind request.  It must not
    *                           be {@code null}.
    */
-  public CRAMMD5BindRequest(final String authenticationID,
-                            final byte[] password)
+  public CRAMMD5BindRequest(@NotNull final String authenticationID,
+                            @NotNull final byte[] password)
   {
     this(authenticationID, new ASN1OctetString(password), NO_CONTROLS);
 
@@ -171,8 +188,8 @@ public final class CRAMMD5BindRequest
    * @param  password          The password for this bind request.  It must not
    *                           be {@code null}.
    */
-  public CRAMMD5BindRequest(final String authenticationID,
-                            final ASN1OctetString password)
+  public CRAMMD5BindRequest(@NotNull final String authenticationID,
+                            @NotNull final ASN1OctetString password)
   {
     this(authenticationID, password, NO_CONTROLS);
   }
@@ -189,8 +206,9 @@ public final class CRAMMD5BindRequest
    *                           be {@code null}.
    * @param  controls          The set of controls to include in the request.
    */
-  public CRAMMD5BindRequest(final String authenticationID,
-                            final String password, final Control... controls)
+  public CRAMMD5BindRequest(@NotNull final String authenticationID,
+                            @NotNull final String password,
+                            @Nullable final Control... controls)
   {
     this(authenticationID, new ASN1OctetString(password), controls);
 
@@ -209,8 +227,9 @@ public final class CRAMMD5BindRequest
    *                           be {@code null}.
    * @param  controls          The set of controls to include in the request.
    */
-  public CRAMMD5BindRequest(final String authenticationID,
-                            final byte[] password, final Control... controls)
+  public CRAMMD5BindRequest(@NotNull final String authenticationID,
+                            @NotNull final byte[] password,
+                            @Nullable final Control... controls)
   {
     this(authenticationID, new ASN1OctetString(password), controls);
 
@@ -229,9 +248,9 @@ public final class CRAMMD5BindRequest
    *                           be {@code null}.
    * @param  controls          The set of controls to include in the request.
    */
-  public CRAMMD5BindRequest(final String authenticationID,
-                            final ASN1OctetString password,
-                            final Control... controls)
+  public CRAMMD5BindRequest(@NotNull final String authenticationID,
+                            @NotNull final ASN1OctetString password,
+                            @Nullable final Control... controls)
   {
     super(controls);
 
@@ -249,6 +268,7 @@ public final class CRAMMD5BindRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getSASLMechanismName()
   {
     return CRAMMD5_MECHANISM_NAME;
@@ -261,6 +281,7 @@ public final class CRAMMD5BindRequest
    *
    * @return  The authentication ID for this bind request.
    */
+  @NotNull()
   public String getAuthenticationID()
   {
     return authenticationID;
@@ -273,6 +294,7 @@ public final class CRAMMD5BindRequest
    *
    * @return  The string representation of the password for this bind request.
    */
+  @NotNull()
   public String getPasswordString()
   {
     return password.stringValue();
@@ -285,6 +307,7 @@ public final class CRAMMD5BindRequest
    *
    * @return  The bytes that comprise the password for this bind request.
    */
+  @NotNull()
   public byte[] getPasswordBytes()
   {
     return password.getValue();
@@ -308,7 +331,9 @@ public final class CRAMMD5BindRequest
    *                         reading the response.
    */
   @Override()
-  protected BindResult process(final LDAPConnection connection, final int depth)
+  @NotNull ()
+  protected BindResult process(@NotNull final LDAPConnection connection,
+                               final int depth)
             throws LDAPException
   {
     unhandledCallbackMessages.clear();
@@ -331,17 +356,17 @@ public final class CRAMMD5BindRequest
            e);
     }
 
-    final SASLHelper helper = new SASLHelper(this, connection,
-         CRAMMD5_MECHANISM_NAME, saslClient, getControls(),
+    final SASLClientBindHandler bindHandler = new SASLClientBindHandler(this,
+         connection, CRAMMD5_MECHANISM_NAME, saslClient, getControls(),
          getResponseTimeoutMillis(connection), unhandledCallbackMessages);
 
     try
     {
-      return helper.processSASLBind();
+      return bindHandler.processSASLBind();
     }
     finally
     {
-      messageID = helper.getMessageID();
+      messageID = bindHandler.getMessageID();
     }
   }
 
@@ -351,7 +376,9 @@ public final class CRAMMD5BindRequest
    * {@inheritDoc}
    */
   @Override()
-  public CRAMMD5BindRequest getRebindRequest(final String host, final int port)
+  @NotNull()
+  public CRAMMD5BindRequest getRebindRequest(@NotNull final String host,
+                                             final int port)
   {
     return new CRAMMD5BindRequest(authenticationID, password, getControls());
   }
@@ -365,7 +392,7 @@ public final class CRAMMD5BindRequest
    */
   @InternalUseOnly()
   @Override()
-  public void handle(final Callback[] callbacks)
+  public void handle(@NotNull final Callback[] callbacks)
   {
     for (final Callback callback : callbacks)
     {
@@ -411,6 +438,7 @@ public final class CRAMMD5BindRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public CRAMMD5BindRequest duplicate()
   {
     return duplicate(getControls());
@@ -422,7 +450,8 @@ public final class CRAMMD5BindRequest
    * {@inheritDoc}
    */
   @Override()
-  public CRAMMD5BindRequest duplicate(final Control[] controls)
+  @NotNull()
+  public CRAMMD5BindRequest duplicate(@Nullable final Control[] controls)
   {
     final CRAMMD5BindRequest bindRequest =
          new CRAMMD5BindRequest(authenticationID, password, controls);
@@ -436,7 +465,7 @@ public final class CRAMMD5BindRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("CRAMMD5BindRequest(authenticationID='");
     buffer.append(authenticationID);
@@ -467,7 +496,8 @@ public final class CRAMMD5BindRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toCode(final List<String> lineList, final String requestID,
+  public void toCode(@NotNull final List<String> lineList,
+                     @NotNull final String requestID,
                      final int indentSpaces, final boolean includeProcessing)
   {
     // Create the request variable.

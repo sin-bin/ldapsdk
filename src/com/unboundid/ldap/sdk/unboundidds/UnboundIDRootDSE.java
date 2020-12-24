@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.LDAPInterface;
 import com.unboundid.ldap.sdk.RootDSE;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -56,7 +73,7 @@ public final class UnboundIDRootDSE
    * The name of the attribute that provides a digest of the base configuration
    * for the software version the server is currently running.
    */
-  public static final String ATTR_BASELINE_CONFIG_DIGEST =
+  @NotNull public static final String ATTR_BASELINE_CONFIG_DIGEST =
        "baselineConfigurationDigest";
 
 
@@ -65,7 +82,7 @@ public final class UnboundIDRootDSE
    * The name of the attribute that provides a digest of the configuration model
    * for the software version the server is currently running.
    */
-  public static final String ATTR_CONFIG_MODEL_DIGEST =
+  @NotNull public static final String ATTR_CONFIG_MODEL_DIGEST =
        "configurationModelDigest";
 
 
@@ -74,7 +91,7 @@ public final class UnboundIDRootDSE
    * The name of the attribute that provides a the unique instance name for the
    * server instance.
    */
-  public static final String ATTR_INSTANCE_NAME = "ds-instance-name";
+  @NotNull public static final String ATTR_INSTANCE_NAME = "ds-instance-name";
 
 
 
@@ -84,7 +101,7 @@ public final class UnboundIDRootDSE
    * content in the UnboundID server, but do not house user-provided data that
    * is expected to be accessed by normal clients.
    */
-  public static final String ATTR_PRIVATE_NAMING_CONTEXTS =
+  @NotNull public static final String ATTR_PRIVATE_NAMING_CONTEXTS =
        "ds-private-naming-contexts";
 
 
@@ -94,7 +111,7 @@ public final class UnboundIDRootDSE
    * server startup, and can be used to determine whether an instance has been
    * restarted.
    */
-  public static final String ATTR_STARTUP_UUID = "startupUUID";
+  @NotNull public static final String ATTR_STARTUP_UUID = "startupUUID";
 
 
 
@@ -102,7 +119,7 @@ public final class UnboundIDRootDSE
    * The name of the attribute that includes the one-time password delivery
    * mechanisms supported for use in the server.
    */
-  public static final String ATTR_SUPPORTED_OTP_DELIVERY_MECHANISM =
+  @NotNull public static final String ATTR_SUPPORTED_OTP_DELIVERY_MECHANISM =
        "ds-supported-otp-delivery-mechanism";
 
 
@@ -113,7 +130,7 @@ public final class UnboundIDRootDSE
    * server supports that capability, but will also attempt to retrieve specific
    * attributes by name in case it does not.
    */
-  private static final String[] REQUEST_ATTRS;
+  @NotNull private static final String[] REQUEST_ATTRS;
   static
   {
     final String[] superAttrs = RootDSE.REQUEST_ATTRS;
@@ -145,7 +162,7 @@ public final class UnboundIDRootDSE
    * @param  rootDSEEntry  The entry to use to create this UnboundID root DSE
    *                       object.  It must not be {@code null}.
    */
-  public UnboundIDRootDSE(final Entry rootDSEEntry)
+  public UnboundIDRootDSE(@NotNull final Entry rootDSEEntry)
   {
     super(rootDSEEntry);
   }
@@ -165,7 +182,9 @@ public final class UnboundIDRootDSE
    * @throws LDAPException  If a problem occurs while attempting to retrieve
    *                         the server root DSE.
    */
-  public static UnboundIDRootDSE getRootDSE(final LDAPInterface connection)
+  @Nullable()
+  public static UnboundIDRootDSE getRootDSE(
+                     @NotNull final LDAPInterface connection)
        throws LDAPException
   {
     final Entry rootDSEEntry = connection.getEntry("", REQUEST_ATTRS);
@@ -186,6 +205,7 @@ public final class UnboundIDRootDSE
    * @return The server's baseline configuration digest, or {@code null} if
    *          that information is not available.
    */
+  @Nullable()
   public String getBaselineConfigurationDigest()
   {
     return getAttributeValue(ATTR_BASELINE_CONFIG_DIGEST);
@@ -200,6 +220,7 @@ public final class UnboundIDRootDSE
    * @return The server's configuration model digest, or {@code null} if that
    *          information is not available.
    */
+  @Nullable()
   public String getConfigurationModelDigest()
   {
     return getAttributeValue(ATTR_CONFIG_MODEL_DIGEST);
@@ -213,6 +234,7 @@ public final class UnboundIDRootDSE
    * @return The unique name assigned to the server instance, or {@code null}
    *          if that information is not available.
    */
+  @Nullable()
   public String getInstanceName()
   {
     return getAttributeValue(ATTR_INSTANCE_NAME);
@@ -229,6 +251,7 @@ public final class UnboundIDRootDSE
    * @return The DNs of the private naming contexts, or {@code null} if that
    *          information is not available.
    */
+  @Nullable()
   public String[] getPrivateNamingContexts()
   {
     return getAttributeValues(ATTR_PRIVATE_NAMING_CONTEXTS);
@@ -243,6 +266,7 @@ public final class UnboundIDRootDSE
    * @return The server's startup UUID, or {@code null} if that information is
    *          not available.
    */
+  @Nullable()
   public String getStartupUUID()
   {
     return getAttributeValue(ATTR_STARTUP_UUID);
@@ -256,6 +280,7 @@ public final class UnboundIDRootDSE
    * @return The names of the supported one-time password delivery mechanisms,
    *          or {@code null} if that information is not available.
    */
+  @Nullable()
   public String[] getSupportedOTPDeliveryMechanisms()
   {
     return getAttributeValues(ATTR_SUPPORTED_OTP_DELIVERY_MECHANISM);
@@ -274,7 +299,8 @@ public final class UnboundIDRootDSE
    *          specified one-time password delivery mechanism, or {@code false}
    *          if it does not.
    */
-  public boolean supportsOTPDeliveryMechanism(final String mechanismName)
+  public boolean supportsOTPDeliveryMechanism(
+              @NotNull final String mechanismName)
   {
     return hasAttributeValue(ATTR_SUPPORTED_OTP_DELIVERY_MECHANISM,
          mechanismName);

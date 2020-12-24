@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -40,6 +55,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -102,7 +119,7 @@ public final class StreamProxyValuesExtendedRequest
    * The OID (1.3.6.1.4.1.30221.2.6.8) for the get stream proxy values extended
    * request.
    */
-  public static final String STREAM_PROXY_VALUES_REQUEST_OID =
+  @NotNull public static final String STREAM_PROXY_VALUES_REQUEST_OID =
        "1.3.6.1.4.1.30221.2.6.8";
 
 
@@ -176,16 +193,16 @@ public final class StreamProxyValuesExtendedRequest
 
   // The list of backend sets defined in the Directory Proxy Server issuing the
   // request.
-  private final List<StreamProxyValuesBackendSet> backendSets;
+  @NotNull private final List<StreamProxyValuesBackendSet> backendSets;
 
   // The list of attribute values to be returned.
-  private final List<String> attributes;
+  @NotNull private final List<String> attributes;
 
   // The search scope to use if DN values are to be included.
-  private final SearchScope dnScope;
+  @Nullable private final SearchScope dnScope;
 
   // The base DN for this stream proxy values request.
-  private final String baseDN;
+  @NotNull private final String baseDN;
 
 
 
@@ -215,11 +232,13 @@ public final class StreamProxyValuesExtendedRequest
    *                            It may be {@code null} or empty if no controls
    *                            should be included in the request.
    */
-  public StreamProxyValuesExtendedRequest(final String baseDN,
-              final SearchScope dnScope, final boolean returnRelativeDNs,
-              final List<String> attributes, final int valuesPerResponse,
-              final List<StreamProxyValuesBackendSet> backendSets,
-              final Control... controls)
+  public StreamProxyValuesExtendedRequest(@NotNull final String baseDN,
+              @Nullable final SearchScope dnScope,
+              final boolean returnRelativeDNs,
+              @Nullable final List<String> attributes,
+              final int valuesPerResponse,
+              @NotNull final List<StreamProxyValuesBackendSet> backendSets,
+              @Nullable final Control... controls)
   {
     super(STREAM_PROXY_VALUES_REQUEST_OID,
          encodeValue(baseDN, dnScope, returnRelativeDNs, attributes,
@@ -262,7 +281,7 @@ public final class StreamProxyValuesExtendedRequest
    * @throws  LDAPException  If a problem occurs while decoding the request.
    */
   public StreamProxyValuesExtendedRequest(
-              final ExtendedRequest extendedRequest)
+              @NotNull final ExtendedRequest extendedRequest)
          throws LDAPException
   {
     super(extendedRequest);
@@ -412,10 +431,13 @@ public final class StreamProxyValuesExtendedRequest
    * @return  The ASN.1 octet string containing the encoded value to use for
    *          this extended request.
    */
-  private static ASN1OctetString encodeValue(final String baseDN,
-       final SearchScope scope, final boolean relativeDNs,
-       final List<String> attributes, final int valuesPerResponse,
-       final List<StreamProxyValuesBackendSet> backendSets)
+  @NotNull()
+  private static ASN1OctetString encodeValue(@NotNull final String baseDN,
+               @Nullable final SearchScope scope,
+               final boolean relativeDNs,
+               @Nullable final List<String> attributes,
+               final int valuesPerResponse,
+               @NotNull final List<StreamProxyValuesBackendSet> backendSets)
   {
     Validator.ensureNotNull(baseDN, backendSets);
     Validator.ensureFalse(backendSets.isEmpty());
@@ -471,6 +493,7 @@ public final class StreamProxyValuesExtendedRequest
    *
    * @return  The base DN for this request.
    */
+  @NotNull()
   public String getBaseDN()
   {
     return baseDN;
@@ -485,6 +508,7 @@ public final class StreamProxyValuesExtendedRequest
    *          or {@code null} if information about entry DNs should not be
    *          returned.
    */
+  @Nullable()
   public SearchScope getDNScope()
   {
     return dnScope;
@@ -514,6 +538,7 @@ public final class StreamProxyValuesExtendedRequest
    *          the client, or an empty list if only information about entry DNs
    *          should be returned.
    */
+  @NotNull()
   public List<String> getAttributes()
   {
     return attributes;
@@ -543,6 +568,7 @@ public final class StreamProxyValuesExtendedRequest
    * @return  The list of backend sets defined in the Directory Proxy Server
    *          instance issuing the request.
    */
+  @NotNull()
   public List<StreamProxyValuesBackendSet> getBackendSets()
   {
     return backendSets;
@@ -554,6 +580,7 @@ public final class StreamProxyValuesExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public StreamProxyValuesExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -565,8 +592,9 @@ public final class StreamProxyValuesExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public StreamProxyValuesExtendedRequest duplicate(
-              final Control[] controls)
+              @Nullable final Control[] controls)
   {
     final StreamProxyValuesExtendedRequest r =
          new StreamProxyValuesExtendedRequest(baseDN, dnScope,
@@ -582,6 +610,7 @@ public final class StreamProxyValuesExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_EXTENDED_REQUEST_NAME_STREAM_PROXY_VALUES.get();
@@ -593,7 +622,7 @@ public final class StreamProxyValuesExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("StreamProxyValuesExtendedRequest(baseDN='");
     buffer.append(baseDN);

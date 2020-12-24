@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,6 +52,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -72,7 +89,7 @@ public final class EndTransactionExtendedResult
 
   // A mapping of the response controls for the operations performed as part of
   // the transaction.
-  private final TreeMap<Integer,Control[]> opResponseControls;
+  @NotNull private final TreeMap<Integer,Control[]> opResponseControls;
 
 
 
@@ -88,7 +105,8 @@ public final class EndTransactionExtendedResult
    *                         provided extended result as an end transaction
    *                         extended result.
    */
-  public EndTransactionExtendedResult(final ExtendedResult extendedResult)
+  public EndTransactionExtendedResult(
+              @NotNull final ExtendedResult extendedResult)
          throws LDAPException
   {
     super(extendedResult);
@@ -183,11 +201,13 @@ public final class EndTransactionExtendedResult
    *                             available.
    */
   public EndTransactionExtendedResult(final int messageID,
-              final ResultCode resultCode, final String diagnosticMessage,
-              final String matchedDN, final String[] referralURLs,
-              final Integer failedOpMessageID,
-              final Map<Integer,Control[]> opResponseControls,
-              final Control[] responseControls)
+              @NotNull final ResultCode resultCode,
+              @Nullable final String diagnosticMessage,
+              @Nullable final String matchedDN,
+              @Nullable final String[] referralURLs,
+              @Nullable final Integer failedOpMessageID,
+              @Nullable final Map<Integer,Control[]> opResponseControls,
+              @Nullable final Control[] responseControls)
   {
     super(messageID, resultCode, diagnosticMessage, matchedDN, referralURLs,
           null, encodeValue(failedOpMessageID, opResponseControls),
@@ -226,8 +246,8 @@ public final class EndTransactionExtendedResult
    * @throws  LDAPException  If a problem occurs while attempting to decode the
    *                         contents of the provided ASN.1 element.
    */
-  private static void decodeOpControls(final ASN1Element element,
-                                       final Map<Integer,Control[]> controlMap)
+  private static void decodeOpControls(@NotNull final ASN1Element element,
+                           @NotNull final Map<Integer,Control[]> controlMap)
           throws LDAPException
   {
     final ASN1Sequence ctlsSequence;
@@ -315,8 +335,10 @@ public final class EndTransactionExtendedResult
    * @return  An ASN.1 octet string containing the encoded value for this
    *          control, or {@code null} if there should not be a value.
    */
-  private static ASN1OctetString encodeValue(final Integer failedOpMessageID,
-                      final Map<Integer,Control[]> opResponseControls)
+  @Nullable()
+  private static ASN1OctetString encodeValue(
+                      @Nullable final Integer failedOpMessageID,
+                      @Nullable final Map<Integer,Control[]> opResponseControls)
   {
     if ((failedOpMessageID == null) && (opResponseControls == null))
     {
@@ -375,6 +397,7 @@ public final class EndTransactionExtendedResult
    *          as part of the transaction.  It may be an empty map if none of the
    *          operations had any response controls.
    */
+  @NotNull()
   public Map<Integer,Control[]> getOperationResponseControls()
   {
     return opResponseControls;
@@ -393,6 +416,7 @@ public final class EndTransactionExtendedResult
    *          {@code null} if there were no controls returned for the specified
    *          operation.
    */
+  @Nullable()
   public Control[] getOperationResponseControls(final int messageID)
   {
     return opResponseControls.get(messageID);
@@ -404,6 +428,7 @@ public final class EndTransactionExtendedResult
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedResultName()
   {
     return INFO_EXTENDED_RESULT_NAME_END_TXN.get();
@@ -419,7 +444,7 @@ public final class EndTransactionExtendedResult
    *                 extended result will be appended.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("EndTransactionExtendedResult(resultCode=");
     buffer.append(getResultCode());

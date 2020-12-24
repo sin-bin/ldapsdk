@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -23,6 +38,7 @@ package com.unboundid.ldap.sdk;
 
 
 import com.unboundid.util.Extensible;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -104,7 +120,7 @@ public class LDAPConnectionPoolHealthCheck
    * @throws  LDAPException  If a problem is detected that suggests that the
    *                         provided connection is not suitable for use.
    */
-  public void ensureNewConnectionValid(final LDAPConnection connection)
+  public void ensureNewConnectionValid(@NotNull final LDAPConnection connection)
          throws LDAPException
   {
     // No processing is performed in this default implementation.
@@ -178,8 +194,8 @@ public class LDAPConnectionPoolHealthCheck
    *                         provided connection is not suitable for use.
    */
   public void ensureConnectionValidAfterAuthentication(
-                   final LDAPConnection connection,
-                   final BindResult bindResult)
+                   @NotNull final LDAPConnection connection,
+                   @NotNull final BindResult bindResult)
          throws LDAPException
   {
     // No processing is performed in this default implementation.
@@ -201,7 +217,8 @@ public class LDAPConnectionPoolHealthCheck
    * @throws  LDAPException  If a problem is detected that suggests that the
    *                         provided connection is not suitable for use.
    */
-  public void ensureConnectionValidForCheckout(final LDAPConnection connection)
+  public void ensureConnectionValidForCheckout(
+                    @NotNull final LDAPConnection connection)
          throws LDAPException
   {
     // No processing is performed in this default implementation.
@@ -223,7 +240,8 @@ public class LDAPConnectionPoolHealthCheck
    * @throws  LDAPException  If a problem is detected that suggests that the
    *                         provided connection is not suitable for use.
    */
-  public void ensureConnectionValidForRelease(final LDAPConnection connection)
+  public void ensureConnectionValidForRelease(
+                   @NotNull final LDAPConnection connection)
          throws LDAPException
   {
     // No processing is performed in this default implementation.
@@ -245,7 +263,7 @@ public class LDAPConnectionPoolHealthCheck
    *                         provided connection is not suitable for use.
    */
   public void ensureConnectionValidForContinuedUse(
-                   final LDAPConnection connection)
+                   @NotNull final LDAPConnection connection)
          throws LDAPException
   {
     // No processing is performed in this default implementation.
@@ -266,7 +284,7 @@ public class LDAPConnectionPoolHealthCheck
    *
    * @param  pool  The connection pool on which to perform maintenance.
    */
-  public void performPoolMaintenance(final AbstractConnectionPool pool)
+  public void performPoolMaintenance(@NotNull final AbstractConnectionPool pool)
   {
     // No processing is performed in this default implementation.
   }
@@ -294,8 +312,8 @@ public class LDAPConnectionPoolHealthCheck
    *                         provided connection is not suitable for use.
    */
   public void ensureConnectionValidAfterException(
-                   final LDAPConnection connection,
-                   final LDAPException exception)
+                   @NotNull final LDAPConnection connection,
+                   @NotNull final LDAPException exception)
          throws LDAPException
   {
     if (! ResultCode.isConnectionUsable(exception.getResultCode()))
@@ -316,6 +334,7 @@ public class LDAPConnectionPoolHealthCheck
    * @return  A string representation of this LDAP connection pool health check.
    */
   @Override()
+  @NotNull()
   public final String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -331,7 +350,7 @@ public class LDAPConnectionPoolHealthCheck
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("LDAPConnectionPoolHealthCheck()");
   }

@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,8 @@ import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.ldap.sdk.ExtendedResult;
 import com.unboundid.util.Extensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -55,7 +72,7 @@ public class LDAPExtendedResponse
 
 
   // The extended result for this LDAP extended response.
-  private final ExtendedResult extendedResult;
+  @NotNull private final ExtendedResult extendedResult;
 
 
 
@@ -66,7 +83,7 @@ public class LDAPExtendedResponse
    * @param  extendedResult  The {@code ExtendedResult} to use to create this
    *                         LDAP extended response.
    */
-  public LDAPExtendedResponse(final ExtendedResult extendedResult)
+  public LDAPExtendedResponse(@NotNull final ExtendedResult extendedResult)
   {
     super(extendedResult);
 
@@ -81,6 +98,7 @@ public class LDAPExtendedResponse
    * @return  The OID for this LDAP extended response, or {@code null} if there
    *          is none.
    */
+  @Nullable()
   public String getID()
   {
     return extendedResult.getOID();
@@ -94,6 +112,7 @@ public class LDAPExtendedResponse
    * @return  The value for this LDAP extended response, or {@code null} if
    *          there is none.
    */
+  @Nullable()
   public byte[] getValue()
   {
     final ASN1OctetString value = extendedResult.getValue();
@@ -116,6 +135,7 @@ public class LDAPExtendedResponse
    * @return  An {@code ExtendedResult} object that is the equivalent of this
    *          LDAP extended response.
    */
+  @NotNull()
   public final ExtendedResult toExtendedResult()
   {
     return extendedResult;
@@ -129,6 +149,7 @@ public class LDAPExtendedResponse
    * @return  A string representation of this LDAP extended response.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return extendedResult.toString();

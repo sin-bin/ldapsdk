@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.ldap.sdk.controls.PasswordExpiredControl;
 import com.unboundid.ldap.sdk.controls.PasswordExpiringControl;
 import com.unboundid.util.Extensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -55,7 +72,7 @@ public class LDAPControl
   /**
    * The OID for the ManageDsaIT request control.
    */
-  public static final String MANAGEDSAIT =
+  @NotNull public static final String MANAGEDSAIT =
        ManageDsaITRequestControl.MANAGE_DSA_IT_REQUEST_OID;
 
 
@@ -63,7 +80,7 @@ public class LDAPControl
   /**
    * The OID for the password expired control.
    */
-  public static final String PWEXPIRED =
+  @NotNull public static final String PWEXPIRED =
        PasswordExpiredControl.PASSWORD_EXPIRED_OID;
 
 
@@ -71,7 +88,7 @@ public class LDAPControl
   /**
    * The OID for the password expiring control.
    */
-  public static final String PWEXPIRING =
+  @NotNull public static final String PWEXPIRING =
        PasswordExpiringControl.PASSWORD_EXPIRING_OID;
 
 
@@ -87,10 +104,10 @@ public class LDAPControl
   private final boolean isCritical;
 
   // The value for this control.
-  private final byte[] value;
+  @Nullable private final byte[] value;
 
   // The OID for this control.
-  private final String oid;
+  @NotNull private final String oid;
 
 
 
@@ -99,7 +116,7 @@ public class LDAPControl
    *
    * @param  control  The control to use to create this control.
    */
-  public LDAPControl(final Control control)
+  public LDAPControl(@NotNull final Control control)
   {
     oid        = control.getOID();
     isCritical = control.isCritical();
@@ -123,7 +140,8 @@ public class LDAPControl
    * @param  critical  Indicates whether the control should be marked critical.
    * @param  vals      The encoded value for the control.
    */
-  public LDAPControl(final String id, final boolean critical, final byte[] vals)
+  public LDAPControl(@NotNull final String id, final boolean critical,
+                     @Nullable final byte[] vals)
   {
     oid        = id;
     isCritical = critical;
@@ -137,6 +155,7 @@ public class LDAPControl
    *
    * @return  The OID for this control.
    */
+  @NotNull()
   public String getID()
   {
     return oid;
@@ -162,6 +181,7 @@ public class LDAPControl
    *
    * @return  The value for this control, or {@code null} if there is none.
    */
+  @Nullable()
   public byte[] getValue()
   {
     return value;
@@ -174,6 +194,7 @@ public class LDAPControl
    *
    * @return  The {@code Control} object for this LDAP control.
    */
+  @NotNull()
   public final Control toControl()
   {
     if (value == null)
@@ -195,7 +216,8 @@ public class LDAPControl
    *
    * @return  The corresponding array of controls.
    */
-  public static Control[] toControls(final LDAPControl[] ldapControls)
+  @Nullable()
+  public static Control[] toControls(@Nullable final LDAPControl[] ldapControls)
   {
     if (ldapControls == null)
     {
@@ -220,7 +242,8 @@ public class LDAPControl
    *
    * @return  The corresponding array of LDAP controls.
    */
-  public static LDAPControl[] toLDAPControls(final Control[] controls)
+  @Nullable()
+  public static LDAPControl[] toLDAPControls(@Nullable final Control[] controls)
   {
     if (controls == null)
     {
@@ -243,6 +266,7 @@ public class LDAPControl
    *
    * @return  A duplicate of this control.
    */
+  @NotNull()
   public LDAPControl duplicate()
   {
     return new LDAPControl(oid, isCritical, value);
@@ -256,6 +280,7 @@ public class LDAPControl
    * @return  A string representation of this control.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return toControl().toString();

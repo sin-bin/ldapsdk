@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,7 +53,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -67,20 +81,25 @@ import com.unboundid.ldap.matchingrules.GeneralizedTimeMatchingRule;
 import com.unboundid.ldap.matchingrules.IntegerMatchingRule;
 import com.unboundid.ldap.matchingrules.MatchingRule;
 import com.unboundid.ldap.protocol.SearchResultReferenceProtocolOp;
+import com.unboundid.ldap.sdk.AddRequest;
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.BindResult;
 import com.unboundid.ldap.sdk.ChangeLogEntry;
 import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.DN;
+import com.unboundid.ldap.sdk.DeleteRequest;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.ldap.sdk.EntrySorter;
 import com.unboundid.ldap.sdk.ExtendedRequest;
 import com.unboundid.ldap.sdk.ExtendedResult;
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.ldap.sdk.LDAPURL;
 import com.unboundid.ldap.sdk.Modification;
 import com.unboundid.ldap.sdk.ModificationType;
+import com.unboundid.ldap.sdk.ModifyDNRequest;
+import com.unboundid.ldap.sdk.ModifyRequest;
 import com.unboundid.ldap.sdk.OperationType;
 import com.unboundid.ldap.sdk.RDN;
 import com.unboundid.ldap.sdk.ReadOnlyEntry;
@@ -100,6 +119,7 @@ import com.unboundid.ldap.sdk.controls.AssertionRequestControl;
 import com.unboundid.ldap.sdk.controls.AuthorizationIdentityRequestControl;
 import com.unboundid.ldap.sdk.controls.AuthorizationIdentityResponseControl;
 import com.unboundid.ldap.sdk.controls.DontUseCopyRequestControl;
+import com.unboundid.ldap.sdk.controls.DraftLDUPSubentriesRequestControl;
 import com.unboundid.ldap.sdk.controls.ManageDsaITRequestControl;
 import com.unboundid.ldap.sdk.controls.PermissiveModifyRequestControl;
 import com.unboundid.ldap.sdk.controls.PostReadRequestControl;
@@ -108,11 +128,11 @@ import com.unboundid.ldap.sdk.controls.PreReadRequestControl;
 import com.unboundid.ldap.sdk.controls.PreReadResponseControl;
 import com.unboundid.ldap.sdk.controls.ProxiedAuthorizationV1RequestControl;
 import com.unboundid.ldap.sdk.controls.ProxiedAuthorizationV2RequestControl;
+import com.unboundid.ldap.sdk.controls.RFC3672SubentriesRequestControl;
 import com.unboundid.ldap.sdk.controls.ServerSideSortRequestControl;
 import com.unboundid.ldap.sdk.controls.ServerSideSortResponseControl;
 import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
 import com.unboundid.ldap.sdk.controls.SortKey;
-import com.unboundid.ldap.sdk.controls.SubentriesRequestControl;
 import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
 import com.unboundid.ldap.sdk.controls.TransactionSpecificationRequestControl;
 import com.unboundid.ldap.sdk.controls.VirtualListViewRequestControl;
@@ -124,6 +144,7 @@ import com.unboundid.ldap.sdk.extensions.StartTLSExtendedRequest;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             IgnoreNoUserModificationRequestControl;
 import com.unboundid.ldif.LDIFAddChangeRecord;
+import com.unboundid.ldif.LDIFChangeRecord;
 import com.unboundid.ldif.LDIFDeleteChangeRecord;
 import com.unboundid.ldif.LDIFException;
 import com.unboundid.ldif.LDIFModifyChangeRecord;
@@ -132,6 +153,8 @@ import com.unboundid.ldif.LDIFReader;
 import com.unboundid.ldif.LDIFWriter;
 import com.unboundid.util.Debug;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -156,7 +179,7 @@ public final class InMemoryRequestHandler
   /**
    * A pre-allocated array containing no controls.
    */
-  private static final Control[] NO_CONTROLS = new Control[0];
+  @NotNull private static final Control[] NO_CONTROLS = new Control[0];
 
 
 
@@ -168,51 +191,51 @@ public final class InMemoryRequestHandler
    * that might otherwise be enforced (e.g., allowed operation types, write
    * access to NO-USER-MODIFICATION attributes, etc.).
    */
-  static final String OID_INTERNAL_OPERATION_REQUEST_CONTROL =
+  @NotNull static final String OID_INTERNAL_OPERATION_REQUEST_CONTROL =
        "1.3.6.1.4.1.30221.2.5.18";
 
 
 
   // The change number for the first changelog entry in the server.
-  private final AtomicLong firstChangeNumber;
+  @NotNull private final AtomicLong firstChangeNumber;
 
   // The change number for the last changelog entry in the server.
-  private final AtomicLong lastChangeNumber;
+  @NotNull private final AtomicLong lastChangeNumber;
 
   // A delay (in milliseconds) to insert before processing operations.
-  private final AtomicLong processingDelayMillis;
+  @NotNull private final AtomicLong processingDelayMillis;
 
   // The reference to the entry validator that will be used for schema checking,
   // if appropriate.
-  private final AtomicReference<EntryValidator> entryValidatorRef;
+  @NotNull private final AtomicReference<EntryValidator> entryValidatorRef;
 
   // The entry to use as the subschema subentry.
-  private final AtomicReference<ReadOnlyEntry> subschemaSubentryRef;
+  @NotNull private final AtomicReference<ReadOnlyEntry> subschemaSubentryRef;
 
   // The reference to the schema that will be used for this request handler.
-  private final AtomicReference<Schema> schemaRef;
+  @NotNull private final AtomicReference<Schema> schemaRef;
 
   // Indicates whether to generate operational attributes for writes.
   private final boolean generateOperationalAttributes;
 
   // The DN of the currently-authenticated user for the associated connection.
-  private DN authenticatedDN;
+  @NotNull private DN authenticatedDN;
 
   // The base DN for the server changelog.
-  private final DN changeLogBaseDN;
+  @NotNull private final DN changeLogBaseDN;
 
   // The DN of the subschema subentry.
-  private final DN subschemaSubentryDN;
+  @NotNull private final DN subschemaSubentryDN;
 
   // The configuration used to create this request handler.
-  private final InMemoryDirectoryServerConfig config;
+  @NotNull private final InMemoryDirectoryServerConfig config;
 
   // A snapshot containing the server content as it initially appeared.  It
   // will not contain any user data, but may contain a changelog base entry.
-  private final InMemoryDirectoryServerSnapshot initialSnapshot;
+  @NotNull private final InMemoryDirectoryServerSnapshot initialSnapshot;
 
   // The primary password encoder for the server.
-  private final InMemoryPasswordEncoder primaryPasswordEncoder;
+  @Nullable private final InMemoryPasswordEncoder primaryPasswordEncoder;
 
   // The maximum number of changelog entries to maintain.
   private final int maxChangelogEntries;
@@ -221,45 +244,45 @@ public final class InMemoryRequestHandler
   private final int maxSizeLimit;
 
   // The client connection for this request handler instance.
-  private final LDAPListenerClientConnection connection;
+  @Nullable private final LDAPListenerClientConnection connection;
 
   // The list of all password encoders (primary and secondary) configured for
   // the in-memory directory server.
-  private final List<InMemoryPasswordEncoder> passwordEncoders;
+  @NotNull private final List<InMemoryPasswordEncoder> passwordEncoders;
 
   // The list of password attributes as requested by the user.  This will be a
   // minimal list, without multiple forms for each attribute type.
-  private final List<String> configuredPasswordAttributes;
+  @NotNull private final List<String> configuredPasswordAttributes;
 
   // The list of extended password attributes, including alternate names and
   // OIDs for each attribute type, when available.
-  private final List<String> extendedPasswordAttributes;
+  @NotNull private final List<String> extendedPasswordAttributes;
 
   // The set of equality indexes defined for the server.
-  private final Map<AttributeTypeDefinition,
+  @NotNull private final Map<AttributeTypeDefinition,
      InMemoryDirectoryServerEqualityAttributeIndex> equalityIndexes;
 
   // An additional set of credentials that may be used for bind operations.
-  private final Map<DN,byte[]> additionalBindCredentials;
+  @NotNull private final Map<DN,byte[]> additionalBindCredentials;
 
   // A map of the available extended operation handlers by request OID.
-  private final Map<String,InMemoryExtendedOperationHandler>
+  @NotNull private final Map<String,InMemoryExtendedOperationHandler>
        extendedRequestHandlers;
 
   // A map of the available SASL bind handlers by mechanism name.
-  private final Map<String,InMemorySASLBindHandler> saslBindHandlers;
+  @NotNull private final Map<String,InMemorySASLBindHandler> saslBindHandlers;
 
   // A map of state information specific to the associated connection.
-  private final Map<String,Object> connectionState;
+  @NotNull private final Map<String,Object> connectionState;
 
   // The set of base DNs for the server.
-  private final Set<DN> baseDNs;
+  @NotNull private final Set<DN> baseDNs;
 
   // The set of referential integrity attributes for the server.
-  private final Set<String> referentialIntegrityAttributes;
+  @NotNull private final Set<String> referentialIntegrityAttributes;
 
   // The map of entries currently held in the server.
-  private final Map<DN,ReadOnlyEntry> entryMap;
+  @NotNull private final Map<DN,ReadOnlyEntry> entryMap;
 
 
 
@@ -273,7 +296,8 @@ public final class InMemoryRequestHandler
    * @throws  LDAPException  If there is a problem with the provided
    *                         configuration.
    */
-  public InMemoryRequestHandler(final InMemoryDirectoryServerConfig config)
+  public InMemoryRequestHandler(
+              @NotNull final InMemoryDirectoryServerConfig config)
          throws LDAPException
   {
     this.config = config;
@@ -483,8 +507,8 @@ public final class InMemoryRequestHandler
    * @param  parent      The parent request handler instance.
    * @param  connection  The client connection for this instance.
    */
-  private InMemoryRequestHandler(final InMemoryRequestHandler parent,
-               final LDAPListenerClientConnection connection)
+  private InMemoryRequestHandler(@NotNull final InMemoryRequestHandler parent,
+               @NotNull final LDAPListenerClientConnection connection)
   {
     this.connection = connection;
 
@@ -533,8 +557,9 @@ public final class InMemoryRequestHandler
    * @throws  LDAPException  If the connection should not be accepted.
    */
   @Override()
+  @NotNull()
   public InMemoryRequestHandler newInstance(
-              final LDAPListenerClientConnection connection)
+              @NotNull final LDAPListenerClientConnection connection)
          throws LDAPException
   {
     return new InMemoryRequestHandler(this, connection);
@@ -550,6 +575,7 @@ public final class InMemoryRequestHandler
    * @return  The snapshot created based on the current content of this
    *          in-memory request handler.
    */
+  @NotNull()
   public InMemoryDirectoryServerSnapshot createSnapshot()
   {
     synchronized (entryMap)
@@ -568,7 +594,8 @@ public final class InMemoryRequestHandler
    * @param  snapshot  The snapshot to be restored.  It must not be
    *                   {@code null}.
    */
-  public void restoreSnapshot(final InMemoryDirectoryServerSnapshot snapshot)
+  public void restoreSnapshot(
+                   @NotNull final InMemoryDirectoryServerSnapshot snapshot)
   {
     synchronized (entryMap)
     {
@@ -605,6 +632,7 @@ public final class InMemoryRequestHandler
    * @return  The schema that will be used by the server, or {@code null} if
    *          none has been configured.
    */
+  @Nullable()
   public Schema getSchema()
   {
     return schemaRef.get();
@@ -617,6 +645,7 @@ public final class InMemoryRequestHandler
    *
    * @return  A list of the base DNs configured for use by the server.
    */
+  @NotNull()
   public List<DN> getBaseDNs()
   {
     return Collections.unmodifiableList(new ArrayList<>(baseDNs));
@@ -632,6 +661,7 @@ public final class InMemoryRequestHandler
    *          instance, or {@code null} if this instance is not associated with
    *          any client connection.
    */
+  @Nullable()
   public LDAPListenerClientConnection getClientConnection()
   {
     return connection;
@@ -648,6 +678,7 @@ public final class InMemoryRequestHandler
    *          {@code DN#NULL_DN} if the connection is unauthenticated or is
    *          authenticated as the anonymous user.
    */
+  @NotNull()
   public synchronized DN getAuthenticatedDN()
   {
     return authenticatedDN;
@@ -664,7 +695,8 @@ public final class InMemoryRequestHandler
    *                          It may be {@code null} or {@link DN#NULL_DN} to
    *                          indicate that the connection is unauthenticated.
    */
-  public synchronized void setAuthenticatedDN(final DN authenticatedDN)
+  public synchronized void setAuthenticatedDN(
+                                @Nullable final DN authenticatedDN)
   {
     if (authenticatedDN == null)
     {
@@ -686,6 +718,7 @@ public final class InMemoryRequestHandler
    *          credentials, or an empty map if no additional credentials have
    *          been defined.
    */
+  @NotNull()
   public Map<DN,byte[]> getAdditionalBindCredentials()
   {
     return additionalBindCredentials;
@@ -703,7 +736,8 @@ public final class InMemoryRequestHandler
    *          additional bind credentials does not include information for the
    *          provided DN.
    */
-  public byte[] getAdditionalBindCredentials(final DN dn)
+  @Nullable()
+  public byte[] getAdditionalBindCredentials(@NotNull final DN dn)
   {
     return additionalBindCredentials.get(dn);
   }
@@ -721,6 +755,7 @@ public final class InMemoryRequestHandler
    *          specific to the connection associated with this request handler
    *          instance.
    */
+  @NotNull()
   public Map<String,Object> getConnectionState()
   {
     return connectionState;
@@ -768,6 +803,56 @@ public final class InMemoryRequestHandler
 
 
   /**
+   * Processes the provided add request.
+   * <BR><BR>
+   * This method may be used regardless of whether the server is listening for
+   * client connections, and regardless of whether add operations are allowed in
+   * the server.
+   *
+   * @param  addRequest  The add request to be processed.  It must not be
+   *                     {@code null}.
+   *
+   * @return  The result of processing the add operation.
+   *
+   * @throws  LDAPException  If the server rejects the add request, or if a
+   *                         problem is encountered while sending the request or
+   *                         reading the response.
+   */
+  @NotNull()
+  public LDAPResult add(@NotNull final AddRequest addRequest)
+         throws LDAPException
+  {
+    final ArrayList<Control> requestControlList =
+         new ArrayList<>(addRequest.getControlList());
+    requestControlList.add(new Control(OID_INTERNAL_OPERATION_REQUEST_CONTROL,
+         false));
+
+    final LDAPMessage responseMessage = processAddRequest(1,
+         new AddRequestProtocolOp(addRequest.getDN(),
+              addRequest.getAttributes()),
+         requestControlList);
+
+    final AddResponseProtocolOp addResponse =
+         responseMessage.getAddResponseProtocolOp();
+
+    final LDAPResult ldapResult = new LDAPResult(responseMessage.getMessageID(),
+         ResultCode.valueOf(addResponse.getResultCode()),
+         addResponse.getDiagnosticMessage(), addResponse.getMatchedDN(),
+         addResponse.getReferralURLs(), responseMessage.getControls());
+
+    switch (addResponse.getResultCode())
+    {
+      case ResultCode.SUCCESS_INT_VALUE:
+      case ResultCode.NO_OPERATION_INT_VALUE:
+        return ldapResult;
+      default:
+        throw new LDAPException(ldapResult);
+    }
+  }
+
+
+
+  /**
    * Attempts to add an entry to the in-memory data set.  The attempt will fail
    * if any of the following conditions is true:
    * <UL>
@@ -800,9 +885,10 @@ public final class InMemoryRequestHandler
    *          {@code AddResponseProtocolOp}.
    */
   @Override()
+  @NotNull()
   public LDAPMessage processAddRequest(final int messageID,
-                                       final AddRequestProtocolOp request,
-                                       final List<Control> controls)
+                          @NotNull final AddRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     synchronized (entryMap)
     {
@@ -1183,11 +1269,24 @@ public final class InMemoryRequestHandler
              responseControls);
       }
 
-      // The add attempt must fail.
+      // The add attempt must fail because the parent doesn't exist.  See if
+      // it's just that the parent doesn't exist or whether the entry isn't
+      // within any of the configured base DNs.
+      for (final DN baseDN : baseDNs)
+      {
+        if (dn.isDescendantOf(baseDN, true))
+        {
+          return new LDAPMessage(messageID, new AddResponseProtocolOp(
+               ResultCode.NO_SUCH_OBJECT_INT_VALUE, getMatchedDNString(dn),
+               ERR_MEM_HANDLER_ADD_MISSING_PARENT.get(request.getDN(),
+                    dn.getParentString()),
+               null));
+        }
+      }
+
       return new LDAPMessage(messageID, new AddResponseProtocolOp(
-           ResultCode.NO_SUCH_OBJECT_INT_VALUE, getMatchedDNString(dn),
-           ERR_MEM_HANDLER_ADD_MISSING_PARENT.get(request.getDN(),
-                dn.getParentString()),
+           ResultCode.NO_SUCH_OBJECT_INT_VALUE, null,
+           ERR_MEM_HANDLER_ADD_NOT_BELOW_BASE_DN.get(request.getDN()),
            null));
     }
   }
@@ -1207,9 +1306,11 @@ public final class InMemoryRequestHandler
    * @throws  LDAPException  If a problem is encountered while encoding the
    *                         password.
    */
-  private ASN1OctetString encodeAddPassword(final ASN1OctetString password,
-                                            final ReadOnlyEntry entry,
-                                            final List<Modification> mods)
+  @NotNull()
+  private ASN1OctetString encodeAddPassword(
+                               @NotNull final ASN1OctetString password,
+                               @NotNull final ReadOnlyEntry entry,
+                               @NotNull final List<Modification> mods)
           throws LDAPException
   {
     for (final InMemoryPasswordEncoder encoder : passwordEncoders)
@@ -1261,9 +1362,10 @@ public final class InMemoryRequestHandler
    *          {@code BindResponseProtocolOp}.
    */
   @Override()
+  @NotNull()
   public LDAPMessage processBindRequest(final int messageID,
-                                        final BindRequestProtocolOp request,
-                                        final List<Control> controls)
+                          @NotNull final BindRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     synchronized (entryMap)
     {
@@ -1513,9 +1615,10 @@ public final class InMemoryRequestHandler
    *          {@code CompareResponseProtocolOp}.
    */
   @Override()
+  @NotNull()
   public LDAPMessage processCompareRequest(final int messageID,
-                          final CompareRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final CompareRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     synchronized (entryMap)
     {
@@ -1649,6 +1752,55 @@ public final class InMemoryRequestHandler
 
 
   /**
+   * Processes the provided delete request.
+   * <BR><BR>
+   * This method may be used regardless of whether the server is listening for
+   * client connections, and regardless of whether delete operations are
+   * allowed in the server.
+   *
+   * @param  deleteRequest  The delete request to be processed.  It must not be
+   *                        {@code null}.
+   *
+   * @return  The result of processing the delete operation.
+   *
+   * @throws  LDAPException  If the server rejects the delete request, or if a
+   *                         problem is encountered while sending the request or
+   *                         reading the response.
+   */
+  @NotNull()
+  public LDAPResult delete(@NotNull final DeleteRequest deleteRequest)
+         throws LDAPException
+  {
+    final ArrayList<Control> requestControlList =
+         new ArrayList<>(deleteRequest.getControlList());
+    requestControlList.add(new Control(OID_INTERNAL_OPERATION_REQUEST_CONTROL,
+         false));
+
+    final LDAPMessage responseMessage = processDeleteRequest(1,
+         new DeleteRequestProtocolOp(deleteRequest.getDN()),
+         requestControlList);
+
+    final DeleteResponseProtocolOp deleteResponse =
+         responseMessage.getDeleteResponseProtocolOp();
+
+    final LDAPResult ldapResult = new LDAPResult(responseMessage.getMessageID(),
+         ResultCode.valueOf(deleteResponse.getResultCode()),
+         deleteResponse.getDiagnosticMessage(), deleteResponse.getMatchedDN(),
+         deleteResponse.getReferralURLs(), responseMessage.getControls());
+
+    switch (deleteResponse.getResultCode())
+    {
+      case ResultCode.SUCCESS_INT_VALUE:
+      case ResultCode.NO_OPERATION_INT_VALUE:
+        return ldapResult;
+      default:
+        throw new LDAPException(ldapResult);
+    }
+  }
+
+
+
+  /**
    * Attempts to process the provided delete request.  The attempt will fail if
    * any of the following conditions is true:
    * <UL>
@@ -1674,9 +1826,10 @@ public final class InMemoryRequestHandler
    *          {@code DeleteResponseProtocolOp}.
    */
   @Override()
+  @NotNull()
   public LDAPMessage processDeleteRequest(final int messageID,
-                                          final DeleteRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final DeleteRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     synchronized (entryMap)
     {
@@ -1887,7 +2040,7 @@ public final class InMemoryRequestHandler
    *
    * @param  dn  The DN of the entry that has been deleted.
    */
-  private void handleReferentialIntegrityDelete(final DN dn)
+  private void handleReferentialIntegrityDelete(@NotNull final DN dn)
   {
     if (referentialIntegrityAttributes.isEmpty())
     {
@@ -1947,9 +2100,10 @@ public final class InMemoryRequestHandler
    *          {@code ExtendedResponseProtocolOp}.
    */
   @Override()
+  @NotNull()
   public LDAPMessage processExtendedRequest(final int messageID,
-                          final ExtendedRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final ExtendedRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     synchronized (entryMap)
     {
@@ -2037,6 +2191,56 @@ public final class InMemoryRequestHandler
 
 
   /**
+   * Processes the provided modify request.
+   * <BR><BR>
+   * This method may be used regardless of whether the server is listening for
+   * client connections, and regardless of whether modify operations are allowed
+   * in the server.
+   *
+   * @param  modifyRequest  The modify request to be processed.  It must not be
+   *                        {@code null}.
+   *
+   * @return  The result of processing the modify operation.
+   *
+   * @throws  LDAPException  If the server rejects the modify request, or if a
+   *                         problem is encountered while sending the request or
+   *                         reading the response.
+   */
+  @NotNull()
+  public LDAPResult modify(@NotNull final ModifyRequest modifyRequest)
+         throws LDAPException
+  {
+    final ArrayList<Control> requestControlList =
+         new ArrayList<>(modifyRequest.getControlList());
+    requestControlList.add(new Control(OID_INTERNAL_OPERATION_REQUEST_CONTROL,
+         false));
+
+    final LDAPMessage responseMessage = processModifyRequest(1,
+         new ModifyRequestProtocolOp(modifyRequest.getDN(),
+              modifyRequest.getModifications()),
+         requestControlList);
+
+    final ModifyResponseProtocolOp modifyResponse =
+         responseMessage.getModifyResponseProtocolOp();
+
+    final LDAPResult ldapResult = new LDAPResult(responseMessage.getMessageID(),
+         ResultCode.valueOf(modifyResponse.getResultCode()),
+         modifyResponse.getDiagnosticMessage(), modifyResponse.getMatchedDN(),
+         modifyResponse.getReferralURLs(), responseMessage.getControls());
+
+    switch (modifyResponse.getResultCode())
+    {
+      case ResultCode.SUCCESS_INT_VALUE:
+      case ResultCode.NO_OPERATION_INT_VALUE:
+        return ldapResult;
+      default:
+        throw new LDAPException(ldapResult);
+    }
+  }
+
+
+
+  /**
    * Attempts to process the provided modify request.  The attempt will fail if
    * any of the following conditions is true:
    * <UL>
@@ -2063,9 +2267,10 @@ public final class InMemoryRequestHandler
    *          {@code ModifyResponseProtocolOp}.
    */
   @Override()
+  @NotNull()
   public LDAPMessage processModifyRequest(final int messageID,
-                                          final ModifyRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final ModifyRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     synchronized (entryMap)
     {
@@ -2378,9 +2583,11 @@ public final class InMemoryRequestHandler
    *
    * @throws  LDAPException  If a problem is encountered during processing.
    */
-  private Modification encodeModificationPasswords(final Modification mod,
-                            final ReadOnlyEntry entry,
-                            final List<Modification> mods)
+  @NotNull()
+  private Modification encodeModificationPasswords(
+                            @NotNull final Modification mod,
+                            @NotNull final ReadOnlyEntry entry,
+                            @NotNull final List<Modification> mods)
           throws LDAPException
   {
     // If the modification doesn't have any values, then we don't need to do
@@ -2446,10 +2653,11 @@ public final class InMemoryRequestHandler
    *
    * @throws  LDAPException  If a problem is encountered during processing.
    */
-  private ASN1OctetString encodeModValue(final ASN1OctetString value,
-                                         final Modification mod,
-                                         final ReadOnlyEntry entry,
-                                         final List<Modification> mods)
+  @NotNull()
+  private ASN1OctetString encodeModValue(@NotNull final ASN1OctetString value,
+                                         @NotNull final Modification mod,
+                                         @NotNull final ReadOnlyEntry entry,
+                                         @NotNull final List<Modification> mods)
           throws LDAPException
   {
     // First, see if the password is already encoded.  If so, then just return
@@ -2539,7 +2747,8 @@ public final class InMemoryRequestHandler
    *
    * @throws  LDAPException  If a problem is encountered.
    */
-  private void validateSchemaMods(final ModifyRequestProtocolOp request)
+  private void validateSchemaMods(
+                    @NotNull final ModifyRequestProtocolOp request)
           throws LDAPException
   {
     // If there is no schema, then we won't allow modifications at all.
@@ -2663,6 +2872,58 @@ public final class InMemoryRequestHandler
 
 
   /**
+   * Processes the provided modify DN request.
+   * <BR><BR>
+   * This method may be used regardless of whether the server is listening for
+   * client connections, and regardless of whether modify DN operations are
+   * allowed in the server.
+   *
+   * @param  modifyDNRequest  The modify DN request to be processed.  It must
+   *                          not be {@code null}.
+   *
+   * @return  The result of processing the modify DN operation.
+   *
+   * @throws  LDAPException  If the server rejects the modify DN request, or if
+   *                         a problem is encountered while sending the request
+   *                         or reading the response.
+   */
+  @NotNull()
+  public LDAPResult modifyDN(@NotNull final ModifyDNRequest modifyDNRequest)
+         throws LDAPException
+  {
+    final ArrayList<Control> requestControlList =
+         new ArrayList<>(modifyDNRequest.getControlList());
+    requestControlList.add(new Control(OID_INTERNAL_OPERATION_REQUEST_CONTROL,
+         false));
+
+    final LDAPMessage responseMessage = processModifyDNRequest(
+         1, new ModifyDNRequestProtocolOp(modifyDNRequest.getDN(),
+              modifyDNRequest.getNewRDN(), modifyDNRequest.deleteOldRDN(),
+              modifyDNRequest.getNewSuperiorDN()),
+         requestControlList);
+
+    final ModifyDNResponseProtocolOp modifyDNResponse =
+         responseMessage.getModifyDNResponseProtocolOp();
+
+    final LDAPResult ldapResult = new LDAPResult(responseMessage.getMessageID(),
+         ResultCode.valueOf(modifyDNResponse.getResultCode()),
+         modifyDNResponse.getDiagnosticMessage(),
+         modifyDNResponse.getMatchedDN(), modifyDNResponse.getReferralURLs(),
+         responseMessage.getControls());
+
+    switch (modifyDNResponse.getResultCode())
+    {
+      case ResultCode.SUCCESS_INT_VALUE:
+      case ResultCode.NO_OPERATION_INT_VALUE:
+        return ldapResult;
+      default:
+        throw new LDAPException(ldapResult);
+    }
+  }
+
+
+
+  /**
    * Attempts to process the provided modify DN request.  The attempt will fail
    * if any of the following conditions is true:
    * <UL>
@@ -2692,9 +2953,10 @@ public final class InMemoryRequestHandler
    *          {@code ModifyDNResponseProtocolOp}.
    */
   @Override()
+  @NotNull()
   public LDAPMessage processModifyDNRequest(final int messageID,
-                          final ModifyDNRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final ModifyDNRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     synchronized (entryMap)
     {
@@ -3147,8 +3409,8 @@ public final class InMemoryRequestHandler
    * @param  oldDN  The old DN for the entry.
    * @param  newDN  The new DN for the entry.
    */
-  private void handleReferentialIntegrityModifyDN(final DN oldDN,
-                                                  final DN newDN)
+  private void handleReferentialIntegrityModifyDN(@NotNull final DN oldDN,
+                                                  @NotNull final DN newDN)
   {
     if (referentialIntegrityAttributes.isEmpty())
     {
@@ -3222,9 +3484,10 @@ public final class InMemoryRequestHandler
    *          {@code SearchResultDoneProtocolOp}.
    */
   @Override()
+  @NotNull()
   public LDAPMessage processSearchRequest(final int messageID,
-                                          final SearchRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final SearchRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     synchronized (entryMap)
     {
@@ -3312,11 +3575,12 @@ public final class InMemoryRequestHandler
    *          client.  The protocol op in the {@code LDAPMessage} must be an
    *          {@code SearchResultDoneProtocolOp}.
    */
+  @NotNull()
   LDAPMessage processSearchRequest(final int messageID,
-                   final SearchRequestProtocolOp request,
-                   final List<Control> controls,
-                   final List<SearchResultEntry> entryList,
-                   final List<SearchResultReference> referenceList)
+                   @NotNull final SearchRequestProtocolOp request,
+                   @NotNull final List<Control> controls,
+                   @NotNull final List<SearchResultEntry> entryList,
+                   @NotNull final List<SearchResultReference> referenceList)
   {
     synchronized (entryMap)
     {
@@ -3480,13 +3744,28 @@ public final class InMemoryRequestHandler
         includeNonSubEntries = true;
       }
       else if (controlMap.containsKey(
-           SubentriesRequestControl.SUBENTRIES_REQUEST_OID))
+           DraftLDUPSubentriesRequestControl.SUBENTRIES_REQUEST_OID))
       {
         includeSubEntries = true;
         includeNonSubEntries = false;
       }
+      else if (controlMap.containsKey(
+           RFC3672SubentriesRequestControl.SUBENTRIES_REQUEST_OID))
+      {
+        includeSubEntries = true;
+
+        final RFC3672SubentriesRequestControl c =
+             (RFC3672SubentriesRequestControl) controlMap.get(
+                  RFC3672SubentriesRequestControl.SUBENTRIES_REQUEST_OID);
+        includeNonSubEntries = (! c.returnOnlySubEntries());
+      }
       else if (baseEntry.hasObjectClass("ldapSubEntry") ||
                baseEntry.hasObjectClass("inheritableLDAPSubEntry"))
+      {
+        includeSubEntries = true;
+        includeNonSubEntries = true;
+      }
+      else if (filterIncludesLDAPSubEntry(request.getFilter()))
       {
         includeSubEntries = true;
         includeNonSubEntries = true;
@@ -3786,12 +4065,8 @@ findEntriesAndRefs:
 
       // Process the set of requested attributes so that we can pare down the
       // entries.
-      final AtomicBoolean allUserAttrs = new AtomicBoolean(false);
-      final AtomicBoolean allOpAttrs = new AtomicBoolean(false);
-      final Map<String,List<List<String>>> returnAttrs =
-           processRequestedAttributes(request.getAttributes(), allUserAttrs,
-                allOpAttrs);
-
+      final SearchEntryParer parer = new SearchEntryParer(
+           request.getAttributes(), schema);
       final int sizeLimit;
       if (request.getSizeLimit() > 0)
       {
@@ -3815,8 +4090,7 @@ findEntriesAndRefs:
                responseControls);
         }
 
-        final Entry trimmedEntry = trimForRequestedAttributes(e,
-             allUserAttrs.get(), allOpAttrs.get(), returnAttrs);
+        final Entry trimmedEntry = parer.pareEntry(e);
         if (request.typesOnly())
         {
           final Entry typesOnlyEntry = new Entry(trimmedEntry.getDN(), schema);
@@ -3849,7 +4123,7 @@ findEntriesAndRefs:
    *
    * @throws  LDAPException  If the provided filter is not acceptable.
    */
-  private static void ensureFilterSupported(final Filter filter)
+  private static void ensureFilterSupported(@NotNull final Filter filter)
           throws LDAPException
   {
     switch (filter.getFilterType())
@@ -3897,11 +4171,47 @@ findEntriesAndRefs:
 
 
   /**
+   * Indicates whether the provided filter includes a component that targets the
+   * ldapSubEntry object class.
+   *
+   * @param  filter  The filter for which to make the determination.
+   *
+   * @return  {@code true} if the provided filter includes a component that
+   *          targets the ldapSubEntry object class or {@code false} if not.
+   */
+  private static boolean filterIncludesLDAPSubEntry(
+                              @NotNull final Filter filter)
+  {
+    switch (filter.getFilterType())
+    {
+      case Filter.FILTER_TYPE_AND:
+      case Filter.FILTER_TYPE_OR:
+        for (final Filter f : filter.getComponents())
+        {
+          if (filterIncludesLDAPSubEntry(f))
+          {
+            return true;
+          }
+        }
+        return false;
+
+      case Filter.FILTER_TYPE_EQUALITY:
+        return  (filter.getAttributeName().equalsIgnoreCase("objectClass") ||
+             filter.getAttributeName().equals("2.5.4.0"));
+
+      default:
+        return false;
+    }
+  }
+
+
+
+  /**
    * Performs any necessary index processing to add the provided entry.
    *
    * @param  entry  The entry that has been added.
    */
-  private void indexAdd(final Entry entry)
+  private void indexAdd(@NotNull final Entry entry)
   {
     for (final InMemoryDirectoryServerEqualityAttributeIndex i :
          equalityIndexes.values())
@@ -3924,7 +4234,7 @@ findEntriesAndRefs:
    *
    * @param  entry  The entry that has been deleted.
    */
-  private void indexDelete(final Entry entry)
+  private void indexDelete(@NotNull final Entry entry)
   {
     for (final InMemoryDirectoryServerEqualityAttributeIndex i :
          equalityIndexes.values())
@@ -3950,7 +4260,8 @@ findEntriesAndRefs:
    * @return  The DNs of entries which may match the given filter, or
    *          {@code null} if the filter is not indexed.
    */
-  private Set<DN> indexSearch(final Filter filter)
+  @Nullable()
+  private Set<DN> indexSearch(@NotNull final Filter filter)
   {
     switch (filter.getFilterType())
     {
@@ -4074,9 +4385,10 @@ findEntriesAndRefs:
    *                         for the associated client connection.
    */
   @SuppressWarnings("unchecked")
+  @Nullable()
   private ASN1OctetString processTransactionRequest(final int messageID,
-                               final ProtocolOp request,
-                               final Map<String,Control> controls)
+                               @NotNull final ProtocolOp request,
+                               @NotNull final Map<String,Control> controls)
           throws LDAPException
   {
     final TransactionSpecificationRequestControl txnControl =
@@ -4162,6 +4474,7 @@ findEntriesAndRefs:
    *
    * @return  The configured list of password attributes.
    */
+  @NotNull()
   public List<String> getPasswordAttributes()
   {
     return configuredPasswordAttributes;
@@ -4176,6 +4489,7 @@ findEntriesAndRefs:
    * @return  The primary password encoder that has been configured for the
    *          server.
    */
+  @Nullable()
   public InMemoryPasswordEncoder getPrimaryPasswordEncoder()
   {
     return primaryPasswordEncoder;
@@ -4188,6 +4502,7 @@ findEntriesAndRefs:
    *
    * @return  A list of all password encoders configured for the server.
    */
+  @NotNull()
   public List<InMemoryPasswordEncoder> getAllPasswordEncoders()
   {
     return passwordEncoders;
@@ -4213,8 +4528,10 @@ findEntriesAndRefs:
    *          password, or an empty list if the entry does not contain any
    *          passwords.
    */
+  @NotNull()
   public List<InMemoryDirectoryServerPassword> getPasswordsInEntry(
-              final Entry entry, final ASN1OctetString clearPasswordToMatch)
+              @NotNull final Entry entry,
+              @Nullable final ASN1OctetString clearPasswordToMatch)
   {
     final ArrayList<InMemoryDirectoryServerPassword> passwordList =
          new ArrayList<>(5);
@@ -4307,7 +4624,7 @@ findEntriesAndRefs:
    * @throws  LDAPException  If the provided string cannot be parsed as a valid
    *                         DN.
    */
-  public int countEntriesBelow(final String baseDN)
+  public int countEntriesBelow(@NotNull final String baseDN)
          throws LDAPException
   {
     synchronized (entryMap)
@@ -4361,7 +4678,8 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem occurs while reading entries or adding
    *                         them to the server.
    */
-  public int importFromLDIF(final boolean clear, final LDIFReader ldifReader)
+  public int importFromLDIF(final boolean clear,
+                            @NotNull final LDIFReader ldifReader)
          throws LDAPException
   {
     synchronized (entryMap)
@@ -4449,7 +4767,7 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem is encountered while attempting to
    *                         write an entry to LDIF.
    */
-  public int exportToLDIF(final LDIFWriter ldifWriter,
+  public int exportToLDIF(@NotNull final LDIFWriter ldifWriter,
                           final boolean excludeGeneratedAttrs,
                           final boolean excludeChangeLog,
                           final boolean closeWriter)
@@ -4533,6 +4851,119 @@ findEntriesAndRefs:
 
 
   /**
+   * Reads entries from the provided LDIF reader and adds them to the server,
+   * optionally clearing any existing entries before beginning to add the new
+   * entries.  If an error is encountered while adding entries from LDIF then
+   * the server will remain populated with the data it held before the import
+   * attempt (even if the {@code clear} is given with a value of {@code true}).
+   * <BR><BR>
+   * This method may be used regardless of whether the server is listening for
+   * client connections.
+   *
+   * @param  ldifReader  The LDIF reader to use to obtain the change records to
+   *                     be applied.
+   *
+   * @return  The number of changes applied from the LDIF file.
+   *
+   * @throws  LDAPException  If a problem occurs while reading change records
+   *                         or applying them to the server.
+   */
+  public int applyChangesFromLDIF(@NotNull final LDIFReader ldifReader)
+         throws LDAPException
+  {
+    synchronized (entryMap)
+    {
+      final InMemoryDirectoryServerSnapshot snapshot = createSnapshot();
+      boolean restoreSnapshot = true;
+
+      try
+      {
+        int changesApplied = 0;
+        while (true)
+        {
+          final LDIFChangeRecord changeRecord;
+          try
+          {
+            changeRecord = ldifReader.readChangeRecord(true);
+            if (changeRecord == null)
+            {
+              restoreSnapshot = false;
+              return changesApplied;
+            }
+          }
+          catch (final LDIFException le)
+          {
+            Debug.debugException(le);
+            throw new LDAPException(ResultCode.LOCAL_ERROR,
+                 ERR_MEM_HANDLER_APPLY_CHANGES_FROM_LDIF_READ_ERROR.get(
+                      le.getMessage()),
+                 le);
+          }
+          catch (final Exception e)
+          {
+            Debug.debugException(e);
+            throw new LDAPException(ResultCode.LOCAL_ERROR,
+                 ERR_MEM_HANDLER_APPLY_CHANGES_FROM_LDIF_READ_ERROR.get(
+                      StaticUtils.getExceptionMessage(e)),
+                 e);
+          }
+
+          if (changeRecord instanceof LDIFAddChangeRecord)
+          {
+            final LDIFAddChangeRecord addChangeRecord =
+                 (LDIFAddChangeRecord) changeRecord;
+            add(addChangeRecord.toAddRequest());
+          }
+          else if (changeRecord instanceof LDIFDeleteChangeRecord)
+          {
+            final LDIFDeleteChangeRecord deleteChangeRecord =
+                 (LDIFDeleteChangeRecord) changeRecord;
+            delete(deleteChangeRecord.toDeleteRequest());
+          }
+          else if (changeRecord instanceof LDIFModifyChangeRecord)
+          {
+            final LDIFModifyChangeRecord modifyChangeRecord =
+                 (LDIFModifyChangeRecord) changeRecord;
+            modify(modifyChangeRecord.toModifyRequest());
+          }
+          else if (changeRecord instanceof LDIFModifyDNChangeRecord)
+          {
+            final LDIFModifyDNChangeRecord modifyDNChangeRecord =
+                 (LDIFModifyDNChangeRecord) changeRecord;
+            modifyDN(modifyDNChangeRecord.toModifyDNRequest());
+          }
+          else
+          {
+            throw new LDAPException(ResultCode.LOCAL_ERROR,
+                 ERR_MEM_HANDLER_APPLY_CHANGES_UNSUPPORTED_CHANGE.get(
+                      String.valueOf(changeRecord)));
+          }
+
+          changesApplied++;
+        }
+      }
+      finally
+      {
+        try
+        {
+          ldifReader.close();
+        }
+        catch (final Exception e)
+        {
+          Debug.debugException(e);
+        }
+
+        if (restoreSnapshot)
+        {
+          restoreSnapshot(snapshot);
+        }
+      }
+    }
+  }
+
+
+
+  /**
    * Attempts to add the provided entry to the in-memory data set.  The attempt
    * will fail if any of the following conditions is true:
    * <UL>
@@ -4559,7 +4990,7 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem occurs while attempting to add the
    *                         provided entry.
    */
-  public void addEntry(final Entry entry,
+  public void addEntry(@NotNull final Entry entry,
                        final boolean ignoreNoUserModification)
          throws LDAPException
   {
@@ -4602,7 +5033,7 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem was encountered while attempting to
    *                         add any of the entries to the server.
    */
-  public void addEntries(final List<? extends Entry> entries)
+  public void addEntries(@NotNull final List<? extends Entry> entries)
          throws LDAPException
   {
     synchronized (entryMap)
@@ -4644,7 +5075,7 @@ findEntriesAndRefs:
    *                         the DN of an entry that cannot be deleted (e.g.,
    *                         the null DN).
    */
-  public int deleteSubtree(final String baseDN)
+  public int deleteSubtree(@NotNull final String baseDN)
          throws LDAPException
   {
     synchronized (entryMap)
@@ -4695,7 +5126,8 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem is encountered while attempting to
    *                         update the specified entry.
    */
-  public void modifyEntry(final String dn, final List<Modification> mods)
+  public void modifyEntry(@NotNull final String dn,
+                          @NotNull final List<Modification> mods)
          throws LDAPException
   {
     final ModifyRequestProtocolOp modifyRequest =
@@ -4728,7 +5160,8 @@ findEntriesAndRefs:
    *
    * @throws  LDAPException  If the provided DN is malformed.
    */
-  public ReadOnlyEntry getEntry(final String dn)
+  @Nullable()
+  public ReadOnlyEntry getEntry(@NotNull final String dn)
          throws LDAPException
   {
     return getEntry(new DN(dn, schemaRef.get()));
@@ -4745,7 +5178,8 @@ findEntriesAndRefs:
    * @return  The requested entry, or {@code null} if no entry exists with the
    *          given DN.
    */
-  public ReadOnlyEntry getEntry(final DN dn)
+  @Nullable()
+  public ReadOnlyEntry getEntry(@NotNull final DN dn)
   {
     synchronized (entryMap)
     {
@@ -4790,9 +5224,10 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem is encountered while performing the
    *                         search.
    */
-  public List<ReadOnlyEntry> search(final String baseDN,
-                                    final SearchScope scope,
-                                    final Filter filter)
+  @NotNull()
+  public List<ReadOnlyEntry> search(@NotNull final String baseDN,
+                                    @NotNull final SearchScope scope,
+                                    @NotNull final Filter filter)
          throws LDAPException
   {
     synchronized (entryMap)
@@ -4915,6 +5350,7 @@ findEntriesAndRefs:
    *
    * @return  The generated root DSE entry.
    */
+  @NotNull()
   private ReadOnlyEntry generateRootDSE()
   {
     final ReadOnlyEntry rootDSEFromCfg = config.getRootDSEEntry();
@@ -4960,6 +5396,7 @@ findEntriesAndRefs:
          AUTHORIZATION_IDENTITY_REQUEST_OID);
     ctlSet.add(DontUseCopyRequestControl.DONT_USE_COPY_REQUEST_OID);
     ctlSet.add(ManageDsaITRequestControl.MANAGE_DSA_IT_REQUEST_OID);
+    ctlSet.add(DraftLDUPSubentriesRequestControl.SUBENTRIES_REQUEST_OID);
     ctlSet.add(DraftZeilengaLDAPNoOp12RequestControl.NO_OP_REQUEST_OID);
     ctlSet.add(PermissiveModifyRequestControl.PERMISSIVE_MODIFY_REQUEST_OID);
     ctlSet.add(PostReadRequestControl.POST_READ_REQUEST_OID);
@@ -4968,9 +5405,9 @@ findEntriesAndRefs:
          PROXIED_AUTHORIZATION_V1_REQUEST_OID);
     ctlSet.add(ProxiedAuthorizationV2RequestControl.
          PROXIED_AUTHORIZATION_V2_REQUEST_OID);
+    ctlSet.add(RFC3672SubentriesRequestControl.SUBENTRIES_REQUEST_OID);
     ctlSet.add(ServerSideSortRequestControl.SERVER_SIDE_SORT_REQUEST_OID);
     ctlSet.add(SimplePagedResultsControl.PAGED_RESULTS_OID);
-    ctlSet.add(SubentriesRequestControl.SUBENTRIES_REQUEST_OID);
     ctlSet.add(SubtreeDeleteRequestControl.SUBTREE_DELETE_REQUEST_OID);
     ctlSet.add(TransactionSpecificationRequestControl.
          TRANSACTION_SPECIFICATION_REQUEST_OID);
@@ -5026,6 +5463,11 @@ findEntriesAndRefs:
            IntegerMatchingRule.getInstance(), lastChangeNumber.toString()));
     }
 
+    for (final Attribute customAttribute : config.getCustomRootDSEAttributes())
+    {
+      rootDSEEntry.setAttribute(customAttribute);
+    }
+
     return new ReadOnlyEntry(rootDSEEntry);
   }
 
@@ -5040,7 +5482,9 @@ findEntriesAndRefs:
    *
    * @return  The generated subschema subentry.
    */
-  private static ReadOnlyEntry generateSubschemaSubentry(final Schema schema)
+  @NotNull()
+  private static ReadOnlyEntry generateSubschemaSubentry(
+                                    @Nullable final Schema schema)
   {
     final Entry e;
 
@@ -5076,228 +5520,6 @@ findEntriesAndRefs:
 
 
   /**
-   * Processes the set of requested attributes from the given search request.
-   *
-   * @param  attrList      The list of requested attributes to examine.
-   * @param  allUserAttrs  Indicates whether to return all user attributes.  It
-   *                       should have an initial value of {@code false}.
-   * @param  allOpAttrs    Indicates whether to return all operational
-   *                       attributes.  It should have an initial value of
-   *                       {@code false}.
-   *
-   * @return  A map of specific attribute types to be returned.  The keys of the
-   *          map will be the lowercase OID and names of the attribute types,
-   *          and the values will be a list of option sets for the associated
-   *          attribute type.
-   */
-  private Map<String,List<List<String>>> processRequestedAttributes(
-               final List<String> attrList, final AtomicBoolean allUserAttrs,
-               final AtomicBoolean allOpAttrs)
-  {
-    if (attrList.isEmpty())
-    {
-      allUserAttrs.set(true);
-      return Collections.emptyMap();
-    }
-
-    final Schema schema = schemaRef.get();
-    final HashMap<String,List<List<String>>> m =
-         new HashMap<>(StaticUtils.computeMapCapacity(attrList.size() * 2));
-    for (final String s : attrList)
-    {
-      if (s.equals("*"))
-      {
-        // All user attributes.
-        allUserAttrs.set(true);
-      }
-      else if (s.equals("+"))
-      {
-        // All operational attributes.
-        allOpAttrs.set(true);
-      }
-      else if (s.startsWith("@"))
-      {
-        // Return attributes by object class.  This can only be supported if a
-        // schema has been defined.
-        if (schema != null)
-        {
-          final String ocName = s.substring(1);
-          final ObjectClassDefinition oc = schema.getObjectClass(ocName);
-          if (oc != null)
-          {
-            for (final AttributeTypeDefinition at :
-                 oc.getRequiredAttributes(schema, true))
-            {
-              addAttributeOIDAndNames(at, m, Collections.<String>emptyList());
-            }
-            for (final AttributeTypeDefinition at :
-                 oc.getOptionalAttributes(schema, true))
-            {
-              addAttributeOIDAndNames(at, m, Collections.<String>emptyList());
-            }
-          }
-        }
-      }
-      else
-      {
-        final ObjectPair<String,List<String>> nameWithOptions =
-             getNameWithOptions(s);
-        if (nameWithOptions == null)
-        {
-          continue;
-        }
-
-        final String name = nameWithOptions.getFirst();
-        final List<String> options = nameWithOptions.getSecond();
-
-        if (schema == null)
-        {
-          // Just use the name as provided.
-          List<List<String>> optionLists = m.get(name);
-          if (optionLists == null)
-          {
-            optionLists = new ArrayList<>(1);
-            m.put(name, optionLists);
-          }
-          optionLists.add(options);
-        }
-        else
-        {
-          // If the attribute type is defined in the schema, then use it to get
-          // all names and the OID.  Otherwise, just use the name as provided.
-          final AttributeTypeDefinition at = schema.getAttributeType(name);
-          if (at == null)
-          {
-            List<List<String>> optionLists = m.get(name);
-            if (optionLists == null)
-            {
-              optionLists = new ArrayList<>(1);
-              m.put(name, optionLists);
-            }
-            optionLists.add(options);
-          }
-          else
-          {
-            addAttributeOIDAndNames(at, m, options);
-          }
-        }
-      }
-    }
-
-    return m;
-  }
-
-
-
-  /**
-   * Parses the provided string into an attribute type and set of options.
-   *
-   * @param  s  The string to be parsed.
-   *
-   * @return  An {@code ObjectPair} in which the first element is the attribute
-   *          type name and the second is the list of options (or an empty
-   *          list if there are no options).  Alternately, a value of
-   *          {@code null} may be returned if the provided string does not
-   *          represent a valid attribute type description.
-   */
-  private static ObjectPair<String,List<String>> getNameWithOptions(
-                                                      final String s)
-  {
-    if (! Attribute.nameIsValid(s, true))
-    {
-      return null;
-    }
-
-    final String l = StaticUtils.toLowerCase(s);
-
-    int semicolonPos = l.indexOf(';');
-    if (semicolonPos < 0)
-    {
-      return new ObjectPair<>(l, Collections.<String>emptyList());
-    }
-
-    final String name = l.substring(0, semicolonPos);
-    final ArrayList<String> optionList = new ArrayList<>(1);
-    while (true)
-    {
-      final int nextSemicolonPos = l.indexOf(';', semicolonPos+1);
-      if (nextSemicolonPos < 0)
-      {
-        optionList.add(l.substring(semicolonPos+1));
-        break;
-      }
-      else
-      {
-        optionList.add(l.substring(semicolonPos+1, nextSemicolonPos));
-        semicolonPos = nextSemicolonPos;
-      }
-    }
-
-    return new ObjectPair<String,List<String>>(name, optionList);
-  }
-
-
-
-  /**
-   * Adds all-lowercase versions of the OID and all names for the provided
-   * attribute type definition to the given map with the given options.
-   *
-   * @param  d  The attribute type definition to process.
-   * @param  m  The map to which the OID and names should be added.
-   * @param  o  The array of attribute options to use in the map.  It should be
-   *            empty if no options are needed, and must not be {@code null}.
-   */
-  private void addAttributeOIDAndNames(final AttributeTypeDefinition d,
-                                       final Map<String,List<List<String>>> m,
-                                       final List<String> o)
-  {
-    if (d == null)
-    {
-      return;
-    }
-
-    final String lowerOID = StaticUtils.toLowerCase(d.getOID());
-    if (lowerOID != null)
-    {
-      List<List<String>> l = m.get(lowerOID);
-      if (l == null)
-      {
-        l = new ArrayList<>(1);
-        m.put(lowerOID, l);
-      }
-
-      l.add(o);
-    }
-
-    for (final String name : d.getNames())
-    {
-      final String lowerName = StaticUtils.toLowerCase(name);
-      List<List<String>> l = m.get(lowerName);
-      if (l == null)
-      {
-        l = new ArrayList<>(1);
-        m.put(lowerName, l);
-      }
-
-      l.add(o);
-    }
-
-    // If a schema is available, then see if the attribute type has any
-    // subordinate types.  If so, then add them.
-    final Schema schema = schemaRef.get();
-    if (schema != null)
-    {
-      for (final AttributeTypeDefinition subordinateType :
-           schema.getSubordinateAttributeTypes(d))
-      {
-        addAttributeOIDAndNames(subordinateType, m, o);
-      }
-    }
-  }
-
-
-
-  /**
    * Performs the necessary processing to determine whether the given entry
    * should be returned as a search result entry or reference, or if it should
    * not be returned at all.
@@ -5320,13 +5542,13 @@ findEntriesAndRefs:
    *                               that should be returned as a search result
    *                               reference.
    */
-  private void processSearchEntry(final Entry entry,
+  private void processSearchEntry(@NotNull final Entry entry,
                     final boolean includeSubEntries,
                     final boolean includeNonSubEntries,
                     final boolean includeChangeLog,
                     final boolean hasManageDsaIT,
-                    final List<Entry> entryList,
-                    final List<SearchResultReference> referenceList)
+                    @NotNull final List<Entry> entryList,
+                    @NotNull final List<SearchResultReference> referenceList)
   {
     // Check to see if the entry should be suppressed based on whether it's an
     // LDAP subentry.
@@ -5374,125 +5596,6 @@ findEntriesAndRefs:
 
 
   /**
-   * Retrieves a copy of the provided entry that includes only the appropriate
-   * set of requested attributes.
-   *
-   * @param  entry         The entry to be returned.
-   * @param  allUserAttrs  Indicates whether to return all user attributes.
-   * @param  allOpAttrs    Indicates whether to return all operational
-   *                       attributes.
-   * @param  returnAttrs   A map with information about the specific attribute
-   *                       types to return.
-   *
-   * @return  A copy of the provided entry that includes only the appropriate
-   *          set of requested attributes.
-   */
-  private Entry trimForRequestedAttributes(final Entry entry,
-                     final boolean allUserAttrs, final boolean allOpAttrs,
-                     final Map<String,List<List<String>>> returnAttrs)
-  {
-    // See if we can return the entry without paring it down.
-    final Schema schema = schemaRef.get();
-    if (allUserAttrs)
-    {
-      if (allOpAttrs || (schema == null))
-      {
-        return entry;
-      }
-    }
-
-
-    // If we've gotten here, then we may only need to return a partial entry.
-    final Entry copy = new Entry(entry.getDN(), schema);
-
-    for (final Attribute a : entry.getAttributes())
-    {
-      final ObjectPair<String,List<String>> nameWithOptions =
-           getNameWithOptions(a.getName());
-      final String name = nameWithOptions.getFirst();
-      final List<String> options = nameWithOptions.getSecond();
-
-      // If there is a schema, then see if it is an operational attribute, since
-      // that needs to be handled in a manner different from user attributes
-      if (schema != null)
-      {
-        final AttributeTypeDefinition at = schema.getAttributeType(name);
-        if ((at != null) && at.isOperational())
-        {
-          if (allOpAttrs)
-          {
-            copy.addAttribute(a);
-            continue;
-          }
-
-          final List<List<String>> optionLists = returnAttrs.get(name);
-          if (optionLists == null)
-          {
-            continue;
-          }
-
-          for (final List<String> optionList : optionLists)
-          {
-            boolean matchAll = true;
-            for (final String option : optionList)
-            {
-              if (! options.contains(option))
-              {
-                matchAll = false;
-                break;
-              }
-            }
-
-            if (matchAll)
-            {
-              copy.addAttribute(a);
-              break;
-            }
-          }
-          continue;
-        }
-      }
-
-      // We'll assume that it's a user attribute, and we'll look for an exact
-      // match on the base name.
-      if (allUserAttrs)
-      {
-        copy.addAttribute(a);
-        continue;
-      }
-
-      final List<List<String>> optionLists = returnAttrs.get(name);
-      if (optionLists == null)
-      {
-        continue;
-      }
-
-      for (final List<String> optionList : optionLists)
-      {
-        boolean matchAll = true;
-        for (final String option : optionList)
-        {
-          if (! options.contains(option))
-          {
-            matchAll = false;
-            break;
-          }
-        }
-
-        if (matchAll)
-        {
-          copy.addAttribute(a);
-          break;
-        }
-      }
-    }
-
-    return copy;
-  }
-
-
-
-  /**
    * Retrieves the DN of the existing entry which is the closest hierarchical
    * match to the provided DN.
    *
@@ -5501,7 +5604,8 @@ findEntriesAndRefs:
    * @return  The appropriate matched DN value, or {@code null} if there is
    *          none.
    */
-  private String getMatchedDNString(final DN dn)
+  @Nullable()
+  private String getMatchedDNString(@NotNull final DN dn)
   {
     DN parentDN = dn.getParent();
     while (parentDN != null)
@@ -5527,7 +5631,8 @@ findEntriesAndRefs:
    * @return  The string array with the same elements as the given list in the
    *          same order, or {@code null} if the given list was null.
    */
-  private static String[] stringListToArray(final List<String> l)
+  @Nullable()
+  private static String[] stringListToArray(@Nullable final List<String> l)
   {
     if (l == null)
     {
@@ -5550,8 +5655,8 @@ findEntriesAndRefs:
    *                     entry.
    * @param  authzDN     The authorization DN for the change.
    */
-  private void addChangeLogEntry(final AddRequestProtocolOp addRequest,
-                                 final DN authzDN)
+  private void addChangeLogEntry(@NotNull final AddRequestProtocolOp addRequest,
+                                 @NotNull final DN authzDN)
   {
     // If the changelog is disabled, then don't do anything.
     if (maxChangelogEntries <= 0)
@@ -5584,7 +5689,8 @@ findEntriesAndRefs:
    * @param  e        The entry to be deleted.
    * @param  authzDN  The authorization DN for the change.
    */
-  private void addDeleteChangeLogEntry(final Entry e, final DN authzDN)
+  private void addDeleteChangeLogEntry(@NotNull final Entry e,
+                                       @NotNull final DN authzDN)
   {
     // If the changelog is disabled, then don't do anything.
     if (maxChangelogEntries <= 0)
@@ -5635,8 +5741,9 @@ findEntriesAndRefs:
    *                        entry.
    * @param  authzDN        The authorization DN for the change.
    */
-  private void addChangeLogEntry(final ModifyRequestProtocolOp modifyRequest,
-                                 final DN authzDN)
+  private void addChangeLogEntry(
+                    @NotNull final ModifyRequestProtocolOp modifyRequest,
+                    @NotNull final DN authzDN)
   {
     // If the changelog is disabled, then don't do anything.
     if (maxChangelogEntries <= 0)
@@ -5672,8 +5779,8 @@ findEntriesAndRefs:
    * @param  authzDN          The authorization DN for the change.
    */
   private void addChangeLogEntry(
-                    final ModifyDNRequestProtocolOp modifyDNRequest,
-                    final DN authzDN)
+                    @NotNull final ModifyDNRequestProtocolOp modifyDNRequest,
+                    @NotNull final DN authzDN)
   {
     // If the changelog is disabled, then don't do anything.
     if (maxChangelogEntries <= 0)
@@ -5711,7 +5818,8 @@ findEntriesAndRefs:
    * @param  e        The changelog entry to add to the data set.
    * @param  authzDN  The authorization DN for the change.
    */
-  private void addChangeLogEntry(final ChangeLogEntry e, final DN authzDN)
+  private void addChangeLogEntry(@NotNull final ChangeLogEntry e,
+                                 @NotNull final DN authzDN)
   {
     // Construct the DN object to use for the entry and put it in the map.
     final long changeNumber = e.getChangeNumber();
@@ -5789,7 +5897,8 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem is encountered while attempting to
    *                         determine the authorization DN.
    */
-  private DN handleProxiedAuthControl(final Map<String,Control> m)
+  @NotNull()
+  private DN handleProxiedAuthControl(@NotNull final Map<String,Control> m)
           throws LDAPException
   {
     final ProxiedAuthorizationV1RequestControl p1 =
@@ -5840,7 +5949,8 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem prevents resolving the authorization
    *                         ID to a user DN.
    */
-  public DN getDNForAuthzID(final String authzID)
+  @NotNull()
+  public DN getDNForAuthzID(@NotNull final String authzID)
          throws LDAPException
   {
     synchronized (entryMap)
@@ -5904,8 +6014,9 @@ findEntriesAndRefs:
    *                         control and the provided entry does not match the
    *                         filter contained in that control.
    */
-  private static void handleAssertionRequestControl(final Map<String,Control> m,
-                                                    final Entry e)
+  private static void handleAssertionRequestControl(
+                           @NotNull final Map<String,Control> m,
+                           @NotNull final Entry e)
           throws LDAPException
   {
     final AssertionRequestControl c = (AssertionRequestControl)
@@ -5945,8 +6056,9 @@ findEntriesAndRefs:
    * @return  The pre-read response control that should be returned to the
    *          client, or {@code null} if there is none.
    */
+  @Nullable()
   private PreReadResponseControl handlePreReadControl(
-               final Map<String,Control> m, final Entry e)
+               @NotNull final Map<String,Control> m, @NotNull final Entry e)
   {
     final PreReadRequestControl c = (PreReadRequestControl)
          m.get(PreReadRequestControl.PRE_READ_REQUEST_OID);
@@ -5955,14 +6067,9 @@ findEntriesAndRefs:
       return null;
     }
 
-    final AtomicBoolean allUserAttrs = new AtomicBoolean(false);
-    final AtomicBoolean allOpAttrs = new AtomicBoolean(false);
-    final Map<String,List<List<String>>> returnAttrs =
-         processRequestedAttributes(Arrays.asList(c.getAttributes()),
-              allUserAttrs, allOpAttrs);
-
-    final Entry trimmedEntry = trimForRequestedAttributes(e, allUserAttrs.get(),
-         allOpAttrs.get(), returnAttrs);
+    final SearchEntryParer parer = new SearchEntryParer(
+         Arrays.asList(c.getAttributes()), schemaRef.get());
+    final Entry trimmedEntry = parer.pareEntry(e);
     return new PreReadResponseControl(new ReadOnlyEntry(trimmedEntry));
   }
 
@@ -5979,8 +6086,9 @@ findEntriesAndRefs:
    * @return  The post-read response control that should be returned to the
    *          client, or {@code null} if there is none.
    */
+  @Nullable()
   private PostReadResponseControl handlePostReadControl(
-               final Map<String,Control> m, final Entry e)
+               @NotNull final Map<String,Control> m, @NotNull final Entry e)
   {
     final PostReadRequestControl c = (PostReadRequestControl)
          m.get(PostReadRequestControl.POST_READ_REQUEST_OID);
@@ -5989,14 +6097,9 @@ findEntriesAndRefs:
       return null;
     }
 
-    final AtomicBoolean allUserAttrs = new AtomicBoolean(false);
-    final AtomicBoolean allOpAttrs = new AtomicBoolean(false);
-    final Map<String,List<List<String>>> returnAttrs =
-         processRequestedAttributes(Arrays.asList(c.getAttributes()),
-              allUserAttrs, allOpAttrs);
-
-    final Entry trimmedEntry = trimForRequestedAttributes(e, allUserAttrs.get(),
-         allOpAttrs.get(), returnAttrs);
+    final SearchEntryParer parer = new SearchEntryParer(
+         Arrays.asList(c.getAttributes()), schemaRef.get());
+    final Entry trimmedEntry = parer.pareEntry(e);
     return new PostReadResponseControl(new ReadOnlyEntry(trimmedEntry));
   }
 
@@ -6013,7 +6116,8 @@ findEntriesAndRefs:
    *          DN, or {@code null} if there are no smart referral entries with
    *          the provided DN or any of its ancestors.
    */
-  private Entry findNearestReferral(final DN dn)
+  @Nullable()
+  private Entry findNearestReferral(@NotNull final DN dn)
   {
     DN d = dn;
     while (true)
@@ -6049,8 +6153,9 @@ findEntriesAndRefs:
    *
    * @return  The referral URLs that should be returned.
    */
-  private static List<String> getReferralURLs(final DN targetDN,
-                                              final Entry referralEntry)
+  @Nullable()
+  private static List<String> getReferralURLs(@NotNull final DN targetDN,
+                                   @NotNull final Entry referralEntry)
   {
     final String[] refs = referralEntry.getAttributeValues("ref");
     if (refs == null)
@@ -6121,7 +6226,7 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public boolean entryExists(final String dn)
+  public boolean entryExists(@NotNull final String dn)
          throws LDAPException
   {
     return (getEntry(dn) != null);
@@ -6142,7 +6247,8 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public boolean entryExists(final String dn, final String filter)
+  public boolean entryExists(@NotNull final String dn,
+                             @NotNull final String filter)
          throws LDAPException
   {
     synchronized (entryMap)
@@ -6182,7 +6288,7 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public boolean entryExists(final Entry entry)
+  public boolean entryExists(@NotNull final Entry entry)
          throws LDAPException
   {
     synchronized (entryMap)
@@ -6220,7 +6326,7 @@ findEntriesAndRefs:
    *
    * @throws  AssertionError  If the target entry does not exist.
    */
-  public void assertEntryExists(final String dn)
+  public void assertEntryExists(@NotNull final String dn)
          throws LDAPException, AssertionError
   {
     final Entry e = getEntry(dn);
@@ -6244,7 +6350,8 @@ findEntriesAndRefs:
    * @throws  AssertionError  If the target entry does not exist or does not
    *                          match the provided filter.
    */
-  public void assertEntryExists(final String dn, final String filter)
+  public void assertEntryExists(@NotNull final String dn,
+                                @NotNull final String filter)
          throws LDAPException, AssertionError
   {
     synchronized (entryMap)
@@ -6290,7 +6397,7 @@ findEntriesAndRefs:
    * @throws  AssertionError  If the target entry does not exist or does not
    *                          match the provided filter.
    */
-  public void assertEntryExists(final Entry entry)
+  public void assertEntryExists(@NotNull final Entry entry)
          throws LDAPException, AssertionError
   {
     synchronized (entryMap)
@@ -6350,7 +6457,8 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public List<String> getMissingEntryDNs(final Collection<String> dns)
+  @NotNull()
+  public List<String> getMissingEntryDNs(@NotNull final Collection<String> dns)
          throws LDAPException
   {
     synchronized (entryMap)
@@ -6382,7 +6490,7 @@ findEntriesAndRefs:
    *
    * @throws  AssertionError  If any of the target entries does not exist.
    */
-  public void assertEntriesExist(final Collection<String> dns)
+  public void assertEntriesExist(@NotNull final Collection<String> dns)
          throws LDAPException, AssertionError
   {
     synchronized (entryMap)
@@ -6421,8 +6529,9 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public List<String> getMissingAttributeNames(final String dn,
-                           final Collection<String> attributeNames)
+  @Nullable()
+  public List<String> getMissingAttributeNames(@NotNull final String dn,
+                           @NotNull final Collection<String> attributeNames)
          throws LDAPException
   {
     synchronized (entryMap)
@@ -6465,8 +6574,8 @@ findEntriesAndRefs:
    * @throws  AssertionError  If the target entry does not exist or does not
    *                          contain all of the specified attributes.
    */
-  public void assertAttributeExists(final String dn,
-                                    final Collection<String> attributeNames)
+  public void assertAttributeExists(@NotNull final String dn,
+                   @NotNull final Collection<String> attributeNames)
         throws LDAPException, AssertionError
   {
     synchronized (entryMap)
@@ -6512,9 +6621,10 @@ findEntriesAndRefs:
    * @throws  LDAPException  If a problem is encountered while trying to
    *                         communicate with the directory server.
    */
-  public List<String> getMissingAttributeValues(final String dn,
-                           final String attributeName,
-                           final Collection<String> attributeValues)
+  @Nullable()
+  public List<String> getMissingAttributeValues(@NotNull final String dn,
+                           @NotNull final String attributeName,
+                           @NotNull final Collection<String> attributeValues)
        throws LDAPException
   {
     synchronized (entryMap)
@@ -6560,9 +6670,9 @@ findEntriesAndRefs:
    *                          contain the specified attribute, or that attribute
    *                          does not have all of the specified values.
    */
-  public void assertValueExists(final String dn,
-                                final String attributeName,
-                                final Collection<String> attributeValues)
+  public void assertValueExists(@NotNull final String dn,
+                   @NotNull final String attributeName,
+                   @NotNull final Collection<String> attributeValues)
         throws LDAPException, AssertionError
   {
     synchronized (entryMap)
@@ -6610,7 +6720,7 @@ findEntriesAndRefs:
    *
    * @throws  AssertionError  If the target entry is found in the server.
    */
-  public void assertEntryMissing(final String dn)
+  public void assertEntryMissing(@NotNull final String dn)
          throws LDAPException, AssertionError
   {
     final Entry e = getEntry(dn);
@@ -6636,8 +6746,8 @@ findEntriesAndRefs:
    * @throws  AssertionError  If the target entry is missing from the server, or
    *                          if it contains any of the target attributes.
    */
-  public void assertAttributeMissing(final String dn,
-                                     final Collection<String> attributeNames)
+  public void assertAttributeMissing(@NotNull final String dn,
+                   @NotNull final Collection<String> attributeNames)
          throws LDAPException, AssertionError
   {
     synchronized (entryMap)
@@ -6683,9 +6793,9 @@ findEntriesAndRefs:
    * @throws  AssertionError  If the target entry is missing from the server, or
    *                          if it contains any of the target attribute values.
    */
-  public void assertValueMissing(final String dn,
-                                 final String attributeName,
-                                 final Collection<String> attributeValues)
+  public void assertValueMissing(@NotNull final String dn,
+                   @NotNull final String attributeName,
+                   @NotNull final Collection<String> attributeValues)
          throws LDAPException, AssertionError
   {
     synchronized (entryMap)

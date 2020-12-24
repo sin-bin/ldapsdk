@@ -1,9 +1,24 @@
 /*
- * Copyright 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2012-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,8 @@ package com.unboundid.ldap.sdk.unboundidds.logs;
 
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -58,35 +75,35 @@ public class EntryRebalancingRequestAccessLogMessage
 
 
   // The maximum number of entries to include in the subtree move.
-  private final Integer sizeLimit;
+  @Nullable private final Integer sizeLimit;
 
   // The unique identifier assigned to the entry rebalancing operation.
-  private final Long rebalancingOperationID;
+  @Nullable private final Long rebalancingOperationID;
 
   // The connection ID of the client connection that performed an operation to
   // trigger the entry rebalancing operation.
-  private final Long triggeringConnectionID;
+  @Nullable private final Long triggeringConnectionID;
 
   // The operation ID of the operation that triggered the entry rebalancing
   // operation.
-  private final Long triggeringOperationID;
+  @Nullable private final Long triggeringOperationID;
 
   // The name of the backend set containing the subtree to move.
-  private final String sourceBackendSetName;
+  @Nullable private final String sourceBackendSetName;
 
   // The address and port of the server in the source backend set from which
   // the entries are being migrated.
-  private final String sourceBackendServer;
+  @Nullable private final String sourceBackendServer;
 
   // The base DN of the subtree being moved from one backend set to another.
-  private final String subtreeBaseDN;
+  @Nullable private final String subtreeBaseDN;
 
   // The name of the backend set into which the subtree will be migrated.
-  private final String targetBackendSetName;
+  @Nullable private final String targetBackendSetName;
 
   // The address and port of the server of the server in the target backend set
   // into which the entries are being migrated.
-  private final String targetBackendServer;
+  @Nullable private final String targetBackendServer;
 
 
 
@@ -100,7 +117,7 @@ public class EntryRebalancingRequestAccessLogMessage
    * @throws  LogException  If the provided string cannot be parsed as a valid
    *                        log message.
    */
-  public EntryRebalancingRequestAccessLogMessage(final String s)
+  public EntryRebalancingRequestAccessLogMessage(@NotNull final String s)
          throws LogException
   {
     this(new LogMessage(s));
@@ -115,7 +132,7 @@ public class EntryRebalancingRequestAccessLogMessage
    * @param  m  The log message to be parsed as an entry rebalancing request
    *            access log message.
    */
-  public EntryRebalancingRequestAccessLogMessage(final LogMessage m)
+  public EntryRebalancingRequestAccessLogMessage(@NotNull final LogMessage m)
   {
     super(m);
 
@@ -139,6 +156,7 @@ public class EntryRebalancingRequestAccessLogMessage
    * @return  The unique identifier assigned to the entry rebalancing operation,
    *          or {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public final Long getRebalancingOperationID()
   {
     return rebalancingOperationID;
@@ -154,6 +172,7 @@ public class EntryRebalancingRequestAccessLogMessage
    *          operation to trigger the entry rebalancing operation, or
    *          {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public final Long getTriggeringConnectionID()
   {
     return triggeringConnectionID;
@@ -169,6 +188,7 @@ public class EntryRebalancingRequestAccessLogMessage
    *          entry rebalancing operation, or {@code null} if it is not included
    *          in the log message.
    */
+  @Nullable()
   public final Long getTriggeringOperationID()
   {
     return triggeringOperationID;
@@ -184,6 +204,7 @@ public class EntryRebalancingRequestAccessLogMessage
    *          rebalancing operation, or {@code null} if it is not included in
    *          the log message.
    */
+  @Nullable()
   public final String getSubtreeBaseDN()
   {
     return subtreeBaseDN;
@@ -199,6 +220,7 @@ public class EntryRebalancingRequestAccessLogMessage
    *          for it to be successfully migrated, or {@code null} if it is not
    *          included in the log message.
    */
+  @Nullable()
   public final Integer getSizeLimit()
   {
     return sizeLimit;
@@ -213,6 +235,7 @@ public class EntryRebalancingRequestAccessLogMessage
    * @return  The name of the backend set containing the subtree to be migrated,
    *          or {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public final String getSourceBackendSetName()
   {
     return sourceBackendSetName;
@@ -228,6 +251,7 @@ public class EntryRebalancingRequestAccessLogMessage
    *          will be migrated, or {@code null} if it is not included in the log
    *          message.
    */
+  @Nullable()
   public final String getSourceBackendServer()
   {
     return sourceBackendServer;
@@ -242,6 +266,7 @@ public class EntryRebalancingRequestAccessLogMessage
    * @return  The name of the backend set ot which the subtree will be migrated,
    *          or {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public final String getTargetBackendSetName()
   {
     return targetBackendSetName;
@@ -257,6 +282,7 @@ public class EntryRebalancingRequestAccessLogMessage
    *          will be migrated, or {@code null} if it is not included in the log
    *          message.
    */
+  @Nullable()
   public final String getTargetBackendServer()
   {
     return targetBackendServer;
@@ -268,6 +294,7 @@ public class EntryRebalancingRequestAccessLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public AccessLogMessageType getMessageType()
   {
     return AccessLogMessageType.ENTRY_REBALANCING_REQUEST;

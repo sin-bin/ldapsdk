@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.ldap.sdk.Version;
 import com.unboundid.util.Debug;
 import com.unboundid.util.LDAPSDKException;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -65,7 +82,7 @@ public final class LDIFException
   private final long lineNumber;
 
   // A list of the lines comprising the LDIF data being parsed, if available.
-  private final List<String> dataLines;
+  @Nullable private final List<String> dataLines;
 
 
 
@@ -79,7 +96,7 @@ public final class LDIFException
    * @param  mayContinueReading  Indicates whether it is possible to continue
    *                             attempting to read from the LDIF source.
    */
-  public LDIFException(final String message, final long lineNumber,
+  public LDIFException(@NotNull final String message, final long lineNumber,
                        final boolean mayContinueReading)
   {
     this(message, lineNumber, mayContinueReading, (List<CharSequence>) null,
@@ -100,8 +117,9 @@ public final class LDIFException
    * @param  cause               The underlying exception that triggered this
    *                             exception.
    */
-  public LDIFException(final String message, final long lineNumber,
-                       final boolean mayContinueReading, final Throwable cause)
+  public LDIFException(@NotNull final String message, final long lineNumber,
+                       final boolean mayContinueReading,
+                       @Nullable final Throwable cause)
   {
     this(message, lineNumber, mayContinueReading, (List<CharSequence>) null,
          cause);
@@ -124,9 +142,10 @@ public final class LDIFException
    * @param  cause               The underlying exception that triggered this
    *                             exception.
    */
-  public LDIFException(final String message, final long lineNumber,
+  public LDIFException(@NotNull final String message, final long lineNumber,
                        final boolean mayContinueReading,
-                       final CharSequence[] dataLines, final Throwable cause)
+                       @Nullable final CharSequence[] dataLines,
+                       @Nullable final Throwable cause)
   {
     this(message, lineNumber, mayContinueReading,
          (dataLines == null) ? null : Arrays.asList(dataLines),
@@ -150,10 +169,10 @@ public final class LDIFException
    * @param  cause               The underlying exception that triggered this
    *                             exception.
    */
-  public LDIFException(final String message, final long lineNumber,
+  public LDIFException(@NotNull final String message, final long lineNumber,
                        final boolean mayContinueReading,
-                       final List<? extends CharSequence> dataLines,
-                       final Throwable cause)
+                       @Nullable final List<? extends CharSequence> dataLines,
+                       @Nullable final Throwable cause)
   {
     super(message, cause);
 
@@ -215,6 +234,7 @@ public final class LDIFException
    *          not be parsed as valid LDIF, or {@code null} if that is not
    *          available.
    */
+  @Nullable()
   public List<String> getDataLines()
   {
     return dataLines;
@@ -226,7 +246,7 @@ public final class LDIFException
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     final boolean includeCause =
          Boolean.getBoolean(Debug.PROPERTY_INCLUDE_CAUSE_IN_EXCEPTION_MESSAGES);
@@ -253,7 +273,8 @@ public final class LDIFException
    *                            automatically be included, regardless of the
    *                            value of the {@code includeCause} argument.
    */
-  public void toString(final StringBuilder buffer, final boolean includeCause,
+  public void toString(@NotNull final StringBuilder buffer,
+                       final boolean includeCause,
                        final boolean includeStackTrace)
   {
     buffer.append("LDIFException(lineNumber=");
@@ -307,6 +328,7 @@ public final class LDIFException
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExceptionMessage()
   {
     return toString();
@@ -318,6 +340,7 @@ public final class LDIFException
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExceptionMessage(final boolean includeCause,
                                     final boolean includeStackTrace)
   {

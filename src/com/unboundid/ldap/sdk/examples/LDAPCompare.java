@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -40,6 +55,8 @@ import com.unboundid.ldap.sdk.Version;
 import com.unboundid.util.Base64;
 import com.unboundid.util.Debug;
 import com.unboundid.util.LDAPCommandLineTool;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -85,13 +102,13 @@ public final class LDAPCompare
 
 
   // The argument parser for this tool.
-  private ArgumentParser parser;
+  @Nullable private ArgumentParser parser;
 
   // The argument used to specify any bind controls that should be used.
-  private ControlArgument bindControls;
+  @Nullable private ControlArgument bindControls;
 
   // The argument used to specify any compare controls that should be used.
-  private ControlArgument compareControls;
+  @Nullable private ControlArgument compareControls;
 
 
 
@@ -101,7 +118,7 @@ public final class LDAPCompare
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String[] args)
+  public static void main(@NotNull final String[] args)
   {
     final ResultCode resultCode = main(args, System.out, System.err);
     if (resultCode != ResultCode.SUCCESS)
@@ -126,9 +143,10 @@ public final class LDAPCompare
    *
    * @return  A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args,
-                                final OutputStream outStream,
-                                final OutputStream errStream)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream)
   {
     final LDAPCompare ldapCompare = new LDAPCompare(outStream, errStream);
     return ldapCompare.runTool(args);
@@ -146,7 +164,8 @@ public final class LDAPCompare
    *                    written.  It may be {@code null} if error messages
    *                    should be suppressed.
    */
-  public LDAPCompare(final OutputStream outStream, final OutputStream errStream)
+  public LDAPCompare(@Nullable final OutputStream outStream,
+                     @Nullable final OutputStream errStream)
   {
     super(outStream, errStream);
   }
@@ -159,6 +178,7 @@ public final class LDAPCompare
    * @return  The name for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "ldapcompare";
@@ -172,9 +192,10 @@ public final class LDAPCompare
    * @return  The description for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
-    return "Process compare operations in LDAP directory server.";
+    return "Perform LDAP compare operations in an LDAP directory server.";
   }
 
 
@@ -185,6 +206,7 @@ public final class LDAPCompare
    * @return  The version string for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -231,6 +253,7 @@ public final class LDAPCompare
    *          trailing arguments are allowed.
    */
   @Override()
+  @NotNull()
   public String getTrailingArgumentsPlaceholder()
   {
     return "attr:value dn1 [dn2 [dn3 [...]]]";
@@ -347,6 +370,24 @@ public final class LDAPCompare
 
 
   /**
+   * Indicates whether this tool should provide a command-line argument that
+   * allows for low-level SSL debugging.  If this returns {@code true}, then an
+   * "--enableSSLDebugging}" argument will be added that sets the
+   * "javax.net.debug" system property to "all" before attempting any
+   * communication.
+   *
+   * @return  {@code true} if this tool should offer an "--enableSSLDebugging"
+   *          argument, or {@code false} if not.
+   */
+  @Override()
+  protected boolean supportsSSLDebugging()
+  {
+    return true;
+  }
+
+
+
+  /**
    * Adds the arguments used by this program that aren't already provided by the
    * generic {@code LDAPCommandLineTool} framework.
    *
@@ -355,7 +396,7 @@ public final class LDAPCompare
    * @throws  ArgumentException  If a problem occurs while adding the arguments.
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     // Save a reference to the argument parser.
@@ -427,6 +468,7 @@ public final class LDAPCompare
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<Control> getBindControls()
   {
     return bindControls.getValues();
@@ -442,6 +484,7 @@ public final class LDAPCompare
    * @return  The result code for the processing that was performed.
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     // Make sure that at least two trailing arguments were provided, which will
@@ -582,6 +625,7 @@ public final class LDAPCompare
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> examples =

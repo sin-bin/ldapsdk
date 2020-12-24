@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -44,6 +59,7 @@ public class VersionMonitorEntryTestCase
    * @throws  Exception  If an unexpected problem occurs.
    */
   @Test()
+  @SuppressWarnings("deprecation")
   public void testConstructorAllValues()
          throws Exception
   {
@@ -64,6 +80,7 @@ public class VersionMonitorEntryTestCase
          "pointVersion: 3",
          "productName: UnboundID Directory Server",
          "revisionNumber: 123",
+         "revisionID: 123",
          "shortName: UnboundID-DS",
          "versionQualifier: -beta1",
          "groovyVersion: groovy-1.2.3.4",
@@ -113,6 +130,9 @@ public class VersionMonitorEntryTestCase
 
     assertNotNull(me.getRevisionNumber());
     assertEquals(me.getRevisionNumber().longValue(), 123L);
+
+    assertNotNull(me.getRevisionID());
+    assertEquals(me.getRevisionID(), "123");
 
     assertNotNull(me.getShortProductName());
     assertEquals(me.getShortProductName(), "UnboundID-DS");
@@ -250,6 +270,7 @@ public class VersionMonitorEntryTestCase
    * @throws  Exception  If an unexpected problem occurs.
    */
   @Test()
+  @SuppressWarnings("deprecation")
   public void testConstructorNoValues()
          throws Exception
   {
@@ -288,6 +309,8 @@ public class VersionMonitorEntryTestCase
     assertNull(me.getProductName());
 
     assertNull(me.getRevisionNumber());
+
+    assertNull(me.getRevisionID());
 
     assertNull(me.getShortProductName());
 

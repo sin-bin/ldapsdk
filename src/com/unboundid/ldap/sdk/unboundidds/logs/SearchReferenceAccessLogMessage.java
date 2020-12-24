@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -61,10 +77,10 @@ public final class SearchReferenceAccessLogMessage
 
 
   // The list of response control OIDs for the operation.
-  private final List<String> responseControlOIDs;
+  @NotNull private final List<String> responseControlOIDs;
 
   // The set of referral URLs returned.
-  private final List<String> referralURLs;
+  @NotNull private final List<String> referralURLs;
 
 
 
@@ -78,7 +94,7 @@ public final class SearchReferenceAccessLogMessage
    * @throws  LogException  If the provided string cannot be parsed as a valid
    *                        log message.
    */
-  public SearchReferenceAccessLogMessage(final String s)
+  public SearchReferenceAccessLogMessage(@NotNull final String s)
          throws LogException
   {
     this(new LogMessage(s));
@@ -93,7 +109,7 @@ public final class SearchReferenceAccessLogMessage
    * @param  m  The log message to be parsed as a search reference access log
    *            message.
    */
-  public SearchReferenceAccessLogMessage(final LogMessage m)
+  public SearchReferenceAccessLogMessage(@NotNull final LogMessage m)
   {
     super(m);
 
@@ -148,6 +164,7 @@ public final class SearchReferenceAccessLogMessage
    * @return  The list of referral URLs returned to the client, or an empty list
    *          if it is not included in the log message.
    */
+  @NotNull()
   public List<String> getReferralURLs()
   {
     return referralURLs;
@@ -161,6 +178,7 @@ public final class SearchReferenceAccessLogMessage
    * @return  The OIDs of any response controls contained in the log message, or
    *          an empty list if it is not included in the log message.
    */
+  @NotNull()
   public List<String> getResponseControlOIDs()
   {
     return responseControlOIDs;
@@ -172,6 +190,7 @@ public final class SearchReferenceAccessLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public AccessLogMessageType getMessageType()
   {
     return AccessLogMessageType.REFERENCE;

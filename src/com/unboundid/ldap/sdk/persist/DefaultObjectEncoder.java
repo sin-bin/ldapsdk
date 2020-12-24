@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -50,10 +65,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.unboundid.asn1.ASN1OctetString;
+import com.unboundid.ldap.matchingrules.BooleanMatchingRule;
 import com.unboundid.ldap.matchingrules.CaseIgnoreStringMatchingRule;
+import com.unboundid.ldap.matchingrules.GeneralizedTimeMatchingRule;
 import com.unboundid.ldap.matchingrules.MatchingRule;
+import com.unboundid.ldap.matchingrules.OctetStringMatchingRule;
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.DN;
 import com.unboundid.ldap.sdk.Filter;
@@ -64,6 +83,8 @@ import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 import com.unboundid.ldap.sdk.schema.AttributeUsage;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -193,7 +214,7 @@ public final class DefaultObjectEncoder
    * {@inheritDoc}
    */
   @Override()
-  public boolean supportsType(final Type t)
+  public boolean supportsType(@NotNull final Type t)
   {
     final TypeInfo typeInfo = new TypeInfo(t);
     if (! typeInfo.isSupported())
@@ -245,7 +266,7 @@ public final class DefaultObjectEncoder
    * @return  {@code true} if this object supports objects of the specified
    *          type, or {@code false} if not.
    */
-  private static boolean supportsTypeInternal(final Class<?> c)
+  private static boolean supportsTypeInternal(@NotNull final Class<?> c)
   {
     if (c.equals(AtomicInteger.class) ||
         c.equals(AtomicLong.class) ||
@@ -311,7 +332,7 @@ public final class DefaultObjectEncoder
    * @return  {@code true} if the provided type is a supported list type, or
    *          or {@code false}.
    */
-  private static boolean isSupportedListType(final Class<?> t)
+  private static boolean isSupportedListType(@NotNull final Class<?> t)
   {
     return (t.equals(List.class) ||
             t.equals(ArrayList.class) ||
@@ -331,7 +352,8 @@ public final class DefaultObjectEncoder
    *          type.
    */
   @SuppressWarnings("rawtypes")
-  private static List<?> createList(final Class<?> t, final int size)
+  @Nullable()
+  private static List<?> createList(@NotNull final Class<?> t, final int size)
   {
     if (t.equals(List.class) || t.equals(ArrayList.class))
     {
@@ -359,7 +381,7 @@ public final class DefaultObjectEncoder
    * @return  {@code true} if the provided type is a supported set type, or
    *          or {@code false}.
    */
-  private static boolean isSupportedSetType(final Class<?> t)
+  private static boolean isSupportedSetType(@NotNull final Class<?> t)
   {
     return (t.equals(Set.class) ||
             t.equals(HashSet.class) ||
@@ -380,7 +402,8 @@ public final class DefaultObjectEncoder
    *          type.
    */
   @SuppressWarnings("rawtypes")
-  private static Set<?> createSet(final Class<?> t, final int size)
+  @Nullable()
+  private static Set<?> createSet(@NotNull final Class<?> t, final int size)
   {
     if (t.equals(Set.class) || t.equals(LinkedHashSet.class))
     {
@@ -408,8 +431,9 @@ public final class DefaultObjectEncoder
    * {@inheritDoc}
    */
   @Override()
-  public AttributeTypeDefinition constructAttributeType(final Field f,
-                                      final OIDAllocator a)
+  @NotNull()
+  public AttributeTypeDefinition constructAttributeType(@NotNull final Field f,
+                                      @NotNull final OIDAllocator a)
          throws LDAPPersistException
   {
     final LDAPField at = f.getAnnotation(LDAPField.class);
@@ -459,8 +483,9 @@ public final class DefaultObjectEncoder
    * {@inheritDoc}
    */
   @Override()
-  public AttributeTypeDefinition constructAttributeType(final Method m,
-                                      final OIDAllocator a)
+  @NotNull()
+  public AttributeTypeDefinition constructAttributeType(@NotNull final Method m,
+                                      @NotNull final OIDAllocator a)
          throws LDAPPersistException
   {
     final LDAPGetter at = m.getAnnotation(LDAPGetter.class);
@@ -511,7 +536,8 @@ public final class DefaultObjectEncoder
    * @return  The syntax that should be used for the specified object type, or
    *          {@code null} if it cannot be determined.
    */
-  private static String getSyntaxOID(final Class<?> t)
+  @Nullable()
+  private static String getSyntaxOID(@NotNull final Class<?> t)
   {
     if (t.equals(BigDecimal.class) ||
         t.equals(Double.class) ||
@@ -592,7 +618,7 @@ public final class DefaultObjectEncoder
    * {@inheritDoc}
    */
   @Override()
-  public boolean supportsMultipleValues(final Field field)
+  public boolean supportsMultipleValues(@NotNull final Field field)
   {
     return supportsMultipleValues(new TypeInfo(field.getGenericType()));
   }
@@ -603,7 +629,7 @@ public final class DefaultObjectEncoder
    * {@inheritDoc}
    */
   @Override()
-  public boolean supportsMultipleValues(final Method method)
+  public boolean supportsMultipleValues(@NotNull final Method method)
   {
     final Type[] paramTypes = method.getGenericParameterTypes();
     if (paramTypes.length != 1)
@@ -624,7 +650,7 @@ public final class DefaultObjectEncoder
    * @return  {@code true} if the provided object type supports multiple values,
    *          or {@code false} if not.
    */
-  private static boolean supportsMultipleValues(final TypeInfo t)
+  private static boolean supportsMultipleValues(@NotNull final TypeInfo t)
   {
     if (t.isArray())
     {
@@ -644,8 +670,10 @@ public final class DefaultObjectEncoder
    * {@inheritDoc}
    */
   @Override()
-  public Attribute encodeFieldValue(final Field field, final Object value,
-                                    final String name)
+  @NotNull()
+  public Attribute encodeFieldValue(@NotNull final Field field,
+                                    @NotNull final Object value,
+                                    @NotNull final String name)
          throws LDAPPersistException
   {
     return encodeValue(field.getGenericType(), value, name);
@@ -657,8 +685,10 @@ public final class DefaultObjectEncoder
    * {@inheritDoc}
    */
   @Override()
-  public Attribute encodeMethodValue(final Method method, final Object value,
-                                     final String name)
+  @NotNull()
+  public Attribute encodeMethodValue(@NotNull final Method method,
+                                     @NotNull final Object value,
+                                     @NotNull final String name)
          throws LDAPPersistException
   {
     return encodeValue(method.getGenericReturnType(), value, name);
@@ -679,8 +709,10 @@ public final class DefaultObjectEncoder
    * @throws  LDAPPersistException  If a problem occurs while attempting to
    *                                construct an attribute for the field.
    */
-  private static Attribute encodeValue(final Type type, final Object value,
-                                       final String name)
+  @NotNull()
+  private static Attribute encodeValue(@NotNull final Type type,
+                                       @NotNull final Object value,
+                                       @NotNull final String name)
          throws LDAPPersistException
   {
     final TypeInfo typeInfo = new TypeInfo(type);
@@ -709,7 +741,10 @@ public final class DefaultObjectEncoder
         c.equals(LDAPURL.class) ||
         c.equals(RDN.class))
     {
-      return new Attribute(name, String.valueOf(value));
+      final String syntaxOID = getSyntaxOID(c);
+      final MatchingRule matchingRule =
+           MatchingRule.selectMatchingRuleForSyntax(syntaxOID);
+      return new Attribute(name, matchingRule, String.valueOf(value));
     }
     else if (value instanceof URI)
     {
@@ -723,7 +758,8 @@ public final class DefaultObjectEncoder
     }
     else if (value instanceof byte[])
     {
-      return new Attribute(name, (byte[]) value);
+      return new Attribute(name, OctetStringMatchingRule.getInstance(),
+           (byte[]) value);
     }
     else if (value instanceof char[])
     {
@@ -732,19 +768,21 @@ public final class DefaultObjectEncoder
     else if (c.equals(Boolean.class) || c.equals(Boolean.TYPE))
     {
       final Boolean b = (Boolean) value;
+      final MatchingRule matchingRule = BooleanMatchingRule.getInstance();
       if (b)
       {
-        return new Attribute(name, "TRUE");
+        return new Attribute(name, matchingRule, "TRUE");
       }
       else
       {
-        return new Attribute(name, "FALSE");
+        return new Attribute(name, matchingRule, "FALSE");
       }
     }
     else if (c.equals(Date.class))
     {
       final Date d = (Date) value;
-      return new Attribute(name, StaticUtils.encodeGeneralizedTime(d));
+      return new Attribute(name, GeneralizedTimeMatchingRule.getInstance(),
+           StaticUtils.encodeGeneralizedTime(d));
     }
     else if (typeInfo.isArray())
     {
@@ -768,7 +806,8 @@ public final class DefaultObjectEncoder
         final ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(value);
         oos.close();
-        return new Attribute(name, baos.toByteArray());
+        return new Attribute(name, OctetStringMatchingRule.getInstance(),
+             baos.toByteArray());
       }
       catch (final Exception e)
       {
@@ -798,13 +837,15 @@ public final class DefaultObjectEncoder
    * @throws  LDAPPersistException  If a problem occurs while trying to create
    *                                the attribute.
    */
-  private static Attribute encodeArray(final Class<?> arrayType,
-                                       final Object arrayObject,
-                                       final String attributeName)
+  @NotNull()
+  private static Attribute encodeArray(@NotNull final Class<?> arrayType,
+                                       @NotNull final Object arrayObject,
+                                       @NotNull final String attributeName)
           throws LDAPPersistException
   {
     final ASN1OctetString[] values =
          new ASN1OctetString[Array.getLength(arrayObject)];
+    final AtomicReference<MatchingRule> matchingRule = new AtomicReference<>();
     for (int i=0; i < values.length; i++)
     {
       final Object o = Array.get(arrayObject, i);
@@ -831,6 +872,12 @@ public final class DefaultObjectEncoder
           arrayType.equals(LDAPURL.class) ||
           arrayType.equals(RDN.class))
       {
+        if (matchingRule.get() == null)
+        {
+          final String syntaxOID = getSyntaxOID(arrayType);
+          matchingRule.set(MatchingRule.selectMatchingRuleForSyntax(syntaxOID));
+        }
+
         values[i] = new ASN1OctetString(String.valueOf(o));
       }
       else if (arrayType.equals(URI.class))
@@ -845,6 +892,7 @@ public final class DefaultObjectEncoder
       }
       else if (o instanceof byte[])
       {
+        matchingRule.compareAndSet(null, OctetStringMatchingRule.getInstance());
         values[i] = new ASN1OctetString((byte[]) o);
       }
       else if (o instanceof char[])
@@ -854,6 +902,8 @@ public final class DefaultObjectEncoder
       else if (arrayType.equals(Boolean.class) ||
                arrayType.equals(Boolean.TYPE))
       {
+        matchingRule.compareAndSet(null, BooleanMatchingRule.getInstance());
+
         final Boolean b = (Boolean) o;
         if (b)
         {
@@ -866,6 +916,9 @@ public final class DefaultObjectEncoder
       }
       else if (arrayType.equals(Date.class))
       {
+        matchingRule.compareAndSet(null,
+             GeneralizedTimeMatchingRule.getInstance());
+
         final Date d = (Date) o;
         values[i] = new ASN1OctetString(StaticUtils.encodeGeneralizedTime(d));
       }
@@ -876,6 +929,8 @@ public final class DefaultObjectEncoder
       }
       else if (Serializable.class.isAssignableFrom(arrayType))
       {
+        matchingRule.compareAndSet(null, OctetStringMatchingRule.getInstance());
+
         try
         {
           final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -900,8 +955,9 @@ public final class DefaultObjectEncoder
       }
     }
 
-    return new Attribute(attributeName,
-         CaseIgnoreStringMatchingRule.getInstance(), values);
+    matchingRule.compareAndSet(null,
+         CaseIgnoreStringMatchingRule.getInstance());
+    return new Attribute(attributeName, matchingRule.get(), values);
   }
 
 
@@ -918,12 +974,14 @@ public final class DefaultObjectEncoder
    * @throws  LDAPPersistException  If a problem occurs while trying to create
    *                                the attribute.
    */
-  private static Attribute encodeCollection(final Class<?> genericType,
-                                            final Collection<?> collection,
-                                            final String attributeName)
+  @NotNull()
+  private static Attribute encodeCollection(@NotNull final Class<?> genericType,
+                                @NotNull final Collection<?> collection,
+                                @NotNull final String attributeName)
           throws LDAPPersistException
   {
     final ASN1OctetString[] values = new ASN1OctetString[collection.size()];
+    final AtomicReference<MatchingRule> matchingRule = new AtomicReference<>();
 
     int i=0;
     for (final Object o : collection)
@@ -951,6 +1009,12 @@ public final class DefaultObjectEncoder
           genericType.equals(LDAPURL.class) ||
           genericType.equals(RDN.class))
       {
+        if (matchingRule.get() == null)
+        {
+          final String syntaxOID = getSyntaxOID(genericType);
+          matchingRule.set(MatchingRule.selectMatchingRuleForSyntax(syntaxOID));
+        }
+
         values[i] = new ASN1OctetString(String.valueOf(o));
       }
       else if (genericType.equals(URI.class))
@@ -965,6 +1029,7 @@ public final class DefaultObjectEncoder
       }
       else if (o instanceof byte[])
       {
+        matchingRule.compareAndSet(null, OctetStringMatchingRule.getInstance());
         values[i] = new ASN1OctetString((byte[]) o);
       }
       else if (o instanceof char[])
@@ -974,6 +1039,8 @@ public final class DefaultObjectEncoder
       else if (genericType.equals(Boolean.class) ||
                genericType.equals(Boolean.TYPE))
       {
+        matchingRule.compareAndSet(null, BooleanMatchingRule.getInstance());
+
         final Boolean b = (Boolean) o;
         if (b)
         {
@@ -986,6 +1053,9 @@ public final class DefaultObjectEncoder
       }
       else if (genericType.equals(Date.class))
       {
+        matchingRule.compareAndSet(null,
+             GeneralizedTimeMatchingRule.getInstance());
+
         final Date d = (Date) o;
         values[i] = new ASN1OctetString(StaticUtils.encodeGeneralizedTime(d));
       }
@@ -996,6 +1066,8 @@ public final class DefaultObjectEncoder
       }
       else if (Serializable.class.isAssignableFrom(genericType))
       {
+        matchingRule.compareAndSet(null, OctetStringMatchingRule.getInstance());
+
         try
         {
           final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1022,8 +1094,9 @@ public final class DefaultObjectEncoder
       i++;
     }
 
-    return new Attribute(attributeName,
-         CaseIgnoreStringMatchingRule.getInstance(), values);
+    matchingRule.compareAndSet(null,
+         CaseIgnoreStringMatchingRule.getInstance());
+    return new Attribute(attributeName, matchingRule.get(), values);
   }
 
 
@@ -1032,8 +1105,9 @@ public final class DefaultObjectEncoder
    * {@inheritDoc}
    */
   @Override()
-  public void decodeField(final Field field, final Object object,
-                          final Attribute attribute)
+  public void decodeField(@NotNull final Field field,
+                          @NotNull final Object object,
+                          @NotNull final Attribute attribute)
          throws LDAPPersistException
   {
     field.setAccessible(true);
@@ -1146,8 +1220,9 @@ public final class DefaultObjectEncoder
    * {@inheritDoc}
    */
   @Override()
-  public void invokeSetter(final Method method, final Object object,
-                           final Attribute attribute)
+  public void invokeSetter(@NotNull final Method method,
+                           @NotNull final Object object,
+                           @NotNull final Attribute attribute)
          throws LDAPPersistException
   {
     final TypeInfo typeInfo =
@@ -1282,7 +1357,9 @@ public final class DefaultObjectEncoder
    *                                object.
    */
   @SuppressWarnings("unchecked")
-  private static Object getValue(final Class<?> t, final Attribute a,
+  @Nullable()
+  private static Object getValue(@NotNull final Class<?> t,
+                                 @NotNull final Attribute a,
                                  final int p)
           throws LDAPPersistException
   {
@@ -1528,7 +1605,8 @@ public final class DefaultObjectEncoder
    * @throws  LDAPPersistException  If a problem occurs while attempting to
    *                                invoke the {@code add} method.
    */
-  private static void invokeAdd(final Object l, final Object o)
+  private static void invokeAdd(@NotNull final Object l,
+                                @NotNull final Object o)
           throws LDAPPersistException
   {
     final Class<?> c = l.getClass();

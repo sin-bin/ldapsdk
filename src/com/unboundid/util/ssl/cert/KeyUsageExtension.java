@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,7 @@ package com.unboundid.util.ssl.cert;
 import com.unboundid.asn1.ASN1BitString;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.OID;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -65,7 +81,7 @@ public final class KeyUsageExtension
   /**
    * The OID (2.5.29.15) for key usage extensions.
    */
-  public static final OID KEY_USAGE_OID = new OID("2.5.29.15");
+  @NotNull public static final OID KEY_USAGE_OID = new OID("2.5.29.15");
 
 
 
@@ -160,7 +176,7 @@ public final class KeyUsageExtension
    * @throws  CertException  If the provided extension cannot be decoded as a
    *                         key usage extension.
    */
-  KeyUsageExtension(final X509CertificateExtension extension)
+  KeyUsageExtension(@NotNull final X509CertificateExtension extension)
        throws CertException
   {
     super(extension);
@@ -330,6 +346,7 @@ public final class KeyUsageExtension
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtensionName()
   {
     return INFO_KEY_USAGE_EXTENSION_NAME.get();
@@ -341,7 +358,7 @@ public final class KeyUsageExtension
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("KeyUsageExtension(oid='");
     buffer.append(getOID());

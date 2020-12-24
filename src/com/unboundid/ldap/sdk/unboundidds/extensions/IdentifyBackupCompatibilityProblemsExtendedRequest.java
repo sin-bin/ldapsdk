@@ -1,9 +1,24 @@
 /*
- * Copyright 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2013-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,8 @@ import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -80,7 +97,7 @@ public final class IdentifyBackupCompatibilityProblemsExtendedRequest
    * The OID (1.3.6.1.4.1.30221.2.6.32) for the identify backup compatibility
    * problems extended request.
    */
-  public static final String
+  @NotNull public static final String
        IDENTIFY_BACKUP_COMPATIBILITY_PROBLEMS_REQUEST_OID =
             "1.3.6.1.4.1.30221.2.6.32";
 
@@ -109,10 +126,10 @@ public final class IdentifyBackupCompatibilityProblemsExtendedRequest
 
   // The backup compatibility descriptor obtained from the source server, or
   // from a backup to be restored.
-  private final ASN1OctetString sourceDescriptor;
+  @NotNull private final ASN1OctetString sourceDescriptor;
 
   // The backup compatibility descriptor obtained from the target server.
-  private final ASN1OctetString targetDescriptor;
+  @NotNull private final ASN1OctetString targetDescriptor;
 
 
 
@@ -130,8 +147,9 @@ public final class IdentifyBackupCompatibilityProblemsExtendedRequest
    *                           should be included.
    */
   public IdentifyBackupCompatibilityProblemsExtendedRequest(
-       final ASN1OctetString sourceDescriptor,
-       final ASN1OctetString targetDescriptor, final Control... controls)
+       @NotNull final ASN1OctetString sourceDescriptor,
+       @NotNull final ASN1OctetString targetDescriptor,
+       @Nullable final Control... controls)
   {
     super(IDENTIFY_BACKUP_COMPATIBILITY_PROBLEMS_REQUEST_OID,
          encodeValue(sourceDescriptor, targetDescriptor), controls);
@@ -156,7 +174,7 @@ public final class IdentifyBackupCompatibilityProblemsExtendedRequest
    *                        request.
    */
   public IdentifyBackupCompatibilityProblemsExtendedRequest(
-       final ExtendedRequest r)
+              @NotNull final ExtendedRequest r)
        throws LDAPException
   {
     super(r);
@@ -202,9 +220,10 @@ public final class IdentifyBackupCompatibilityProblemsExtendedRequest
    * @return  The ASN.1 octet string containing the encoded representation of
    *          the provided information.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(
-                                      final ASN1OctetString sourceDescriptor,
-                                      final ASN1OctetString targetDescriptor)
+               @NotNull final ASN1OctetString sourceDescriptor,
+               @NotNull final ASN1OctetString targetDescriptor)
   {
     Validator.ensureNotNull(sourceDescriptor);
     Validator.ensureNotNull(targetDescriptor);
@@ -227,6 +246,7 @@ public final class IdentifyBackupCompatibilityProblemsExtendedRequest
    * @return  The backup compatibility descriptor obtained from the source
    *          server, or from a backup to be restored.
    */
+  @NotNull()
   public ASN1OctetString getSourceDescriptor()
   {
     return sourceDescriptor;
@@ -241,6 +261,7 @@ public final class IdentifyBackupCompatibilityProblemsExtendedRequest
    * @return  The backup compatibility descriptor obtained from the target
    *          server.
    */
+  @NotNull()
   public ASN1OctetString getTargetDescriptor()
   {
     return targetDescriptor;
@@ -252,8 +273,9 @@ public final class IdentifyBackupCompatibilityProblemsExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public IdentifyBackupCompatibilityProblemsExtendedResult process(
-              final LDAPConnection connection, final int depth)
+              @NotNull final LDAPConnection connection, final int depth)
          throws LDAPException
   {
     final ExtendedResult extendedResponse = super.process(connection, depth);
@@ -267,6 +289,7 @@ public final class IdentifyBackupCompatibilityProblemsExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public IdentifyBackupCompatibilityProblemsExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -278,8 +301,9 @@ public final class IdentifyBackupCompatibilityProblemsExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public IdentifyBackupCompatibilityProblemsExtendedRequest duplicate(
-              final Control[] controls)
+              @Nullable final Control[] controls)
   {
     final IdentifyBackupCompatibilityProblemsExtendedRequest r =
          new IdentifyBackupCompatibilityProblemsExtendedRequest(
@@ -294,6 +318,7 @@ public final class IdentifyBackupCompatibilityProblemsExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_EXTENDED_REQUEST_NAME_IDENTIFY_BACKUP_COMPAT_PROBLEMS.get();
@@ -305,7 +330,7 @@ public final class IdentifyBackupCompatibilityProblemsExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("IdentifyBackupCompatibilityProblemsExtendedRequest(" +
          "sourceDescriptorLength=");

@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -149,6 +166,14 @@ import static com.unboundid.ldap.sdk.unboundidds.extensions.ExtOpMessages.*;
  *             clearTOTPSharedSecrets                       (79),
  *             hasRegisteredYubiKeyPublicID                 (80),
  *             hasStaticPassword                            (81),
+ *             getLastBindPasswordValidationTime            (82),
+ *             getSecondsSinceLastBindPasswordValidation    (83),
+ *             setLastBindPasswordValidationTime            (84),
+ *             clearLastBindPasswordValidationTime          (85),
+ *             getAccountIsValidationLocked                 (86),
+ *             setAccountIsValidationLocked                 (87),
+ *             getRecentLoginHistory                        (88),
+ *             clearRecentLoginHistory                      (89),
  *             ... },
  *      opValues     SEQUENCE OF OCTET STRING OPTIONAL }
  * </PRE>
@@ -196,7 +221,7 @@ public final class PasswordPolicyStateExtendedRequest
    * The OID (1.3.6.1.4.1.30221.1.6.1) for the password policy state extended
    * request.
    */
-  public static final String PASSWORD_POLICY_STATE_REQUEST_OID =
+  @NotNull public static final String PASSWORD_POLICY_STATE_REQUEST_OID =
        "1.3.6.1.4.1.30221.1.6.1";
 
 
@@ -209,10 +234,10 @@ public final class PasswordPolicyStateExtendedRequest
 
 
   // The set of password policy state operations to process.
-  private final PasswordPolicyStateOperation[] operations;
+  @NotNull private final PasswordPolicyStateOperation[] operations;
 
   // The DN of the user account on which to operate.
-  private final String userDN;
+  @NotNull private final String userDN;
 
 
 
@@ -226,8 +251,8 @@ public final class PasswordPolicyStateExtendedRequest
    *                     to retrieve the values of all available password policy
    *                     state properties.
    */
-  public PasswordPolicyStateExtendedRequest(final String userDN,
-              final PasswordPolicyStateOperation... operations)
+  public PasswordPolicyStateExtendedRequest(@NotNull final String userDN,
+              @NotNull final PasswordPolicyStateOperation... operations)
   {
     this(userDN, null, operations);
   }
@@ -245,9 +270,9 @@ public final class PasswordPolicyStateExtendedRequest
    *                     to retrieve the values of all available password policy
    *                     state properties.
    */
-  public PasswordPolicyStateExtendedRequest(final String userDN,
-              final Control[] controls,
-              final PasswordPolicyStateOperation... operations)
+  public PasswordPolicyStateExtendedRequest(@NotNull final String userDN,
+              @Nullable final Control[] controls,
+              @NotNull final PasswordPolicyStateOperation... operations)
   {
     super(PASSWORD_POLICY_STATE_REQUEST_OID, encodeValue(userDN, operations),
           controls);
@@ -268,7 +293,7 @@ public final class PasswordPolicyStateExtendedRequest
    * @throws  LDAPException  If a problem occurs while decoding the request.
    */
   public PasswordPolicyStateExtendedRequest(
-              final ExtendedRequest extendedRequest)
+              @NotNull final ExtendedRequest extendedRequest)
          throws LDAPException
   {
     super(extendedRequest);
@@ -340,8 +365,9 @@ public final class PasswordPolicyStateExtendedRequest
    *
    * @return  An ASN.1 octet string containing the encoded value.
    */
-  private static ASN1OctetString encodeValue(final String userDN,
-       final PasswordPolicyStateOperation[] operations)
+  @NotNull()
+  private static ASN1OctetString encodeValue(@NotNull final String userDN,
+                      @Nullable final PasswordPolicyStateOperation[] operations)
   {
     final ASN1Element[] elements;
     if ((operations == null) || (operations.length == 0))
@@ -376,6 +402,7 @@ public final class PasswordPolicyStateExtendedRequest
    *
    * @return  The DN of the user account on which to operate.
    */
+  @NotNull()
   public String getUserDN()
   {
     return userDN;
@@ -390,6 +417,7 @@ public final class PasswordPolicyStateExtendedRequest
    *          an empty list if the values of all password policy state
    *          properties should be retrieved.
    */
+  @NotNull()
   public PasswordPolicyStateOperation[] getOperations()
   {
     return operations;
@@ -401,8 +429,9 @@ public final class PasswordPolicyStateExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public PasswordPolicyStateExtendedResult
-              process(final LDAPConnection connection, final int depth)
+  @NotNull()
+  public PasswordPolicyStateExtendedResult process(
+              @NotNull final LDAPConnection connection, final int depth)
          throws LDAPException
   {
     final ExtendedResult extendedResponse = super.process(connection, depth);
@@ -415,6 +444,7 @@ public final class PasswordPolicyStateExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public PasswordPolicyStateExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -426,7 +456,9 @@ public final class PasswordPolicyStateExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public PasswordPolicyStateExtendedRequest duplicate(final Control[] controls)
+  @NotNull()
+  public PasswordPolicyStateExtendedRequest duplicate(
+              @Nullable final Control[] controls)
   {
     final PasswordPolicyStateExtendedRequest r =
          new PasswordPolicyStateExtendedRequest(userDN, controls, operations);
@@ -440,6 +472,7 @@ public final class PasswordPolicyStateExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_EXTENDED_REQUEST_NAME_PW_POLICY_STATE.get();
@@ -451,7 +484,7 @@ public final class PasswordPolicyStateExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("PasswordPolicyStateExtendedRequest(userDN='");
     buffer.append(userDN);

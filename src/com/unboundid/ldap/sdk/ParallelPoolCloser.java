@@ -1,9 +1,24 @@
 /*
- * Copyright 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2012-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
 
 
 
@@ -44,7 +60,7 @@ final class ParallelPoolCloser
   private final boolean unbind;
 
   // A collection containing the connections to be closed.
-  private final Collection<LDAPConnection> connections;
+  @NotNull private final Collection<LDAPConnection> connections;
 
   // The number of threads to use to establish connections in parallel.
   private final int numThreads;
@@ -62,7 +78,7 @@ final class ParallelPoolCloser
    * @param  numThreads   The number of threads to use to close the connections
    *                      in parallel.
    */
-  ParallelPoolCloser(final Collection<LDAPConnection> connections,
+  ParallelPoolCloser(@NotNull final Collection<LDAPConnection> connections,
                      final boolean unbind, final int numThreads)
   {
     this.connections = connections;

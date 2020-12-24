@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -35,6 +50,8 @@ import javax.net.ssl.X509TrustManager;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -59,7 +76,7 @@ public final class TrustStoreTrustManager
   /**
    * A pre-allocated empty certificate array.
    */
-  private static final X509Certificate[] NO_CERTIFICATES =
+  @NotNull private static final X509Certificate[] NO_CERTIFICATES =
        new X509Certificate[0];
 
 
@@ -76,13 +93,13 @@ public final class TrustStoreTrustManager
   private final boolean examineValidityDates;
 
   // The PIN to use to access the trust store.
-  private final char[] trustStorePIN;
+  @Nullable private final char[] trustStorePIN;
 
   // The path to the trust store file.
-  private final String trustStoreFile;
+  @NotNull private final String trustStoreFile;
 
   // The format to use for the trust store file.
-  private final String trustStoreFormat;
+  @NotNull private final String trustStoreFormat;
 
 
 
@@ -95,7 +112,7 @@ public final class TrustStoreTrustManager
    * @param  trustStoreFile  The path to the trust store file to use.  It must
    *                         not be {@code null}.
    */
-  public TrustStoreTrustManager(final File trustStoreFile)
+  public TrustStoreTrustManager(@NotNull final File trustStoreFile)
   {
     this(trustStoreFile.getAbsolutePath(), null, null, true);
   }
@@ -111,7 +128,7 @@ public final class TrustStoreTrustManager
    * @param  trustStoreFile  The path to the trust store file to use.  It must
    *                         not be {@code null}.
    */
-  public TrustStoreTrustManager(final String trustStoreFile)
+  public TrustStoreTrustManager(@NotNull final String trustStoreFile)
   {
     this(trustStoreFile, null, null, true);
   }
@@ -134,9 +151,9 @@ public final class TrustStoreTrustManager
    *                               the current time is outside the validity
    *                               window for the certificate.
    */
-  public TrustStoreTrustManager(final File trustStoreFile,
-                                final char[] trustStorePIN,
-                                final String trustStoreFormat,
+  public TrustStoreTrustManager(@NotNull final File trustStoreFile,
+                                @Nullable final char[] trustStorePIN,
+                                @Nullable final String trustStoreFormat,
                                 final boolean examineValidityDates)
   {
     this(trustStoreFile.getAbsolutePath(), trustStorePIN, trustStoreFormat,
@@ -161,9 +178,9 @@ public final class TrustStoreTrustManager
    *                               the current time is outside the validity
    *                               window for the certificate.
    */
-  public TrustStoreTrustManager(final String trustStoreFile,
-                                final char[] trustStorePIN,
-                                final String trustStoreFormat,
+  public TrustStoreTrustManager(@NotNull final String trustStoreFile,
+                                @Nullable final char[] trustStorePIN,
+                                @Nullable final String trustStoreFormat,
                                 final boolean examineValidityDates)
   {
     Validator.ensureNotNull(trustStoreFile);
@@ -189,6 +206,7 @@ public final class TrustStoreTrustManager
    *
    * @return  The path to the trust store file to use.
    */
+  @NotNull()
   public String getTrustStoreFile()
   {
     return trustStoreFile;
@@ -201,6 +219,7 @@ public final class TrustStoreTrustManager
    *
    * @return  The name of the trust store file format.
    */
+  @NotNull()
   public String getTrustStoreFormat()
   {
     return trustStoreFormat;
@@ -237,8 +256,9 @@ public final class TrustStoreTrustManager
    * @throws  CertificateException  If the provided client certificate chain
    *                                should not be trusted.
    */
-  private synchronized X509TrustManager[] getTrustManagers(
-                                               final X509Certificate[] chain)
+  @NotNull()
+  private X509TrustManager[] getTrustManagers(
+                                  @NotNull final X509Certificate[] chain)
           throws CertificateException
   {
     if (examineValidityDates)
@@ -270,10 +290,8 @@ public final class TrustStoreTrustManager
            ERR_TRUSTSTORE_UNSUPPORTED_FORMAT.get(trustStoreFormat), e);
     }
 
-    FileInputStream inputStream = null;
-    try
+    try (FileInputStream inputStream = new FileInputStream(f))
     {
-      inputStream = new FileInputStream(f);
       ks.load(inputStream, trustStorePIN);
     }
     catch (final Exception e)
@@ -284,20 +302,6 @@ public final class TrustStoreTrustManager
            ERR_TRUSTSTORE_CANNOT_LOAD.get(trustStoreFile, trustStoreFormat,
                 StaticUtils.getExceptionMessage(e)),
            e);
-    }
-    finally
-    {
-      if (inputStream != null)
-      {
-        try
-        {
-          inputStream.close();
-        }
-        catch (final Exception e)
-        {
-          Debug.debugException(e);
-        }
-      }
     }
 
     try
@@ -339,8 +343,8 @@ public final class TrustStoreTrustManager
    *                                should not be trusted.
    */
   @Override()
-  public synchronized void checkClientTrusted(final X509Certificate[] chain,
-                                final String authType)
+  public void checkClientTrusted(@NotNull final X509Certificate[] chain,
+                                 @NotNull final String authType)
          throws CertificateException
   {
     for (final X509TrustManager m : getTrustManagers(chain))
@@ -363,8 +367,8 @@ public final class TrustStoreTrustManager
    *                                should not be trusted.
    */
   @Override()
-  public synchronized void checkServerTrusted(final X509Certificate[] chain,
-                                final String authType)
+  public void checkServerTrusted(@NotNull final X509Certificate[] chain,
+                                 @NotNull final String authType)
          throws CertificateException
   {
     for (final X509TrustManager m : getTrustManagers(chain))
@@ -382,7 +386,8 @@ public final class TrustStoreTrustManager
    * @return  The accepted issuer certificates for this trust manager.
    */
   @Override()
-  public synchronized X509Certificate[] getAcceptedIssuers()
+  @NotNull()
+  public X509Certificate[] getAcceptedIssuers()
   {
     return NO_CERTIFICATES;
   }

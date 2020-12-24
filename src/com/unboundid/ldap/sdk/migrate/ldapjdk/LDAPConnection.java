@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -49,6 +64,8 @@ import com.unboundid.ldap.sdk.UpdatableLDAPRequest;
 import com.unboundid.util.Debug;
 import com.unboundid.util.Mutable;
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -122,25 +139,25 @@ public class LDAPConnection
 
 
   // The connection used to perform the actual communication with the server.
-  private volatile com.unboundid.ldap.sdk.LDAPConnection conn;
+  @NotNull private volatile com.unboundid.ldap.sdk.LDAPConnection conn;
 
   // The default constraints that will be used for non-search operations.
-  private LDAPConstraints constraints;
+  @NotNull private LDAPConstraints constraints;
 
   // The set of controls returned from the last operation.
-  private LDAPControl[] responseControls;
+  @Nullable private LDAPControl[] responseControls;
 
   // The default constraints that will be used for search operations.
-  private LDAPSearchConstraints searchConstraints;
+  @NotNull private LDAPSearchConstraints searchConstraints;
 
   // The socket factory for this connection.
-  private LDAPSocketFactory socketFactory;
+  @Nullable private LDAPSocketFactory socketFactory;
 
   // The DN last used to bind to the server.
-  private String authDN;
+  @Nullable private String authDN;
 
   // The password last used to bind to the server.
-  private String authPW;
+  @Nullable private String authPW;
 
 
 
@@ -160,7 +177,7 @@ public class LDAPConnection
    * @param  socketFactory  The socket factory to use when creating the socket
    *                        to use for communicating with the server.
    */
-  public LDAPConnection(final LDAPSocketFactory socketFactory)
+  public LDAPConnection(@Nullable final LDAPSocketFactory socketFactory)
   {
     this.socketFactory = socketFactory;
     if (socketFactory == null)
@@ -206,6 +223,7 @@ public class LDAPConnection
    * @return  The {@code com.unboundid.ldap.sdk.LDAPConnection} object used to
    *          back this connection.
    */
+  @NotNull()
   public com.unboundid.ldap.sdk.LDAPConnection getSDKConnection()
   {
     return conn;
@@ -218,6 +236,7 @@ public class LDAPConnection
    *
    * @return  The address to which the connection is established.
    */
+  @Nullable()
   public String getHost()
   {
     return conn.getConnectedAddress();
@@ -243,6 +262,7 @@ public class LDAPConnection
    * @return  The DN of the user that last authenticated on this connection,
    *          or {@code null} if it is not available.
    */
+  @Nullable()
   public String getAuthenticationDN()
   {
     return authDN;
@@ -257,6 +277,7 @@ public class LDAPConnection
    * @return  The password of the user that last authenticated on this
    *           connection, or {@code null} if it is not available.
    */
+  @Nullable()
   public String getAuthenticationPassword()
   {
     return authPW;
@@ -318,6 +339,7 @@ public class LDAPConnection
    * @return  The socket factory for this LDAP connection, or {@code null} if
    *          none has been provided.
    */
+  @Nullable()
   public LDAPSocketFactory getSocketFactory()
   {
     return socketFactory;
@@ -330,7 +352,7 @@ public class LDAPConnection
    *
    * @param  socketFactory  The socket factory for this LDAP connection.
    */
-  public void setSocketFactory(final LDAPSocketFactory socketFactory)
+  public void setSocketFactory(@Nullable final LDAPSocketFactory socketFactory)
   {
     this.socketFactory = socketFactory;
 
@@ -351,6 +373,7 @@ public class LDAPConnection
    *
    * @return  The constraints for this connection.
    */
+  @NotNull()
   public LDAPConstraints getConstraints()
   {
     return constraints;
@@ -363,7 +386,7 @@ public class LDAPConnection
    *
    * @param  constraints  The constraints for this connection.
    */
-  public void setConstraints(final LDAPConstraints constraints)
+  public void setConstraints(@Nullable final LDAPConstraints constraints)
   {
     if (constraints == null)
     {
@@ -382,6 +405,7 @@ public class LDAPConnection
    *
    * @return  The search constraints for this connection.
    */
+  @NotNull()
   public LDAPSearchConstraints getSearchConstraints()
   {
     return searchConstraints;
@@ -395,7 +419,7 @@ public class LDAPConnection
    * @param  searchConstraints  The search constraints for this connection.
    */
   public void setSearchConstraints(
-                   final LDAPSearchConstraints searchConstraints)
+                   @Nullable final LDAPSearchConstraints searchConstraints)
   {
     if (searchConstraints == null)
     {
@@ -416,6 +440,7 @@ public class LDAPConnection
    * @return  The response controls from the last operation processed on this
    *          connection, or {@code null} if there were none.
    */
+  @Nullable()
   public LDAPControl[] getResponseControls()
   {
     return responseControls;
@@ -447,7 +472,7 @@ public class LDAPConnection
    * @throws  LDAPException  If a problem occurs while attempting to establish
    *                         this connection.
    */
-  public void connect(final String host, final int port)
+  public void connect(@NotNull final String host, final int port)
          throws LDAPException
   {
     authDN           = null;
@@ -493,8 +518,9 @@ public class LDAPConnection
    *                         is thrown, then the connection will not be
    *                         established.
    */
-  public void connect(final String host, final int port, final String dn,
-                      final String password)
+  public void connect(@NotNull final String host, final int port,
+                      @Nullable final String dn,
+                      @Nullable final String password)
          throws LDAPException
   {
     connect(3, host, port, dn, password, null);
@@ -519,8 +545,10 @@ public class LDAPConnection
    *                         is thrown, then the connection will not be
    *                         established.
    */
-  public void connect(final String host, final int port, final String dn,
-                      final String password, final LDAPConstraints constraints)
+  public void connect(@NotNull final String host, final int port,
+                      @Nullable final String dn,
+                      @Nullable final String password,
+                      @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     connect(3, host, port, dn, password, constraints);
@@ -547,8 +575,9 @@ public class LDAPConnection
    *                         is thrown, then the connection will not be
    *                         established.
    */
-  public void connect(final int version, final String host, final int port,
-                      final String dn, final String password)
+  public void connect(final int version, @NotNull final String host,
+                      final int port, @Nullable final String dn,
+                      @Nullable final String password)
          throws LDAPException
   {
     connect(version, host, port, dn, password, null);
@@ -576,9 +605,10 @@ public class LDAPConnection
    *                         is thrown, then the connection will not be
    *                         established.
    */
-  public void connect(final int version, final String host, final int port,
-                      final String dn, final String password,
-                      final LDAPConstraints constraints)
+  public void connect(final int version, @NotNull final String host,
+                      final int port, @Nullable final String dn,
+                      @Nullable final String password,
+                      @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     connect(host, port);
@@ -683,7 +713,7 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while sending the request.
    */
-  public void abandon(final LDAPSearchResults searchResults)
+  public void abandon(@NotNull final LDAPSearchResults searchResults)
          throws LDAPException
   {
     try
@@ -718,7 +748,7 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while adding the entry.
    */
-  public void add(final LDAPEntry entry)
+  public void add(@NotNull final LDAPEntry entry)
          throws LDAPException
   {
     add(entry, null);
@@ -734,7 +764,8 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while adding the entry.
    */
-  public void add(final LDAPEntry entry, final LDAPConstraints constraints)
+  public void add(@NotNull final LDAPEntry entry,
+                  @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     final AddRequest addRequest = new AddRequest(entry.toEntry());
@@ -764,7 +795,8 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If the bind attempt fails.
    */
-  public void authenticate(final String dn, final String password)
+  public void authenticate(@Nullable final String dn,
+                           @Nullable final String password)
          throws LDAPException
   {
     bind(3, dn, password, null);
@@ -782,8 +814,9 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If the bind attempt fails.
    */
-  public void authenticate(final String dn, final String password,
-                           final LDAPConstraints constraints)
+  public void authenticate(@Nullable final String dn,
+                           @Nullable final String password,
+                           @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     bind(3, dn, password, constraints);
@@ -802,8 +835,8 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If the bind attempt fails.
    */
-  public void authenticate(final int version, final String dn,
-                           final String password)
+  public void authenticate(final int version, @Nullable final String dn,
+                           @Nullable final String password)
          throws LDAPException
   {
     bind(version, dn, password, null);
@@ -824,9 +857,9 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If the bind attempt fails.
    */
-  public void authenticate(final int version, final String dn,
-                           final String password,
-                           final LDAPConstraints constraints)
+  public void authenticate(final int version, @Nullable final String dn,
+                           @Nullable final String password,
+                           @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     bind(version, dn, password, constraints);
@@ -843,7 +876,7 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If the bind attempt fails.
    */
-  public void bind(final String dn, final String password)
+  public void bind(@Nullable final String dn, @Nullable final String password)
          throws LDAPException
   {
     bind(3, dn, password, null);
@@ -861,8 +894,8 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If the bind attempt fails.
    */
-  public void bind(final String dn, final String password,
-                   final LDAPConstraints constraints)
+  public void bind(@Nullable final String dn, @Nullable final String password,
+                   @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     bind(3, dn, password, constraints);
@@ -881,7 +914,8 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If the bind attempt fails.
    */
-  public void bind(final int version, final String dn, final String password)
+  public void bind(final int version, @Nullable final String dn,
+                   @Nullable final String password)
          throws LDAPException
   {
     bind(version, dn, password, null);
@@ -902,8 +936,9 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If the bind attempt fails.
    */
-  public void bind(final int version, final String dn, final String password,
-                   final LDAPConstraints constraints)
+  public void bind(final int version, @Nullable final String dn,
+                   @Nullable final String password,
+                   @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     final SimpleBindRequest bindRequest =
@@ -943,7 +978,8 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the compare.
    */
-  public boolean compare(final String dn, final LDAPAttribute attribute)
+  public boolean compare(@NotNull final String dn,
+                         @NotNull final LDAPAttribute attribute)
          throws LDAPException
   {
     return compare(dn, attribute, null);
@@ -964,8 +1000,9 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the compare.
    */
-  public boolean compare(final String dn, final LDAPAttribute attribute,
-                         final LDAPConstraints constraints)
+  public boolean compare(@NotNull final String dn,
+                         @NotNull final LDAPAttribute attribute,
+                         @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     final CompareRequest compareRequest = new CompareRequest(dn,
@@ -995,7 +1032,7 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the delete.
    */
-  public void delete(final String dn)
+  public void delete(@NotNull final String dn)
          throws LDAPException
   {
     delete(dn, null);
@@ -1011,7 +1048,8 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the delete.
    */
-  public void delete(final String dn, final LDAPConstraints constraints)
+  public void delete(@NotNull final String dn,
+                     @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     final DeleteRequest deleteRequest = new DeleteRequest(dn);
@@ -1041,8 +1079,9 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the operation.
    */
+  @NotNull()
   public LDAPExtendedOperation extendedOperation(
-              final LDAPExtendedOperation extendedOperation)
+              @NotNull final LDAPExtendedOperation extendedOperation)
          throws LDAPException
   {
     return extendedOperation(extendedOperation,  null);
@@ -1060,9 +1099,10 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the operation.
    */
+  @NotNull()
   public LDAPExtendedOperation extendedOperation(
-              final LDAPExtendedOperation extendedOperation,
-              final LDAPConstraints constraints)
+              @NotNull final LDAPExtendedOperation extendedOperation,
+              @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     final ExtendedRequest extendedRequest = new ExtendedRequest(
@@ -1114,7 +1154,8 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the delete.
    */
-  public void modify(final String dn, final LDAPModification mod)
+  public void modify(@NotNull final String dn,
+                     @NotNull final LDAPModification mod)
          throws LDAPException
   {
     modify(dn, new LDAPModification[] { mod }, null);
@@ -1130,7 +1171,8 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the delete.
    */
-  public void modify(final String dn, final LDAPModification[] mods)
+  public void modify(@NotNull final String dn,
+                     @NotNull final LDAPModification[] mods)
          throws LDAPException
   {
     modify(dn, mods, null);
@@ -1147,8 +1189,9 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the delete.
    */
-  public void modify(final String dn, final LDAPModification mod,
-                     final LDAPConstraints constraints)
+  public void modify(@NotNull final String dn,
+                     @NotNull final LDAPModification mod,
+                     @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     modify(dn, new LDAPModification[] { mod }, constraints);
@@ -1165,8 +1208,9 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the delete.
    */
-  public void modify(final String dn, final LDAPModification[] mods,
-                     final LDAPConstraints constraints)
+  public void modify(@NotNull final String dn,
+                     @NotNull final LDAPModification[] mods,
+                     @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     final Modification[] m = new Modification[mods.length];
@@ -1201,7 +1245,8 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the delete.
    */
-  public void modify(final String dn, final LDAPModificationSet mods)
+  public void modify(@NotNull final String dn,
+                     @NotNull final LDAPModificationSet mods)
          throws LDAPException
   {
     modify(dn, mods.toArray(), null);
@@ -1218,8 +1263,9 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the delete.
    */
-  public void modify(final String dn, final LDAPModificationSet mods,
-                     final LDAPConstraints constraints)
+  public void modify(@NotNull final String dn,
+                     @NotNull final LDAPModificationSet mods,
+                     @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     modify(dn, mods.toArray(), constraints);
@@ -1236,7 +1282,8 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while performing the search.
    */
-  public LDAPEntry read(final String dn)
+  @NotNull()
+  public LDAPEntry read(@NotNull final String dn)
          throws LDAPException
   {
     return read(dn, null, null);
@@ -1254,8 +1301,9 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while performing the search.
    */
-  public LDAPEntry read(final String dn,
-                        final LDAPSearchConstraints constraints)
+  @NotNull()
+  public LDAPEntry read(@NotNull final String dn,
+                        @Nullable final LDAPSearchConstraints constraints)
          throws LDAPException
   {
     return read(dn, null, constraints);
@@ -1273,7 +1321,9 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while performing the search.
    */
-  public LDAPEntry read(final String dn, final String[] attrs)
+  @NotNull()
+  public LDAPEntry read(@NotNull final String dn,
+                        @Nullable final String[] attrs)
          throws LDAPException
   {
     return read(dn, attrs, null);
@@ -1292,8 +1342,10 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while performing the search.
    */
-  public LDAPEntry read(final String dn, final String[] attrs,
-                        final LDAPSearchConstraints constraints)
+  @NotNull()
+  public LDAPEntry read(@NotNull final String dn,
+                        @Nullable final String[] attrs,
+                        @Nullable final LDAPSearchConstraints constraints)
          throws LDAPException
   {
     final Filter filter = Filter.createORFilter(
@@ -1335,7 +1387,7 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the delete.
    */
-  public void rename(final String dn, final String newRDN,
+  public void rename(@NotNull final String dn, @NotNull final String newRDN,
                      final boolean deleteOldRDN)
          throws LDAPException
   {
@@ -1354,9 +1406,9 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the delete.
    */
-  public void rename(final String dn, final String newRDN,
+  public void rename(@NotNull final String dn, @NotNull final String newRDN,
                      final boolean deleteOldRDN,
-                     final LDAPConstraints constraints)
+                     @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     rename(dn, newRDN, null, deleteOldRDN, constraints);
@@ -1375,8 +1427,9 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the delete.
    */
-  public void rename(final String dn, final String newRDN,
-                     final String newParentDN, final boolean deleteOldRDN)
+  public void rename(@NotNull final String dn, @NotNull final String newRDN,
+                     @Nullable final String newParentDN,
+                     final boolean deleteOldRDN)
          throws LDAPException
   {
     rename(dn, newRDN, newParentDN, deleteOldRDN, null);
@@ -1396,9 +1449,10 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while processing the delete.
    */
-  public void rename(final String dn, final String newRDN,
-                     final String newParentDN, final boolean deleteOldRDN,
-                     final LDAPConstraints constraints)
+  public void rename(@NotNull final String dn, @NotNull final String newRDN,
+                     @Nullable final String newParentDN,
+                     final boolean deleteOldRDN,
+                     @Nullable final LDAPConstraints constraints)
          throws LDAPException
   {
     final ModifyDNRequest modifyDNRequest =
@@ -1434,8 +1488,10 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while performing the search.
    */
-  public LDAPSearchResults search(final String baseDN, final int scope,
-              final String filter, final String[] attributes,
+  @NotNull()
+  public LDAPSearchResults search(@NotNull final String baseDN, final int scope,
+              @NotNull final String filter,
+              @Nullable final String[] attributes,
               final boolean typesOnly)
          throws LDAPException
   {
@@ -1459,9 +1515,12 @@ public class LDAPConnection
    *
    * @throws  LDAPException  If a problem occurs while performing the search.
    */
-  public LDAPSearchResults search(final String baseDN, final int scope,
-              final String filter, final String[] attributes,
-              final boolean typesOnly, final LDAPSearchConstraints constraints)
+  @NotNull()
+  public LDAPSearchResults search(@NotNull final String baseDN, final int scope,
+              @NotNull final String filter,
+              @Nullable final String[] attributes,
+              final boolean typesOnly,
+              @Nullable final LDAPSearchConstraints constraints)
          throws LDAPException
   {
     final LDAPSearchResults results;
@@ -1502,7 +1561,8 @@ public class LDAPConnection
    *
    * @return  The set of controls to use in a request.
    */
-  private Control[] getControls(final LDAPConstraints c)
+  @NotNull()
+  private Control[] getControls(@Nullable final LDAPConstraints c)
   {
     Control[] controls = null;
     if (c != null)
@@ -1532,8 +1592,8 @@ public class LDAPConnection
    * @param  request      The request to be updated.
    * @param  constraints  The constraints to be applied.
    */
-  private void update(final UpdatableLDAPRequest request,
-                      final LDAPConstraints constraints)
+  private void update(@NotNull final UpdatableLDAPRequest request,
+                      @Nullable final LDAPConstraints constraints)
   {
     final LDAPConstraints c =
          (constraints == null) ? this.constraints : constraints;
@@ -1550,7 +1610,7 @@ public class LDAPConnection
    *
    * @param  ldapResult  The result containing the controls to use.
    */
-  private void setResponseControls(final LDAPResult ldapResult)
+  private void setResponseControls(@NotNull final LDAPResult ldapResult)
   {
     if (ldapResult.hasResponseControl())
     {
@@ -1571,7 +1631,7 @@ public class LDAPConnection
    * @param  ldapException  The exception containing the controls to use.
    */
   private void setResponseControls(
-                    final com.unboundid.ldap.sdk.LDAPException ldapException)
+       @NotNull final com.unboundid.ldap.sdk.LDAPException ldapException)
   {
     if (ldapException.hasResponseControl())
     {

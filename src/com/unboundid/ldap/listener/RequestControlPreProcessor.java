@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,15 +48,16 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.controls.AssertionRequestControl;
 import com.unboundid.ldap.sdk.controls.AuthorizationIdentityRequestControl;
 import com.unboundid.ldap.sdk.controls.DontUseCopyRequestControl;
+import com.unboundid.ldap.sdk.controls.DraftLDUPSubentriesRequestControl;
 import com.unboundid.ldap.sdk.controls.ManageDsaITRequestControl;
 import com.unboundid.ldap.sdk.controls.PermissiveModifyRequestControl;
 import com.unboundid.ldap.sdk.controls.PostReadRequestControl;
 import com.unboundid.ldap.sdk.controls.PreReadRequestControl;
 import com.unboundid.ldap.sdk.controls.ProxiedAuthorizationV1RequestControl;
 import com.unboundid.ldap.sdk.controls.ProxiedAuthorizationV2RequestControl;
+import com.unboundid.ldap.sdk.controls.RFC3672SubentriesRequestControl;
 import com.unboundid.ldap.sdk.controls.ServerSideSortRequestControl;
 import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
-import com.unboundid.ldap.sdk.controls.SubentriesRequestControl;
 import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
 import com.unboundid.ldap.sdk.controls.TransactionSpecificationRequestControl;
 import com.unboundid.ldap.sdk.controls.VirtualListViewRequestControl;
@@ -49,6 +65,7 @@ import com.unboundid.ldap.sdk.experimental.
             DraftZeilengaLDAPNoOp12RequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             IgnoreNoUserModificationRequestControl;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 
 import static com.unboundid.ldap.listener.ListenerMessages.*;
@@ -90,8 +107,9 @@ final class RequestControlPreProcessor
    * @throws  LDAPException  If a problem is encountered while processing the
    *                         provided set of controls.
    */
+  @NotNull()
   static Map<String,Control> processControls(final byte requestOpType,
-                                             final List<Control> controls)
+                                  @NotNull final List<Control> controls)
          throws LDAPException
   {
     final Map<String,Control> m =
@@ -181,6 +199,33 @@ final class RequestControlPreProcessor
         }
 
         if (m.put(oid, new DontUseCopyRequestControl(control)) != null)
+        {
+          throw new LDAPException(ResultCode.CONSTRAINT_VIOLATION,
+               ERR_CONTROL_PROCESSOR_MULTIPLE_CONTROLS.get(oid));
+        }
+      }
+      else if (oid.equals(
+           DraftLDUPSubentriesRequestControl.SUBENTRIES_REQUEST_OID))
+      {
+        switch (requestOpType)
+        {
+          case LDAPMessage.PROTOCOL_OP_TYPE_SEARCH_REQUEST:
+            // The control is acceptable for these operations.
+            break;
+
+          default:
+            if (control.isCritical())
+            {
+              throw new LDAPException(ResultCode.UNAVAILABLE_CRITICAL_EXTENSION,
+                   ERR_CONTROL_PROCESSOR_UNSUPPORTED_FOR_OP.get(oid));
+            }
+            else
+            {
+              continue;
+            }
+        }
+
+        if (m.put(oid, new DraftLDUPSubentriesRequestControl(control)) != null)
         {
           throw new LDAPException(ResultCode.CONSTRAINT_VIOLATION,
                ERR_CONTROL_PROCESSOR_MULTIPLE_CONTROLS.get(oid));
@@ -420,7 +465,8 @@ final class RequestControlPreProcessor
                ERR_CONTROL_PROCESSOR_MULTIPLE_CONTROLS.get(oid));
         }
       }
-      else if (oid.equals(SubentriesRequestControl.SUBENTRIES_REQUEST_OID))
+      else if (oid.equals(
+           RFC3672SubentriesRequestControl.SUBENTRIES_REQUEST_OID))
       {
         switch (requestOpType)
         {
@@ -440,7 +486,7 @@ final class RequestControlPreProcessor
             }
         }
 
-        if (m.put(oid, new SubentriesRequestControl(control)) != null)
+        if (m.put(oid, new RFC3672SubentriesRequestControl(control)) != null)
         {
           throw new LDAPException(ResultCode.CONSTRAINT_VIOLATION,
                ERR_CONTROL_PROCESSOR_MULTIPLE_CONTROLS.get(oid));

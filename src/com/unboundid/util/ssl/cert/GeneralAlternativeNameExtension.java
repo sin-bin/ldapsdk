@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,7 @@ import com.unboundid.ldap.sdk.DN;
 import com.unboundid.asn1.ASN1Element;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.OID;
 import com.unboundid.util.StaticUtils;
@@ -93,7 +109,7 @@ public abstract class GeneralAlternativeNameExtension
 
 
   // The general names for inclusion in this extension.
-  private final GeneralNames generalNames;
+  @NotNull private final GeneralNames generalNames;
 
 
 
@@ -109,9 +125,9 @@ public abstract class GeneralAlternativeNameExtension
    * @throws  CertException  If a problem is encountered while encoding the
    *                         value for this extension.
    */
-  protected GeneralAlternativeNameExtension(final OID oid,
-                                            final boolean isCritical,
-                                            final GeneralNames generalNames)
+  protected GeneralAlternativeNameExtension(@NotNull final OID oid,
+                 final boolean isCritical,
+                 @NotNull final GeneralNames generalNames)
        throws CertException
   {
     super(oid, isCritical, generalNames.encode().encode());
@@ -132,7 +148,7 @@ public abstract class GeneralAlternativeNameExtension
    *                         general alternative name extension.
    */
   protected GeneralAlternativeNameExtension(
-                 final X509CertificateExtension extension)
+                 @NotNull final X509CertificateExtension extension)
             throws CertException
   {
     super(extension);
@@ -178,6 +194,7 @@ public abstract class GeneralAlternativeNameExtension
    * @return  The {@code GeneralNames} object for this alternative name
    *          extension.
    */
+  @NotNull()
   public final GeneralNames getGeneralNames()
   {
     return generalNames;
@@ -190,6 +207,7 @@ public abstract class GeneralAlternativeNameExtension
    *
    * @return  The otherName elements from the extension.
    */
+  @NotNull()
   public final List<ObjectPair<OID,ASN1Element>> getOtherNames()
   {
     return generalNames.getOtherNames();
@@ -202,6 +220,7 @@ public abstract class GeneralAlternativeNameExtension
    *
    * @return  The RFC 822 names from the extension.
    */
+  @NotNull()
   public final List<String> getRFC822Names()
   {
     return generalNames.getRFC822Names();
@@ -214,6 +233,7 @@ public abstract class GeneralAlternativeNameExtension
    *
    * @return  The DNS names from the extension.
    */
+  @NotNull()
   public final List<String> getDNSNames()
   {
     return generalNames.getDNSNames();
@@ -226,6 +246,7 @@ public abstract class GeneralAlternativeNameExtension
    *
    * @return  The x400Address elements from the extension.
    */
+  @NotNull()
   public final List<ASN1Element> getX400Addresses()
   {
     return generalNames.getX400Addresses();
@@ -238,6 +259,7 @@ public abstract class GeneralAlternativeNameExtension
    *
    * @return  The directory names from the extension.
    */
+  @NotNull()
   public final List<DN> getDirectoryNames()
   {
     return generalNames.getDirectoryNames();
@@ -250,6 +272,7 @@ public abstract class GeneralAlternativeNameExtension
    *
    * @return  The ediPartyName elements from the extension.
    */
+  @NotNull()
   public final List<ASN1Element> getEDIPartyNames()
   {
     return generalNames.getEDIPartyNames();
@@ -262,6 +285,7 @@ public abstract class GeneralAlternativeNameExtension
    *
    * @return  The URIs from the extension.
    */
+  @NotNull()
   public final List<String> getUniformResourceIdentifiers()
   {
     return generalNames.getUniformResourceIdentifiers();
@@ -274,6 +298,7 @@ public abstract class GeneralAlternativeNameExtension
    *
    * @return  The IP addresses from the extension.
    */
+  @NotNull()
   public final List<InetAddress> getIPAddresses()
   {
     return generalNames.getIPAddresses();
@@ -286,6 +311,7 @@ public abstract class GeneralAlternativeNameExtension
    *
    * @return  The registeredID elements from the extension.
    */
+  @NotNull()
   public final List<OID> getRegisteredIDs()
   {
     return generalNames.getRegisteredIDs();
@@ -300,8 +326,8 @@ public abstract class GeneralAlternativeNameExtension
    * @param  buffer         The buffer to which the information should be
    *                        appended.
    */
-  protected void toString(final String extensionName,
-                          final StringBuilder buffer)
+  protected void toString(@NotNull final String extensionName,
+                          @NotNull final StringBuilder buffer)
   {
     buffer.append(extensionName);
     buffer.append("(oid='");

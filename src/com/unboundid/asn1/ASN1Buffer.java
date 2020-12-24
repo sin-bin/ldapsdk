@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,6 +49,8 @@ import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -63,7 +80,7 @@ public final class ASN1Buffer
    * multi-byte length should be encoded with one byte for the header and one
    * byte for the number of value bytes.
    */
-  private static final byte[] MULTIBYTE_LENGTH_HEADER_PLUS_ONE =
+  @NotNull private static final byte[] MULTIBYTE_LENGTH_HEADER_PLUS_ONE =
        { (byte) 0x81, (byte) 0x00 };
 
 
@@ -73,7 +90,7 @@ public final class ASN1Buffer
    * multi-byte length should be encoded with one byte for the header and two
    * bytes for the number of value bytes.
    */
-  private static final byte[] MULTIBYTE_LENGTH_HEADER_PLUS_TWO =
+  @NotNull private static final byte[] MULTIBYTE_LENGTH_HEADER_PLUS_TWO =
        { (byte) 0x82, (byte) 0x00, (byte) 0x00 };
 
 
@@ -83,7 +100,7 @@ public final class ASN1Buffer
    * multi-byte length should be encoded with one byte for the header and three
    * bytes for the number of value bytes.
    */
-  private static final byte[] MULTIBYTE_LENGTH_HEADER_PLUS_THREE =
+  @NotNull private static final byte[] MULTIBYTE_LENGTH_HEADER_PLUS_THREE =
        { (byte) 0x83, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 
 
@@ -93,7 +110,7 @@ public final class ASN1Buffer
    * multi-byte length should be encoded with one byte for the header and four
    * bytes for the number of value bytes.
    */
-  private static final byte[] MULTIBYTE_LENGTH_HEADER_PLUS_FOUR =
+  @NotNull private static final byte[] MULTIBYTE_LENGTH_HEADER_PLUS_FOUR =
        { (byte) 0x84, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 
 
@@ -107,10 +124,10 @@ public final class ASN1Buffer
 
   // Indicates whether to zero out the contents of the buffer the next time it
   // is cleared in order to wipe out any sensitive data it may contain.
-  private final AtomicBoolean zeroBufferOnClear;
+  @NotNull private final AtomicBoolean zeroBufferOnClear;
 
   // The buffer to which all data will be written.
-  private final ByteStringBuffer buffer;
+  @NotNull private final ByteStringBuffer buffer;
 
   // The maximum buffer size that should be retained.
   private final int maxBufferSize;
@@ -208,7 +225,7 @@ public final class ASN1Buffer
    *
    * @param  element  The element to be added.  It must not be {@code null}.
    */
-  public void addElement(final ASN1Element element)
+  public void addElement(@NotNull final ASN1Element element)
   {
     element.encodeTo(buffer);
   }
@@ -283,7 +300,7 @@ public final class ASN1Buffer
    * @param  date  The date value that specifies the time to represent.  This
    *               must not be {@code null}.
    */
-  public void addGeneralizedTime(final Date date)
+  public void addGeneralizedTime(@NotNull final Date date)
   {
     addGeneralizedTime(date.getTime());
   }
@@ -298,7 +315,7 @@ public final class ASN1Buffer
    * @param  date  The date value that specifies the time to represent.  This
    *               must not be {@code null}.
    */
-  public void addGeneralizedTime(final byte type, final Date date)
+  public void addGeneralizedTime(final byte type, @NotNull final Date date)
   {
     addGeneralizedTime(type, date.getTime());
   }
@@ -600,7 +617,7 @@ public final class ASN1Buffer
    * @param  value  The value to use for the integer element.  It must not be
    *                {@code null}.
    */
-  public void addInteger(final BigInteger value)
+  public void addInteger(@NotNull final BigInteger value)
   {
     addInteger(ASN1Constants.UNIVERSAL_INTEGER_TYPE, value);
   }
@@ -614,7 +631,7 @@ public final class ASN1Buffer
    * @param  value  The value to use for the integer element.  It must not be
    *                {@code null}.
    */
-  public void addInteger(final byte type, final BigInteger value)
+  public void addInteger(final byte type, @NotNull final BigInteger value)
   {
     buffer.append(type);
 
@@ -679,7 +696,7 @@ public final class ASN1Buffer
    *
    * @param  value  The value to use for the octet string element.
    */
-  public void addOctetString(final byte[] value)
+  public void addOctetString(@Nullable final byte[] value)
   {
     addOctetString(ASN1Constants.UNIVERSAL_OCTET_STRING_TYPE, value);
   }
@@ -692,7 +709,7 @@ public final class ASN1Buffer
    *
    * @param  value  The value to use for the octet string element.
    */
-  public void addOctetString(final CharSequence value)
+  public void addOctetString(@Nullable final CharSequence value)
   {
     if (value == null)
     {
@@ -713,7 +730,7 @@ public final class ASN1Buffer
    *
    * @param  value  The value to use for the octet string element.
    */
-  public void addOctetString(final String value)
+  public void addOctetString(@Nullable final String value)
   {
     addOctetString(ASN1Constants.UNIVERSAL_OCTET_STRING_TYPE, value);
   }
@@ -727,7 +744,7 @@ public final class ASN1Buffer
    * @param  type   The BER type to use for the octet string element.
    * @param  value  The value to use for the octet string element.
    */
-  public void addOctetString(final byte type, final byte[] value)
+  public void addOctetString(final byte type, @Nullable final byte[] value)
   {
     buffer.append(type);
 
@@ -751,7 +768,8 @@ public final class ASN1Buffer
    * @param  type   The BER type to use for the octet string element.
    * @param  value  The value to use for the octet string element.
    */
-  public void addOctetString(final byte type, final CharSequence value)
+  public void addOctetString(final byte type,
+                             @Nullable final CharSequence value)
   {
     if (value == null)
     {
@@ -772,7 +790,7 @@ public final class ASN1Buffer
    * @param  type   The BER type to use for the octet string element.
    * @param  value  The value to use for the octet string element.
    */
-  public void addOctetString(final byte type, final String value)
+  public void addOctetString(final byte type, @Nullable final String value)
   {
     buffer.append(type);
 
@@ -812,7 +830,7 @@ public final class ASN1Buffer
    * @param  date  The date value that specifies the time to represent.  This
    *               must not be {@code null}.
    */
-  public void addUTCTime(final Date date)
+  public void addUTCTime(@NotNull final Date date)
   {
     addUTCTime(date.getTime());
   }
@@ -826,7 +844,7 @@ public final class ASN1Buffer
    * @param  date  The date value that specifies the time to represent.  This
    *               must not be {@code null}.
    */
-  public void addUTCTime(final byte type, final Date date)
+  public void addUTCTime(final byte type, @NotNull final Date date)
   {
     addUTCTime(type, date.getTime());
   }
@@ -876,6 +894,7 @@ public final class ASN1Buffer
    *          have been added, then the {@link ASN1BufferSequence#end} method
    *          MUST be called to ensure that the sequence is properly encoded.
    */
+  @NotNull()
   public ASN1BufferSequence beginSequence()
   {
     return beginSequence(ASN1Constants.UNIVERSAL_SEQUENCE_TYPE);
@@ -893,6 +912,7 @@ public final class ASN1Buffer
    *          have been added, then the {@link ASN1BufferSequence#end} method
    *          MUST be called to ensure that the sequence is properly encoded.
    */
+  @NotNull()
   public ASN1BufferSequence beginSequence(final byte type)
   {
     buffer.append(type);
@@ -909,6 +929,7 @@ public final class ASN1Buffer
    *          then the {@link ASN1BufferSet#end} method MUST be called to ensure
    *          that the set is properly encoded.
    */
+  @NotNull()
   public ASN1BufferSet beginSet()
   {
     return beginSet(ASN1Constants.UNIVERSAL_SET_TYPE);
@@ -926,6 +947,7 @@ public final class ASN1Buffer
    *          then the {@link ASN1BufferSet#end} method MUST be called to ensure
    *          that the set is properly encoded.
    */
+  @NotNull()
   public ASN1BufferSet beginSet(final byte type)
   {
     buffer.append(type);
@@ -1000,7 +1022,7 @@ public final class ASN1Buffer
    * @throws  IOException  If a problem occurs while writing to the provided
    *                       output stream.
    */
-  public void writeTo(final OutputStream outputStream)
+  public void writeTo(@NotNull final OutputStream outputStream)
          throws IOException
   {
     if (Debug.debugEnabled(DebugType.ASN1))
@@ -1018,6 +1040,7 @@ public final class ASN1Buffer
    *
    * @return  A byte array containing the contents of this ASN.1 buffer.
    */
+  @NotNull()
   public byte[] toByteArray()
   {
     return buffer.toByteArray();
@@ -1036,6 +1059,7 @@ public final class ASN1Buffer
    * @return  A byte buffer that wraps the data associated with this ASN.1
    *          buffer.
    */
+  @NotNull()
   public ByteBuffer asByteBuffer()
   {
     return ByteBuffer.wrap(buffer.getBackingArray(), 0, buffer.length());

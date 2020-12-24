@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -61,6 +76,8 @@ import com.unboundid.ldap.sdk.ModifyDNRequest;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchRequest;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -82,17 +99,17 @@ public final class InMemoryOperationInterceptorRequestHandler
                   SearchReferenceTransformer
 {
   // The set of interceptors to be used to transform requests and responses.
-  private final InMemoryOperationInterceptor[] interceptors;
+  @NotNull private final InMemoryOperationInterceptor[] interceptors;
 
   // The client connection associated with this request handler instance.
-  private final LDAPListenerClientConnection connection;
+  @Nullable private final LDAPListenerClientConnection connection;
 
   // The request handler that will be used to ensure that operations actually
   // get processed.
-  private final LDAPListenerRequestHandler wrappedHandler;
+  @NotNull private final LDAPListenerRequestHandler wrappedHandler;
 
   // A map containing active operations mapped by message ID.
-  private final Map<Integer,InterceptedOperation> activeOperations;
+  @NotNull private final Map<Integer,InterceptedOperation> activeOperations;
 
 
 
@@ -109,8 +126,8 @@ public final class InMemoryOperationInterceptorRequestHandler
    *                         that operations actually get processed.
    */
   public InMemoryOperationInterceptorRequestHandler(
-              final List<InMemoryOperationInterceptor> interceptors,
-              final LDAPListenerRequestHandler wrappedHandler)
+              @NotNull final List<InMemoryOperationInterceptor> interceptors,
+              @NotNull final LDAPListenerRequestHandler wrappedHandler)
   {
     this.wrappedHandler = wrappedHandler;
 
@@ -138,9 +155,9 @@ public final class InMemoryOperationInterceptorRequestHandler
    *                         handler instance.
    */
   private InMemoryOperationInterceptorRequestHandler(
-               final InMemoryOperationInterceptor[] interceptors,
-               final LDAPListenerRequestHandler wrappedHandler,
-               final LDAPListenerClientConnection connection)
+               @NotNull final InMemoryOperationInterceptor[] interceptors,
+               @NotNull final LDAPListenerRequestHandler wrappedHandler,
+               @NotNull final LDAPListenerClientConnection connection)
   {
     this.interceptors   = interceptors;
     this.wrappedHandler = wrappedHandler;
@@ -155,8 +172,9 @@ public final class InMemoryOperationInterceptorRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public InMemoryOperationInterceptorRequestHandler newInstance(
-              final LDAPListenerClientConnection connection)
+              @NotNull final LDAPListenerClientConnection connection)
          throws LDAPException
   {
     final InMemoryOperationInterceptorRequestHandler handler =
@@ -176,9 +194,10 @@ public final class InMemoryOperationInterceptorRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processAddRequest(final int messageID,
-                                       final AddRequestProtocolOp request,
-                                       final List<Control> controls)
+                          @NotNull final AddRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final InterceptedAddOperation op = new InterceptedAddOperation(connection,
          messageID, request, toArray(controls));
@@ -255,9 +274,10 @@ public final class InMemoryOperationInterceptorRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processBindRequest(final int messageID,
-                                        final BindRequestProtocolOp request,
-                                        final List<Control> controls)
+                          @NotNull final BindRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     if (request.getCredentialsType() == BindRequestProtocolOp.CRED_TYPE_SIMPLE)
     {
@@ -401,9 +421,10 @@ public final class InMemoryOperationInterceptorRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processCompareRequest(final int messageID,
-                          final CompareRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final CompareRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final InterceptedCompareOperation op =
          new InterceptedCompareOperation(connection, messageID, request,
@@ -477,9 +498,10 @@ public final class InMemoryOperationInterceptorRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processDeleteRequest(final int messageID,
-                                          final DeleteRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final DeleteRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final InterceptedDeleteOperation op =
          new InterceptedDeleteOperation(connection, messageID, request,
@@ -553,9 +575,10 @@ public final class InMemoryOperationInterceptorRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processExtendedRequest(final int messageID,
-                          final ExtendedRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final ExtendedRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final InterceptedExtendedOperation op =
          new InterceptedExtendedOperation(connection, messageID, request,
@@ -630,9 +653,10 @@ public final class InMemoryOperationInterceptorRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processModifyRequest(final int messageID,
-                                          final ModifyRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final ModifyRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final InterceptedModifyOperation op =
          new InterceptedModifyOperation(connection, messageID, request,
@@ -706,9 +730,10 @@ public final class InMemoryOperationInterceptorRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processModifyDNRequest(final int messageID,
-                          final ModifyDNRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final ModifyDNRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final InterceptedModifyDNOperation op =
          new InterceptedModifyDNOperation(connection, messageID, request,
@@ -782,9 +807,10 @@ public final class InMemoryOperationInterceptorRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processSearchRequest(final int messageID,
-                                          final SearchRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final SearchRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     final InterceptedSearchOperation op =
          new InterceptedSearchOperation(connection, messageID, request,
@@ -858,9 +884,11 @@ public final class InMemoryOperationInterceptorRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public ObjectPair<SearchResultEntryProtocolOp,Control[]> transformEntry(
-              final int messageID, final SearchResultEntryProtocolOp entry,
-              final Control[] controls)
+              final int messageID,
+              @NotNull final SearchResultEntryProtocolOp entry,
+              @NotNull final Control[] controls)
   {
     final InterceptedSearchOperation op =
          (InterceptedSearchOperation) activeOperations.get(messageID);
@@ -898,10 +926,11 @@ public final class InMemoryOperationInterceptorRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public ObjectPair<SearchResultReferenceProtocolOp,Control[]>
               transformReference(final int messageID,
-                   final SearchResultReferenceProtocolOp reference,
-                   final Control[] controls)
+                   @NotNull final SearchResultReferenceProtocolOp reference,
+                   @NotNull final Control[] controls)
   {
     final InterceptedSearchOperation op =
          (InterceptedSearchOperation) activeOperations.get(messageID);
@@ -951,10 +980,11 @@ public final class InMemoryOperationInterceptorRequestHandler
    *          response should not be returned to the client.
    */
   @Override()
+  @Nullable()
   public ObjectPair<IntermediateResponseProtocolOp,Control[]>
               transformIntermediateResponse(final int messageID,
-                   final IntermediateResponseProtocolOp response,
-                   final Control[] controls)
+                   @NotNull final IntermediateResponseProtocolOp response,
+                   @NotNull final Control[] controls)
   {
     final InterceptedOperation op = activeOperations.get(messageID);
     if (op == null)
@@ -995,7 +1025,8 @@ public final class InMemoryOperationInterceptorRequestHandler
    *
    * @return  The resulting array of controls.
    */
-  private static Control[] toArray(final List<Control> controls)
+  @NotNull()
+  private static Control[] toArray(@NotNull final List<Control> controls)
   {
     if ((controls == null) || controls.isEmpty())
     {

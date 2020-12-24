@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,6 +53,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 import javax.security.sasl.RealmCallback;
 import javax.security.sasl.Sasl;
@@ -48,6 +64,8 @@ import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -129,7 +147,7 @@ public final class GSSAPIBindRequest
   /**
    * The name for the GSSAPI SASL mechanism.
    */
-  public static final String GSSAPI_MECHANISM_NAME = "GSSAPI";
+  @NotNull public static final String GSSAPI_MECHANISM_NAME = "GSSAPI";
 
 
 
@@ -137,14 +155,16 @@ public final class GSSAPIBindRequest
    * The name of the configuration property used to specify the address of the
    * Kerberos key distribution center.
    */
-  private static final String PROPERTY_KDC_ADDRESS = "java.security.krb5.kdc";
+  @NotNull private static final String PROPERTY_KDC_ADDRESS =
+       "java.security.krb5.kdc";
 
 
 
   /**
    * The name of the configuration property used to specify the Kerberos realm.
    */
-  private static final String PROPERTY_REALM = "java.security.krb5.realm";
+  @NotNull private static final String PROPERTY_REALM =
+       "java.security.krb5.realm";
 
 
 
@@ -152,7 +172,7 @@ public final class GSSAPIBindRequest
    * The name of the configuration property used to specify the path to the JAAS
    * configuration file.
    */
-  private static final String PROPERTY_CONFIG_FILE =
+  @NotNull private static final String PROPERTY_CONFIG_FILE =
        "java.security.auth.login.config";
 
 
@@ -162,7 +182,7 @@ public final class GSSAPIBindRequest
    * can come from somewhere other than the location specified in the JAAS
    * configuration file.
    */
-  private static final String PROPERTY_SUBJECT_CREDS_ONLY =
+  @NotNull private static final String PROPERTY_SUBJECT_CREDS_ONLY =
        "javax.security.auth.useSubjectCredsOnly";
 
 
@@ -172,24 +192,24 @@ public final class GSSAPIBindRequest
    * this class was loaded.  If this is set, then it will be used in place of
    * an automatically-generated config file.
    */
-  private static final String DEFAULT_CONFIG_FILE =
-       System.getProperty(PROPERTY_CONFIG_FILE);
+  @Nullable private static final String DEFAULT_CONFIG_FILE =
+       StaticUtils.getSystemProperty(PROPERTY_CONFIG_FILE);
 
 
 
   /**
    * The default KDC address that will be used if none is explicitly configured.
    */
-  private static final String DEFAULT_KDC_ADDRESS =
-       System.getProperty(PROPERTY_KDC_ADDRESS);
+  @Nullable private static final String DEFAULT_KDC_ADDRESS =
+       StaticUtils.getSystemProperty(PROPERTY_KDC_ADDRESS);
 
 
 
   /**
    * The default realm that will be used if none is explicitly configured.
    */
-  private static final String DEFAULT_REALM =
-       System.getProperty(PROPERTY_REALM);
+  @Nullable private static final String DEFAULT_REALM =
+       StaticUtils.getSystemProperty(PROPERTY_REALM);
 
 
 
@@ -201,17 +221,17 @@ public final class GSSAPIBindRequest
 
 
   // The password for the GSSAPI bind request.
-  private final ASN1OctetString password;
+  @Nullable private final ASN1OctetString password;
 
   // A reference to the connection to use for bind processing.
-  private final AtomicReference<LDAPConnection> conn;
+  @NotNull private final AtomicReference<LDAPConnection> conn;
 
   // Indicates whether to enable JVM-level debugging for GSSAPI processing.
   private final boolean enableGSSAPIDebugging;
 
   // Indicates whether the client should act as the GSSAPI initiator or the
   // acceptor.
-  private final Boolean isInitiator;
+  @Nullable private final Boolean isInitiator;
 
   // Indicates whether to attempt to refresh the configuration before the JAAS
   // login method is called.
@@ -242,47 +262,47 @@ public final class GSSAPIBindRequest
 
   // The SASL quality of protection value(s) allowed for the DIGEST-MD5 bind
   // request.
-  private final List<SASLQualityOfProtection> allowedQoP;
+  @NotNull private final List<SASLQualityOfProtection> allowedQoP;
 
   // A list that will be updated with messages about any unhandled callbacks
   // encountered during processing.
-  private final List<String> unhandledCallbackMessages;
+  @NotNull private final List<String> unhandledCallbackMessages;
 
   // The names of any system properties that should not be altered by GSSAPI
   // processing.
-  private Set<String> suppressedSystemProperties;
+  @NotNull private Set<String> suppressedSystemProperties;
 
   // The authentication ID string for the GSSAPI bind request.
-  private final String authenticationID;
+  @Nullable private final String authenticationID;
 
   // The authorization ID string for the GSSAPI bind request, if available.
-  private final String authorizationID;
+  @Nullable private final String authorizationID;
 
   // The path to the JAAS configuration file to use for bind processing.
-  private final String configFilePath;
+  @Nullable private final String configFilePath;
 
   // The name that will be used to identify this client in the JAAS framework.
-  private final String jaasClientName;
+  @NotNull private final String jaasClientName;
 
   // The KDC address for the GSSAPI bind request, if available.
-  private final String kdcAddress;
+  @Nullable private final String kdcAddress;
 
   // The path to the keytab file to use if useKeyTab is true.
-  private final String keyTabPath;
+  @Nullable private final String keyTabPath;
 
   // The realm for the GSSAPI bind request, if available.
-  private final String realm;
+  @Nullable private final String realm;
 
   // The server name that should be used when creating the Java SaslClient, if
   // defined.
-  private final String saslClientServerName;
+  @Nullable private final String saslClientServerName;
 
   // The protocol that should be used in the Kerberos service principal for
   // the server system.
-  private final String servicePrincipalProtocol;
+  @NotNull private final String servicePrincipalProtocol;
 
   // The path to the Kerberos ticket cache to use.
-  private final String ticketCachePath;
+  @Nullable private final String ticketCachePath;
 
 
 
@@ -299,7 +319,8 @@ public final class GSSAPIBindRequest
    *                         configuration file to use during authentication
    *                         processing.
    */
-  public GSSAPIBindRequest(final String authenticationID, final String password)
+  public GSSAPIBindRequest(@NotNull final String authenticationID,
+                           @NotNull final String password)
          throws LDAPException
   {
     this(new GSSAPIBindRequestProperties(authenticationID, password));
@@ -320,7 +341,8 @@ public final class GSSAPIBindRequest
    *                         configuration file to use during authentication
    *                         processing.
    */
-  public GSSAPIBindRequest(final String authenticationID, final byte[] password)
+  public GSSAPIBindRequest(@NotNull final String authenticationID,
+                           @NotNull final byte[] password)
          throws LDAPException
   {
     this(new GSSAPIBindRequestProperties(authenticationID, password));
@@ -342,8 +364,9 @@ public final class GSSAPIBindRequest
    *                         configuration file to use during authentication
    *                         processing.
    */
-  public GSSAPIBindRequest(final String authenticationID, final String password,
-                           final Control[] controls)
+  public GSSAPIBindRequest(@NotNull final String authenticationID,
+                           @NotNull final String password,
+                           @Nullable final Control[] controls)
          throws LDAPException
   {
     this(new GSSAPIBindRequestProperties(authenticationID, password), controls);
@@ -365,8 +388,9 @@ public final class GSSAPIBindRequest
    *                         configuration file to use during authentication
    *                         processing.
    */
-  public GSSAPIBindRequest(final String authenticationID, final byte[] password,
-                           final Control[] controls)
+  public GSSAPIBindRequest(@NotNull final String authenticationID,
+                           @NotNull final byte[] password,
+                           @Nullable final Control[] controls)
          throws LDAPException
   {
     this(new GSSAPIBindRequestProperties(authenticationID, password), controls);
@@ -399,10 +423,12 @@ public final class GSSAPIBindRequest
    *                         configuration file to use during authentication
    *                         processing.
    */
-  public GSSAPIBindRequest(final String authenticationID,
-                           final String authorizationID, final String password,
-                           final String realm, final String kdcAddress,
-                           final String configFilePath)
+  public GSSAPIBindRequest(@NotNull final String authenticationID,
+                           @Nullable final String authorizationID,
+                           @NotNull final String password,
+                           @Nullable final String realm,
+                           @Nullable final String kdcAddress,
+                           @Nullable final String configFilePath)
          throws LDAPException
   {
     this(new GSSAPIBindRequestProperties(authenticationID, authorizationID,
@@ -436,10 +462,12 @@ public final class GSSAPIBindRequest
    *                         configuration file to use during authentication
    *                         processing.
    */
-  public GSSAPIBindRequest(final String authenticationID,
-                           final String authorizationID, final byte[] password,
-                           final String realm, final String kdcAddress,
-                           final String configFilePath)
+  public GSSAPIBindRequest(@NotNull final String authenticationID,
+                           @Nullable final String authorizationID,
+                           @NotNull final byte[] password,
+                           @Nullable final String realm,
+                           @Nullable final String kdcAddress,
+                           @Nullable final String configFilePath)
          throws LDAPException
   {
     this(new GSSAPIBindRequestProperties(authenticationID, authorizationID,
@@ -474,11 +502,13 @@ public final class GSSAPIBindRequest
    *                         configuration file to use during authentication
    *                         processing.
    */
-  public GSSAPIBindRequest(final String authenticationID,
-                           final String authorizationID, final String password,
-                           final String realm, final String kdcAddress,
-                           final String configFilePath,
-                           final Control[] controls)
+  public GSSAPIBindRequest(@NotNull final String authenticationID,
+                           @Nullable final String authorizationID,
+                           @NotNull final String password,
+                           @Nullable final String realm,
+                           @Nullable final String kdcAddress,
+                           @Nullable final String configFilePath,
+                           @Nullable final Control[] controls)
          throws LDAPException
   {
     this(new GSSAPIBindRequestProperties(authenticationID, authorizationID,
@@ -514,11 +544,13 @@ public final class GSSAPIBindRequest
    *                         configuration file to use during authentication
    *                         processing.
    */
-  public GSSAPIBindRequest(final String authenticationID,
-                           final String authorizationID, final byte[] password,
-                           final String realm, final String kdcAddress,
-                           final String configFilePath,
-                           final Control[] controls)
+  public GSSAPIBindRequest(@NotNull final String authenticationID,
+                           @Nullable final String authorizationID,
+                           @NotNull final byte[] password,
+                           @Nullable final String realm,
+                           @Nullable final String kdcAddress,
+                           @Nullable final String configFilePath,
+                           @Nullable final Control[] controls)
          throws LDAPException
   {
     this(new GSSAPIBindRequestProperties(authenticationID, authorizationID,
@@ -540,8 +572,9 @@ public final class GSSAPIBindRequest
    *                         configuration file to use during authentication
    *                         processing.
    */
-  public GSSAPIBindRequest(final GSSAPIBindRequestProperties gssapiProperties,
-                           final Control... controls)
+  public GSSAPIBindRequest(
+              @NotNull final GSSAPIBindRequestProperties gssapiProperties,
+              @Nullable final Control... controls)
           throws LDAPException
   {
     super(controls);
@@ -608,6 +641,7 @@ public final class GSSAPIBindRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getSASLMechanismName()
   {
     return GSSAPI_MECHANISM_NAME;
@@ -621,6 +655,7 @@ public final class GSSAPIBindRequest
    * @return  The authentication ID for the GSSAPI bind request, or {@code null}
    *          if an existing Kerberos session should be used.
    */
+  @Nullable()
   public String getAuthenticationID()
   {
     return authenticationID;
@@ -634,6 +669,7 @@ public final class GSSAPIBindRequest
    * @return  The authorization ID for this bind request, or {@code null} if
    *          there should not be a separate authorization identity.
    */
+  @Nullable()
   public String getAuthorizationID()
   {
     return authorizationID;
@@ -648,6 +684,7 @@ public final class GSSAPIBindRequest
    * @return  The string representation of the password for this bind request,
    *          or {@code null} if an existing Kerberos session should be used.
    */
+  @Nullable()
   public String getPasswordString()
   {
     if (password == null)
@@ -669,6 +706,7 @@ public final class GSSAPIBindRequest
    * @return  The bytes that comprise the password for this bind request, or
    *          {@code null} if an existing Kerberos session should be used.
    */
+  @Nullable()
   public byte[] getPasswordBytes()
   {
     if (password == null)
@@ -690,6 +728,7 @@ public final class GSSAPIBindRequest
    *          defined and the client should attempt to determine the realm from
    *          the system configuration.
    */
+  @Nullable()
   public String getRealm()
   {
     return realm;
@@ -707,6 +746,7 @@ public final class GSSAPIBindRequest
    *          authentication has completed, in order from most preferred to
    *          least preferred.
    */
+  @NotNull()
   public List<SASLQualityOfProtection> getAllowedQoP()
   {
     return allowedQoP;
@@ -721,6 +761,7 @@ public final class GSSAPIBindRequest
    *          {@code null} if none was defined and the client should attempt to
    *          determine the KDC address from the system configuration.
    */
+  @Nullable()
   public String getKDCAddress()
   {
     return kdcAddress;
@@ -735,6 +776,7 @@ public final class GSSAPIBindRequest
    * @return  The path to the JAAS configuration file that will be used during
    *          authentication processing.
    */
+  @Nullable()
   public String getConfigFilePath()
   {
     return configFilePath;
@@ -749,6 +791,7 @@ public final class GSSAPIBindRequest
    * @return  The protocol specified in the service principal that the directory
    *          server uses for its communication with the KDC.
    */
+  @NotNull()
   public String getServicePrincipalProtocol()
   {
     return servicePrincipalProtocol;
@@ -793,6 +836,7 @@ public final class GSSAPIBindRequest
    *          credentials, or {@code null} if the default keytab location should
    *          be used.
    */
+  @Nullable()
   public String getKeyTabPath()
   {
     return keyTabPath;
@@ -840,6 +884,7 @@ public final class GSSAPIBindRequest
    *          during authentication, or {@code null} if the default ticket cache
    *          file should be used.
    */
+  @Nullable()
   public String getTicketCachePath()
   {
     return ticketCachePath;
@@ -890,6 +935,7 @@ public final class GSSAPIBindRequest
    *          {@link GSSAPIBindRequestProperties#setIsInitiator}  method has
    *          been used to explicitly specify a value).
    */
+  @Nullable()
   public Boolean getIsInitiator()
   {
     return isInitiator;
@@ -904,6 +950,7 @@ public final class GSSAPIBindRequest
    * @return  A set of system properties that will not be altered by GSSAPI
    *          processing.
    */
+  @NotNull()
   public Set<String> getSuppressedSystemProperties()
   {
     return suppressedSystemProperties;
@@ -939,8 +986,9 @@ public final class GSSAPIBindRequest
    * @throws  LDAPException  If an error occurs while attempting to create the
    *                         configuration file.
    */
+  @NotNull()
   private static String getConfigFilePath(
-                             final GSSAPIBindRequestProperties properties)
+               @NotNull final GSSAPIBindRequestProperties properties)
           throws LDAPException
   {
     try
@@ -1026,8 +1074,8 @@ public final class GSSAPIBindRequest
    * @param  w  The writer to use to create the config file.
    * @param  p  The properties to use for GSSAPI authentication.
    */
-  private static void writeSunJAASConfig(final PrintWriter w,
-                                         final GSSAPIBindRequestProperties p)
+  private static void writeSunJAASConfig(@NotNull final PrintWriter w,
+                          @NotNull final GSSAPIBindRequestProperties p)
   {
     w.println(p.getJAASClientName() + " {");
     w.println("  com.sun.security.auth.module.Krb5LoginModule required");
@@ -1086,8 +1134,8 @@ public final class GSSAPIBindRequest
    * @param  w  The writer to use to create the config file.
    * @param  p  The properties to use for GSSAPI authentication.
    */
-  private static void writeIBMJAASConfig(final PrintWriter w,
-                                         final GSSAPIBindRequestProperties p)
+  private static void writeIBMJAASConfig(@NotNull final PrintWriter w,
+                           @NotNull final GSSAPIBindRequestProperties p)
   {
     // NOTE:  It does not appear that the IBM GSSAPI implementation has any
     // analog for the renewTGT property, so it will be ignored.
@@ -1165,7 +1213,9 @@ public final class GSSAPIBindRequest
    *                         reading the response.
    */
   @Override()
-  protected BindResult process(final LDAPConnection connection, final int depth)
+  @NotNull()
+  protected BindResult process(@NotNull final LDAPConnection connection,
+                               final int depth)
             throws LDAPException
   {
     if (! conn.compareAndSet(null, connection))
@@ -1254,6 +1304,18 @@ public final class GSSAPIBindRequest
 
     try
     {
+      // Reload the configuration before creating the login context, which may
+      // work around problems that could arise if certain configuration is
+      // loaded and cached before the above system properties were set.
+      Configuration.getConfiguration().refresh();
+    }
+    catch (final Exception e)
+    {
+      Debug.debugException(e);
+    }
+
+    try
+    {
       final LoginContext context;
       try
       {
@@ -1307,6 +1369,7 @@ public final class GSSAPIBindRequest
    */
   @InternalUseOnly()
   @Override()
+  @NotNull()
   public Object run()
          throws LDAPException
   {
@@ -1342,17 +1405,17 @@ public final class GSSAPIBindRequest
            e);
     }
 
-    final SASLHelper helper = new SASLHelper(this, connection,
-         GSSAPI_MECHANISM_NAME, saslClient, getControls(),
+    final SASLClientBindHandler bindHandler = new SASLClientBindHandler(this,
+         connection, GSSAPI_MECHANISM_NAME, saslClient, getControls(),
          getResponseTimeoutMillis(connection), unhandledCallbackMessages);
 
     try
     {
-      return helper.processSASLBind();
+      return bindHandler.processSASLBind();
     }
     finally
     {
-      messageID = helper.getMessageID();
+      messageID = bindHandler.getMessageID();
     }
   }
 
@@ -1362,7 +1425,9 @@ public final class GSSAPIBindRequest
    * {@inheritDoc}
    */
   @Override()
-  public GSSAPIBindRequest getRebindRequest(final String host, final int port)
+  @NotNull()
+  public GSSAPIBindRequest getRebindRequest(@NotNull final String host,
+                                            final int port)
   {
     try
     {
@@ -1404,7 +1469,7 @@ public final class GSSAPIBindRequest
    */
   @InternalUseOnly()
   @Override()
-  public void handle(final Callback[] callbacks)
+  public void handle(@NotNull final Callback[] callbacks)
          throws UnsupportedCallbackException
   {
     for (final Callback callback : callbacks)
@@ -1472,6 +1537,7 @@ public final class GSSAPIBindRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public GSSAPIBindRequest duplicate()
   {
     return duplicate(getControls());
@@ -1483,7 +1549,8 @@ public final class GSSAPIBindRequest
    * {@inheritDoc}
    */
   @Override()
-  public GSSAPIBindRequest duplicate(final Control[] controls)
+  @NotNull()
+  public GSSAPIBindRequest duplicate(@Nullable final Control[] controls)
   {
     try
     {
@@ -1528,11 +1595,11 @@ public final class GSSAPIBindRequest
    *
    * @param  name  The name of the property to be suppressed.
    */
-  private void clearProperty(final String name)
+  private void clearProperty(@NotNull final String name)
   {
     if (! suppressedSystemProperties.contains(name))
     {
-      System.clearProperty(name);
+      StaticUtils.clearSystemProperty(name);
     }
   }
 
@@ -1545,11 +1612,12 @@ public final class GSSAPIBindRequest
    * @param  name   The name of the property to be suppressed.
    * @param  value  The value of the property to be suppressed.
    */
-  private void setProperty(final String name, final String value)
+  private void setProperty(@NotNull final String name,
+                           @NotNull final String value)
   {
     if (! suppressedSystemProperties.contains(name))
     {
-      System.setProperty(name, value);
+      StaticUtils.setSystemProperty(name, value);
     }
   }
 
@@ -1559,7 +1627,7 @@ public final class GSSAPIBindRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("GSSAPIBindRequest(authenticationID='");
     buffer.append(authenticationID);
@@ -1630,7 +1698,8 @@ public final class GSSAPIBindRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toCode(final List<String> lineList, final String requestID,
+  public void toCode(@NotNull final List<String> lineList,
+                     @NotNull final String requestID,
                      final int indentSpaces, final boolean includeProcessing)
   {
     // Create and update the bind request properties object.

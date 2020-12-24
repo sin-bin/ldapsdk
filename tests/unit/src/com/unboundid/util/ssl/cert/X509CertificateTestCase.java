@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,9 +47,13 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -54,9 +73,12 @@ import com.unboundid.asn1.ASN1UTCTime;
 import com.unboundid.asn1.ASN1UTF8String;
 import com.unboundid.ldap.sdk.DN;
 import com.unboundid.ldap.sdk.LDAPSDKTestCase;
+import com.unboundid.util.Debug;
+import com.unboundid.util.DebugType;
 import com.unboundid.util.OID;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.StaticUtils;
+import com.unboundid.util.TestLogHandler;
 import com.unboundid.util.ssl.JVMDefaultTrustManager;
 
 
@@ -2895,5 +2917,79 @@ public final class X509CertificateTestCase
     assertTrue(c.isWithinValidityWindow(c.getNotAfterTime() - 2000L));
 
     assertFalse(c.isWithinValidityWindow(c.getNotAfterTime() + 2000L));
+  }
+
+
+
+  /**
+   * Tests to verify that all of the certificates in the JVM-default trust store
+   * can be decoded without error.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testDecodingAllJVMDefaultCertificates()
+       throws Exception
+  {
+    final KeyStore keyStore = KeyStore.getInstance("JKS");
+
+    final File caCertsFile =
+         JVMDefaultTrustManager.getInstance().getCACertsFile();
+    try (FileInputStream inputStream = new FileInputStream(caCertsFile))
+    {
+      keyStore.load(inputStream, null);
+    }
+
+
+    final boolean enabledBeforeStarting = Debug.debugEnabled();
+    final Set<DebugType> debugTypesBeforeStarting = Debug.getDebugTypes();
+    final Logger logger = Debug.getLogger();
+    final Level levelBeforeStarting = logger.getLevel();
+    final boolean useParentHandlersBeforeStarting =
+         logger.getUseParentHandlers();
+    final TestLogHandler testLogHandler = new TestLogHandler();
+
+    try
+    {
+      Debug.setEnabled(true, EnumSet.allOf(DebugType.class));
+      logger.setUseParentHandlers(false);
+
+      testLogHandler.setFilter(null);
+      testLogHandler.setLevel(Level.ALL);
+      logger.addHandler(testLogHandler);
+
+
+      final Enumeration<String> aliasEnumeration = keyStore.aliases();
+      while (aliasEnumeration.hasMoreElements())
+      {
+        final String alias = aliasEnumeration.nextElement();
+        final KeyStore.Entry entry = keyStore.getEntry(alias, null);
+        if (entry instanceof KeyStore.TrustedCertificateEntry)
+        {
+          final KeyStore.TrustedCertificateEntry tce =
+               (KeyStore.TrustedCertificateEntry) entry;
+          new X509Certificate(tce.getTrustedCertificate().getEncoded());
+        }
+        else if (entry instanceof KeyStore.PrivateKeyEntry)
+        {
+          final KeyStore.PrivateKeyEntry pke =
+               (KeyStore.PrivateKeyEntry) entry;
+          for (final Certificate c : pke.getCertificateChain())
+          {
+            new X509Certificate(c.getEncoded());
+          }
+        }
+      }
+    }
+    finally
+    {
+      logger.removeHandler(testLogHandler);
+      Debug.setEnabled(enabledBeforeStarting, debugTypesBeforeStarting);
+      logger.setLevel(levelBeforeStarting);
+      logger.setUseParentHandlers(useParentHandlersBeforeStarting);
+    }
+
+    assertEquals(testLogHandler.getMessageCount(), 0,
+         testLogHandler.getMessagesString());
   }
 }

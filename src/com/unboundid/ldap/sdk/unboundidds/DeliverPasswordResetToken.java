@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,6 +53,8 @@ import com.unboundid.ldap.sdk.unboundidds.extensions.
             DeliverPasswordResetTokenExtendedResult;
 import com.unboundid.util.Debug;
 import com.unboundid.util.LDAPCommandLineTool;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -79,28 +96,28 @@ public final class DeliverPasswordResetToken
 
 
   // The DN of the user to whom the password reset token should be sent.
-  private DNArgument userDN;
+  @Nullable private DNArgument userDN;
 
   // The text to include after the password reset token in the "compact"
   // message.
-  private StringArgument compactTextAfterToken;
+  @Nullable private StringArgument compactTextAfterToken;
 
   // The text to include before the password reset token in the "compact"
   // message.
-  private StringArgument compactTextBeforeToken;
+  @Nullable private StringArgument compactTextBeforeToken;
 
   // The name of the mechanism through which the one-time password should be
   // delivered.
-  private StringArgument deliveryMechanism;
+  @Nullable private StringArgument deliveryMechanism;
 
   // The text to include after the password reset token in the "full" message.
-  private StringArgument fullTextAfterToken;
+  @Nullable private StringArgument fullTextAfterToken;
 
   // The text to include before the password reset token in the "full" message.
-  private StringArgument fullTextBeforeToken;
+  @Nullable private StringArgument fullTextBeforeToken;
 
   // The subject to use for the message containing the delivered token.
-  private StringArgument messageSubject;
+  @Nullable private StringArgument messageSubject;
 
 
 
@@ -110,7 +127,7 @@ public final class DeliverPasswordResetToken
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String... args)
+  public static void main(@NotNull final String... args)
   {
     final ResultCode resultCode = main(args, System.out, System.err);
     if (resultCode != ResultCode.SUCCESS)
@@ -135,9 +152,10 @@ public final class DeliverPasswordResetToken
    *
    * @return  A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args,
-                                final OutputStream outStream,
-                                final OutputStream errStream)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream)
   {
     final DeliverPasswordResetToken tool =
          new DeliverPasswordResetToken(outStream, errStream);
@@ -156,8 +174,8 @@ public final class DeliverPasswordResetToken
    *                    written.  It may be {@code null} if error messages
    *                    should be suppressed.
    */
-  public DeliverPasswordResetToken(final OutputStream outStream,
-                                   final OutputStream errStream)
+  public DeliverPasswordResetToken(@Nullable final OutputStream outStream,
+                                   @Nullable final OutputStream errStream)
   {
     super(outStream, errStream);
 
@@ -176,6 +194,7 @@ public final class DeliverPasswordResetToken
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "deliver-password-reset-token";
@@ -187,6 +206,7 @@ public final class DeliverPasswordResetToken
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return INFO_DELIVER_PW_RESET_TOKEN_TOOL_DESCRIPTION.get();
@@ -198,6 +218,7 @@ public final class DeliverPasswordResetToken
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -209,7 +230,7 @@ public final class DeliverPasswordResetToken
    * {@inheritDoc}
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     userDN = new DNArgument('b', "userDN", true, 1,
@@ -349,6 +370,24 @@ public final class DeliverPasswordResetToken
 
 
   /**
+   * Indicates whether this tool should provide a command-line argument that
+   * allows for low-level SSL debugging.  If this returns {@code true}, then an
+   * "--enableSSLDebugging}" argument will be added that sets the
+   * "javax.net.debug" system property to "all" before attempting any
+   * communication.
+   *
+   * @return  {@code true} if this tool should offer an "--enableSSLDebugging"
+   *          argument, or {@code false} if not.
+   */
+  @Override()
+  protected boolean supportsSSLDebugging()
+  {
+    return true;
+  }
+
+
+
+  /**
    * {@inheritDoc}
    */
   @Override()
@@ -363,6 +402,7 @@ public final class DeliverPasswordResetToken
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     // Get the set of preferred delivery mechanisms.
@@ -469,6 +509,7 @@ public final class DeliverPasswordResetToken
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> exampleMap =

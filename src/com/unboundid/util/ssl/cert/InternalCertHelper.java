@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.asn1.ASN1Set;
 import com.unboundid.ldap.sdk.DN;
 import com.unboundid.util.InternalUseOnly;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.OID;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.ThreadSafety;
@@ -117,21 +134,22 @@ public final class InternalCertHelper
    *                         certificate.
    */
   @InternalUseOnly()
+  @NotNull()
   public static X509Certificate createX509Certificate(
-                     final X509CertificateVersion version,
-                     final BigInteger serialNumber,
-                     final OID signatureAlgorithmOID,
-                     final ASN1Element signatureAlgorithmParameters,
-                     final ASN1BitString signatureValue,
-                     final DN issuerDN, final long notBefore,
-                     final long notAfter, final DN subjectDN,
-                     final OID publicKeyAlgorithmOID,
-                     final ASN1Element publicKeyAlgorithmParameters,
-                     final ASN1BitString encodedPublicKey,
-                     final DecodedPublicKey decodedPublicKey,
-                     final ASN1BitString issuerUniqueID,
-                     final ASN1BitString subjectUniqueID,
-                     final X509CertificateExtension... extensions)
+                     @NotNull final X509CertificateVersion version,
+                     @NotNull final BigInteger serialNumber,
+                     @NotNull final OID signatureAlgorithmOID,
+                     @Nullable final ASN1Element signatureAlgorithmParameters,
+                     @NotNull final ASN1BitString signatureValue,
+                     @NotNull final DN issuerDN, final long notBefore,
+                     final long notAfter, @NotNull final DN subjectDN,
+                     @NotNull final OID publicKeyAlgorithmOID,
+                     @Nullable final ASN1Element publicKeyAlgorithmParameters,
+                     @NotNull final ASN1BitString encodedPublicKey,
+                     @Nullable final DecodedPublicKey decodedPublicKey,
+                     @Nullable final ASN1BitString issuerUniqueID,
+                     @Nullable final ASN1BitString subjectUniqueID,
+                     @NotNull final X509CertificateExtension... extensions)
        throws CertException
   {
     return new X509Certificate(version, serialNumber, signatureAlgorithmOID,
@@ -190,18 +208,20 @@ public final class InternalCertHelper
    *                         certificate signing request.
    */
   @InternalUseOnly()
+  @NotNull()
   public static PKCS10CertificateSigningRequest
-              createPKCS10CertificateSigningRequest(
-                   final PKCS10CertificateSigningRequestVersion version,
-                   final OID signatureAlgorithmOID,
-                   final ASN1Element signatureAlgorithmParameters,
-                   final ASN1BitString signatureValue,
-                   final DN subjectDN, final OID publicKeyAlgorithmOID,
-                   final ASN1Element publicKeyAlgorithmParameters,
-                   final ASN1BitString encodedPublicKey,
-                   final DecodedPublicKey decodedPublicKey,
-                   final List<ObjectPair<OID,ASN1Set>> nonExtensionAttributes,
-                   final X509CertificateExtension... extensions)
+                     createPKCS10CertificateSigningRequest(
+         @NotNull final PKCS10CertificateSigningRequestVersion version,
+         @NotNull final OID signatureAlgorithmOID,
+         @Nullable final ASN1Element signatureAlgorithmParameters,
+         @NotNull final ASN1BitString signatureValue,
+         @NotNull final DN subjectDN,
+         @NotNull final OID publicKeyAlgorithmOID,
+         @Nullable final ASN1Element publicKeyAlgorithmParameters,
+         @NotNull final ASN1BitString encodedPublicKey,
+         @Nullable final DecodedPublicKey decodedPublicKey,
+         @Nullable final List<ObjectPair<OID,ASN1Set>> nonExtensionAttributes,
+         @NotNull final X509CertificateExtension... extensions)
          throws CertException
   {
     return new PKCS10CertificateSigningRequest(version, signatureAlgorithmOID,
@@ -246,14 +266,15 @@ public final class InternalCertHelper
    *                         private key.
    */
   @InternalUseOnly()
+  @NotNull()
   public static PKCS8PrivateKey createPKCS8PrivateKey(
-                     final PKCS8PrivateKeyVersion version,
-                     final OID privateKeyAlgorithmOID,
-                     final ASN1Element privateKeyAlgorithmParameters,
-                     final ASN1OctetString encodedPrivateKey,
-                     final DecodedPrivateKey decodedPrivateKey,
-                     final ASN1Element attributesElement,
-                     final ASN1BitString publicKey)
+                     @NotNull final PKCS8PrivateKeyVersion version,
+                     @NotNull final OID privateKeyAlgorithmOID,
+                     @Nullable final ASN1Element privateKeyAlgorithmParameters,
+                     @NotNull final ASN1OctetString encodedPrivateKey,
+                     @Nullable final DecodedPrivateKey decodedPrivateKey,
+                     @Nullable final ASN1Element attributesElement,
+                     @Nullable final ASN1BitString publicKey)
          throws CertException
   {
     return new PKCS8PrivateKey(version, privateKeyAlgorithmOID,

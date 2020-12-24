@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,8 @@ package com.unboundid.ldap.sdk.unboundidds.logs;
 
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -58,16 +75,16 @@ public class ModifyDNRequestAccessLogMessage
 
 
   // Indicates whether to delete the old RDN value(s).
-  private final Boolean deleteOldRDN;
+  @Nullable private final Boolean deleteOldRDN;
 
   // The DN of the entry to rename.
-  private final String dn;
+  @Nullable private final String dn;
 
   // The new RDN to use for the entry.
-  private final String newRDN;
+  @Nullable private final String newRDN;
 
   // The new superior DN for the entry.
-  private final String newSuperiorDN;
+  @Nullable private final String newSuperiorDN;
 
 
 
@@ -81,7 +98,7 @@ public class ModifyDNRequestAccessLogMessage
    * @throws  LogException  If the provided string cannot be parsed as a valid
    *                        log message.
    */
-  public ModifyDNRequestAccessLogMessage(final String s)
+  public ModifyDNRequestAccessLogMessage(@NotNull final String s)
          throws LogException
   {
     this(new LogMessage(s));
@@ -96,7 +113,7 @@ public class ModifyDNRequestAccessLogMessage
    * @param  m  The log message to be parsed as a modify DN request access log
    *            message.
    */
-  public ModifyDNRequestAccessLogMessage(final LogMessage m)
+  public ModifyDNRequestAccessLogMessage(@NotNull final LogMessage m)
   {
     super(m);
 
@@ -114,6 +131,7 @@ public class ModifyDNRequestAccessLogMessage
    * @return  The DN of the entry to rename, or {@code null} if it is not
    *          included in the log message.
    */
+  @Nullable()
   public final String getDN()
   {
     return dn;
@@ -127,6 +145,7 @@ public class ModifyDNRequestAccessLogMessage
    * @return  The new RDN to use for the entry, or {@code null} if it is not
    *          included in the log message.
    */
+  @Nullable()
   public final String getNewRDN()
   {
     return newRDN;
@@ -142,6 +161,7 @@ public class ModifyDNRequestAccessLogMessage
    *          should be kept in the entry, or {@code null} if it is not included
    *          in the log message.
    */
+  @Nullable()
   public final Boolean deleteOldRDN()
   {
     return deleteOldRDN;
@@ -155,6 +175,7 @@ public class ModifyDNRequestAccessLogMessage
    * @return  The new superior DN to use for the entry, or {@code null} if it is
    *          not included in the log message.
    */
+  @Nullable()
   public final String getNewSuperiorDN()
   {
     return newSuperiorDN;
@@ -166,6 +187,7 @@ public class ModifyDNRequestAccessLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public final AccessLogOperationType getOperationType()
   {
     return AccessLogOperationType.MODDN;

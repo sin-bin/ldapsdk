@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,6 +53,8 @@ import com.unboundid.ldap.matchingrules.MatchingRule;
 import com.unboundid.ldap.sdk.controls.SortKey;
 import com.unboundid.ldap.sdk.schema.Schema;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -94,10 +111,10 @@ public final class EntrySorter
   private final boolean sortByHierarchy;
 
   // The set of sort keys for attribute-level sorting.
-  private final List<SortKey> sortKeys;
+  @NotNull private final List<SortKey> sortKeys;
 
   // The schema to use to make the comparison, if available.
-  private final Schema schema;
+  @Nullable private final Schema schema;
 
 
 
@@ -125,7 +142,8 @@ public final class EntrySorter
    *                          (but never {@code null}) if sorting should be done
    *                          only based on hierarchy.
    */
-  public EntrySorter(final boolean sortByHierarchy, final SortKey... sortKeys)
+  public EntrySorter(final boolean sortByHierarchy,
+                     @NotNull final SortKey... sortKeys)
   {
     this(sortByHierarchy, null, Arrays.asList(sortKeys));
   }
@@ -145,8 +163,9 @@ public final class EntrySorter
    *                          (but never {@code null}) if sorting should be done
    *                          only based on hierarchy.
    */
-  public EntrySorter(final boolean sortByHierarchy, final Schema schema,
-                     final SortKey... sortKeys)
+  public EntrySorter(final boolean sortByHierarchy,
+                     @Nullable final Schema schema,
+                     @NotNull final SortKey... sortKeys)
   {
     this(sortByHierarchy, schema, Arrays.asList(sortKeys));
   }
@@ -165,7 +184,7 @@ public final class EntrySorter
    *                          on hierarchy.
    */
   public EntrySorter(final boolean sortByHierarchy,
-                     final List<SortKey> sortKeys)
+                     @Nullable final List<SortKey> sortKeys)
   {
     this(sortByHierarchy, null, sortKeys);
   }
@@ -185,8 +204,9 @@ public final class EntrySorter
    *                          {@code null} if sorting should be done only based
    *                          on hierarchy.
    */
-  public EntrySorter(final boolean sortByHierarchy, final Schema schema,
-                     final List<SortKey> sortKeys)
+  public EntrySorter(final boolean sortByHierarchy,
+                     @Nullable final Schema schema,
+                     @Nullable final List<SortKey> sortKeys)
   {
     this.sortByHierarchy = sortByHierarchy;
     this.schema          = schema;
@@ -211,7 +231,9 @@ public final class EntrySorter
    *
    * @return  A sorted set, ordered in accordance with this entry sorter.
    */
-  public SortedSet<Entry> sort(final Collection<? extends Entry> entries)
+  @NotNull()
+  public SortedSet<Entry> sort(
+              @NotNull final Collection<? extends Entry> entries)
   {
     final TreeSet<Entry> entrySet = new TreeSet<>(this);
     entrySet.addAll(entries);
@@ -233,7 +255,7 @@ public final class EntrySorter
    *          order.
    */
   @Override()
-  public int compare(final Entry e1, final Entry e2)
+  public int compare(@NotNull final Entry e1, @NotNull final Entry e2)
   {
     DN parsedDN1 = null;
     DN parsedDN2 = null;
@@ -493,7 +515,7 @@ public final class EntrySorter
    *          or {@code false} if not.
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == null)
     {
@@ -527,6 +549,7 @@ public final class EntrySorter
    * @return  A string representation of this entry sorter.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -543,7 +566,7 @@ public final class EntrySorter
    * @param  buffer  The buffer to which the string representation should be
    *                 appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("EntrySorter(sortByHierarchy=");
     buffer.append(sortByHierarchy);

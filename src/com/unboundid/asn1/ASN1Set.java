@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,8 @@ import java.util.Collection;
 import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -75,14 +92,14 @@ public final class ASN1Set
 
 
   // The set of ASN.1 elements contained in this set.
-  private final ASN1Element[] elements;
+  @NotNull private final ASN1Element[] elements;
 
   // The encoded representation of the value, if available.
-  private byte[] encodedValue;
+  @Nullable private byte[] encodedValue;
 
   // A volatile variable used to guard publishing the encodedValue array.  See
   // the note above to explain why this is needed.
-  private volatile byte[] encodedValueGuard;
+  @Nullable private volatile byte[] encodedValueGuard;
 
 
 
@@ -122,7 +139,7 @@ public final class ASN1Set
    *
    * @param  elements  The set of elements to include in this set.
    */
-  public ASN1Set(final ASN1Element... elements)
+  public ASN1Set(@Nullable final ASN1Element... elements)
   {
     super(ASN1Constants.UNIVERSAL_SET_TYPE);
 
@@ -146,7 +163,7 @@ public final class ASN1Set
    *
    * @param  elements  The set of elements to include in this set.
    */
-  public ASN1Set(final Collection<? extends ASN1Element> elements)
+  public ASN1Set(@Nullable final Collection<? extends ASN1Element> elements)
   {
     super(ASN1Constants.UNIVERSAL_SET_TYPE);
 
@@ -172,7 +189,7 @@ public final class ASN1Set
    * @param  type      The BER type to use for this element.
    * @param  elements  The set of elements to include in this set.
    */
-  public ASN1Set(final byte type, final ASN1Element... elements)
+  public ASN1Set(final byte type, @Nullable final ASN1Element... elements)
   {
     super(type);
 
@@ -198,7 +215,7 @@ public final class ASN1Set
    * @param  elements  The set of elements to include in this set.
    */
   public ASN1Set(final byte type,
-                 final Collection<? extends ASN1Element> elements)
+                 @Nullable final Collection<? extends ASN1Element> elements)
   {
     super(type);
 
@@ -225,8 +242,9 @@ public final class ASN1Set
    * @param  elements  The set of elements to include in this set.
    * @param  value     The pre-encoded value for this element.
    */
-  private ASN1Set(final byte type, final ASN1Element[] elements,
-                  final byte[] value)
+  private ASN1Set(final byte type,
+                  @NotNull final ASN1Element[] elements,
+                  @NotNull final byte[] value)
   {
     super(type);
 
@@ -240,6 +258,7 @@ public final class ASN1Set
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   byte[] getValueArray()
   {
     return getValue();
@@ -273,6 +292,7 @@ public final class ASN1Set
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public byte[] getValue()
   {
     if (encodedValue == null)
@@ -290,7 +310,7 @@ public final class ASN1Set
    * {@inheritDoc}
    */
   @Override()
-  public void encodeTo(final ByteStringBuffer buffer)
+  public void encodeTo(@NotNull final ByteStringBuffer buffer)
   {
     buffer.append(getType());
 
@@ -320,6 +340,7 @@ public final class ASN1Set
    *
    * @return  The set of encapsulated elements held in this set.
    */
+  @NotNull()
   public ASN1Element[] elements()
   {
     return elements;
@@ -337,7 +358,8 @@ public final class ASN1Set
    * @throws  ASN1Exception  If the provided array cannot be decoded as a set
    *                         element.
    */
-  public static ASN1Set decodeAsSet(final byte[] elementBytes)
+  @NotNull()
+  public static ASN1Set decodeAsSet(@NotNull final byte[] elementBytes)
          throws ASN1Exception
   {
     try
@@ -442,7 +464,8 @@ public final class ASN1Set
    * @throws  ASN1Exception  If the provided element cannot be decoded as a set
    *                         element.
    */
-  public static ASN1Set decodeAsSet(final ASN1Element element)
+  @NotNull()
+  public static ASN1Set decodeAsSet(@NotNull final ASN1Element element)
          throws ASN1Exception
   {
     int numElements = 0;
@@ -510,7 +533,7 @@ public final class ASN1Set
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append('[');
     for (int i=0; i < elements.length; i++)

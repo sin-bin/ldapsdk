@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,7 @@ import com.unboundid.ldap.sdk.examples.AuthRate;
 import com.unboundid.ldap.sdk.examples.Base64Tool;
 import com.unboundid.ldap.sdk.examples.IdentifyReferencesToMissingEntries;
 import com.unboundid.ldap.sdk.examples.IdentifyUniqueAttributeConflicts;
+import com.unboundid.ldap.sdk.examples.IndentLDAPFilter;
 import com.unboundid.ldap.sdk.examples.LDAPCompare;
 import com.unboundid.ldap.sdk.examples.LDAPDebugger;
 import com.unboundid.ldap.sdk.examples.LDAPModify;
@@ -39,10 +55,16 @@ import com.unboundid.ldap.sdk.examples.LDAPSearch;
 import com.unboundid.ldap.sdk.examples.ModRate;
 import com.unboundid.ldap.sdk.examples.SearchRate;
 import com.unboundid.ldap.sdk.examples.SearchAndModRate;
+import com.unboundid.ldap.sdk.examples.TestLDAPSDKPerformance;
 import com.unboundid.ldap.sdk.examples.ValidateLDIF;
 import com.unboundid.ldap.sdk.persist.GenerateSchemaFromSource;
 import com.unboundid.ldap.sdk.persist.GenerateSourceFromSchema;
+import com.unboundid.ldap.sdk.schema.ValidateLDAPSchema;
 import com.unboundid.ldap.sdk.transformations.TransformLDIF;
+import com.unboundid.ldif.LDIFDiff;
+import com.unboundid.ldif.LDIFModify;
+import com.unboundid.ldif.LDIFSearch;
+import com.unboundid.util.ssl.TLSCipherSuiteSelector;
 import com.unboundid.util.ssl.cert.ManageCertificates;
 
 
@@ -68,17 +90,25 @@ import com.unboundid.util.ssl.cert.ManageCertificates;
  *       {@link IdentifyReferencesToMissingEntries} tool.</LI>
  *   <LI>identify-unique-attribute-conflicts -- Launch the
  *       {@link IdentifyUniqueAttributeConflicts} tool.</LI>
+ *   <LI>indent-ldap-filter -- Launch the {@link IndentLDAPFilter} tool.</LI>
  *   <LI>in-memory-directory-server -- Launch the
  *       {@link InMemoryDirectoryServerTool} tool.</LI>
  *   <LI>ldapcompare -- Launch the {@link LDAPCompare} tool.</LI>
  *   <LI>ldapmodify -- Launch the {@link LDAPModify} tool.</LI>
  *   <LI>ldapsearch -- Launch the {@link LDAPSearch} tool.</LI>
  *   <LI>ldap-debugger -- Launch the {@link LDAPDebugger} tool.</LI>
+ *   <LI>ldifmodify -- Launch the {@link LDIFModify} tool.</LI>
+ *   <LI>ldifsearch -- Launch the {@link LDIFSearch} tool.</LI>
+ *   <LI>ldif-diff -- Launch the {@link LDIFDiff} tool.</LI>
  *   <LI>manage-certificates -- Launch the {@link ManageCertificates} tool.</LI>
  *   <LI>modrate -- Launch the {@link ModRate} tool.</LI>
  *   <LI>searchrate -- Launch the {@link SearchRate} tool.</LI>
  *   <LI>search-and-mod-rate -- Launch the {@link SearchAndModRate} tool.</LI>
+ *   <LI>tls-cipher-suite-selector -- Launch the {@link TLSCipherSuiteSelector}
+ *       tool.</LI>
  *   <LI>transform-ldif -- Launch the {@link TransformLDIF} tool.</LI>
+ *   <LI>validate-ldap-schema -- Launch the {@link ValidateLDAPSchema}
+ *       tool.</LI>
  *   <LI>validate-ldif -- Launch the {@link ValidateLDIF} tool.</LI>
  *   <LI>version -- Display version information for the LDAP SDK.</LI>
  * </UL>
@@ -102,7 +132,7 @@ public final class Launcher
    *
    * @param  args  The command-line arguments provided to this program.
    */
-  public static void main(final String... args)
+  public static void main(@NotNull final String... args)
   {
     main(System.out, System.err, args);
   }
@@ -123,10 +153,13 @@ public final class Launcher
    *
    * @return  A result code with information about the status of processing.
    */
-  public static ResultCode main(final OutputStream outStream,
-                                final OutputStream errStream,
-                                final String... args)
+  @NotNull()
+  public static ResultCode main(@Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream,
+                                @Nullable final String... args)
   {
+
+
     if ((args == null) || (args.length == 0) ||
         args[0].equalsIgnoreCase("version"))
     {
@@ -164,6 +197,10 @@ public final class Launcher
       return IdentifyUniqueAttributeConflicts.main(remainingArgs, outStream,
            errStream);
     }
+    else if (firstArg.equals("indent-ldap-filter"))
+    {
+      return IndentLDAPFilter.main(outStream, errStream, remainingArgs);
+    }
     else if (firstArg.equals("in-memory-directory-server"))
     {
       return InMemoryDirectoryServerTool.main(remainingArgs, outStream,
@@ -193,6 +230,18 @@ public final class Launcher
     {
       return LDAPDebugger.main(remainingArgs, outStream, errStream);
     }
+    else if (firstArg.equals("ldifmodify"))
+    {
+      return LDIFModify.main(outStream, errStream, remainingArgs);
+    }
+    else if (firstArg.equals("ldifsearch"))
+    {
+      return LDIFSearch.main(outStream, errStream, remainingArgs);
+    }
+    else if (firstArg.equals("ldif-diff"))
+    {
+      return LDIFDiff.main(outStream, errStream, remainingArgs);
+    }
     else if (firstArg.equals("manage-certificates"))
     {
       return ManageCertificates.main(System.in, outStream, errStream,
@@ -210,9 +259,21 @@ public final class Launcher
     {
       return SearchAndModRate.main(remainingArgs, outStream, errStream);
     }
+    else if (firstArg.equals("test-ldap-sdk-performance"))
+    {
+      return TestLDAPSDKPerformance.main(outStream, errStream, remainingArgs);
+    }
+    else if (firstArg.equals("tls-cipher-suite-selector"))
+    {
+      return TLSCipherSuiteSelector.main(outStream, errStream, remainingArgs);
+    }
     else if (firstArg.equals("transform-ldif"))
     {
       return TransformLDIF.main(outStream, errStream, remainingArgs);
+    }
+    else if (firstArg.equals("validate-ldap-schema"))
+    {
+      return ValidateLDAPSchema.main(outStream, errStream, remainingArgs);
     }
     else if (firstArg.equals("validate-ldif"))
     {
@@ -231,16 +292,23 @@ public final class Launcher
         err.println("     generate-source-from-schema");
         err.println("     identify-references-to-missing-entries");
         err.println("     identify-unique-attribute-conflicts");
+        err.println("     indent-ldap-filter");
         err.println("     in-memory-directory-server");
         err.println("     ldapcompare");
         err.println("     ldapmodify");
         err.println("     ldapsearch");
         err.println("     ldap-debugger");
+        err.println("     ldifmodify");
+        err.println("     ldifsearch");
+        err.println("     ldif-diff");
         err.println("     manage-certificates");
         err.println("     modrate");
         err.println("     searchrate");
         err.println("     search-and-mod-rate");
+        err.println("     test-ldap-sdk-performance");
+        err.println("     tls-cipher-suite-selector");
         err.println("     transform-ldif");
+        err.println("     validate-ldap-schema");
         err.println("     validate-ldif");
         err.println("     version");
       }

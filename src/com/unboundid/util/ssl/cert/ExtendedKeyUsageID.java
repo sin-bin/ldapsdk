@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,6 +37,8 @@ package com.unboundid.util.ssl.cert;
 
 
 
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.OID;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -95,10 +112,10 @@ public enum ExtendedKeyUsageID
 
 
   // The OID for this extended key usage ID value.
-  private final OID oid;
+  @NotNull private final OID oid;
 
   // The human-readable name for this extended key usage ID value.
-  private final String name;
+  @NotNull private final String name;
 
 
 
@@ -110,7 +127,8 @@ public enum ExtendedKeyUsageID
    * @param  name       The human-readable name for this extended key usage ID
    *                    value.
    */
-  ExtendedKeyUsageID(final String oidString, final String name)
+  ExtendedKeyUsageID(@NotNull final String oidString,
+                     @NotNull final String name)
   {
     this.name = name;
 
@@ -124,6 +142,7 @@ public enum ExtendedKeyUsageID
    *
    * @return  The OID for this extended key usage ID value.
    */
+  @NotNull()
   public OID getOID()
   {
     return oid;
@@ -136,6 +155,7 @@ public enum ExtendedKeyUsageID
    *
    * @return  The human-readable name for this extended key usage ID value.
    */
+  @NotNull()
   public String getName()
   {
     return name;
@@ -152,7 +172,8 @@ public enum ExtendedKeyUsageID
    * @return  The extended key usage ID value with the specified OID, or
    *          {@code null} if there is no value with the specified OID.
    */
-  public static ExtendedKeyUsageID forOID(final OID oid)
+  @Nullable()
+  public static ExtendedKeyUsageID forOID(@NotNull final OID oid)
   {
     for (final ExtendedKeyUsageID id : values())
     {
@@ -178,7 +199,8 @@ public enum ExtendedKeyUsageID
    *            the provided OID, or a string representation of the OID if there
    *            is no value with that OID.
    */
-  public static String getNameOrOID(final OID oid)
+  @NotNull()
+  public static String getNameOrOID(@NotNull final OID oid)
   {
     final ExtendedKeyUsageID id = forOID(oid);
     if (id == null)
@@ -202,7 +224,8 @@ public enum ExtendedKeyUsageID
    * @return  The requested extended key usage ID, or {@code null} if no such ID
    *          is defined.
    */
-  public static ExtendedKeyUsageID forName(final String name)
+  @Nullable()
+  public static ExtendedKeyUsageID forName(@NotNull final String name)
   {
     switch (StaticUtils.toLowerCase(name))
     {

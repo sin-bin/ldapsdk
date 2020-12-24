@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import java.util.Map;
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -74,7 +91,7 @@ public final class DumpDBDetailsTask
    * The fully-qualified name of the Java class that is used for the dump DB
    * details task.
    */
-  static final String DUMP_DB_DETAILS_TASK_CLASS =
+  @NotNull static final String DUMP_DB_DETAILS_TASK_CLASS =
        "com.unboundid.directory.server.tasks.DumpDBDetailsTask";
 
 
@@ -83,7 +100,7 @@ public final class DumpDBDetailsTask
    * The name of the attribute used to specify the backend ID of the target
    * backend.
    */
-  private static final String ATTR_BACKEND_ID =
+  @NotNull private static final String ATTR_BACKEND_ID =
        "ds-task-dump-db-backend-id";
 
 
@@ -91,14 +108,15 @@ public final class DumpDBDetailsTask
   /**
    * The name of the object class used in dump DB details task entries.
    */
-  private static final String OC_DUMP_DB_DETAILS_TASK = "ds-task-dump-db";
+  @NotNull private static final String OC_DUMP_DB_DETAILS_TASK =
+       "ds-task-dump-db";
 
 
 
   /**
    * The task property that will be used for the backend ID.
    */
-  private static final TaskProperty PROPERTY_BACKEND_ID =
+  @NotNull private static final TaskProperty PROPERTY_BACKEND_ID =
      new TaskProperty(ATTR_BACKEND_ID,
           INFO_DUMP_DB_DISPLAY_NAME_BACKEND_ID.get(),
           INFO_DUMP_DB_DESCRIPTION_BACKEND_ID.get(), String.class, true,
@@ -114,7 +132,7 @@ public final class DumpDBDetailsTask
 
 
   // The name of the backend to be examined.
-  private final String backendID;
+  @NotNull private final String backendID;
 
 
 
@@ -139,7 +157,8 @@ public final class DumpDBDetailsTask
    * @param  backendID  The backend ID for the backend to examine.  It must not
    *                    be {@code null}.
    */
-  public DumpDBDetailsTask(final String taskID, final String backendID)
+  public DumpDBDetailsTask(@Nullable final String taskID,
+                           @NotNull final String backendID)
   {
     this(taskID, backendID, null, null, null, null, null);
   }
@@ -169,12 +188,13 @@ public final class DumpDBDetailsTask
    *                                 that should be notified if this task does
    *                                 not complete successfully.
    */
-  public DumpDBDetailsTask(final String taskID, final String backendID,
-                           final Date scheduledStartTime,
-                           final List<String> dependencyIDs,
-                           final FailedDependencyAction failedDependencyAction,
-                           final List<String> notifyOnCompletion,
-                           final List<String> notifyOnError)
+  public DumpDBDetailsTask(@Nullable final String taskID,
+              @NotNull final String backendID,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnError)
   {
     this(taskID, backendID, scheduledStartTime, dependencyIDs,
          failedDependencyAction, null, notifyOnCompletion, null,
@@ -220,17 +240,18 @@ public final class DumpDBDetailsTask
    *                                 alert notification if this task fails to
    *                                 complete successfully.
    */
-  public DumpDBDetailsTask(final String taskID, final String backendID,
-                           final Date scheduledStartTime,
-                           final List<String> dependencyIDs,
-                           final FailedDependencyAction failedDependencyAction,
-                           final List<String> notifyOnStart,
-                           final List<String> notifyOnCompletion,
-                           final List<String> notifyOnSuccess,
-                           final List<String> notifyOnError,
-                           final Boolean alertOnStart,
-                           final Boolean alertOnSuccess,
-                           final Boolean alertOnError)
+  public DumpDBDetailsTask(@Nullable final String taskID,
+              @NotNull final String backendID,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnStart,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnSuccess,
+              @Nullable final List<String> notifyOnError,
+              @Nullable final Boolean alertOnStart,
+              @Nullable final Boolean alertOnSuccess,
+              @Nullable final Boolean alertOnError)
   {
     super(taskID, DUMP_DB_DETAILS_TASK_CLASS, scheduledStartTime, dependencyIDs,
          failedDependencyAction, notifyOnStart, notifyOnCompletion,
@@ -252,7 +273,7 @@ public final class DumpDBDetailsTask
    * @throws  TaskException  If the provided entry cannot be parsed as a dump DB
    *                         details task entry.
    */
-  public DumpDBDetailsTask(final Entry entry)
+  public DumpDBDetailsTask(@NotNull final Entry entry)
          throws TaskException
   {
     super(entry);
@@ -279,7 +300,8 @@ public final class DumpDBDetailsTask
    * @throws  TaskException  If the provided set of properties cannot be used to
    *                         create a valid dump DB details task.
    */
-  public DumpDBDetailsTask(final Map<TaskProperty,List<Object>> properties)
+  public DumpDBDetailsTask(
+              @NotNull final Map<TaskProperty,List<Object>> properties)
          throws TaskException
   {
     super(DUMP_DB_DETAILS_TASK_CLASS, properties);
@@ -313,6 +335,7 @@ public final class DumpDBDetailsTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskName()
   {
     return INFO_TASK_NAME_DUMP_DB.get();
@@ -324,6 +347,7 @@ public final class DumpDBDetailsTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskDescription()
   {
     return INFO_TASK_DESCRIPTION_DUMP_DB.get();
@@ -336,6 +360,7 @@ public final class DumpDBDetailsTask
    *
    * @return  The backend ID of the backend to examine.
    */
+  @NotNull()
   public String getBackendID()
   {
     return backendID;
@@ -347,6 +372,7 @@ public final class DumpDBDetailsTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<String> getAdditionalObjectClasses()
   {
     return Collections.singletonList(OC_DUMP_DB_DETAILS_TASK);
@@ -358,6 +384,7 @@ public final class DumpDBDetailsTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<Attribute> getAdditionalAttributes()
   {
     return Collections.singletonList(new Attribute(ATTR_BACKEND_ID, backendID));
@@ -369,6 +396,7 @@ public final class DumpDBDetailsTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<TaskProperty> getTaskSpecificProperties()
   {
     return Collections.singletonList(PROPERTY_BACKEND_ID);
@@ -380,6 +408,7 @@ public final class DumpDBDetailsTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<TaskProperty,List<Object>> getTaskPropertyValues()
   {
     final LinkedHashMap<TaskProperty,List<Object>> props =

@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,7 @@ import com.unboundid.ldap.sdk.OperationType;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -53,7 +69,7 @@ public final class DraftChuLDAPLogSchema00CompareEntry
    * The name of the attribute used to hold the encoded attribute value
    * assertion.
    */
-  public static final String ATTR_ENCODED_ASSERTION = "reqAssertion";
+  @NotNull public static final String ATTR_ENCODED_ASSERTION = "reqAssertion";
 
 
 
@@ -65,10 +81,10 @@ public final class DraftChuLDAPLogSchema00CompareEntry
 
 
   // The assertion value for the compare operation.
-  private final ASN1OctetString assertionValue;
+  @NotNull private final ASN1OctetString assertionValue;
 
   // The attribute name for the compare operation.
-  private final String attributeName;
+  @NotNull private final String attributeName;
 
 
 
@@ -82,7 +98,7 @@ public final class DraftChuLDAPLogSchema00CompareEntry
    *                         compare access log entry as per the specification
    *                         contained in draft-chu-ldap-logschema-00.
    */
-  public DraftChuLDAPLogSchema00CompareEntry(final Entry entry)
+  public DraftChuLDAPLogSchema00CompareEntry(@NotNull final Entry entry)
          throws LDAPException
   {
     super(entry, OperationType.COMPARE);
@@ -127,6 +143,7 @@ public final class DraftChuLDAPLogSchema00CompareEntry
    * @return  The attribute name for the compare request described by this
    *          compare access log entry.
    */
+  @NotNull()
   public String getAttributeName()
   {
     return attributeName;
@@ -141,6 +158,7 @@ public final class DraftChuLDAPLogSchema00CompareEntry
    * @return  The string representation of the assertion value for the compare
    *          request described by this compare access log entry.
    */
+  @NotNull()
   public String getAssertionValueString()
   {
     return assertionValue.stringValue();
@@ -155,6 +173,7 @@ public final class DraftChuLDAPLogSchema00CompareEntry
    * @return  The bytes that comprise the assertion value for the compare
    *          request described by this compare access log entry.
    */
+  @NotNull()
   public byte[] getAssertionValueBytes()
   {
     return assertionValue.getValue();
@@ -169,6 +188,7 @@ public final class DraftChuLDAPLogSchema00CompareEntry
    * @return  The {@code CompareRequest} created from this compare access log
    *          entry.
    */
+  @NotNull()
   public CompareRequest toCompareRequest()
   {
     return new CompareRequest(getTargetEntryDN(), attributeName,

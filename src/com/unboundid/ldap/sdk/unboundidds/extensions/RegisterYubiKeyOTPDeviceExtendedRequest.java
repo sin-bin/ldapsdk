@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -82,7 +99,7 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    * The OID (1.3.6.1.4.1.30221.2.6.54) for the register YubiKey OTP device
    * extended request.
    */
-  public static final String REGISTER_YUBIKEY_OTP_DEVICE_REQUEST_OID =
+  @NotNull public static final String REGISTER_YUBIKEY_OTP_DEVICE_REQUEST_OID =
        "1.3.6.1.4.1.30221.2.6.54";
 
 
@@ -117,13 +134,13 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
 
 
   // The static password for the request.
-  private final ASN1OctetString staticPassword;
+  @Nullable private final ASN1OctetString staticPassword;
 
   // The authentication ID for the request.
-  private final String authenticationID;
+  @Nullable private final String authenticationID;
 
   // The YubiKey OTP for the request.
-  private final String yubiKeyOTP;
+  @NotNull private final String yubiKeyOTP;
 
 
 
@@ -138,8 +155,9 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    *                     be {@code null} or empty if there should not be any
    *                     request controls.
    */
-  public RegisterYubiKeyOTPDeviceExtendedRequest(final String yubiKeyOTP,
-                                                 final Control... controls)
+  public RegisterYubiKeyOTPDeviceExtendedRequest(
+              @NotNull final String yubiKeyOTP,
+              @Nullable final Control... controls)
   {
     this(null, (ASN1OctetString) null, yubiKeyOTP, controls);
   }
@@ -169,10 +187,11 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    *                           It may be {@code null} or empty if there should
    *                           not be any request controls.
    */
-  public RegisterYubiKeyOTPDeviceExtendedRequest(final String authenticationID,
-                                                 final String staticPassword,
-                                                 final String yubiKeyOTP,
-                                                 final Control... controls)
+  public RegisterYubiKeyOTPDeviceExtendedRequest(
+              @Nullable final String authenticationID,
+              @Nullable final String staticPassword,
+              @NotNull final String yubiKeyOTP,
+              @Nullable final Control... controls)
   {
     this(authenticationID, encodePassword(staticPassword), yubiKeyOTP,
          controls);
@@ -203,10 +222,11 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    *                           It may be {@code null} or empty if there should
    *                           not be any request controls.
    */
-  public RegisterYubiKeyOTPDeviceExtendedRequest(final String authenticationID,
-                                                 final byte[] staticPassword,
-                                                 final String yubiKeyOTP,
-                                                 final Control... controls)
+  public RegisterYubiKeyOTPDeviceExtendedRequest(
+              @Nullable final String authenticationID,
+              @Nullable final byte[] staticPassword,
+              @NotNull final String yubiKeyOTP,
+              @Nullable final Control... controls)
   {
     this(authenticationID, encodePassword(staticPassword), yubiKeyOTP,
          controls);
@@ -237,9 +257,11 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    *                           It may be {@code null} or empty if there should
    *                           not be any request controls.
    */
-  private RegisterYubiKeyOTPDeviceExtendedRequest(final String authenticationID,
-               final ASN1OctetString staticPassword, final String yubiKeyOTP,
-               final Control... controls)
+  private RegisterYubiKeyOTPDeviceExtendedRequest(
+               @Nullable final String authenticationID,
+               @Nullable final ASN1OctetString staticPassword,
+               @NotNull final String yubiKeyOTP,
+               @Nullable final Control... controls)
   {
     super(REGISTER_YUBIKEY_OTP_DEVICE_REQUEST_OID,
          encodeValue(authenticationID, staticPassword, yubiKeyOTP), controls);
@@ -261,7 +283,8 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    * @throws  LDAPException  If a problem is encountered while attempting to
    *                         decode the provided request.
    */
-  public RegisterYubiKeyOTPDeviceExtendedRequest(final ExtendedRequest request)
+  public RegisterYubiKeyOTPDeviceExtendedRequest(
+              @NotNull final ExtendedRequest request)
          throws LDAPException
   {
     super(request);
@@ -337,7 +360,8 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    *
    * @return  The encoded password, or {@code null} if no password was given.
    */
-  static ASN1OctetString encodePassword(final Object password)
+  @Nullable()
+  static ASN1OctetString encodePassword(@Nullable final Object password)
   {
     if (password == null)
     {
@@ -378,9 +402,11 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    *
    * @return  The ASN.1 octet string containing the encoded request value.
    */
-  private static ASN1OctetString encodeValue(final String authenticationID,
-                                      final ASN1OctetString staticPassword,
-                                      final String yubiKeyOTP)
+  @NotNull()
+  private static ASN1OctetString encodeValue(
+               @Nullable final String authenticationID,
+               @Nullable final ASN1OctetString staticPassword,
+               @NotNull final String yubiKeyOTP)
   {
     Validator.ensureNotNull(yubiKeyOTP);
 
@@ -411,6 +437,7 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    *          {@code null} if the device is to be registered as the user as
    *          whom the underlying connection is authenticated.
    */
+  @Nullable()
   public String getAuthenticationID()
   {
     return authenticationID;
@@ -425,6 +452,7 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    * @return  The string representation of the static password for the target
    *          user, or {@code null} if no static password was provided.
    */
+  @Nullable()
   public String getStaticPasswordString()
   {
     if (staticPassword == null)
@@ -446,6 +474,7 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    * @return  The bytes that comprise the static password for the target user,
    *          or {@code null} if no static password was provided.
    */
+  @Nullable()
   public byte[] getStaticPasswordBytes()
   {
     if (staticPassword == null)
@@ -467,6 +496,7 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    * @return  A one-time password generated by the YubiKey device to be
    *          registered.
    */
+  @NotNull()
   public String getYubiKeyOTP()
   {
     return yubiKeyOTP;
@@ -478,6 +508,7 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public RegisterYubiKeyOTPDeviceExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -489,8 +520,9 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public RegisterYubiKeyOTPDeviceExtendedRequest duplicate(
-                                                      final Control[] controls)
+              @Nullable final Control[] controls)
   {
     final RegisterYubiKeyOTPDeviceExtendedRequest r =
          new RegisterYubiKeyOTPDeviceExtendedRequest(authenticationID,
@@ -505,6 +537,7 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_REGISTER_YUBIKEY_OTP_REQUEST_NAME.get();
@@ -516,7 +549,7 @@ public final class RegisterYubiKeyOTPDeviceExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("RegisterYubiKeyOTPDeviceExtendedRequest(");
 

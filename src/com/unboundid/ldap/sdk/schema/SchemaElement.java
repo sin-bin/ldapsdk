@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,8 +45,9 @@ import java.util.Map;
 
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
-import com.unboundid.util.Debug;
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -51,9 +67,60 @@ public abstract class SchemaElement
        implements Serializable
 {
   /**
+   * Indicates whether schema elements will be permitted to use an empty
+   * quoted string as the value of the {@code DESC} component.
+   */
+  private static boolean allowEmptyDescription = Boolean.getBoolean(
+         "com.unboundid.ldap.sdk.schema.AllowEmptyDescription");
+
+
+
+  /**
    * The serial version UID for this serializable class.
    */
   private static final long serialVersionUID = -8249972237068748580L;
+
+
+
+  /**
+   * Indicates whether to allow schema elements to contain an empty string as
+   * the value for the {@code DESC} component.  Although quoted strings are not
+   * allowed in schema elements as per RFC 4512 section 4.1, some directory
+   * servers allow it, and it may be necessary to support schema definitions
+   * used in conjunction with those servers.
+   * <BR><BR>
+   * The LDAP SDK does not allow empty schema element descriptions by default,
+   * but it may be updated to allow it using either the
+   * {@link #setAllowEmptyDescription} method or by setting the value of the
+   * {@code com.unboundid.ldap.sdk.schema.AllowEmptyDescription} system property
+   * to {@code true} before this class is loaded.
+   *
+   * @return  {@code true} if the LDAP SDK should allow schema elements with
+   *          empty descriptions, or {@code false} if not.
+   */
+  public static boolean allowEmptyDescription()
+  {
+    return allowEmptyDescription;
+  }
+
+
+
+  /**
+   * Specifies whether to allow schema elements to contain an empty string as
+   * the value for the {@code DESC} component.  If specified, this will override
+   * the value of the
+   * {@code com.unboundid.ldap.sdk.schema.AllowEmptyDescription} system
+   * property.
+   *
+   * @param  allowEmptyDescription  Indicates whether to allow schema elements
+   *                                to contain an empty string as the value for
+   *                                the {@code DESC} component.
+   */
+  public static void setAllowEmptyDescription(
+                          final boolean allowEmptyDescription)
+  {
+    SchemaElement.allowEmptyDescription = allowEmptyDescription;
+  }
 
 
 
@@ -69,7 +136,8 @@ public abstract class SchemaElement
    * @throws  LDAPException  If the end of the string was reached without
    *                         finding a non-space character.
    */
-  static int skipSpaces(final String s, final int startPos, final int length)
+  static int skipSpaces(@NotNull final String s, final int startPos,
+                        final int length)
          throws LDAPException
   {
     int pos = startPos;
@@ -81,8 +149,7 @@ public abstract class SchemaElement
     if (pos >= length)
     {
       throw new LDAPException(ResultCode.DECODING_ERROR,
-                              ERR_SCHEMA_ELEM_SKIP_SPACES_NO_CLOSE_PAREN.get(
-                                   s));
+           ERR_SCHEMA_ELEM_SKIP_SPACES_NO_CLOSE_PAREN.get(s));
     }
 
     return pos;
@@ -94,22 +161,26 @@ public abstract class SchemaElement
    * Reads one or more hex-encoded bytes from the specified portion of the RDN
    * string.
    *
-   * @param  s         The string from which the data is to be read.
-   * @param  startPos  The position at which to start reading.  This should be
-   *                   the first hex character immediately after the initial
-   *                   backslash.
-   * @param  length    The position of the end of the string.
-   * @param  buffer    The buffer to which the decoded string portion should be
-   *                   appended.
+   * @param  s              The string from which the data is to be read.
+   * @param  startPos       The position at which to start reading.  This should
+   *                        be the first hex character immediately after the
+   *                        initial backslash.
+   * @param  length         The position of the end of the string.
+   * @param  componentName  The name of the component in the schema element
+   *                        definition whose value is being read.
+   * @param  buffer         The buffer to which the decoded string portion
+   *                        should be appended.
    *
    * @return  The position at which the caller may resume parsing.
    *
    * @throws  LDAPException  If a problem occurs while reading hex-encoded
    *                         bytes.
    */
-  private static int readEscapedHexString(final String s, final int startPos,
+  private static int readEscapedHexString(@NotNull final String s,
+                                          final int startPos,
                                           final int length,
-                                          final StringBuilder buffer)
+                                          @NotNull final String componentName,
+                                          @NotNull final StringBuilder buffer)
           throws LDAPException
   {
     int pos    = startPos;
@@ -175,15 +246,15 @@ public abstract class SchemaElement
           b = (byte) 0xF0;
           break;
         default:
-          throw new LDAPException(ResultCode.INVALID_DN_SYNTAX,
-                                  ERR_SCHEMA_ELEM_INVALID_HEX_CHAR.get(s,
-                                       s.charAt(pos-1), (pos-1)));
+          throw new LDAPException(ResultCode.INVALID_ATTRIBUTE_SYNTAX,
+               ERR_SCHEMA_ELEM_INVALID_HEX_CHAR.get(s, s.charAt(pos-1),
+                    (pos-1), componentName));
       }
 
       if (pos >= length)
       {
-        throw new LDAPException(ResultCode.INVALID_DN_SYNTAX,
-                                ERR_SCHEMA_ELEM_MISSING_HEX_CHAR.get(s));
+        throw new LDAPException(ResultCode.INVALID_ATTRIBUTE_SYNTAX,
+             ERR_SCHEMA_ELEM_MISSING_HEX_CHAR.get(s, componentName));
       }
 
       switch (s.charAt(pos++))
@@ -243,9 +314,9 @@ public abstract class SchemaElement
           byteBuffer.put((byte) (b | 0x0F));
           break;
         default:
-          throw new LDAPException(ResultCode.INVALID_DN_SYNTAX,
-                                  ERR_SCHEMA_ELEM_INVALID_HEX_CHAR.get(s,
-                                       s.charAt(pos-1), (pos-1)));
+          throw new LDAPException(ResultCode.INVALID_ATTRIBUTE_SYNTAX,
+               ERR_SCHEMA_ELEM_INVALID_HEX_CHAR.get(s, s.charAt(pos-1),
+                    (pos-1), componentName));
       }
 
       if (((pos+1) < length) && (s.charAt(pos) == '\\') &&
@@ -265,18 +336,7 @@ public abstract class SchemaElement
     byteBuffer.flip();
     final byte[] byteArray = new byte[byteBuffer.limit()];
     byteBuffer.get(byteArray);
-
-    try
-    {
-      buffer.append(StaticUtils.toUTF8String(byteArray));
-    }
-    catch (final Exception e)
-    {
-      Debug.debugException(e);
-      // This should never happen.
-      buffer.append(new String(byteArray));
-    }
-
+    buffer.append(StaticUtils.toUTF8String(byteArray));
     return pos;
   }
 
@@ -285,11 +345,15 @@ public abstract class SchemaElement
   /**
    * Reads a single-quoted string from the provided string.
    *
-   * @param  s         The string from which to read the single-quoted string.
-   * @param  startPos  The position at which to start reading.
-   * @param  length    The position of the end of the string.
-   * @param  buffer    The buffer into which the single-quoted string should be
-   *                   placed (without the surrounding single quotes).
+   * @param  s              The string from which to read the single-quoted
+   *                        string.
+   * @param  startPos       The position at which to start reading.
+   * @param  length         The position of the end of the string.
+   * @param  componentName  The name of the component in the schema element
+   *                        definition whose value is being read.
+   * @param  buffer         The buffer into which the single-quoted string
+   *                        should be placed (without the surrounding single
+   *                        quotes).
    *
    * @return  The position of the first space immediately following the closing
    *          quote.
@@ -297,16 +361,17 @@ public abstract class SchemaElement
    * @throws  LDAPException  If a problem is encountered while attempting to
    *                         read the single-quoted string.
    */
-  static int readQDString(final String s, final int startPos, final int length,
-                          final StringBuilder buffer)
+  static int readQDString(@NotNull final String s, final int startPos,
+                          final int length, @NotNull final String componentName,
+                          @NotNull final StringBuilder buffer)
       throws LDAPException
   {
     // The first character must be a single quote.
     if (s.charAt(startPos) != '\'')
     {
       throw new LDAPException(ResultCode.DECODING_ERROR,
-                              ERR_SCHEMA_ELEM_EXPECTED_SINGLE_QUOTE.get(s,
-                                   startPos));
+           ERR_SCHEMA_ELEM_EXPECTED_SINGLE_QUOTE.get(s, startPos,
+                componentName));
     }
 
     // Read until we find the next closing quote.  If we find any hex-escaped
@@ -326,10 +391,10 @@ public abstract class SchemaElement
         if (pos >= length)
         {
           throw new LDAPException(ResultCode.DECODING_ERROR,
-                                  ERR_SCHEMA_ELEM_ENDS_WITH_BACKSLASH.get(s));
+               ERR_SCHEMA_ELEM_ENDS_WITH_BACKSLASH.get(s, componentName));
         }
 
-        pos = readEscapedHexString(s, pos, length, buffer);
+        pos = readEscapedHexString(s, pos, length, componentName, buffer);
       }
       else
       {
@@ -340,13 +405,16 @@ public abstract class SchemaElement
     if ((pos >= length) || ((s.charAt(pos) != ' ') && (s.charAt(pos) != ')')))
     {
       throw new LDAPException(ResultCode.DECODING_ERROR,
-                              ERR_SCHEMA_ELEM_NO_CLOSING_PAREN.get(s));
+           ERR_SCHEMA_ELEM_NO_CLOSING_PAREN.get(s, componentName));
     }
 
     if (buffer.length() == 0)
     {
-      throw new LDAPException(ResultCode.DECODING_ERROR,
-                              ERR_SCHEMA_ELEM_EMPTY_QUOTES.get(s));
+      if (! (allowEmptyDescription && componentName.equalsIgnoreCase("DESC")))
+      {
+        throw new LDAPException(ResultCode.DECODING_ERROR,
+             ERR_SCHEMA_ELEM_EMPTY_QUOTES.get(s, componentName));
+      }
     }
 
     return pos;
@@ -361,10 +429,13 @@ public abstract class SchemaElement
    * one or more space-delimited single-quoted strings, followed by a space and
    * a closing parenthesis.
    *
-   * @param  s          The string from which to read the single-quoted strings.
-   * @param  startPos   The position at which to start reading.
-   * @param  length     The position of the end of the string.
-   * @param  valueList  The list into which the values read may be placed.
+   * @param  s              The string from which to read the single-quoted
+   *                        strings.
+   * @param  startPos       The position at which to start reading.
+   * @param  length         The position of the end of the string.
+   * @param  componentName  The name of the component in the schema element
+   *                        definition whose value is being read.
+   * @param  valueList      The list into which the values read may be placed.
    *
    * @return  The position of the first space immediately following the end of
    *          the values.
@@ -372,8 +443,10 @@ public abstract class SchemaElement
    * @throws  LDAPException  If a problem is encountered while attempting to
    *                         read the single-quoted strings.
    */
-  static int readQDStrings(final String s, final int startPos, final int length,
-                           final ArrayList<String> valueList)
+  static int readQDStrings(@NotNull final String s, final int startPos,
+                           final int length,
+                           @NotNull final String componentName,
+                           @NotNull final ArrayList<String> valueList)
       throws LDAPException
   {
     // Look at the first character.  It must be either a single quote or an
@@ -383,7 +456,8 @@ public abstract class SchemaElement
     {
       // It's just a single value, so use the readQDString method to get it.
       final StringBuilder buffer = new StringBuilder();
-      final int returnPos = readQDString(s, startPos, length, buffer);
+      final int returnPos = readQDString(s, startPos, length, componentName,
+           buffer);
       valueList.add(buffer.toString());
       return returnPos;
     }
@@ -404,28 +478,28 @@ public abstract class SchemaElement
         {
           // This is the next value in the list.
           final StringBuilder buffer = new StringBuilder();
-          pos = readQDString(s, pos, length, buffer);
+          pos = readQDString(s, pos, length, componentName, buffer);
           valueList.add(buffer.toString());
         }
         else
         {
           throw new LDAPException(ResultCode.DECODING_ERROR,
-                                  ERR_SCHEMA_ELEM_EXPECTED_QUOTE_OR_PAREN.get(
-                                       s, startPos));
+               ERR_SCHEMA_ELEM_EXPECTED_QUOTE_OR_PAREN.get(s, startPos,
+                    componentName));
         }
       }
 
       if (valueList.isEmpty())
       {
         throw new LDAPException(ResultCode.DECODING_ERROR,
-                                ERR_SCHEMA_ELEM_EMPTY_STRING_LIST.get(s));
+             ERR_SCHEMA_ELEM_EMPTY_STRING_LIST.get(s, componentName));
       }
 
       if ((pos >= length) ||
           ((s.charAt(pos) != ' ') && (s.charAt(pos) != ')')))
       {
         throw new LDAPException(ResultCode.DECODING_ERROR,
-                                ERR_SCHEMA_ELEM_NO_SPACE_AFTER_QUOTE.get(s));
+             ERR_SCHEMA_ELEM_NO_SPACE_AFTER_QUOTE.get(s, componentName));
       }
 
       return pos;
@@ -433,8 +507,8 @@ public abstract class SchemaElement
     else
     {
       throw new LDAPException(ResultCode.DECODING_ERROR,
-                              ERR_SCHEMA_ELEM_EXPECTED_QUOTE_OR_PAREN.get(s,
-                                   startPos));
+           ERR_SCHEMA_ELEM_EXPECTED_QUOTE_OR_PAREN.get(s, startPos,
+                componentName));
     }
   }
 
@@ -457,8 +531,8 @@ public abstract class SchemaElement
    * @throws  LDAPException  If a problem is encountered while attempting to
    *                         read the OID string.
    */
-  static int readOID(final String s, final int startPos, final int length,
-                     final StringBuilder buffer)
+  static int readOID(@NotNull final String s, final int startPos,
+                     final int length, @NotNull final StringBuilder buffer)
       throws LDAPException
   {
     // Read until we find the first space.
@@ -472,7 +546,7 @@ public abstract class SchemaElement
         if (buffer.length() == 0)
         {
           throw new LDAPException(ResultCode.DECODING_ERROR,
-                                  ERR_SCHEMA_ELEM_EMPTY_OID.get(s));
+               ERR_SCHEMA_ELEM_EMPTY_OID.get(s));
         }
 
         return pos;
@@ -501,8 +575,7 @@ public abstract class SchemaElement
       else
       {
           throw new LDAPException(ResultCode.DECODING_ERROR,
-                                  ERR_SCHEMA_ELEM_UNEXPECTED_CHAR_IN_OID.get(s,
-                                       pos));
+               ERR_SCHEMA_ELEM_UNEXPECTED_CHAR_IN_OID.get(s, pos));
       }
 
       pos++;
@@ -511,7 +584,7 @@ public abstract class SchemaElement
 
     // We hit the end of the string before finding a space.
     throw new LDAPException(ResultCode.DECODING_ERROR,
-                            ERR_SCHEMA_ELEM_NO_SPACE_AFTER_OID.get(s));
+         ERR_SCHEMA_ELEM_NO_SPACE_AFTER_OID.get(s));
   }
 
 
@@ -522,10 +595,12 @@ public abstract class SchemaElement
    * followed by a space followed by one or more space-delimited OID strings,
    * followed by a space and a closing parenthesis.
    *
-   * @param  s          The string from which to read the OID strings.
-   * @param  startPos   The position at which to start reading.
-   * @param  length     The position of the end of the string.
-   * @param  valueList  The list into which the values read may be placed.
+   * @param  s              The string from which to read the OID strings.
+   * @param  startPos       The position at which to start reading.
+   * @param  length         The position of the end of the string.
+   * @param  componentName  The name of the component in the schema element
+   *                        definition whose value is being read.
+   * @param  valueList      The list into which the values read may be placed.
    *
    * @return  The position of the first space immediately following the end of
    *          the values.
@@ -533,8 +608,9 @@ public abstract class SchemaElement
    * @throws  LDAPException  If a problem is encountered while attempting to
    *                         read the OID strings.
    */
-  static int readOIDs(final String s, final int startPos, final int length,
-                      final ArrayList<String> valueList)
+  static int readOIDs(@NotNull final String s, final int startPos,
+                      final int length, @NotNull final String componentName,
+                      @NotNull final ArrayList<String> valueList)
       throws LDAPException
   {
     // Look at the first character.  If it's an opening parenthesis, then read
@@ -572,15 +648,15 @@ public abstract class SchemaElement
         else
         {
           throw new LDAPException(ResultCode.DECODING_ERROR,
-                         ERR_SCHEMA_ELEM_UNEXPECTED_CHAR_IN_OID_LIST.get(s,
-                              pos));
+               ERR_SCHEMA_ELEM_UNEXPECTED_CHAR_IN_OID_LIST.get(s, pos,
+                    componentName));
         }
       }
 
       if (valueList.isEmpty())
       {
         throw new LDAPException(ResultCode.DECODING_ERROR,
-                                ERR_SCHEMA_ELEM_EMPTY_OID_LIST.get(s));
+             ERR_SCHEMA_ELEM_EMPTY_OID_LIST.get(s, componentName));
       }
 
       if (pos >= length)
@@ -591,7 +667,7 @@ public abstract class SchemaElement
         // it can't possibly be the end of the schema element definition, so
         // that's still an error.
         throw new LDAPException(ResultCode.DECODING_ERROR,
-                                ERR_SCHEMA_ELEM_NO_SPACE_AFTER_OID_LIST.get(s));
+             ERR_SCHEMA_ELEM_NO_SPACE_AFTER_OID_LIST.get(s, componentName));
       }
 
       return pos;
@@ -614,7 +690,8 @@ public abstract class SchemaElement
    * @param  value   The value to be encoded and placed in the buffer.
    * @param  buffer  The buffer to which the encoded value is to be appended.
    */
-  static void encodeValue(final String value, final StringBuilder buffer)
+  static void encodeValue(@NotNull final String value,
+                          @NotNull final StringBuilder buffer)
   {
     final int length = value.length();
     for (int i=0; i < length; i++)
@@ -630,6 +707,16 @@ public abstract class SchemaElement
       }
     }
   }
+
+
+
+  /**
+   * Retrieves the type of schema element that this object represents.
+   *
+   * @return  The type of schema element that this object represents.
+   */
+  @NotNull()
+  public abstract SchemaElementType getSchemaElementType();
 
 
 
@@ -650,7 +737,7 @@ public abstract class SchemaElement
    * @return  {@code true} if the provided object may be considered equal to
    *          this schema element, or {@code false} if not.
    */
-  public abstract boolean equals(Object o);
+  public abstract boolean equals(@Nullable Object o);
 
 
 
@@ -663,8 +750,9 @@ public abstract class SchemaElement
    * @return  {@code true} if the provided extension maps are equivalent, or
    *          {@code false} if not.
    */
-  protected static boolean extensionsEqual(final Map<String,String[]> m1,
-                                           final Map<String,String[]> m2)
+  protected static boolean extensionsEqual(
+                                @NotNull final Map<String,String[]> m1,
+                                @NotNull final Map<String,String[]> m2)
   {
     if (m1.isEmpty())
     {
@@ -699,7 +787,8 @@ public abstract class SchemaElement
    * @return  A string array if the provided collection is non-{@code null}, or
    *          {@code null} if the provided collection is {@code null}.
    */
-  static String[] toArray(final Collection<String> c)
+  @Nullable()
+  static String[] toArray(@Nullable final Collection<String> c)
   {
     if (c == null)
     {
@@ -719,5 +808,6 @@ public abstract class SchemaElement
    *          described in RFC 4512.
    */
   @Override()
+  @NotNull()
   public abstract String toString();
 }

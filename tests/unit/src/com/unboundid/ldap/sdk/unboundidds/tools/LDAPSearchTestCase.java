@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,8 +37,13 @@ package com.unboundid.ldap.sdk.unboundidds.tools;
 
 
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 
@@ -42,6 +62,7 @@ import com.unboundid.ldap.sdk.extensions.NoticeOfDisconnectionExtendedResult;
 import com.unboundid.ldif.LDIFReader;
 import com.unboundid.util.PassphraseEncryptedInputStream;
 import com.unboundid.util.PasswordReader;
+import com.unboundid.util.StaticUtils;
 import com.unboundid.util.json.JSONObject;
 import com.unboundid.util.json.JSONObjectReader;
 
@@ -180,6 +201,9 @@ public final class LDAPSearchTestCase
 
     assertNotNull(ldapSearch.getExampleUsages());
     assertFalse(ldapSearch.getExampleUsages().isEmpty());
+
+    ldapSearch.getOutStream();
+    ldapSearch.getErrStream();
   }
 
 
@@ -196,6 +220,180 @@ public final class LDAPSearchTestCase
     assertEquals(
          LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM, "--help"),
          ResultCode.SUCCESS);
+  }
+
+
+
+  /**
+   * Tests the ability to get SASL help information for the tool when no
+   * mechanism was specified.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testSASLHelpWithoutMechanism()
+         throws Exception
+  {
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    assertEquals(
+         LDAPSearch.main(out, out, "--help-sasl"),
+         ResultCode.SUCCESS);
+
+    boolean externalFound = false;
+    boolean gssapiFound = false;
+    boolean plainFound = false;
+    for (final String line :
+         StaticUtils.stringToLines(StaticUtils.toUTF8String(out.toByteArray())))
+    {
+      if (line.contains("The EXTERNAL SASL Mechanism"))
+      {
+        externalFound = true;
+      }
+      else if (line.contains("The GSSAPI SASL Mechanism"))
+      {
+        gssapiFound = true;
+      }
+      else if (line.contains("The PLAIN SASL Mechanism"))
+      {
+        plainFound = true;
+      }
+    }
+
+    assertTrue(externalFound);
+    assertTrue(gssapiFound);
+    assertTrue(plainFound);
+  }
+
+
+
+  /**
+   * Tests the ability to get SASL help information for the tool when the GSSAPI
+   * mechanism was specified.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testSASLHelpWithGSSAPIMechanism()
+         throws Exception
+  {
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    assertEquals(
+         LDAPSearch.main(out, out,
+              "--help-sasl",
+              "--saslOption", "mech=GSSAPI"),
+         ResultCode.SUCCESS);
+
+    boolean externalFound = false;
+    boolean gssapiFound = false;
+    boolean plainFound = false;
+    for (final String line :
+         StaticUtils.stringToLines(StaticUtils.toUTF8String(out.toByteArray())))
+    {
+      if (line.contains("The EXTERNAL SASL Mechanism"))
+      {
+        externalFound = true;
+      }
+      else if (line.contains("The GSSAPI SASL Mechanism"))
+      {
+        gssapiFound = true;
+      }
+      else if (line.contains("The PLAIN SASL Mechanism"))
+      {
+        plainFound = true;
+      }
+    }
+
+    assertFalse(externalFound);
+    assertTrue(gssapiFound);
+    assertFalse(plainFound);
+  }
+
+
+
+  /**
+   * Tests the ability to get SASL help information for the tool when an
+   * unsupported mechanism is specified.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testSASLHelpWithUnsupportedMechanism()
+         throws Exception
+  {
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    assertEquals(
+         LDAPSearch.main(out, out,
+              "--help-sasl",
+              "--saslOption", "mech=UNSUPPORTED"),
+         ResultCode.SUCCESS);
+
+    boolean externalFound = false;
+    boolean gssapiFound = false;
+    boolean plainFound = false;
+    for (final String line :
+         StaticUtils.stringToLines(StaticUtils.toUTF8String(out.toByteArray())))
+    {
+      if (line.contains("The EXTERNAL SASL Mechanism"))
+      {
+        externalFound = true;
+      }
+      else if (line.contains("The GSSAPI SASL Mechanism"))
+      {
+        gssapiFound = true;
+      }
+      else if (line.contains("The PLAIN SASL Mechanism"))
+      {
+        plainFound = true;
+      }
+    }
+
+    assertTrue(externalFound);
+    assertTrue(gssapiFound);
+    assertTrue(plainFound);
+  }
+
+
+
+  /**
+   * Tests the ability to get SASL help information for the tool when a SASL
+   * option is specified without a mechanism name.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testSASLHelpWithNonMechOption()
+         throws Exception
+  {
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    assertEquals(
+         LDAPSearch.main(out, out,
+              "--help-sasl",
+              "--saslOption", "qop=auth"),
+         ResultCode.SUCCESS);
+
+    boolean externalFound = false;
+    boolean gssapiFound = false;
+    boolean plainFound = false;
+    for (final String line :
+         StaticUtils.stringToLines(StaticUtils.toUTF8String(out.toByteArray())))
+    {
+      if (line.contains("The EXTERNAL SASL Mechanism"))
+      {
+        externalFound = true;
+      }
+      else if (line.contains("The GSSAPI SASL Mechanism"))
+      {
+        gssapiFound = true;
+      }
+      else if (line.contains("The PLAIN SASL Mechanism"))
+      {
+        plainFound = true;
+      }
+    }
+
+    assertTrue(externalFound);
+    assertTrue(gssapiFound);
+    assertTrue(plainFound);
   }
 
 
@@ -248,6 +446,7 @@ public final class LDAPSearchTestCase
          "--bindControl", "1.2.3.4",
          "--authorizationIdentity",
          "--getAuthorizationEntryAttribute", "*",
+         "--getRecentLoginHistory",
          "--getUserResourceLimits",
          "--usePasswordPolicyControl",
          "--suppressOperationalAttributeUpdates", "last-access-time",
@@ -288,7 +487,7 @@ public final class LDAPSearchTestCase
          "--getEffectiveRightsAuthzID", "u:jdoe",
          "--getEffectiveRightsAttribute", "uid",
          "--includeReplicationConflictEntries",
-         "--includeSubentries",
+         "--draftLDUPSubentries",
          "--joinRule", "dn:isMemberOf",
          "--joinBaseDN", "dc=example,dc=com",
          "--joinScope", "sub",
@@ -330,6 +529,7 @@ public final class LDAPSearchTestCase
          "--baseDN", "",
          "--scope", "base",
          "--permitUnindexedSearch",
+         "--rfc3672Subentries", "false",
          "(objectClass=*)",
          "*",
          "+",
@@ -1384,6 +1584,81 @@ public final class LDAPSearchTestCase
 
 
   /**
+   * Provides test coverage for the tool when configured to use the multi-valued
+   * CSV output format.  This method is just intended to get coverage; it
+   * doesn't actually attempt to verify that the output is properly formatted.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testMultiValuedCSVOutputFormat()
+         throws Exception
+  {
+    assertEquals(
+         LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+              "--hostname", "localhost",
+              "--port", String.valueOf(ds.getListenPort()),
+              "--baseDN", "dc=example,dc=com",
+              "--scope", "sub",
+              "--outputFormat", "multi-valued-csv",
+              "--requestedAttribute", "uid",
+              "--requestedAttribute", "givenName",
+              "--requestedAttribute", "sn",
+              "(objectClass=person)"),
+         ResultCode.SUCCESS);
+
+    final File urlFile = createTempFile();
+    assertEquals(
+         LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+              "--hostname", "localhost",
+              "--port", String.valueOf(ds.getListenPort()),
+              "--outputFormat", "multi-valued-csv",
+              "--ldapURLFile", urlFile.getAbsolutePath()),
+         ResultCode.PARAM_ERROR);
+
+    assertEquals(
+         LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+              "--hostname", "localhost",
+              "--port", String.valueOf(ds.getListenPort()),
+              "--baseDN", "dc=example,dc=com",
+              "--scope", "sub",
+              "--outputFormat", "multi-valued-csv",
+              "--filter", "(objectClass=person)",
+              "uid",
+              "givenName",
+              "sn"),
+         ResultCode.PARAM_ERROR);
+
+    assertEquals(
+         LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+              "--hostname", "localhost",
+              "--port", String.valueOf(ds.getListenPort()),
+              "--baseDN", "dc=example,dc=com",
+              "--scope", "sub",
+              "--outputFormat", "multi-valued-csv",
+              "--requestedAttribute", "givenName",
+              "--requestedAttribute", "sn",
+              "--filter", "(objectClass=person)",
+              "uid"),
+         ResultCode.PARAM_ERROR);
+
+    assertEquals(
+         LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+              "--hostname", "localhost",
+              "--port", String.valueOf(ds.getListenPort()),
+              "--baseDN", "dc=example,dc=com",
+              "--scope", "sub",
+              "--outputFormat", "multi-valued-csv",
+              "--requestedAttribute", "uid",
+              "(objectClass=person)",
+              "givenName",
+              "sn"),
+         ResultCode.PARAM_ERROR);
+  }
+
+
+
+  /**
    * Provides test coverage for the tool when configured to use the
    * tab-delimited text output format.  This method is just intended to get
    * coverage; it doesn't actually attempt to verify that the output is properly
@@ -1455,6 +1730,201 @@ public final class LDAPSearchTestCase
               "givenName",
               "sn"),
          ResultCode.PARAM_ERROR);
+  }
+
+
+
+  /**
+   * Provides test coverage for the tool when configured to use the
+   * multi-valued tab-delimited text output format.  This method is just
+   * intended to get coverage; it doesn't actually attempt to verify that the
+   * output is properly formatted.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testMultiValuedTabDelimitedOutputFormat()
+         throws Exception
+  {
+    assertEquals(
+         LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+              "--hostname", "localhost",
+              "--port", String.valueOf(ds.getListenPort()),
+              "--baseDN", "dc=example,dc=com",
+              "--scope", "sub",
+              "--outputFormat", "multi-valued-tab-delimited",
+              "--requestedAttribute", "uid",
+              "--requestedAttribute", "givenName",
+              "--requestedAttribute", "sn",
+              "(objectClass=person)"),
+         ResultCode.SUCCESS);
+
+    final File urlFile = createTempFile();
+    assertEquals(
+         LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+              "--hostname", "localhost",
+              "--port", String.valueOf(ds.getListenPort()),
+              "--outputFormat", "multi-valued-tab-delimited",
+              "--ldapURLFile", urlFile.getAbsolutePath()),
+         ResultCode.PARAM_ERROR);
+
+    assertEquals(
+         LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+              "--hostname", "localhost",
+              "--port", String.valueOf(ds.getListenPort()),
+              "--baseDN", "dc=example,dc=com",
+              "--scope", "sub",
+              "--outputFormat", "multi-valued-tab-delimited",
+              "--filter", "(objectClass=person)",
+              "uid",
+              "givenName",
+              "sn"),
+         ResultCode.PARAM_ERROR);
+
+    assertEquals(
+         LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+              "--hostname", "localhost",
+              "--port", String.valueOf(ds.getListenPort()),
+              "--baseDN", "dc=example,dc=com",
+              "--scope", "sub",
+              "--outputFormat", "multi-valued-tab-delimited",
+              "--requestedAttribute", "givenName",
+              "--requestedAttribute", "sn",
+              "--filter", "(objectClass=person)",
+              "uid"),
+         ResultCode.PARAM_ERROR);
+
+    assertEquals(
+         LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+              "--hostname", "localhost",
+              "--port", String.valueOf(ds.getListenPort()),
+              "--baseDN", "dc=example,dc=com",
+              "--scope", "sub",
+              "--outputFormat", "multi-valued-tab-delimited",
+              "--requestedAttribute", "uid",
+              "(objectClass=person)",
+              "givenName",
+              "sn"),
+         ResultCode.PARAM_ERROR);
+  }
+
+
+
+  /**
+   * Provides test coverage for the tool when configured to use the dns-only
+   * output format and an output file is used.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testDNsOnlyOutputFormatWithOutputFile()
+         throws Exception
+  {
+    final File outputFile = createTempFile();
+
+    assertEquals(
+         LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+              "--hostname", "localhost",
+              "--port", String.valueOf(ds.getListenPort()),
+              "--baseDN", "dc=example,dc=com",
+              "--scope", "sub",
+              "--outputFormat", "dns-only",
+              "--requestedAttribute", "uid",
+              "--outputFile", outputFile.getAbsolutePath(),
+              "(objectClass=person)"),
+         ResultCode.SUCCESS);
+
+    try (FileReader fileReader = new FileReader(outputFile);
+         BufferedReader bufferedReader = new BufferedReader(fileReader))
+    {
+      assertEquals(bufferedReader.readLine(),
+           "uid=aaron.adams,ou=People,dc=example,dc=com");
+      assertEquals(bufferedReader.readLine(),
+           "uid=brenda.brown,ou=People,dc=example,dc=com");
+      assertEquals(bufferedReader.readLine(),
+           "uid=chester.cooper,ou=People,dc=example,dc=com");
+      assertEquals(bufferedReader.readLine(),
+           "uid=dolly.duke,ou=People,dc=example,dc=com");
+      assertEquals(bufferedReader.readLine(),
+           "uid=ezra.edwards,ou=People,dc=example,dc=com");
+      assertNull(bufferedReader.readLine());
+    }
+  }
+
+
+
+  /**
+   * Provides test coverage for the tool when configured to use the values-only
+   * output format and an output file is used.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testValuesOnlyOutputFormatWithOutputFile()
+         throws Exception
+  {
+    final File outputFile = createTempFile();
+
+    assertEquals(
+         LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+              "--hostname", "localhost",
+              "--port", String.valueOf(ds.getListenPort()),
+              "--baseDN", "dc=example,dc=com",
+              "--scope", "sub",
+              "--outputFormat", "values-only",
+              "--requestedAttribute", "uid",
+              "--outputFile", outputFile.getAbsolutePath(),
+              "(objectClass=person)"),
+         ResultCode.SUCCESS);
+
+    try (FileReader fileReader = new FileReader(outputFile);
+         BufferedReader bufferedReader = new BufferedReader(fileReader))
+    {
+      assertEquals(bufferedReader.readLine(), "aaron.adams");
+      assertEquals(bufferedReader.readLine(), "brenda.brown");
+      assertEquals(bufferedReader.readLine(), "chester.cooper");
+      assertEquals(bufferedReader.readLine(), "dolly.duke");
+      assertEquals(bufferedReader.readLine(), "ezra.edwards");
+      assertNull(bufferedReader.readLine());
+    }
+  }
+
+
+
+  /**
+   * Provides test coverage for the tool when configured to use the values-only
+   * output format and no output file is used.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testVaulesOnlyOutputFormatWithoutOutputFile()
+         throws Exception
+  {
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+    assertEquals(
+         LDAPSearch.main(out, out,
+              "--hostname", "localhost",
+              "--port", String.valueOf(ds.getListenPort()),
+              "--baseDN", "dc=example,dc=com",
+              "--scope", "sub",
+              "--outputFormat", "values-only",
+              "--requestedAttribute", "uid",
+              "(objectClass=person)"),
+         ResultCode.SUCCESS);
+
+    try (InputStreamReader inputStreamReader = new InputStreamReader(
+              new ByteArrayInputStream(out.toByteArray()));
+         BufferedReader bufferedReader = new BufferedReader(inputStreamReader))
+    {
+      assertEquals(bufferedReader.readLine(), "aaron.adams");
+      assertEquals(bufferedReader.readLine(), "brenda.brown");
+      assertEquals(bufferedReader.readLine(), "chester.cooper");
+      assertEquals(bufferedReader.readLine(), "dolly.duke");
+      assertEquals(bufferedReader.readLine(), "ezra.edwards");
+      assertNull(bufferedReader.readLine());
+    }
   }
 
 
@@ -1980,5 +2450,76 @@ public final class LDAPSearchTestCase
     assertNull(ldifReader.readEntry());
 
     ldifReader.close();
+  }
+
+
+
+  /**
+   * Provides test coverage for the controls used to get and request routing
+   * information.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testRoutingControls()
+         throws Exception
+  {
+    final InMemoryDirectoryServer ds =
+         new InMemoryDirectoryServer("dc=example,dc=com");
+    ds.startListening();
+    final int dsPort = ds.getListenPort();
+    ds.shutDown(true);
+
+    LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+         "--hostname", "localhost",
+         "--port", String.valueOf(dsPort),
+         "--getBackendSetID",
+         "--getServerID",
+         "--routeToBackendSet", "rp1:bs1",
+         "--routeToBackendSet", "rp1:bs2",
+         "--routeToBackendSet", "rp2:bs3",
+         "--routeToServer", "server-id",
+         "--baseDN", "dc=example,dc=com",
+         "--scope", "base",
+         "(objectClass=*)");
+
+    LDAPSearch.main(NULL_OUTPUT_STREAM, NULL_OUTPUT_STREAM,
+         "--hostname", "localhost",
+         "--port", String.valueOf(dsPort),
+         "--routeToBackendSet", "malformed",
+         "--baseDN", "dc=example,dc=com",
+         "--scope", "base",
+         "(objectClass=*)");
+  }
+
+
+
+  /**
+   * Provides test coverage for the --requireMatch argument.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testRequireMatch()
+         throws Exception
+  {
+    ResultCode resultCode = LDAPSearch.main(NULL_OUTPUT_STREAM,
+         NULL_OUTPUT_STREAM,
+         "--hostname", "localhost",
+         "--port", String.valueOf(ds.getListenPort()),
+         "--baseDN", "dc=example,dc=com",
+         "--scope", "sub",
+         "(uid=nonexistent)");
+    assertEquals(resultCode, ResultCode.SUCCESS);
+
+    resultCode = LDAPSearch.main(NULL_OUTPUT_STREAM,
+         NULL_OUTPUT_STREAM,
+         "--hostname", "localhost",
+         "--port", String.valueOf(ds.getListenPort()),
+         "--baseDN", "dc=example,dc=com",
+         "--scope", "sub",
+         "--requireMatch",
+         "(uid=nonexistent)");
+    assertEquals(resultCode, ResultCode.NO_RESULTS_RETURNED);
   }
 }

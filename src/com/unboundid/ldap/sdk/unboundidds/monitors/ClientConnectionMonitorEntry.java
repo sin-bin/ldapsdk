@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,7 @@ import java.util.Map;
 
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -70,7 +86,7 @@ public final class ClientConnectionMonitorEntry
   /**
    * The structural object class used in client connection monitor entries.
    */
-  static final String CLIENT_CONNECTION_MONITOR_OC =
+  @NotNull static final String CLIENT_CONNECTION_MONITOR_OC =
        "ds-client-connection-monitor-entry";
 
 
@@ -79,7 +95,7 @@ public final class ClientConnectionMonitorEntry
    * The name of the attribute that contains information about the established
    * connections.
    */
-  private static final String ATTR_CONNECTION = "connection";
+  @NotNull private static final String ATTR_CONNECTION = "connection";
 
 
 
@@ -91,7 +107,7 @@ public final class ClientConnectionMonitorEntry
 
 
   // The list of connections currently established.
-  private final List<String> connections;
+  @NotNull private final List<String> connections;
 
 
 
@@ -101,7 +117,7 @@ public final class ClientConnectionMonitorEntry
    * @param  entry  The entry to be parsed as a client connection monitor entry.
    *                It must not be {@code null}.
    */
-  public ClientConnectionMonitorEntry(final Entry entry)
+  public ClientConnectionMonitorEntry(@NotNull final Entry entry)
   {
     super(entry);
 
@@ -120,6 +136,7 @@ public final class ClientConnectionMonitorEntry
    *          not included in the monitor entry or there are no established
    *          connections.
    */
+  @NotNull()
   public List<String> getConnections()
   {
     return connections;
@@ -131,6 +148,7 @@ public final class ClientConnectionMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDisplayName()
   {
     return INFO_CLIENT_CONNECTION_MONITOR_DISPNAME.get();
@@ -142,6 +160,7 @@ public final class ClientConnectionMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDescription()
   {
     return INFO_CLIENT_CONNECTION_MONITOR_DESC.get();
@@ -153,6 +172,7 @@ public final class ClientConnectionMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<String,MonitorAttribute> getMonitorAttributes()
   {
     final LinkedHashMap<String,MonitorAttribute> attrs =

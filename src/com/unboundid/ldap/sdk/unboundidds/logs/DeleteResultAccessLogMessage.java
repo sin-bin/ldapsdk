@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,8 @@ import com.unboundid.ldap.sdk.unboundidds.controls.
             AssuredReplicationRemoteLevel;
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -68,95 +85,97 @@ public class DeleteResultAccessLogMessage
 
 
   // The assured replication level to use for local servers.
-  private final AssuredReplicationLocalLevel assuredReplicationLocalLevel;
+  @Nullable private final AssuredReplicationLocalLevel
+       assuredReplicationLocalLevel;
 
   // The assured replication level to use for remote servers.
-  private final AssuredReplicationRemoteLevel assuredReplicationRemoteLevel;
+  @Nullable private final AssuredReplicationRemoteLevel
+       assuredReplicationRemoteLevel;
 
   //  Indicates whether the delete operation targeted a soft-deleted entry.
-  private final Boolean changeToSoftDeletedEntry;
+  @Nullable private final Boolean changeToSoftDeletedEntry;
 
   // Indicates whether the response was known to be delayed by replication
   // assurance processing.
-  private final Boolean responseDelayedByAssurance;
+  @Nullable private final Boolean responseDelayedByAssurance;
 
   // Indicates whether the any uncached data was accessed in the course of
   // processing this operation.
-  private final Boolean uncachedDataAccessed;
+  @Nullable private final Boolean uncachedDataAccessed;
 
   // The processing time for the operation.
-  private final Double processingTime;
+  @Nullable private final Double processingTime;
 
   // The queue time for the operation.
-  private final Double queueTime;
+  @Nullable private final Double queueTime;
 
   // The port of the backend server to which the request has been forwarded.
-  private final Integer targetPort;
+  @Nullable private final Integer targetPort;
 
   // The list of indexes for which keys near the index entry limit were accessed
   // while processing the operation.
-  private final List<String> indexesWithKeysAccessedNearEntryLimit;
+  @NotNull private final List<String> indexesWithKeysAccessedNearEntryLimit;
 
   // The list of indexes for which keys over the index entry limit were accessed
   // while processing the operation.
-  private final List<String> indexesWithKeysAccessedOverEntryLimit;
+  @NotNull private final List<String> indexesWithKeysAccessedOverEntryLimit;
 
   // The list of privileges required for processing the operation that the
   // requester did not have.
-  private final List<String> missingPrivileges;
+  @NotNull private final List<String> missingPrivileges;
 
   // The list of privileges used during the course of processing the operation
   // before an alternate authorization identity was assigned.
-  private final List<String> preAuthZUsedPrivileges;
+  @NotNull private final List<String> preAuthZUsedPrivileges;
 
   // The list of referral URLs for the operation.
-  private final List<String> referralURLs;
+  @NotNull private final List<String> referralURLs;
 
   // The list of response control OIDs for the operation.
-  private final List<String> responseControlOIDs;
+  @NotNull private final List<String> responseControlOIDs;
 
   // The list of servers accessed while processing the operation.
-  private final List<String> serversAccessed;
+  @NotNull private final List<String> serversAccessed;
 
   // The list of privileges used during the course of processing the operation.
-  private final List<String> usedPrivileges;
+  @NotNull private final List<String> usedPrivileges;
 
   // The assured replication timeout, in milliseconds.
-  private final Long assuredReplicationTimeoutMillis;
+  @Nullable private final Long assuredReplicationTimeoutMillis;
 
   // The number of intermediate response messages returned to the client.
-  private final Long intermediateResponsesReturned;
+  @Nullable private final Long intermediateResponsesReturned;
 
   // The result code for the operation.
-  private final ResultCode resultCode;
+  @Nullable private final ResultCode resultCode;
 
   // Additional information about the operation result.
-  private final String additionalInformation;
+  @Nullable private final String additionalInformation;
 
   // The alternate authorization DN for the operation.
-  private final String authzDN;
+  @Nullable private final String authzDN;
 
   // The diagnostic message for the operation.
-  private final String diagnosticMessage;
+  @Nullable private final String diagnosticMessage;
 
   // The intermediate client result for the operation.
-  private final String intermediateClientResult;
+  @Nullable private final String intermediateClientResult;
 
   // The matched DN for the operation.
-  private final String matchedDN;
+  @Nullable private final String matchedDN;
 
   // The replication change ID for the operation.
-  private final String replicationChangeID;
+  @Nullable private final String replicationChangeID;
 
   // The DN of the soft-deleted entry that was created as a result of a soft
   // delete operation rather than a hard delete.
-  private final String softDeletedEntryDN;
+  @Nullable private final String softDeletedEntryDN;
 
   // The address of the backend server to which the request has been forwarded.
-  private final String targetHost;
+  @Nullable private final String targetHost;
 
   // The protocol used to forward the request to the backend server.
-  private final String targetProtocol;
+  @Nullable private final String targetProtocol;
 
 
 
@@ -169,7 +188,7 @@ public class DeleteResultAccessLogMessage
    * @throws  LogException  If the provided string cannot be parsed as a valid
    *                        log message.
    */
-  public DeleteResultAccessLogMessage(final String s)
+  public DeleteResultAccessLogMessage(@NotNull final String s)
          throws LogException
   {
     this(new LogMessage(s));
@@ -184,7 +203,7 @@ public class DeleteResultAccessLogMessage
    * @param  m  The log message to be parsed as a delete result access log
    *            message.
    */
-  public DeleteResultAccessLogMessage(final LogMessage m)
+  public DeleteResultAccessLogMessage(@NotNull final LogMessage m)
   {
     super(m);
 
@@ -406,6 +425,7 @@ public class DeleteResultAccessLogMessage
    *          included in the log message.
    */
   @Override()
+  @Nullable()
   public ResultCode getResultCode()
   {
     return resultCode;
@@ -420,6 +440,7 @@ public class DeleteResultAccessLogMessage
    *          not included in the log message.
    */
   @Override()
+  @Nullable()
   public String getDiagnosticMessage()
   {
     return diagnosticMessage;
@@ -436,6 +457,7 @@ public class DeleteResultAccessLogMessage
    *          message.
    */
   @Override()
+  @Nullable()
   public String getAdditionalInformation()
   {
     return additionalInformation;
@@ -450,6 +472,7 @@ public class DeleteResultAccessLogMessage
    *          included in the log message.
    */
   @Override()
+  @Nullable()
   public String getMatchedDN()
   {
     return matchedDN;
@@ -464,6 +487,7 @@ public class DeleteResultAccessLogMessage
    *          it is not included in the log message.
    */
   @Override()
+  @NotNull()
   public List<String> getReferralURLs()
   {
     return referralURLs;
@@ -480,6 +504,7 @@ public class DeleteResultAccessLogMessage
    *          if it is not included in the log message.
    */
   @Override()
+  @Nullable()
   public Long getIntermediateResponsesReturned()
   {
     return intermediateResponsesReturned;
@@ -496,6 +521,7 @@ public class DeleteResultAccessLogMessage
    *          message.
    */
   @Override()
+  @Nullable()
   public Double getProcessingTimeMillis()
   {
     return processingTime;
@@ -512,6 +538,7 @@ public class DeleteResultAccessLogMessage
    *          the log message.
    */
   @Override()
+  @Nullable()
   public Double getQueueTimeMillis()
   {
     return queueTime;
@@ -526,6 +553,7 @@ public class DeleteResultAccessLogMessage
    *          an empty list if it is not included in the log message.
    */
   @Override()
+  @NotNull()
   public List<String> getResponseControlOIDs()
   {
     return responseControlOIDs;
@@ -544,6 +572,7 @@ public class DeleteResultAccessLogMessage
    *          included in the log message.
    */
   @Override()
+  @NotNull()
   public List<String> getServersAccessed()
   {
     return serversAccessed;
@@ -561,6 +590,7 @@ public class DeleteResultAccessLogMessage
    *          it is not included in the log message (and the server likely did
    *          not access uncached data).
    */
+  @Nullable()
   public Boolean getUncachedDataAccessed()
   {
     return uncachedDataAccessed;
@@ -576,6 +606,7 @@ public class DeleteResultAccessLogMessage
    *          or {@code null} if it is not included in the log message.
    */
   @Override()
+  @Nullable()
   public String getIntermediateClientResult()
   {
     return intermediateClientResult;
@@ -589,6 +620,7 @@ public class DeleteResultAccessLogMessage
    * @return  The alternate authorization DN for the operation, or {@code null}
    *          if it is not included in the log message.
    */
+  @Nullable()
   public String getAlternateAuthorizationDN()
   {
     return authzDN;
@@ -602,6 +634,7 @@ public class DeleteResultAccessLogMessage
    * @return  The replication change ID for the operation, or {@code null} if it
    *          is not included in the log message.
    */
+  @Nullable()
   public String getReplicationChangeID()
   {
     return replicationChangeID;
@@ -618,6 +651,7 @@ public class DeleteResultAccessLogMessage
    *          message (e.g., because the operation was a hard delete rather than
    *          a soft delete).
    */
+  @Nullable()
   public String getSoftDeletedEntryDN()
   {
     return softDeletedEntryDN;
@@ -633,6 +667,7 @@ public class DeleteResultAccessLogMessage
    *          non-soft-deleted entry, or {@code null} if it is not included in
    *          the log message (and likely did not target a soft-deleted entry).
    */
+  @Nullable()
   public Boolean getChangeToSoftDeletedEntry()
   {
     return changeToSoftDeletedEntry;
@@ -648,6 +683,7 @@ public class DeleteResultAccessLogMessage
    *          forwarded, or {@code null} if it is not included in the log
    *          message.
    */
+  @Nullable()
   public String getTargetHost()
   {
     return targetHost;
@@ -663,6 +699,7 @@ public class DeleteResultAccessLogMessage
    *          forwarded, or {@code null} if it is not included in the log
    *          message.
    */
+  @Nullable()
   public Integer getTargetPort()
   {
     return targetPort;
@@ -676,6 +713,7 @@ public class DeleteResultAccessLogMessage
    * @return  The protocol used to forward the request to the backend server, or
    *          {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public String getTargetProtocol()
   {
     return targetProtocol;
@@ -692,6 +730,7 @@ public class DeleteResultAccessLogMessage
    *          message (e.g., because assured replication will not be performed
    *          for the operation).
    */
+  @Nullable()
   public AssuredReplicationLocalLevel getAssuredReplicationLocalLevel()
   {
     return assuredReplicationLocalLevel;
@@ -708,6 +747,7 @@ public class DeleteResultAccessLogMessage
    *          message (e.g., because assured replication will not be performed
    *          for the operation).
    */
+  @Nullable()
   public AssuredReplicationRemoteLevel getAssuredReplicationRemoteLevel()
   {
     return assuredReplicationRemoteLevel;
@@ -726,6 +766,7 @@ public class DeleteResultAccessLogMessage
    *          not included in the log message (e.g., because assured replication
    *          will not be performed for the operation).
    */
+  @Nullable()
   public Long getAssuredReplicationTimeoutMillis()
   {
     return assuredReplicationTimeoutMillis;
@@ -744,6 +785,7 @@ public class DeleteResultAccessLogMessage
    *          log message (e.g., because assured replication will not be
    *          performed for the operation)
    */
+  @Nullable()
   public Boolean getResponseDelayedByAssurance()
   {
     return responseDelayedByAssurance;
@@ -759,6 +801,7 @@ public class DeleteResultAccessLogMessage
    *          the operation, or an empty list if no privileges were used or this
    *          is not included in the log message.
    */
+  @NotNull()
   public List<String> getUsedPrivileges()
   {
     return usedPrivileges;
@@ -775,6 +818,7 @@ public class DeleteResultAccessLogMessage
    *          assigned, or an empty list if no privileges were used or this is
    *          not included in the log message.
    */
+  @NotNull()
   public List<String> getPreAuthorizationUsedPrivileges()
   {
     return preAuthZUsedPrivileges;
@@ -791,6 +835,7 @@ public class DeleteResultAccessLogMessage
    *          an empty list if there were no missing privileges or this is not
    *          included in the log message.
    */
+  @NotNull()
   public List<String> getMissingPrivileges()
   {
     return missingPrivileges;
@@ -808,6 +853,7 @@ public class DeleteResultAccessLogMessage
    *          empty list if no such index keys were accessed, or if this is not
    *          included in the log message.
    */
+  @NotNull()
   public List<String> getIndexesWithKeysAccessedNearEntryLimit()
   {
     return indexesWithKeysAccessedNearEntryLimit;
@@ -824,6 +870,7 @@ public class DeleteResultAccessLogMessage
    *          empty list if no such index keys were accessed, or if this is not
    *          included in the log message.
    */
+  @NotNull()
   public List<String> getIndexesWithKeysAccessedOverEntryLimit()
   {
     return indexesWithKeysAccessedOverEntryLimit;
@@ -835,6 +882,7 @@ public class DeleteResultAccessLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public AccessLogMessageType getMessageType()
   {
     return AccessLogMessageType.RESULT;

@@ -1,9 +1,24 @@
 /*
- * Copyright 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2012-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -53,14 +68,10 @@ import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldap.sdk.SimpleBindRequest;
 import com.unboundid.ldap.sdk.UnsolicitedNotificationHandler;
 import com.unboundid.ldap.sdk.Version;
+import com.unboundid.ldap.sdk.controls.DraftLDUPSubentriesRequestControl;
 import com.unboundid.ldap.sdk.controls.ManageDsaITRequestControl;
-import com.unboundid.ldap.sdk.controls.SubentriesRequestControl;
 import com.unboundid.ldap.sdk.extensions.WhoAmIExtendedRequest;
 import com.unboundid.ldap.sdk.extensions.WhoAmIExtendedResult;
-import com.unboundid.ldap.sdk.unboundidds.controls.
-            InteractiveTransactionSpecificationRequestControl;
-import com.unboundid.ldap.sdk.unboundidds.controls.
-            InteractiveTransactionSpecificationResponseControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             OperationPurposeRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
@@ -72,23 +83,19 @@ import com.unboundid.ldap.sdk.unboundidds.controls.
 import com.unboundid.ldap.sdk.unboundidds.controls.
             SuppressReferentialIntegrityUpdatesRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.extensions.
-            EndInteractiveTransactionExtendedRequest;
-import com.unboundid.ldap.sdk.unboundidds.extensions.
             GetSubtreeAccessibilityExtendedRequest;
 import com.unboundid.ldap.sdk.unboundidds.extensions.
             GetSubtreeAccessibilityExtendedResult;
 import com.unboundid.ldap.sdk.unboundidds.extensions.
             SetSubtreeAccessibilityExtendedRequest;
 import com.unboundid.ldap.sdk.unboundidds.extensions.
-            StartInteractiveTransactionExtendedRequest;
-import com.unboundid.ldap.sdk.unboundidds.extensions.
-            StartInteractiveTransactionExtendedResult;
-import com.unboundid.ldap.sdk.unboundidds.extensions.
             SubtreeAccessibilityRestriction;
 import com.unboundid.ldap.sdk.unboundidds.extensions.
             SubtreeAccessibilityState;
 import com.unboundid.util.Debug;
 import com.unboundid.util.MultiServerLDAPCommandLineTool;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ReverseComparator;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -130,27 +137,27 @@ public final class MoveSubtree
    * instances to provide a unique identifier that will be generated every time
    * the server starts.
    */
-  private static final String ATTR_STARTUP_UUID = "startupUUID";
+  @NotNull private static final String ATTR_STARTUP_UUID = "startupUUID";
 
 
 
   // The argument used to indicate whether to operate in verbose mode.
-  private BooleanArgument verbose = null;
+  @Nullable private BooleanArgument verbose = null;
 
   // The argument used to specify the base DNs of the subtrees to move.
-  private DNArgument baseDN = null;
+  @Nullable private DNArgument baseDN = null;
 
   // The argument used to specify a file with base DNs of the subtrees to move.
-  private FileArgument baseDNFile = null;
+  @Nullable private FileArgument baseDNFile = null;
 
   // The argument used to specify the maximum number of entries to move.
-  private IntegerArgument sizeLimit = null;
+  @Nullable private IntegerArgument sizeLimit = null;
 
   // A message that will be displayed if the tool is interrupted.
-  private volatile String interruptMessage = null;
+  @Nullable private volatile String interruptMessage = null;
 
   // The argument used to specify the purpose for the move.
-  private StringArgument purpose = null;
+  @Nullable private StringArgument purpose = null;
 
 
 
@@ -160,7 +167,7 @@ public final class MoveSubtree
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String... args)
+  public static void main(@NotNull final String... args)
   {
     final ResultCode rc = main(args, System.out, System.err);
     if (rc != ResultCode.SUCCESS)
@@ -184,8 +191,10 @@ public final class MoveSubtree
    *
    * @return  A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args, final OutputStream out,
-                                final OutputStream err)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream out,
+                                @Nullable final OutputStream err)
   {
     final MoveSubtree moveSubtree = new MoveSubtree(out, err);
     return moveSubtree.runTool(args);
@@ -202,7 +211,8 @@ public final class MoveSubtree
    * @param  err  The output stream to which standard error should be written.
    *              It may be {@code null} if error messages should be suppressed.
    */
-  public MoveSubtree(final OutputStream out, final OutputStream err)
+  public MoveSubtree(@Nullable final OutputStream out,
+                     @Nullable final OutputStream err)
   {
     super(out, err, new String[] { "source", "target" }, null);
   }
@@ -213,6 +223,7 @@ public final class MoveSubtree
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "move-subtree";
@@ -224,6 +235,7 @@ public final class MoveSubtree
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return INFO_MOVE_SUBTREE_TOOL_DESCRIPTION.get();
@@ -235,6 +247,7 @@ public final class MoveSubtree
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -246,7 +259,7 @@ public final class MoveSubtree
    * {@inheritDoc}
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     baseDN = new DNArgument('b', "baseDN", false, 0,
@@ -287,6 +300,7 @@ public final class MoveSubtree
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPConnectionOptions getConnectionOptions()
   {
     final LDAPConnectionOptions options = new LDAPConnectionOptions();
@@ -348,6 +362,7 @@ public final class MoveSubtree
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     final List<String> baseDNs;
@@ -550,6 +565,13 @@ public final class MoveSubtree
 
 
   /**
+   * <BLOCKQUOTE>
+   *   <B>NOTE:</B>  The use of interactive transactions is strongly discouraged
+   *   because it can create conditions which are prone to deadlocks between
+   *   operations that may significantly affect performance and will result in
+   *   the cancellation of one or both operations.  Use one of the
+   *   {@code moveSubtreeWithRestrictedAccessibility} methods instead.
+   * </BLOCKQUOTE>
    * Moves a single leaf entry using a pair of interactive transactions.  The
    * logic used to accomplish this is as follows:
    * <OL>
@@ -612,13 +634,20 @@ public final class MoveSubtree
    *
    * @return  An object with information about the result of the attempted
    *          subtree move.
+   *
+   * @deprecated  The use of interactive transactions is strongly discouraged
+   *              because it can create conditions which are prone to deadlocks
+   *              between operations that may significantly affect performance
+   *              and will result in the cancellation of one or both operations.
    */
+  @Deprecated()
+  @NotNull()
   public static MoveSubtreeResult moveEntryWithInteractiveTransaction(
-                     final LDAPConnection sourceConnection,
-                     final LDAPConnection targetConnection,
-                     final String entryDN,
-                     final OperationPurposeRequestControl opPurposeControl,
-                     final MoveSubtreeListener listener)
+              @NotNull final LDAPConnection sourceConnection,
+              @NotNull final LDAPConnection targetConnection,
+              @NotNull final String entryDN,
+              @Nullable final OperationPurposeRequestControl opPurposeControl,
+              @Nullable final MoveSubtreeListener listener)
   {
     return moveEntryWithInteractiveTransaction(sourceConnection,
          targetConnection, entryDN, opPurposeControl, false, listener);
@@ -627,6 +656,13 @@ public final class MoveSubtree
 
 
   /**
+   * <BLOCKQUOTE>
+   *   <B>NOTE:</B>  The use of interactive transactions is strongly discouraged
+   *   because it can create conditions which are prone to deadlocks between
+   *   operations that may significantly affect performance and will result in
+   *   the cancellation of one or both operations.  Use one of the
+   *   {@code moveSubtreeWithRestrictedAccessibility} methods instead.
+   * </BLOCKQUOTE>
    * Moves a single leaf entry using a pair of interactive transactions.  The
    * logic used to accomplish this is as follows:
    * <OL>
@@ -692,14 +728,22 @@ public final class MoveSubtree
    *
    * @return  An object with information about the result of the attempted
    *          subtree move.
+   *
+   * @deprecated  The use of interactive transactions is strongly discouraged
+   *              because it can create conditions which are prone to deadlocks
+   *              between operations that may significantly affect performance
+   *              and will result in the cancellation of one or both operations.
    */
+  @Deprecated()
+  @SuppressWarnings("deprecation")
+  @NotNull()
   public static MoveSubtreeResult moveEntryWithInteractiveTransaction(
-                     final LDAPConnection sourceConnection,
-                     final LDAPConnection targetConnection,
-                     final String entryDN,
-                     final OperationPurposeRequestControl opPurposeControl,
-                     final boolean suppressRefInt,
-                     final MoveSubtreeListener listener)
+              @NotNull final LDAPConnection sourceConnection,
+              @NotNull final LDAPConnection targetConnection,
+              @NotNull final String entryDN,
+              @Nullable final OperationPurposeRequestControl opPurposeControl,
+              final boolean suppressRefInt,
+              @Nullable final MoveSubtreeListener listener)
   {
     final StringBuilder errorMsg = new StringBuilder();
     final StringBuilder adminMsg = new StringBuilder();
@@ -721,30 +765,35 @@ processingBlock:
     try
     {
       // Start an interactive transaction in the source server.
-      final InteractiveTransactionSpecificationRequestControl sourceTxnControl;
+      final com.unboundid.ldap.sdk.unboundidds.controls.
+           InteractiveTransactionSpecificationRequestControl sourceTxnControl;
       try
       {
-        final StartInteractiveTransactionExtendedRequest startTxnRequest;
+        final com.unboundid.ldap.sdk.unboundidds.extensions.
+             StartInteractiveTransactionExtendedRequest startTxnRequest;
         if (opPurposeControl == null)
         {
-          startTxnRequest =
-               new StartInteractiveTransactionExtendedRequest(entryDN);
+          startTxnRequest = new com.unboundid.ldap.sdk.unboundidds.extensions.
+               StartInteractiveTransactionExtendedRequest(entryDN);
         }
         else
         {
-          startTxnRequest = new StartInteractiveTransactionExtendedRequest(
-               entryDN, new Control[]{opPurposeControl});
+          startTxnRequest = new com.unboundid.ldap.sdk.unboundidds.extensions.
+               StartInteractiveTransactionExtendedRequest(entryDN,
+               new Control[]{opPurposeControl});
         }
 
-        final StartInteractiveTransactionExtendedResult startTxnResult =
-             (StartInteractiveTransactionExtendedResult)
+        final com.unboundid.ldap.sdk.unboundidds.extensions.
+             StartInteractiveTransactionExtendedResult startTxnResult =
+             (com.unboundid.ldap.sdk.unboundidds.extensions.
+                  StartInteractiveTransactionExtendedResult)
              sourceConnection.processExtendedOperation(startTxnRequest);
         if (startTxnResult.getResultCode() == ResultCode.SUCCESS)
         {
           sourceTxnID = startTxnResult.getTransactionID();
-          sourceTxnControl =
-               new InteractiveTransactionSpecificationRequestControl(
-                    sourceTxnID, true, true);
+          sourceTxnControl = new com.unboundid.ldap.sdk.unboundidds.controls.
+               InteractiveTransactionSpecificationRequestControl(sourceTxnID,
+               true, true);
         }
         else
         {
@@ -769,30 +818,35 @@ processingBlock:
 
 
       // Start an interactive transaction in the target server.
-      final InteractiveTransactionSpecificationRequestControl targetTxnControl;
+      final com.unboundid.ldap.sdk.unboundidds.controls.
+           InteractiveTransactionSpecificationRequestControl targetTxnControl;
       try
       {
-        final StartInteractiveTransactionExtendedRequest startTxnRequest;
+        final com.unboundid.ldap.sdk.unboundidds.extensions.
+             StartInteractiveTransactionExtendedRequest startTxnRequest;
         if (opPurposeControl == null)
         {
-          startTxnRequest =
-               new StartInteractiveTransactionExtendedRequest(entryDN);
+          startTxnRequest = new com.unboundid.ldap.sdk.unboundidds.extensions.
+               StartInteractiveTransactionExtendedRequest(entryDN);
         }
         else
         {
-          startTxnRequest = new StartInteractiveTransactionExtendedRequest(
-               entryDN, new Control[]{opPurposeControl});
+          startTxnRequest = new com.unboundid.ldap.sdk.unboundidds.extensions.
+               StartInteractiveTransactionExtendedRequest(entryDN,
+               new Control[]{opPurposeControl});
         }
 
-        final StartInteractiveTransactionExtendedResult startTxnResult =
-             (StartInteractiveTransactionExtendedResult)
+        final com.unboundid.ldap.sdk.unboundidds.extensions.
+             StartInteractiveTransactionExtendedResult startTxnResult =
+             (com.unboundid.ldap.sdk.unboundidds.extensions.
+                  StartInteractiveTransactionExtendedResult)
              targetConnection.processExtendedOperation(startTxnRequest);
         if (startTxnResult.getResultCode() == ResultCode.SUCCESS)
         {
           targetTxnID = startTxnResult.getTransactionID();
-          targetTxnControl =
-               new InteractiveTransactionSpecificationRequestControl(
-                    targetTxnID, true, true);
+          targetTxnControl = new com.unboundid.ldap.sdk.unboundidds.controls.
+               InteractiveTransactionSpecificationRequestControl(targetTxnID,
+               true, true);
         }
         else
         {
@@ -825,8 +879,8 @@ processingBlock:
         searchControls = new Control[]
         {
           sourceTxnControl,
+          new DraftLDUPSubentriesRequestControl(true),
           new ManageDsaITRequestControl(true),
-          new SubentriesRequestControl(true),
           new ReturnConflictEntriesRequestControl(true),
           new SoftDeletedEntryAccessRequestControl(true, true, false),
           new RealAttributesOnlyRequestControl(true)
@@ -837,8 +891,8 @@ processingBlock:
         searchControls = new Control[]
         {
           sourceTxnControl,
+          new DraftLDUPSubentriesRequestControl(true),
           new ManageDsaITRequestControl(true),
-          new SubentriesRequestControl(true),
           new ReturnConflictEntriesRequestControl(true),
           new SoftDeletedEntryAccessRequestControl(true, true, false),
           new RealAttributesOnlyRequestControl(true),
@@ -870,9 +924,11 @@ processingBlock:
       {
         try
         {
-          final InteractiveTransactionSpecificationResponseControl txnResult =
-               InteractiveTransactionSpecificationResponseControl.get(
-                    searchResult);
+          final com.unboundid.ldap.sdk.unboundidds.controls.
+               InteractiveTransactionSpecificationResponseControl txnResult =
+               com.unboundid.ldap.sdk.unboundidds.controls.
+                    InteractiveTransactionSpecificationResponseControl.get(
+                         searchResult);
           if ((txnResult == null) || (! txnResult.transactionValid()))
           {
             resultCode.compareAndSet(null, ResultCode.LOCAL_ERROR);
@@ -902,9 +958,11 @@ processingBlock:
 
         try
         {
-          final InteractiveTransactionSpecificationResponseControl txnResult =
-               InteractiveTransactionSpecificationResponseControl.get(
-                    searchResult);
+          final com.unboundid.ldap.sdk.unboundidds.controls.
+               InteractiveTransactionSpecificationResponseControl txnResult =
+               com.unboundid.ldap.sdk.unboundidds.controls.
+                    InteractiveTransactionSpecificationResponseControl.get(
+                         searchResult);
           if ((txnResult != null) && (! txnResult.transactionValid()))
           {
             sourceTxnID = null;
@@ -992,9 +1050,11 @@ processingBlock:
 
           try
           {
-            final InteractiveTransactionSpecificationResponseControl txnResult =
-                 InteractiveTransactionSpecificationResponseControl.get(
-                      deleteResult);
+            final com.unboundid.ldap.sdk.unboundidds.controls.
+                 InteractiveTransactionSpecificationResponseControl txnResult =
+                 com.unboundid.ldap.sdk.unboundidds.controls.
+                      InteractiveTransactionSpecificationResponseControl.get(
+                           deleteResult);
             if ((txnResult == null) || (! txnResult.transactionValid()))
             {
               resultCode.compareAndSet(null, ResultCode.LOCAL_ERROR);
@@ -1026,9 +1086,11 @@ processingBlock:
 
           try
           {
-            final InteractiveTransactionSpecificationResponseControl txnResult =
-                 InteractiveTransactionSpecificationResponseControl.get(
-                      deleteResult);
+            final com.unboundid.ldap.sdk.unboundidds.controls.
+                 InteractiveTransactionSpecificationResponseControl txnResult =
+                 com.unboundid.ldap.sdk.unboundidds.controls.
+                      InteractiveTransactionSpecificationResponseControl.get(
+                           deleteResult);
             if ((txnResult != null) && (! txnResult.transactionValid()))
             {
               sourceTxnID = null;
@@ -1065,16 +1127,18 @@ processingBlock:
       // Commit the transaction in the target server.
       try
       {
-        final EndInteractiveTransactionExtendedRequest commitRequest;
+        final com.unboundid.ldap.sdk.unboundidds.extensions.
+             EndInteractiveTransactionExtendedRequest commitRequest;
         if (opPurposeControl == null)
         {
-          commitRequest = new EndInteractiveTransactionExtendedRequest(
-               targetTxnID, true);
+          commitRequest = new com.unboundid.ldap.sdk.unboundidds.extensions.
+               EndInteractiveTransactionExtendedRequest(targetTxnID, true);
         }
         else
         {
-          commitRequest = new EndInteractiveTransactionExtendedRequest(
-               targetTxnID, true, new Control[] { opPurposeControl });
+          commitRequest = new com.unboundid.ldap.sdk.unboundidds.extensions.
+               EndInteractiveTransactionExtendedRequest(targetTxnID, true,
+               new Control[] { opPurposeControl });
         }
 
         final ExtendedResult commitResult =
@@ -1108,16 +1172,18 @@ processingBlock:
       // Commit the transaction in the source server.
       try
       {
-        final EndInteractiveTransactionExtendedRequest commitRequest;
+        final com.unboundid.ldap.sdk.unboundidds.extensions.
+             EndInteractiveTransactionExtendedRequest commitRequest;
         if (opPurposeControl == null)
         {
-          commitRequest = new EndInteractiveTransactionExtendedRequest(
-               sourceTxnID, true);
+          commitRequest = new com.unboundid.ldap.sdk.unboundidds.extensions.
+               EndInteractiveTransactionExtendedRequest(sourceTxnID, true);
         }
         else
         {
-          commitRequest = new EndInteractiveTransactionExtendedRequest(
-               sourceTxnID, true, new Control[] { opPurposeControl });
+          commitRequest = new com.unboundid.ldap.sdk.unboundidds.extensions.
+               EndInteractiveTransactionExtendedRequest(sourceTxnID, true,
+               new Control[] { opPurposeControl });
         }
 
         final ExtendedResult commitResult =
@@ -1156,16 +1222,18 @@ processingBlock:
       {
         try
         {
-          final EndInteractiveTransactionExtendedRequest abortRequest;
+          final com.unboundid.ldap.sdk.unboundidds.extensions.
+               EndInteractiveTransactionExtendedRequest abortRequest;
           if (opPurposeControl == null)
           {
-            abortRequest = new EndInteractiveTransactionExtendedRequest(
-                 targetTxnID, false);
+            abortRequest = new com.unboundid.ldap.sdk.unboundidds.extensions.
+                 EndInteractiveTransactionExtendedRequest(targetTxnID, false);
           }
           else
           {
-            abortRequest = new EndInteractiveTransactionExtendedRequest(
-                 targetTxnID, false, new Control[] { opPurposeControl });
+            abortRequest = new com.unboundid.ldap.sdk.unboundidds.extensions.
+                 EndInteractiveTransactionExtendedRequest(targetTxnID, false,
+                 new Control[] { opPurposeControl });
           }
 
           final ExtendedResult abortResult =
@@ -1210,16 +1278,18 @@ processingBlock:
       {
         try
         {
-          final EndInteractiveTransactionExtendedRequest abortRequest;
+          final com.unboundid.ldap.sdk.unboundidds.extensions.
+               EndInteractiveTransactionExtendedRequest abortRequest;
           if (opPurposeControl == null)
           {
-            abortRequest = new EndInteractiveTransactionExtendedRequest(
-                 sourceTxnID, false);
+            abortRequest = new com.unboundid.ldap.sdk.unboundidds.extensions.
+                 EndInteractiveTransactionExtendedRequest(sourceTxnID, false);
           }
           else
           {
-            abortRequest = new EndInteractiveTransactionExtendedRequest(
-                 sourceTxnID, false, new Control[] { opPurposeControl });
+            abortRequest = new com.unboundid.ldap.sdk.unboundidds.extensions.
+                 EndInteractiveTransactionExtendedRequest(sourceTxnID, false,
+                 new Control[] { opPurposeControl });
           }
 
           final ExtendedResult abortResult =
@@ -1360,12 +1430,13 @@ processingBlock:
    * @return  An object with information about the result of the attempted
    *          subtree move.
    */
+  @NotNull()
   public static MoveSubtreeResult moveSubtreeWithRestrictedAccessibility(
-                     final LDAPConnection sourceConnection,
-                     final LDAPConnection targetConnection,
-                     final String baseDN, final int sizeLimit,
-                     final OperationPurposeRequestControl opPurposeControl,
-                     final MoveSubtreeListener listener)
+              @NotNull final LDAPConnection sourceConnection,
+              @NotNull final LDAPConnection targetConnection,
+              @NotNull final String baseDN, final int sizeLimit,
+              @Nullable final OperationPurposeRequestControl opPurposeControl,
+              @Nullable final MoveSubtreeListener listener)
   {
     return moveSubtreeWithRestrictedAccessibility(sourceConnection,
          targetConnection, baseDN, sizeLimit, opPurposeControl, false,
@@ -1446,13 +1517,14 @@ processingBlock:
    * @return  An object with information about the result of the attempted
    *          subtree move.
    */
+  @NotNull()
   public static MoveSubtreeResult moveSubtreeWithRestrictedAccessibility(
-                     final LDAPConnection sourceConnection,
-                     final LDAPConnection targetConnection,
-                     final String baseDN, final int sizeLimit,
-                     final OperationPurposeRequestControl opPurposeControl,
-                     final boolean suppressRefInt,
-                     final MoveSubtreeListener listener)
+              @NotNull final LDAPConnection sourceConnection,
+              @NotNull final LDAPConnection targetConnection,
+              @NotNull final String baseDN, final int sizeLimit,
+              @Nullable final OperationPurposeRequestControl opPurposeControl,
+              final boolean suppressRefInt,
+              @Nullable final MoveSubtreeListener listener)
   {
     return moveSubtreeWithRestrictedAccessibility(null, sourceConnection,
          targetConnection, baseDN, sizeLimit, opPurposeControl, suppressRefInt,
@@ -1496,14 +1568,15 @@ processingBlock:
    * @return  An object with information about the result of the attempted
    *          subtree move.
    */
+  @NotNull()
   private static MoveSubtreeResult moveSubtreeWithRestrictedAccessibility(
-                      final MoveSubtree tool,
-                      final LDAPConnection sourceConnection,
-                      final LDAPConnection targetConnection,
-                      final String baseDN, final int sizeLimit,
-                      final OperationPurposeRequestControl opPurposeControl,
-                      final boolean suppressRefInt,
-                      final MoveSubtreeListener listener)
+               @Nullable final MoveSubtree tool,
+               @NotNull final LDAPConnection sourceConnection,
+               @NotNull final LDAPConnection targetConnection,
+               @NotNull final String baseDN, final int sizeLimit,
+               @Nullable final OperationPurposeRequestControl opPurposeControl,
+               final boolean suppressRefInt,
+               @Nullable final MoveSubtreeListener listener)
   {
     // Ensure that the subtree is currently accessible in both the source and
     // target servers.
@@ -1607,8 +1680,8 @@ processingBlock:
       {
         searchControls = new Control[]
         {
+          new DraftLDUPSubentriesRequestControl(true),
           new ManageDsaITRequestControl(true),
-          new SubentriesRequestControl(true),
           new ReturnConflictEntriesRequestControl(true),
           new SoftDeletedEntryAccessRequestControl(true, true, false),
           new RealAttributesOnlyRequestControl(true)
@@ -1618,8 +1691,8 @@ processingBlock:
       {
         searchControls = new Control[]
         {
+          new DraftLDUPSubentriesRequestControl(true),
           new ManageDsaITRequestControl(true),
-          new SubentriesRequestControl(true),
           new ReturnConflictEntriesRequestControl(true),
           new SoftDeletedEntryAccessRequestControl(true, true, false),
           new RealAttributesOnlyRequestControl(true),
@@ -1916,9 +1989,11 @@ processingBlock:
    * @throws  LDAPException  If a problem is encountered while making the
    *                         determination.
    */
-  private static String getAuthenticatedUserDN(final LDAPConnection connection,
-                      final boolean isSource,
-                      final OperationPurposeRequestControl opPurposeControl)
+  @Nullable()
+  private static String getAuthenticatedUserDN(
+               @NotNull final LDAPConnection connection,
+               final boolean isSource,
+               @Nullable final OperationPurposeRequestControl opPurposeControl)
           throws LDAPException
   {
     final BindRequest bindRequest =
@@ -2004,11 +2079,12 @@ processingBlock:
    *          result that should be used if there is an accessibility problem
    *          with the subtree on the source and/or target server.
    */
+  @Nullable()
   private static MoveSubtreeResult checkInitialAccessibility(
-                      final LDAPConnection sourceConnection,
-                      final LDAPConnection targetConnection,
-                      final String baseDN,
-                      final OperationPurposeRequestControl opPurposeControl)
+               @NotNull final LDAPConnection sourceConnection,
+               @NotNull final LDAPConnection targetConnection,
+               @NotNull final String baseDN,
+               @Nullable final OperationPurposeRequestControl opPurposeControl)
   {
     final DN parsedBaseDN;
     try
@@ -2297,10 +2373,13 @@ processingBlock:
    * @throws  LDAPException  If a problem is encountered while attempting to set
    *                         the accessibility state for the subtree.
    */
-  private static void setAccessibility(final LDAPConnection connection,
-               final boolean isSource, final String baseDN,
-               final SubtreeAccessibilityState state, final String bypassDN,
-               final OperationPurposeRequestControl opPurposeControl)
+  private static void setAccessibility(
+               @NotNull final LDAPConnection connection,
+               final boolean isSource,
+               @NotNull final String baseDN,
+               @NotNull final SubtreeAccessibilityState state,
+               @Nullable final String bypassDN,
+               @Nullable final OperationPurposeRequestControl opPurposeControl)
           throws LDAPException
   {
     final String connectionName =
@@ -2376,7 +2455,8 @@ processingBlock:
    * @param  message  The interrupt message to set.  It may be {@code null} if
    *                  an existing interrupt message should be cleared.
    */
-  static void setInterruptMessage(final MoveSubtree tool, final String message)
+  static void setInterruptMessage(@Nullable final MoveSubtree tool,
+                                  @Nullable final String message)
   {
     if (tool != null)
     {
@@ -2412,13 +2492,16 @@ processingBlock:
    * @return  {@code true} if the delete was completely successful, or
    *          {@code false} if any errors were encountered.
    */
-  private static boolean deleteEntries(final LDAPConnection connection,
-               final boolean isSource, final TreeSet<DN> entryDNs,
-               final OperationPurposeRequestControl opPurposeControl,
-               final boolean suppressRefInt, final MoveSubtreeListener listener,
-               final AtomicInteger deleteCount,
-               final AtomicReference<ResultCode> resultCode,
-               final StringBuilder errorMsg)
+  private static boolean deleteEntries(
+               @NotNull final LDAPConnection connection,
+               final boolean isSource,
+               @NotNull final TreeSet<DN> entryDNs,
+               @Nullable final OperationPurposeRequestControl opPurposeControl,
+               final boolean suppressRefInt,
+               @Nullable final MoveSubtreeListener listener,
+               @NotNull final AtomicInteger deleteCount,
+               @NotNull final AtomicReference<ResultCode> resultCode,
+               @NotNull final StringBuilder errorMsg)
   {
     final ArrayList<Control> deleteControlList = new ArrayList<>(3);
     deleteControlList.add(new ManageDsaITRequestControl(true));
@@ -2515,7 +2598,8 @@ processingBlock:
    * @param  message  The message to be appended to the buffer.
    * @param  buffer   The buffer to which the message should be appended.
    */
-  static void append(final String message, final StringBuilder buffer)
+  static void append(@Nullable final String message,
+                     @NotNull final StringBuilder buffer)
   {
     if (message != null)
     {
@@ -2534,8 +2618,9 @@ processingBlock:
    * {@inheritDoc}
    */
   @Override()
-  public void handleUnsolicitedNotification(final LDAPConnection connection,
-                                            final ExtendedResult notification)
+  public void handleUnsolicitedNotification(
+                   @NotNull final LDAPConnection connection,
+                   @NotNull final ExtendedResult notification)
   {
     wrapOut(0, 79,
          INFO_MOVE_SUBTREE_UNSOLICITED_NOTIFICATION.get(notification.getOID(),
@@ -2549,7 +2634,8 @@ processingBlock:
    * {@inheritDoc}
    */
   @Override()
-  public ReadOnlyEntry doPreAddProcessing(final ReadOnlyEntry entry)
+  @NotNull()
+  public ReadOnlyEntry doPreAddProcessing(@NotNull final ReadOnlyEntry entry)
   {
     // No processing required.
     return entry;
@@ -2561,7 +2647,7 @@ processingBlock:
    * {@inheritDoc}
    */
   @Override()
-  public void doPostAddProcessing(final ReadOnlyEntry entry)
+  public void doPostAddProcessing(@NotNull final ReadOnlyEntry entry)
   {
     wrapOut(0, 79, INFO_MOVE_SUBTREE_ADD_SUCCESSFUL.get(entry.getDN()));
   }
@@ -2572,7 +2658,7 @@ processingBlock:
    * {@inheritDoc}
    */
   @Override()
-  public void doPreDeleteProcessing(final DN entryDN)
+  public void doPreDeleteProcessing(@NotNull final DN entryDN)
   {
     // No processing required.
   }
@@ -2583,7 +2669,7 @@ processingBlock:
    * {@inheritDoc}
    */
   @Override()
-  public void doPostDeleteProcessing(final DN entryDN)
+  public void doPostDeleteProcessing(@NotNull final DN entryDN)
   {
     wrapOut(0, 79, INFO_MOVE_SUBTREE_DELETE_SUCCESSFUL.get(entryDN.toString()));
   }
@@ -2605,7 +2691,7 @@ processingBlock:
    * {@inheritDoc}
    */
   @Override()
-  protected void doShutdownHookProcessing(final ResultCode resultCode)
+  protected void doShutdownHookProcessing(@Nullable final ResultCode resultCode)
   {
     if (resultCode != null)
     {
@@ -2623,6 +2709,7 @@ processingBlock:
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> exampleMap =

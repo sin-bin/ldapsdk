@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -73,10 +89,10 @@ public final class ThreadStackTrace
   private final int threadID;
 
   // The list of stack trace elements for the thread.
-  private final List<StackTraceElement> stackTraceElements;
+  @NotNull private final List<StackTraceElement> stackTraceElements;
 
   // The name for this thread.
-  private final String threadName;
+  @NotNull private final String threadName;
 
 
 
@@ -89,8 +105,8 @@ public final class ThreadStackTrace
    *                             associated thread.  It may be empty if no stack
    *                             trace was available.
    */
-  public ThreadStackTrace(final int threadID, final String threadName,
-                          final List<StackTraceElement> stackTraceElements)
+  public ThreadStackTrace(final int threadID, @NotNull final String threadName,
+              @NotNull final List<StackTraceElement> stackTraceElements)
   {
     this.threadID           = threadID;
     this.threadName         = threadName;
@@ -116,6 +132,7 @@ public final class ThreadStackTrace
    *
    * @return  The name of the associated thread.
    */
+  @NotNull()
   public String getThreadName()
   {
     return threadName;
@@ -129,6 +146,7 @@ public final class ThreadStackTrace
    * @return  The list of stack trace elements for the associated thread, or an
    *          empty list if no stack trace was available.
    */
+  @NotNull()
   public List<StackTraceElement> getStackTraceElements()
   {
     return stackTraceElements;

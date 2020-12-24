@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -83,7 +100,7 @@ public final class PasswordUpdateBehaviorRequestControl
    * The OID (1.3.6.1.4.1.30221.2.5.51) for the password update behavior request
    * control.
    */
-  public static final String PASSWORD_UPDATE_BEHAVIOR_REQUEST_OID =
+  @NotNull public static final String PASSWORD_UPDATE_BEHAVIOR_REQUEST_OID =
        "1.3.6.1.4.1.30221.2.5.51";
 
 
@@ -153,28 +170,28 @@ public final class PasswordUpdateBehaviorRequestControl
 
   // Indicates whether the requester should be allowed to provide a pre-encoded
   // password.
-  private final Boolean allowPreEncodedPassword;
+  @Nullable private final Boolean allowPreEncodedPassword;
 
   // Indicates whether to ignore any minimum password age configured in the
   // password policy.
-  private final Boolean ignoreMinimumPasswordAge;
+  @Nullable private final Boolean ignoreMinimumPasswordAge;
 
   // Indicates whether to skip the process of checking whether the provided
   // password matches the new current password or is in the password history.
-  private final Boolean ignorePasswordHistory;
+  @Nullable private final Boolean ignorePasswordHistory;
 
   // Indicates whether to treat the password change as a self change.
-  private final Boolean isSelfChange;
+  @Nullable private final Boolean isSelfChange;
 
   // Indicates whether to update the user's account to indicate that they must
   // change their password the next time they authenticate.
-  private final Boolean mustChangePassword;
+  @Nullable private final Boolean mustChangePassword;
 
   // Indicates whether to skip password validation for the new password.
-  private final Boolean skipPasswordValidation;
+  @Nullable private final Boolean skipPasswordValidation;
 
   // Specifies the password storage scheme to use for the new password.
-  private final String passwordStorageScheme;
+  @Nullable private final String passwordStorageScheme;
 
 
 
@@ -188,8 +205,8 @@ public final class PasswordUpdateBehaviorRequestControl
    *                     critical.
    */
   public PasswordUpdateBehaviorRequestControl(
-              final PasswordUpdateBehaviorRequestControlProperties properties,
-              final boolean isCritical)
+       @NotNull final PasswordUpdateBehaviorRequestControlProperties properties,
+       final boolean isCritical)
   {
     super(PASSWORD_UPDATE_BEHAVIOR_REQUEST_OID, isCritical,
          encodeValue(properties));
@@ -215,7 +232,7 @@ public final class PasswordUpdateBehaviorRequestControl
    * @throws  LDAPException  If the provided control cannot be parsed as a
    *                         password update behavior request control.
    */
-  public PasswordUpdateBehaviorRequestControl(final Control control)
+  public PasswordUpdateBehaviorRequestControl(@NotNull final Control control)
          throws LDAPException
   {
     super(control);
@@ -298,8 +315,9 @@ public final class PasswordUpdateBehaviorRequestControl
    * @return  An ASN.1 octet string that can be used as the request control
    *          value.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(
-               final PasswordUpdateBehaviorRequestControlProperties properties)
+       @NotNull final PasswordUpdateBehaviorRequestControlProperties properties)
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(6);
 
@@ -361,6 +379,7 @@ public final class PasswordUpdateBehaviorRequestControl
    *          {@code null} if the server should automatically determine whether
    *          the password update is a self change or an administrative reset.
    */
+  @Nullable()
   public Boolean getIsSelfChange()
   {
     return isSelfChange;
@@ -382,6 +401,7 @@ public final class PasswordUpdateBehaviorRequestControl
    *          the password policy configuration should be used to determine
    *          whether to accept pre-encoded passwords.
    */
+  @Nullable()
   public Boolean getAllowPreEncodedPassword()
   {
     return allowPreEncodedPassword;
@@ -403,6 +423,7 @@ public final class PasswordUpdateBehaviorRequestControl
    *          {@code null} if the password policy configuration should be used
    *          to determine whether to skip password validation.
    */
+  @Nullable()
   public Boolean getSkipPasswordValidation()
   {
     return skipPasswordValidation;
@@ -424,6 +445,7 @@ public final class PasswordUpdateBehaviorRequestControl
    *          password policy configuration should be used to determine whether
    *          to ignore the password history.
    */
+  @Nullable()
   public Boolean getIgnorePasswordHistory()
   {
     return ignorePasswordHistory;
@@ -444,6 +466,7 @@ public final class PasswordUpdateBehaviorRequestControl
    *          age, or {@code null} if the password policy configuration should
    *          be used to determine the appropriate behavior.
    */
+  @Nullable()
   public Boolean getIgnoreMinimumPasswordAge()
   {
     return ignoreMinimumPasswordAge;
@@ -461,6 +484,7 @@ public final class PasswordUpdateBehaviorRequestControl
    *          user's password policy configuration should determine the
    *          appropriate schemes for encoding new passwords.
    */
+  @Nullable()
   public String getPasswordStorageScheme()
   {
     return passwordStorageScheme;
@@ -480,6 +504,7 @@ public final class PasswordUpdateBehaviorRequestControl
    *          operation, or {@code null} if the password policy configuration
    *          should be used to control this behavior.
    */
+  @Nullable()
   public Boolean getMustChangePassword()
   {
     return mustChangePassword;
@@ -491,6 +516,7 @@ public final class PasswordUpdateBehaviorRequestControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_PW_UPDATE_BEHAVIOR_REQ_CONTROL_NAME.get();
@@ -502,7 +528,7 @@ public final class PasswordUpdateBehaviorRequestControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("PasswordUpdateBehaviorRequestControl(oid='");
     buffer.append(PASSWORD_UPDATE_BEHAVIOR_REQUEST_OID);

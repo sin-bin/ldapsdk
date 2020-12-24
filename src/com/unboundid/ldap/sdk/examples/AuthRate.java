@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.unboundid.ldap.sdk.Control;
@@ -50,6 +66,8 @@ import com.unboundid.util.FixedRateBarrier;
 import com.unboundid.util.FormattableColumn;
 import com.unboundid.util.HorizontalAlignment;
 import com.unboundid.util.LDAPCommandLineTool;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.OutputFormat;
 import com.unboundid.util.RateAdjustor;
@@ -171,86 +189,86 @@ public final class AuthRate
 
 
   // Indicates whether a request has been made to stop running.
-  private final AtomicBoolean stopRequested;
+  @NotNull private final AtomicBoolean stopRequested;
+
+  // The number of authrate threads that are currently running.
+  @NotNull private final AtomicInteger runningThreads;
 
   // The argument used to indicate that bind requests should include the
   // authorization identity request control.
-  private BooleanArgument authorizationIdentityRequestControl;
+  @Nullable private BooleanArgument authorizationIdentityRequestControl;
 
   // The argument used to indicate whether the tool should only perform a bind
   // without a search.
-  private BooleanArgument bindOnly;
+  @Nullable private BooleanArgument bindOnly;
 
   // The argument used to indicate whether to generate output in CSV format.
-  private BooleanArgument csvFormat;
+  @Nullable private BooleanArgument csvFormat;
 
   // The argument used to indicate that bind requests should include the
   // password policy request control.
-  private BooleanArgument passwordPolicyRequestControl;
+  @Nullable private BooleanArgument passwordPolicyRequestControl;
 
   // The argument used to indicate whether to suppress information about error
   // result codes.
-  private BooleanArgument suppressErrorsArgument;
+  @Nullable private BooleanArgument suppressErrorsArgument;
 
   // The argument used to specify arbitrary controls to include in bind
   // requests.
-  private ControlArgument bindControl;
+  @Nullable private ControlArgument bindControl;
 
   // The argument used to specify arbitrary controls to include in search
   // requests.
-  private ControlArgument searchControl;
+  @Nullable private ControlArgument searchControl;
 
   // The argument used to specify a variable rate file.
-  private FileArgument sampleRateFile;
+  @Nullable private FileArgument sampleRateFile;
 
   // The argument used to specify a variable rate file.
-  private FileArgument variableRateData;
+  @Nullable private FileArgument variableRateData;
 
   // The argument used to specify the collection interval.
-  private IntegerArgument collectionInterval;
+  @Nullable private IntegerArgument collectionInterval;
 
   // The argument used to specify the number of intervals.
-  private IntegerArgument numIntervals;
+  @Nullable private IntegerArgument numIntervals;
 
   // The argument used to specify the number of threads.
-  private IntegerArgument numThreads;
+  @Nullable private IntegerArgument numThreads;
 
   // The argument used to specify the seed to use for the random number
   // generator.
-  private IntegerArgument randomSeed;
+  @Nullable private IntegerArgument randomSeed;
 
   // The target rate of authentications per second.
-  private IntegerArgument ratePerSecond;
+  @Nullable private IntegerArgument ratePerSecond;
 
   // The number of warm-up intervals to perform.
-  private IntegerArgument warmUpIntervals;
+  @Nullable private IntegerArgument warmUpIntervals;
 
   // The argument used to specify the attributes to return.
-  private StringArgument attributes;
+  @Nullable private StringArgument attributes;
 
   // The argument used to specify the type of authentication to perform.
-  private StringArgument authType;
+  @Nullable private StringArgument authType;
 
   // The argument used to specify the base DNs for the searches.
-  private StringArgument baseDN;
+  @Nullable private StringArgument baseDN;
 
   // The argument used to specify the filters for the searches.
-  private StringArgument filter;
+  @Nullable private StringArgument filter;
 
   // The argument used to specify the scope for the searches.
-  private ScopeArgument scopeArg;
+  @Nullable private ScopeArgument scopeArg;
 
   // The argument used to specify the timestamp format.
-  private StringArgument timestampFormat;
+  @Nullable private StringArgument timestampFormat;
 
   // The argument used to specify the password to use to authenticate.
-  private StringArgument userPassword;
-
-  // The thread currently being used to run the searchrate tool.
-  private volatile Thread runningThread;
+  @Nullable private StringArgument userPassword;
 
   // A wakeable sleeper that will be used to sleep between reporting intervals.
-  private final WakeableSleeper sleeper;
+  @NotNull private final WakeableSleeper sleeper;
 
 
 
@@ -260,7 +278,7 @@ public final class AuthRate
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String[] args)
+  public static void main(@NotNull final String[] args)
   {
     final ResultCode resultCode = main(args, System.out, System.err);
     if (resultCode != ResultCode.SUCCESS)
@@ -285,9 +303,10 @@ public final class AuthRate
    *
    * @return  A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args,
-                                final OutputStream outStream,
-                                final OutputStream errStream)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream)
   {
     final AuthRate authRate = new AuthRate(outStream, errStream);
     return authRate.runTool(args);
@@ -305,11 +324,13 @@ public final class AuthRate
    *                    written.  It may be {@code null} if error messages
    *                    should be suppressed.
    */
-  public AuthRate(final OutputStream outStream, final OutputStream errStream)
+  public AuthRate(@Nullable final OutputStream outStream,
+                  @Nullable final OutputStream errStream)
   {
     super(outStream, errStream);
 
     stopRequested = new AtomicBoolean(false);
+    runningThreads = new AtomicInteger(0);
     sleeper = new WakeableSleeper();
   }
 
@@ -321,6 +342,7 @@ public final class AuthRate
    * @return  The name for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "authrate";
@@ -334,6 +356,7 @@ public final class AuthRate
    * @return  The description for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return "Perform repeated authentications against an LDAP directory " +
@@ -350,6 +373,7 @@ public final class AuthRate
    * @return  The version string for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -474,7 +498,7 @@ public final class AuthRate
    * @throws  ArgumentException  If a problem occurs while adding the arguments.
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     String description = "The base DN to use for the searches.  It may be a " +
@@ -502,7 +526,7 @@ public final class AuthRate
                   "(e.g., \"(uid=user.[1-1000])\").  See " +
                   ValuePattern.PUBLIC_JAVADOC_URL + " for complete details " +
                   "about the value pattern syntax.  This must be provided.";
-    filter = new StringArgument('f', "filter", true, 1, "{filter}",
+    filter = new StringArgument('f', "filter", false, 1, "{filter}",
                                 description);
     filter.setArgumentGroupName("Search and Authentication Arguments");
     parser.addArgument(filter);
@@ -536,6 +560,7 @@ public final class AuthRate
     bindOnly.setArgumentGroupName("Search and Authentication Arguments");
     bindOnly.addLongIdentifier("bind-only", true);
     parser.addArgument(bindOnly);
+    parser.addRequiredArgumentSet(filter, bindOnly);
 
 
     description = "The type of authentication to perform.  Allowed values " +
@@ -732,6 +757,7 @@ public final class AuthRate
    *          for use with this tool.
    */
   @Override()
+  @NotNull()
   public LDAPConnectionOptions getConnectionOptions()
   {
     final LDAPConnectionOptions options = new LDAPConnectionOptions();
@@ -749,30 +775,8 @@ public final class AuthRate
    * @return  The result code for the processing that was performed.
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
-  {
-    runningThread = Thread.currentThread();
-
-    try
-    {
-      return doToolProcessingInternal();
-    }
-    finally
-    {
-      runningThread = null;
-    }
-  }
-
-
-
-  /**
-   * Performs the actual processing for this tool.  In this case, it gets a
-   * connection to the directory server and uses it to perform the requested
-   * searches.
-   *
-   * @return  The result code for the processing that was performed.
-   */
-  private ResultCode doToolProcessingInternal()
   {
     // If the sample rate file argument was specified, then generate the sample
     // variable rate data file and return.
@@ -819,15 +823,22 @@ public final class AuthRate
     }
 
     final ValuePattern filterPattern;
-    try
+    if (filter.isPresent())
     {
-      filterPattern = new ValuePattern(filter.getValue(), seed);
+      try
+      {
+        filterPattern = new ValuePattern(filter.getValue(), seed);
+      }
+      catch (final ParseException pe)
+      {
+        Debug.debugException(pe);
+        err("Unable to parse the filter pattern:  ", pe.getMessage());
+        return ResultCode.PARAM_ERROR;
+      }
     }
-    catch (final ParseException pe)
+    else
     {
-      Debug.debugException(pe);
-      err("Unable to parse the filter pattern:  ", pe.getMessage());
-      return ResultCode.PARAM_ERROR;
+      filterPattern = null;
     }
 
 
@@ -992,8 +1003,9 @@ public final class AuthRate
       threads[i] = new AuthRateThread(this, i, searchConnection, bindConnection,
            dnPattern, scopeArg.getValue(), filterPattern, attrs,
            userPassword.getValue(), bindOnly.isPresent(), authType.getValue(),
-           searchControl.getValues(), bindControls, barrier, authCounter,
-           authDurations, errorCounter, rcCounter, fixedRateBarrier);
+           searchControl.getValues(), bindControls, runningThreads, barrier,
+           authCounter, authDurations, errorCounter, rcCounter,
+           fixedRateBarrier);
       threads[i].start();
     }
 
@@ -1188,21 +1200,19 @@ public final class AuthRate
     stopRequested.set(true);
     sleeper.wakeup();
 
-    final Thread t = runningThread;
-    if (t != null)
+    while (true)
     {
-      try
+      final int stillRunning = runningThreads.get();
+      if (stillRunning <= 0)
       {
-        t.join();
+        break;
       }
-      catch (final Exception e)
+      else
       {
-        Debug.debugException(e);
-
-        if (e instanceof InterruptedException)
+        try
         {
-          Thread.currentThread().interrupt();
-        }
+          Thread.sleep(1L);
+        } catch (final Exception e) {}
       }
     }
   }
@@ -1213,6 +1223,7 @@ public final class AuthRate
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> examples =

@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -72,8 +89,9 @@ public final class DeleteNotificationDestinationExtendedRequest
    * The OID (1.3.6.1.4.1.30221.2.6.37) for the delete notification destination
    * extended request.
    */
-  public static final String DELETE_NOTIFICATION_DESTINATION_REQUEST_OID =
-       "1.3.6.1.4.1.30221.2.6.37";
+  @NotNull public static final String
+       DELETE_NOTIFICATION_DESTINATION_REQUEST_OID =
+            "1.3.6.1.4.1.30221.2.6.37";
 
 
 
@@ -85,10 +103,10 @@ public final class DeleteNotificationDestinationExtendedRequest
 
 
   // The notification destination ID.
-  private final String destinationID;
+  @NotNull private final String destinationID;
 
   // The notification manager ID.
-  private final String managerID;
+  @NotNull private final String managerID;
 
 
 
@@ -104,8 +122,10 @@ public final class DeleteNotificationDestinationExtendedRequest
    *                           It may be {@code null} or empty if no controls
    *                           are needed.
    */
-  public DeleteNotificationDestinationExtendedRequest(final String managerID,
-              final String destinationID, final Control... controls)
+  public DeleteNotificationDestinationExtendedRequest(
+              @NotNull final String managerID,
+              @NotNull final String destinationID,
+              @Nullable final Control... controls)
   {
     super(DELETE_NOTIFICATION_DESTINATION_REQUEST_OID,
          encodeValue(managerID, destinationID), controls);
@@ -126,7 +146,7 @@ public final class DeleteNotificationDestinationExtendedRequest
    * @throws  LDAPException  If a problem occurs while decoding the request.
    */
   public DeleteNotificationDestinationExtendedRequest(
-              final ExtendedRequest extendedRequest)
+              @NotNull final ExtendedRequest extendedRequest)
          throws LDAPException
   {
     super(extendedRequest);
@@ -170,8 +190,9 @@ public final class DeleteNotificationDestinationExtendedRequest
    *
    * @return  The ASN.1 octet string containing the encoded value.
    */
-  private static ASN1OctetString encodeValue(final String managerID,
-                      final String destinationID)
+  @NotNull()
+  private static ASN1OctetString encodeValue(@NotNull final String managerID,
+                      @NotNull final String destinationID)
   {
     Validator.ensureNotNull(managerID);
     Validator.ensureNotNull(destinationID);
@@ -189,6 +210,7 @@ public final class DeleteNotificationDestinationExtendedRequest
    *
    * @return  The notification manager ID.
    */
+  @NotNull()
   public String getManagerID()
   {
     return managerID;
@@ -201,6 +223,7 @@ public final class DeleteNotificationDestinationExtendedRequest
    *
    * @return  The notification destination ID.
    */
+  @NotNull()
   public String getDestinationID()
   {
     return destinationID;
@@ -212,6 +235,7 @@ public final class DeleteNotificationDestinationExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public DeleteNotificationDestinationExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -223,8 +247,9 @@ public final class DeleteNotificationDestinationExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public DeleteNotificationDestinationExtendedRequest
-              duplicate(final Control[] controls)
+  @NotNull()
+  public DeleteNotificationDestinationExtendedRequest duplicate(
+              @Nullable final Control[] controls)
   {
     final DeleteNotificationDestinationExtendedRequest r =
          new DeleteNotificationDestinationExtendedRequest(managerID,
@@ -239,6 +264,7 @@ public final class DeleteNotificationDestinationExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_EXTENDED_REQUEST_NAME_DEL_NOTIFICATION_DEST.get();
@@ -250,7 +276,7 @@ public final class DeleteNotificationDestinationExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("DeleteNotificationDestinationExtendedRequest(managerID='");
     buffer.append(managerID);

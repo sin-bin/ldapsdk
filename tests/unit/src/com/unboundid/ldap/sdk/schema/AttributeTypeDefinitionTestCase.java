@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -100,6 +115,9 @@ public class AttributeTypeDefinitionTestCase
 
     assertNotNull(at.getExtensions());
     assertTrue(at.getExtensions().isEmpty());
+
+    assertNotNull(at.getSchemaElementType());
+    assertEquals(at.getSchemaElementType(), SchemaElementType.ATTRIBUTE_TYPE);
   }
 
 
@@ -1381,5 +1399,47 @@ public class AttributeTypeDefinitionTestCase
               "SYNTAX 1.2.3.5 SINGLE-VALUE COLLECTIVE NO-USER-MODIFICATION " +
               "USAGE dSAOperation X-ONE-SINGLE 'bar' X-TWO-SINGLE 'bar' )");
     assertFalse(at1.equals(at2));
+  }
+
+
+
+  /**
+   * Tests to ensure that empty descriptions can be allowed if the LDAP SDK is
+   * configured to permit it.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testAllowEmptyDescription()
+         throws Exception
+  {
+    try
+    {
+      assertFalse(SchemaElement.allowEmptyDescription());
+      new AttributeTypeDefinition("( 1.2.3.4 DESC '' )");
+      fail("Expected an exception for a schema element with an empty " +
+           "description");
+    }
+    catch (final LDAPException e)
+    {
+      // This was expected.
+    }
+
+    try
+    {
+      assertFalse(SchemaElement.allowEmptyDescription());
+      SchemaElement.setAllowEmptyDescription(true);
+      assertTrue(SchemaElement.allowEmptyDescription());
+
+      final AttributeTypeDefinition definition =
+           new AttributeTypeDefinition("( 1.2.3.4 DESC '' )");
+      assertNotNull(definition.getDescription());
+      assertEquals(definition.getDescription(), "");
+    }
+    finally
+    {
+      SchemaElement.setAllowEmptyDescription(false);
+      assertFalse(SchemaElement.allowEmptyDescription());
+    }
   }
 }

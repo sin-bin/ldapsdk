@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -64,10 +79,20 @@ public final class UniquenessResponseControlTestCase
 
     assertNotNull(c.getValue());
 
+    assertFalse(c.uniquenessConflictFound());
+
     assertNotNull(c.getUniquenessID());
     assertEquals(c.getUniquenessID(), "uniqueness-id");
 
+    assertNotNull(c.getPreCommitValidationResult());
+    assertEquals(c.getPreCommitValidationResult(),
+         UniquenessValidationResult.VALIDATION_NOT_ATTEMPTED);
+
     assertNull(c.getPreCommitValidationPassed());
+
+    assertNotNull(c.getPostCommitValidationResult());
+    assertEquals(c.getPostCommitValidationResult(),
+         UniquenessValidationResult.VALIDATION_NOT_ATTEMPTED);
 
     assertNull(c.getPostCommitValidationPassed());
 
@@ -103,14 +128,77 @@ public final class UniquenessResponseControlTestCase
 
     assertNotNull(c.getValue());
 
+    assertTrue(c.uniquenessConflictFound());
+
     assertNotNull(c.getUniquenessID());
     assertEquals(c.getUniquenessID(), "another-uniqueness-id");
+
+    assertNotNull(c.getPreCommitValidationResult());
+    assertEquals(c.getPreCommitValidationResult(),
+         UniquenessValidationResult.VALIDATION_PASSED);
 
     assertNotNull(c.getPreCommitValidationPassed());
     assertEquals(c.getPreCommitValidationPassed(), Boolean.TRUE);
 
+    assertNotNull(c.getPostCommitValidationResult());
+    assertEquals(c.getPostCommitValidationResult(),
+         UniquenessValidationResult.VALIDATION_FAILED);
+
     assertNotNull(c.getPostCommitValidationPassed());
     assertEquals(c.getPostCommitValidationPassed(), Boolean.FALSE);
+
+    assertNotNull(c.getValidationMessage());
+    assertEquals(c.getValidationMessage(), "validation message");
+
+    assertNotNull(c.getControlName());
+
+    assertNotNull(c.toString());
+  }
+
+
+
+  /**
+   * Tests the behavior for a control created with all elements, but with the
+   * validation results flipped.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testCreateWithAllElementsFlippedResult()
+         throws Exception
+  {
+    UniquenessResponseControl c = new UniquenessResponseControl(
+         "another-uniqueness-id", false, true, "validation message");
+
+    c = new UniquenessResponseControl().decodeControl(c.getOID(),
+         c.isCritical(), c.getValue());
+    assertNotNull(c);
+
+    assertNotNull(c.getOID());
+    assertEquals(c.getOID(), "1.3.6.1.4.1.30221.2.5.53");
+
+    assertFalse(c.isCritical());
+
+    assertNotNull(c.getValue());
+
+    assertTrue(c.uniquenessConflictFound());
+
+    assertNotNull(c.getUniquenessID());
+    assertEquals(c.getUniquenessID(), "another-uniqueness-id");
+
+    assertNotNull(c.getPreCommitValidationResult());
+    assertEquals(c.getPreCommitValidationResult(),
+         UniquenessValidationResult.VALIDATION_FAILED);
+
+    assertNotNull(c.getPreCommitValidationPassed());
+    assertEquals(c.getPreCommitValidationPassed(), Boolean.FALSE);
+
+    assertNotNull(c.getPostCommitValidationResult());
+    assertEquals(c.getPostCommitValidationResult(),
+         UniquenessValidationResult.VALIDATION_PASSED);
+
+    assertNotNull(c.getPostCommitValidationPassed());
+    assertEquals(c.getPostCommitValidationPassed(), Boolean.TRUE);
 
     assertNotNull(c.getValidationMessage());
     assertEquals(c.getValidationMessage(), "validation message");

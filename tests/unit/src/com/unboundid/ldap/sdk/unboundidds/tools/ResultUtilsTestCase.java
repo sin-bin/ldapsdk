@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.testng.annotations.DataProvider;
@@ -73,11 +89,15 @@ import com.unboundid.ldap.sdk.unboundidds.controls.
             AssuredReplicationServerResultCode;
 import com.unboundid.ldap.sdk.unboundidds.controls.AuthenticationFailureReason;
 import com.unboundid.ldap.sdk.unboundidds.controls.
+            GeneratePasswordResponseControl;
+import com.unboundid.ldap.sdk.unboundidds.controls.
             GetAuthorizationEntryResponseControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             GetBackendSetIDResponseControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             GetPasswordPolicyStateIssuesResponseControl;
+import com.unboundid.ldap.sdk.unboundidds.controls.
+            GetRecentLoginHistoryResponseControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.GetServerIDResponseControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             GetUserResourceLimitsResponseControl;
@@ -99,6 +119,8 @@ import com.unboundid.ldap.sdk.unboundidds.controls.
             PasswordValidationDetailsResponseControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             PasswordValidationDetailsResponseType;
+import com.unboundid.ldap.sdk.unboundidds.controls.RecentLoginHistory;
+import com.unboundid.ldap.sdk.unboundidds.controls.RecentLoginHistoryAttempt;
 import com.unboundid.ldap.sdk.unboundidds.controls.SoftDeleteResponseControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             TransactionSettingsResponseControl;
@@ -1073,6 +1095,53 @@ public final class ResultUtilsTestCase
          });
 
 
+    // A valid generate password response control without a password expiration
+    // time.
+    resultList.add(
+         new Object[]
+         {
+           new GeneratePasswordResponseControl("generated-password", false,
+                (Long) null),
+           Arrays.asList(
+                "#      Generate Password Response Control:",
+                "#           OID:  " + GeneratePasswordResponseControl.
+                     GENERATE_PASSWORD_RESPONSE_OID,
+                "#           Generated Password:  generated-password",
+                "#           Must Change Password:  false")
+         });
+
+
+    // A valid generate password response control with a password expiration
+    // time.
+    resultList.add(
+         new Object[]
+         {
+           new GeneratePasswordResponseControl("generated-password", true,
+                86400L),
+           Arrays.asList(
+                "#      Generate Password Response Control:",
+                "#           OID:  " + GeneratePasswordResponseControl.
+                     GENERATE_PASSWORD_RESPONSE_OID,
+                "#           Generated Password:  generated-password",
+                "#           Must Change Password:  true",
+                "#           Seconds Until Expiration:  86400")
+         });
+
+
+    // An invalid generate password response control.
+    resultList.add(
+         new Object[]
+         {
+           new Control(GeneratePasswordResponseControl.
+                GENERATE_PASSWORD_RESPONSE_OID),
+           Arrays.asList(
+                "#      Response Control:",
+                "#           OID:  " + GeneratePasswordResponseControl.
+                     GENERATE_PASSWORD_RESPONSE_OID,
+                "#           Is Critical:  false")
+         });
+
+
     // A valid get authorization entry response control for an unauthenticated
     // connection.
     resultList.add(
@@ -1358,6 +1427,75 @@ public final class ResultUtilsTestCase
                 "#           OID:  " +
                      GetPasswordPolicyStateIssuesResponseControl.
                           GET_PASSWORD_POLICY_STATE_ISSUES_RESPONSE_OID,
+                "#           Is Critical:  false")
+         });
+
+
+    // A valid get recent login history response control without any successful
+    // or failed attempts.
+    resultList.add(
+         new Object[]
+         {
+           new GetRecentLoginHistoryResponseControl(new RecentLoginHistory(
+                null, null)),
+           Arrays.asList(
+                "#      Get Recent Login History Response Control:",
+                "#           OID:  " + GetRecentLoginHistoryResponseControl.
+                     GET_RECENT_LOGIN_HISTORY_RESPONSE_OID,
+                "#           No Successful Attempts",
+                "#           No Failed Attempts")
+         });
+
+
+    // A valid get recent login history response control with both successful
+    // and failed attempts.
+    final long currentTime = System.currentTimeMillis();
+    final TreeSet<RecentLoginHistoryAttempt> successes = new TreeSet<>();
+    successes.add(new RecentLoginHistoryAttempt(true, currentTime, "simple",
+         "1.2.3.4", null, 0L));
+
+    final TreeSet<RecentLoginHistoryAttempt> failures = new TreeSet<>();
+    failures.add(new RecentLoginHistoryAttempt(false, (currentTime - 5_000L),
+         "simple", "1.2.3.4", "invalid-credentials", 1L));
+
+    RecentLoginHistory recentLoginHistory =
+         new RecentLoginHistory(successes, failures);
+
+    resultList.add(
+         new Object[]
+         {
+           new GetRecentLoginHistoryResponseControl(recentLoginHistory),
+           Arrays.asList(
+                "#      Get Recent Login History Response Control:",
+                "#           OID:  " + GetRecentLoginHistoryResponseControl.
+                     GET_RECENT_LOGIN_HISTORY_RESPONSE_OID,
+                "#           Successful Attempt:",
+                "#                Timestamp:  " +
+                     StaticUtils.encodeRFC3339Time(currentTime),
+                "#                Authentication Method:  simple",
+                "#                Client IP Address:  1.2.3.4",
+                "#                Additional Attempt Count:  0",
+                "#           Failed Attempt:",
+                "#                Timestamp:  " +
+                     StaticUtils.encodeRFC3339Time(currentTime - 5_000L),
+                "#                Authentication Method:  simple",
+                "#                Client IP Address:  1.2.3.4",
+                "#                Failure Reason:  invalid-credentials",
+                "#                Additional Attempt Count:  1")
+         });
+
+
+    // An invalid recent login history response control.
+    resultList.add(
+         new Object[]
+         {
+           new Control(GetRecentLoginHistoryResponseControl.
+                GET_RECENT_LOGIN_HISTORY_RESPONSE_OID),
+           Arrays.asList(
+                "#      Response Control:",
+                "#           OID:  " +
+                     GetRecentLoginHistoryResponseControl.
+                          GET_RECENT_LOGIN_HISTORY_RESPONSE_OID,
                 "#           Is Critical:  false")
          });
 

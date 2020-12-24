@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -60,7 +75,6 @@ import com.unboundid.ldap.sdk.unboundidds.extensions.
 import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.LDAPSDKUsageException;
-import com.unboundid.util.StaticUtils;
 import com.unboundid.util.SynchronizedSocketFactory;
 import com.unboundid.util.SynchronizedSSLSocketFactory;
 import com.unboundid.util.ssl.HostNameSSLSocketVerifier;
@@ -102,6 +116,7 @@ public class LDAPConnectionOptionsTestCase
     assertEquals(opts.getResponseTimeoutMillis(), 300_000L);
     assertFalse(opts.abandonOnTimeout());
     assertEquals(opts.getMaxMessageSize(), (20 * 1024 * 1024));
+    assertNull(opts.getConnectionLogger());
     assertNull(opts.getDisconnectHandler());
     assertNull(opts.getUnsolicitedNotificationHandler());
     assertFalse(opts.captureConnectStackTrace());
@@ -155,22 +170,13 @@ public class LDAPConnectionOptionsTestCase
            300_000L);
     }
 
-    final String vmVendor =
-         StaticUtils.toLowerCase(System.getProperty("java.vm.vendor"));
-    if (vmVendor.contains("sun microsystems") ||
-        vmVendor.contains("oracle") ||
-        vmVendor.contains("apple"))
-    {
-      assertTrue(opts.allowConcurrentSocketFactoryUse());
-    }
-    else
-    {
-      assertFalse(opts.allowConcurrentSocketFactoryUse());
-    }
+    assertTrue(opts.allowConcurrentSocketFactoryUse());
 
     assertNotNull(opts.getSSLSocketVerifier());
     assertTrue(
          opts.getSSLSocketVerifier() instanceof TrustAllSSLSocketVerifier);
+
+    assertNotNull(opts.getNameResolver());
   }
 
 
@@ -194,6 +200,7 @@ public class LDAPConnectionOptionsTestCase
     opts.setReferralConnector(new TestReferralConnector());
     opts.setResponseTimeoutMillis(1234L);
     opts.setAbandonOnTimeout(true);
+    opts.setConnectionLogger(new TestLDAPConnectionLogger());
     opts.setDisconnectHandler(new TestDisconnectHandler());
     opts.setUnsolicitedNotificationHandler(
          new TestUnsolicitedNotificationHandler());
@@ -223,6 +230,7 @@ public class LDAPConnectionOptionsTestCase
     assertEquals(dup.getResponseTimeoutMillis(),
                  opts.getResponseTimeoutMillis());
     assertEquals(dup.abandonOnTimeout(), opts.abandonOnTimeout());
+    assertEquals(dup.getConnectionLogger(), opts.getConnectionLogger());
     assertEquals(dup.getDisconnectHandler(), opts.getDisconnectHandler());
     assertEquals(dup.getUnsolicitedNotificationHandler(),
                  opts.getUnsolicitedNotificationHandler());
@@ -239,6 +247,8 @@ public class LDAPConnectionOptionsTestCase
     assertEquals(dup.allowConcurrentSocketFactoryUse(),
          opts.allowConcurrentSocketFactoryUse());
     assertTrue(dup.getSSLSocketVerifier() instanceof HostNameSSLSocketVerifier);
+
+    assertNotNull(opts.getNameResolver());
   }
 
 
@@ -879,6 +889,28 @@ public class LDAPConnectionOptionsTestCase
 
 
   /**
+   * Tests connection logger functionality.
+   */
+  @Test()
+  public void testConnectionLogger()
+  {
+    final LDAPConnectionOptions opts = new LDAPConnectionOptions();
+
+    assertNull(opts.getConnectionLogger());
+    assertNotNull(opts.toString());
+
+    opts.setConnectionLogger(new TestLDAPConnectionLogger());
+    assertNotNull(opts.getConnectionLogger());
+    assertNotNull(opts.toString());
+
+    opts.setConnectionLogger(null);
+    assertNull(opts.getConnectionLogger());
+    assertNotNull(opts.toString());
+  }
+
+
+
+  /**
    * Tests disconnect handler functionality.
    */
   @Test()
@@ -1130,6 +1162,10 @@ public class LDAPConnectionOptionsTestCase
          ds.getListenAddress("LDAPS").getHostAddress(),
          ds.getListenPort("LDAPS"));
     assertNotNull(conn.getRootDSE());
+    assertTrue(TrustAllSSLSocketVerifier.getInstance().verify("127.0.0.1",
+         conn.getSSLSession()));
+    assertTrue(TrustAllSSLSocketVerifier.getInstance().verify(
+         "disallowed.example.com", conn.getSSLSession()));
     conn.close();
 
     conn = new LDAPConnection(opts,
@@ -1151,8 +1187,7 @@ public class LDAPConnectionOptionsTestCase
     try
     {
       conn = new LDAPConnection(clientSSLUtil.createSSLSocketFactory(), opts,
-           ds.getListenAddress("LDAPS").getHostAddress(),
-           ds.getListenPort("LDAPS"));
+           "localhost", ds.getListenPort("LDAPS"));
       conn.close();
       fail("Expected an exception due to hostname validation failure");
     }
@@ -1167,9 +1202,7 @@ public class LDAPConnectionOptionsTestCase
 
     try
     {
-      conn = new LDAPConnection(opts,
-           ds.getListenAddress("LDAP").getHostAddress(),
-           ds.getListenPort("LDAP"));
+      conn = new LDAPConnection(opts, "localhost", ds.getListenPort("LDAP"));
       assertNotNull(conn.getRootDSE());
       conn.processExtendedOperation(
            new StartTLSExtendedRequest(clientSSLUtil.createSSLSocketFactory()));
@@ -1196,6 +1229,10 @@ public class LDAPConnectionOptionsTestCase
          ds.getListenAddress("LDAPS").getHostAddress(),
          ds.getListenPort("LDAPS"));
     assertNotNull(conn.getRootDSE());
+    assertTrue(new HostNameSSLSocketVerifier(true).verify("127.0.0.1",
+         conn.getSSLSession()));
+    assertFalse(new HostNameSSLSocketVerifier(true).verify(
+         "disallowed.example.com", conn.getSSLSession()));
     conn.close();
 
     conn = new LDAPConnection(opts,
@@ -1209,6 +1246,38 @@ public class LDAPConnectionOptionsTestCase
     conn.close();
 
     ds.shutDown(true);
+  }
+
+
+
+  /**
+   * Tests the methods for interacting with the configured name resolver.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testNameResolver()
+  {
+    final LDAPConnectionOptions opts = new LDAPConnectionOptions();
+
+    assertNotNull(opts.getNameResolver());
+    assertTrue(opts.getNameResolver() instanceof DefaultNameResolver);
+
+    assertNotNull(opts.toString());
+
+    opts.setNameResolver(new CachingNameResolver());
+
+    assertNotNull(opts.getNameResolver());
+    assertTrue(opts.getNameResolver() instanceof CachingNameResolver);
+
+    assertNotNull(opts.toString());
+
+    opts.setNameResolver(null);
+
+    assertNotNull(opts.getNameResolver());
+    assertTrue(opts.getNameResolver() instanceof DefaultNameResolver);
+
+    assertNotNull(opts.toString());
   }
 
 

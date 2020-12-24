@@ -1,9 +1,24 @@
 /*
- * Copyright 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2012-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,7 @@ import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -55,7 +71,7 @@ public final class ValidityDateTrustManager
   /**
    * A pre-allocated empty certificate array.
    */
-  private static final X509Certificate[] NO_CERTIFICATES =
+  @NotNull private static final X509Certificate[] NO_CERTIFICATES =
        new X509Certificate[0];
 
 
@@ -82,8 +98,8 @@ public final class ValidityDateTrustManager
    *                                should not be trusted.
    */
   @Override()
-  public void checkClientTrusted(final X509Certificate[] chain,
-                                 final String authType)
+  public void checkClientTrusted(@NotNull final X509Certificate[] chain,
+                                 @NotNull final String authType)
          throws CertificateException
   {
     checkCertificateValidity(chain[0]);
@@ -103,8 +119,8 @@ public final class ValidityDateTrustManager
    *                                should not be trusted.
    */
   @Override()
-  public void checkServerTrusted(final X509Certificate[] chain,
-                                 final String authType)
+  public void checkServerTrusted(@NotNull final X509Certificate[] chain,
+                                 @NotNull final String authType)
          throws CertificateException
   {
     checkCertificateValidity(chain[0]);
@@ -121,7 +137,7 @@ public final class ValidityDateTrustManager
    * @throws  CertificateException  If the presented certificate is outside the
    *                                validity window.
    */
-  private static void checkCertificateValidity(final X509Certificate c)
+  private static void checkCertificateValidity(@NotNull final X509Certificate c)
          throws CertificateException
   {
     final Date currentTime = new Date();
@@ -152,6 +168,7 @@ public final class ValidityDateTrustManager
    * @return  The accepted issuer certificates for this trust manager.
    */
   @Override()
+  @NotNull()
   public X509Certificate[] getAcceptedIssuers()
   {
     return NO_CERTIFICATES;

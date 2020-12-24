@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,8 @@ package com.unboundid.ldap.sdk.unboundidds.logs;
 
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -58,7 +75,10 @@ public class ExtendedRequestAccessLogMessage
 
 
   // The OID for the extended request.
-  private final String requestOID;
+  @Nullable private final String requestOID;
+
+  // The name for the extended request.
+  @Nullable private final String requestType;
 
 
 
@@ -72,7 +92,7 @@ public class ExtendedRequestAccessLogMessage
    * @throws  LogException  If the provided string cannot be parsed as a valid
    *                        log message.
    */
-  public ExtendedRequestAccessLogMessage(final String s)
+  public ExtendedRequestAccessLogMessage(@NotNull final String s)
          throws LogException
   {
     this(new LogMessage(s));
@@ -87,11 +107,12 @@ public class ExtendedRequestAccessLogMessage
    * @param  m  The log message to be parsed as an extended request access log
    *            message.
    */
-  public ExtendedRequestAccessLogMessage(final LogMessage m)
+  public ExtendedRequestAccessLogMessage(@NotNull final LogMessage m)
   {
     super(m);
 
     requestOID = getNamedValue("requestOID");
+    requestType = getNamedValue("requestType");
   }
 
 
@@ -102,6 +123,7 @@ public class ExtendedRequestAccessLogMessage
    * @return  The OID of the extended request, or {@code null} if it is not
    *          included in the log message.
    */
+  @Nullable()
   public final String getRequestOID()
   {
     return requestOID;
@@ -110,9 +132,25 @@ public class ExtendedRequestAccessLogMessage
 
 
   /**
+   * Retrieves the type of extended operation being processed.  This is
+   * generally a human-readable name for the oepration.
+   *
+   * @return  The type of extended operation, or {@code null} if it is not
+   *          included in the log message.
+   */
+  @Nullable()
+  public final String getRequestType()
+  {
+    return requestType;
+  }
+
+
+
+  /**
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public final AccessLogOperationType getOperationType()
   {
     return AccessLogOperationType.EXTENDED;

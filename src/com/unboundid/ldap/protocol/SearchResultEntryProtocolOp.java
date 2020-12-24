@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -43,6 +58,8 @@ import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.util.Debug;
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -70,10 +87,10 @@ public final class SearchResultEntryProtocolOp
 
 
   // The list of attributes for this search result entry.
-  private final List<Attribute> attributes;
+  @NotNull private final List<Attribute> attributes;
 
   // The entry DN for this search result entry.
-  private final String dn;
+  @NotNull private final String dn;
 
 
 
@@ -85,8 +102,8 @@ public final class SearchResultEntryProtocolOp
    * @param  attributes  The list of attributes to include in this search result
    *                     entry.
    */
-  public SearchResultEntryProtocolOp(final String dn,
-                                     final List<Attribute> attributes)
+  public SearchResultEntryProtocolOp(@NotNull final String dn,
+                                     @NotNull final List<Attribute> attributes)
   {
     this.dn         = dn;
     this.attributes = Collections.unmodifiableList(attributes);
@@ -99,7 +116,7 @@ public final class SearchResultEntryProtocolOp
    *
    * @param  entry  The entry to use to create this protocol op.
    */
-  public SearchResultEntryProtocolOp(final Entry entry)
+  public SearchResultEntryProtocolOp(@NotNull final Entry entry)
   {
     dn = entry.getDN();
     attributes = Collections.unmodifiableList(new ArrayList<>(
@@ -118,7 +135,7 @@ public final class SearchResultEntryProtocolOp
    * @throws  LDAPException  If a problem occurs while reading or parsing the
    *                         search result entry.
    */
-  SearchResultEntryProtocolOp(final ASN1StreamReader reader)
+  SearchResultEntryProtocolOp(@NotNull final ASN1StreamReader reader)
        throws LDAPException
   {
     try
@@ -159,6 +176,7 @@ public final class SearchResultEntryProtocolOp
    *
    * @return  The DN for this search result entry.
    */
+  @NotNull()
   public String getDN()
   {
     return dn;
@@ -171,6 +189,7 @@ public final class SearchResultEntryProtocolOp
    *
    * @return  The list of attributes for this search result entry.
    */
+  @NotNull()
   public List<Attribute> getAttributes()
   {
     return attributes;
@@ -193,6 +212,7 @@ public final class SearchResultEntryProtocolOp
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ASN1Element encodeProtocolOp()
   {
     final ArrayList<ASN1Element> attrElements =
@@ -219,8 +239,9 @@ public final class SearchResultEntryProtocolOp
    * @throws  LDAPException  If the provided ASN.1 element cannot be decoded as
    *                         a search result entry protocol op.
    */
+  @NotNull()
   public static SearchResultEntryProtocolOp decodeProtocolOp(
-                                                 final ASN1Element element)
+                     @NotNull final ASN1Element element)
          throws LDAPException
   {
     try
@@ -257,7 +278,7 @@ public final class SearchResultEntryProtocolOp
    * {@inheritDoc}
    */
   @Override()
-  public void writeTo(final ASN1Buffer buffer)
+  public void writeTo(@NotNull final ASN1Buffer buffer)
   {
     final ASN1BufferSequence opSequence =
          buffer.beginSequence(LDAPMessage.PROTOCOL_OP_TYPE_SEARCH_RESULT_ENTRY);
@@ -283,7 +304,9 @@ public final class SearchResultEntryProtocolOp
    *
    * @return  The search result entry that was created.
    */
-  public SearchResultEntry toSearchResultEntry(final Control... controls)
+  @NotNull()
+  public SearchResultEntry toSearchResultEntry(
+                                @Nullable final Control... controls)
   {
     return new SearchResultEntry(dn, attributes, controls);
   }
@@ -296,6 +319,7 @@ public final class SearchResultEntryProtocolOp
    * @return  A string representation of this protocol op.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -309,7 +333,7 @@ public final class SearchResultEntryProtocolOp
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("SearchResultEntryProtocolOp(dn='");
     buffer.append(dn);

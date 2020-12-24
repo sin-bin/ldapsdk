@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -48,6 +63,8 @@ import com.unboundid.util.DNFileReader;
 import com.unboundid.util.LDAPCommandLineTool;
 import com.unboundid.util.FilterFileReader;
 import com.unboundid.util.FixedRateBarrier;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.RateAdjustor;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -101,7 +118,8 @@ public final class ManageAccount
    * The primary name of the argument used to indicate that the tool should
    * append to the reject file rather than overwrite it.
    */
-  private static final String ARG_APPEND_TO_REJECT_FILE = "appendToRejectFile";
+  @NotNull private static final String ARG_APPEND_TO_REJECT_FILE =
+       "appendToRejectFile";
 
 
 
@@ -109,7 +127,7 @@ public final class ManageAccount
    * The primary name of the argument used to specify a base DN to use for
    * searches.
    */
-  static final String ARG_BASE_DN = "baseDN";
+  @NotNull static final String ARG_BASE_DN = "baseDN";
 
 
 
@@ -117,7 +135,7 @@ public final class ManageAccount
    * The primary name of the argument used to specify the path to a file to a
    * sample variable rate data file to create.
    */
-  private static final String ARG_GENERATE_SAMPLE_RATE_FILE =
+  @NotNull private static final String ARG_GENERATE_SAMPLE_RATE_FILE =
        "generateSampleRateFile";
 
 
@@ -126,7 +144,7 @@ public final class ManageAccount
    * The primary name of the argument used to specify the path to a file
    * containing the DNs of the users on which to operate.
    */
-  private static final String ARG_DN_INPUT_FILE = "dnInputFile";
+  @NotNull private static final String ARG_DN_INPUT_FILE = "dnInputFile";
 
 
 
@@ -134,7 +152,8 @@ public final class ManageAccount
    * The primary name of the argument used to specify the path to a file
    * containing search filters to use to identify users.
    */
-  private static final String ARG_FILTER_INPUT_FILE = "filterInputFile";
+  @NotNull private static final String ARG_FILTER_INPUT_FILE =
+       "filterInputFile";
 
 
 
@@ -142,7 +161,7 @@ public final class ManageAccount
    * The primary name of the argument used to specify the number of threads to
    * use to process search operations to identify which users to target.
    */
-  static final String ARG_NUM_SEARCH_THREADS = "numSearchThreads";
+  @NotNull static final String ARG_NUM_SEARCH_THREADS = "numSearchThreads";
 
 
 
@@ -150,7 +169,7 @@ public final class ManageAccount
    * The primary name of the argument used to specify the number of threads to
    * use to perform manage-account processing.
    */
-  static final String ARG_NUM_THREADS = "numThreads";
+  @NotNull static final String ARG_NUM_THREADS = "numThreads";
 
 
 
@@ -158,7 +177,7 @@ public final class ManageAccount
    * The primary name of the argument used to specify the target rate of
    * operations per second.
    */
-  private static final String ARG_RATE_PER_SECOND = "ratePerSecond";
+  @NotNull private static final String ARG_RATE_PER_SECOND = "ratePerSecond";
 
 
 
@@ -166,7 +185,7 @@ public final class ManageAccount
    * The primary name of the argument used to specify the path to a reject file
    * to create.
    */
-  private static final String ARG_REJECT_FILE = "rejectFile";
+  @NotNull private static final String ARG_REJECT_FILE = "rejectFile";
 
 
 
@@ -174,7 +193,7 @@ public final class ManageAccount
    * The primary name of the argument used to specify the simple page size to
    * use when performing searches.
    */
-  static final String ARG_SIMPLE_PAGE_SIZE = "simplePageSize";
+  @NotNull static final String ARG_SIMPLE_PAGE_SIZE = "simplePageSize";
 
 
 
@@ -182,7 +201,7 @@ public final class ManageAccount
    * The primary name of the argument used to suppress result operation types
    * without values.
    */
-  static final String ARG_SUPPRESS_EMPTY_RESULT_OPERATIONS =
+  @NotNull static final String ARG_SUPPRESS_EMPTY_RESULT_OPERATIONS =
        "suppressEmptyResultOperations";
 
 
@@ -191,7 +210,7 @@ public final class ManageAccount
    * The primary name of the argument used to specify the DN of the user on
    * which to operate.
    */
-  private static final String ARG_TARGET_DN = "targetDN";
+  @NotNull private static final String ARG_TARGET_DN = "targetDN";
 
 
 
@@ -199,7 +218,7 @@ public final class ManageAccount
    * The primary name of the argument used to specify a search filter to use to
    * identify users.
    */
-  private static final String ARG_TARGET_FILTER = "targetFilter";
+  @NotNull private static final String ARG_TARGET_FILTER = "targetFilter";
 
 
 
@@ -207,7 +226,7 @@ public final class ManageAccount
    * The primary name of the argument used to specify the user IDs of target
    * users.
    */
-  private static final String ARG_TARGET_USER_ID = "targetUserID";
+  @NotNull private static final String ARG_TARGET_USER_ID = "targetUserID";
 
 
 
@@ -215,7 +234,7 @@ public final class ManageAccount
    * The primary name of the argument used to specify the name of the attribute
    * to identify which user has a given user ID.
    */
-  static final String ARG_USER_ID_ATTRIBUTE = "userIDAttribute";
+  @NotNull static final String ARG_USER_ID_ATTRIBUTE = "userIDAttribute";
 
 
 
@@ -223,7 +242,8 @@ public final class ManageAccount
    * The primary name of the argument used to specify the path to a file
    * containing the user IDs of the target users.
    */
-  private static final String ARG_USER_ID_INPUT_FILE = "userIDInputFile";
+  @NotNull private static final String ARG_USER_ID_INPUT_FILE =
+       "userIDInputFile";
 
 
 
@@ -231,64 +251,65 @@ public final class ManageAccount
    * The primary name of the argument used to specify the path to a variable
    * rate data file.
    */
-  private static final String ARG_VARIABLE_RATE_DATA = "variableRateData";
+  @NotNull private static final String ARG_VARIABLE_RATE_DATA =
+       "variableRateData";
 
 
 
   /**
    * The default search base DN.
    */
-  private static final DN DEFAULT_BASE_DN = DN.NULL_DN;
+  @NotNull private static final DN DEFAULT_BASE_DN = DN.NULL_DN;
 
 
 
   /**
    * The default user ID attribute.
    */
-  private static final String DEFAULT_USER_ID_ATTRIBUTE = "uid";
+  @NotNull private static final String DEFAULT_USER_ID_ATTRIBUTE = "uid";
 
 
 
   /**
    * A target user DN to use in examples.
    */
-  private static final String EXAMPLE_TARGET_USER_DN =
+  @NotNull private static final String EXAMPLE_TARGET_USER_DN =
        "uid=jdoe,ou=People,dc=example,dc=com";
 
 
 
   // The argument parser for this tool.
-  private volatile ArgumentParser parser;
+  @Nullable private volatile ArgumentParser parser;
 
   // Indicates whether all DNs have been provided to the manage-account
   // processor.
-  private final AtomicBoolean allDNsProvided;
+  @NotNull private final AtomicBoolean allDNsProvided;
 
   // Indicates whether all filters have been provided to the manage-account
   // search processor.
-  private final AtomicBoolean allFiltersProvided;
+  @NotNull private final AtomicBoolean allFiltersProvided;
 
   // Indicates whether a request has been made to cancel processing.
-  private final AtomicBoolean cancelRequested;
+  @NotNull private final AtomicBoolean cancelRequested;
 
   // The rate limiter to use for this tool.
-  private volatile FixedRateBarrier rateLimiter;
+  @Nullable private volatile FixedRateBarrier rateLimiter;
 
   // The LDAP connection options to use for connections created by this tool.
-  private final LDAPConnectionOptions connectionOptions;
+  @NotNull private final LDAPConnectionOptions connectionOptions;
 
   // The LDIF writer to use to write information about successful and failed
   // operations.
-  private volatile LDIFWriter outputWriter;
+  @Nullable private volatile LDIFWriter outputWriter;
 
   // The LDIF writer to use to write information about failed operations.
-  private volatile LDIFWriter rejectWriter;
+  @Nullable private volatile LDIFWriter rejectWriter;
 
   // The search processor for this tool.
-  private volatile ManageAccountSearchProcessor searchProcessor;
+  @Nullable private volatile ManageAccountSearchProcessor searchProcessor;
 
   // The rate adjustor to use to vary the load over time.
-  private volatile RateAdjustor rateAdjustor;
+  @Nullable private volatile RateAdjustor rateAdjustor;
 
 
 
@@ -297,7 +318,7 @@ public final class ManageAccount
    *
    * @param  args  The command-line arguments provided to this tool.
    */
-  public static void main(final String... args)
+  public static void main(@NotNull final String... args)
   {
     final ResultCode resultCode = main(System.out, System.err, args);
     if (resultCode != ResultCode.SUCCESS)
@@ -321,8 +342,10 @@ public final class ManageAccount
    *          code other than {@link ResultCode#SUCCESS} should be considered a
    *          failure.
    */
-  public static ResultCode main(final OutputStream out, final OutputStream err,
-                                final String... args)
+  @NotNull()
+  public static ResultCode main(@Nullable final OutputStream out,
+                                @Nullable final OutputStream err,
+                                @NotNull final String... args)
   {
     final ManageAccount tool = new ManageAccount(out, err);
 
@@ -350,7 +373,8 @@ public final class ManageAccount
    * @param  err  The output stream to use for standard error.  It may be
    *              {@code null} if standard error should be suppressed.
    */
-  public ManageAccount(final OutputStream out, final OutputStream err)
+  public ManageAccount(@Nullable final OutputStream out,
+                       @Nullable final OutputStream err)
   {
     super(out, err);
 
@@ -375,6 +399,7 @@ public final class ManageAccount
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "manage-account";
@@ -386,6 +411,7 @@ public final class ManageAccount
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return INFO_MANAGE_ACCT_TOOL_DESC.get();
@@ -397,6 +423,7 @@ public final class ManageAccount
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -496,6 +523,17 @@ public final class ManageAccount
    * {@inheritDoc}
    */
   @Override()
+  protected boolean supportsSSLDebugging()
+  {
+    return true;
+  }
+
+
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override()
   protected boolean supportsMultipleServers()
   {
     return true;
@@ -518,7 +556,7 @@ public final class ManageAccount
    * {@inheritDoc}
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
        throws ArgumentException
   {
     // Get a copy of the argument parser for later use.
@@ -1613,6 +1651,110 @@ public final class ManageAccount
     createSubCommand(ManageAccountSubCommandType.GET_HAS_STATIC_PASSWORD,
          INFO_MANAGE_ACCT_SC_GET_HAS_STATIC_PW_EXAMPLE.get(
               EXAMPLE_TARGET_USER_DN));
+
+
+    // Define the subcommand to retrieve the last bind password validation time
+    // for a user.
+    createSubCommand(
+         ManageAccountSubCommandType.GET_LAST_BIND_PASSWORD_VALIDATION_TIME,
+         INFO_MANAGE_ACCT_SC_GET_LAST_BIND_PW_VALIDATION_TIME_EXAMPLE.get(
+              EXAMPLE_TARGET_USER_DN));
+
+
+    // Define the subcommand to retrieve the length of time since the last bind
+    // password validation for a user.
+    createSubCommand(
+         ManageAccountSubCommandType.
+              GET_SECONDS_SINCE_LAST_BIND_PASSWORD_VALIDATION,
+         INFO_MANAGE_ACCT_SC_GET_SECS_SINCE_LAST_BIND_PW_VALIDATION_EXAMPLE.get(
+              EXAMPLE_TARGET_USER_DN));
+
+
+    // Define the subcommand to set the last bind password validation time for a
+    // user.
+    final ArgumentParser setLastBindPasswordValidationTimeParser =
+         createSubCommandParser(ManageAccountSubCommandType.
+              SET_LAST_BIND_PASSWORD_VALIDATION_TIME);
+
+    final TimestampArgument setLastBindPasswordValidationTimeValueArg =
+         new TimestampArgument('O', "validationTime", false, 1, null,
+              INFO_MANAGE_ACCT_SC_SET_LAST_BIND_PW_VALIDATION_TIME_ARG_VALUE.
+                   get());
+    setLastBindPasswordValidationTimeValueArg.addLongIdentifier(
+         "operationValue", true);
+    setLastBindPasswordValidationTimeValueArg.addLongIdentifier(
+         "validation-time", true);
+    setLastBindPasswordValidationTimeValueArg.addLongIdentifier(
+         "operation-value", true);
+    setLastBindPasswordValidationTimeParser.addArgument(
+         setLastBindPasswordValidationTimeValueArg);
+
+    createSubCommand(
+         ManageAccountSubCommandType.SET_LAST_BIND_PASSWORD_VALIDATION_TIME,
+         setLastBindPasswordValidationTimeParser,
+         createSubCommandExample(
+              ManageAccountSubCommandType.
+                   SET_LAST_BIND_PASSWORD_VALIDATION_TIME,
+              INFO_MANAGE_ACCT_SC_SET_LAST_BIND_PW_VALIDATION_TIME_EXAMPLE.get(
+                   EXAMPLE_TARGET_USER_DN, currentGeneralizedTime),
+              "--validationTime", currentGeneralizedTime));
+
+
+    // Define the subcommand to clear the last bind password validation time for
+    // a user.
+    createSubCommand(
+         ManageAccountSubCommandType.CLEAR_LAST_BIND_PASSWORD_VALIDATION_TIME,
+         INFO_MANAGE_ACCT_SC_CLEAR_LAST_BIND_PW_VALIDATION_TIME_EXAMPLE.get(
+              EXAMPLE_TARGET_USER_DN));
+
+
+    // Define the subcommand to determine whether an account is locked because
+    // it contains a password that does not satisfy all of the configured
+    // password validators.
+    createSubCommand(
+         ManageAccountSubCommandType.GET_ACCOUNT_IS_VALIDATION_LOCKED,
+         INFO_MANAGE_ACCT_SC_GET_ACCT_VALIDATION_LOCKED_EXAMPLE.get(
+              EXAMPLE_TARGET_USER_DN));
+
+
+    // Define the subcommand to specify whether an account is locked because it
+    // contains a password that does not satisfy all of the configured password
+    // validators.
+    final ArgumentParser setIsValidationLockedParser =
+         createSubCommandParser(
+              ManageAccountSubCommandType.SET_ACCOUNT_IS_VALIDATION_LOCKED);
+
+    final BooleanValueArgument setIsValidationLockedValueArg =
+         new BooleanValueArgument('O', "accountIsValidationLocked", true, null,
+              INFO_MANAGE_ACCT_SC_SET_ACCT_VALIDATION_LOCKED_ARG_VALUE.get());
+    setIsValidationLockedValueArg.addLongIdentifier("operationValue", true);
+    setIsValidationLockedValueArg.addLongIdentifier(
+         "account-is-validation-locked", true);
+    setIsValidationLockedValueArg.addLongIdentifier("operation-value", true);
+    setIsValidationLockedParser.addArgument(setIsValidationLockedValueArg);
+
+    createSubCommand(
+         ManageAccountSubCommandType.SET_ACCOUNT_IS_VALIDATION_LOCKED,
+         setIsValidationLockedParser,
+         createSubCommandExample(
+              ManageAccountSubCommandType.SET_ACCOUNT_IS_VALIDATION_LOCKED,
+              INFO_MANAGE_ACCT_SC_SET_ACCT_VALIDATION_LOCKED_EXAMPLE.get(
+                   EXAMPLE_TARGET_USER_DN),
+              "--accountIsValidationLocked", "true"));
+
+
+    // Define the subcommand to retrieve a user's recent login history.
+    createSubCommand(
+         ManageAccountSubCommandType.GET_RECENT_LOGIN_HISTORY,
+         INFO_MANAGE_ACCT_SC_GET_RECENT_LOGIN_HISTORY_EXAMPLE.get(
+              EXAMPLE_TARGET_USER_DN));
+
+
+    // Define the subcommand to retrieve a user's recent login history.
+    createSubCommand(
+         ManageAccountSubCommandType.CLEAR_RECENT_LOGIN_HISTORY,
+         INFO_MANAGE_ACCT_SC_CLEAR_RECENT_LOGIN_HISTORY_EXAMPLE.get(
+              EXAMPLE_TARGET_USER_DN));
   }
 
 
@@ -1628,8 +1770,9 @@ public final class ManageAccount
    * @throws  ArgumentException  If a problem is encountered while creating the
    *                             argument parser.
    */
+  @NotNull()
   private static ArgumentParser createSubCommandParser(
-                                     final ManageAccountSubCommandType type)
+               @NotNull final ManageAccountSubCommandType type)
           throws ArgumentException
   {
     return new ArgumentParser(type.getPrimaryName(), type.getDescription());
@@ -1649,9 +1792,11 @@ public final class ManageAccount
    *
    * @return The generated example usage map.
    */
+  @NotNull()
   private static LinkedHashMap<String[],String> createSubCommandExample(
-                      final ManageAccountSubCommandType t,
-                      final String description, final String... args)
+               @NotNull final ManageAccountSubCommandType t,
+               @NotNull final String description,
+               @NotNull final String... args)
   {
     final LinkedHashMap<String[], String> examples =
          new LinkedHashMap<>(StaticUtils.computeMapCapacity(1));
@@ -1673,9 +1818,10 @@ public final class ManageAccount
    *                      be empty if no additional arguments are needed.
    */
   private static void createSubCommandExample(
-       final LinkedHashMap<String[], String> examples,
-       final ManageAccountSubCommandType t, final String description,
-       final String... args)
+       @NotNull final LinkedHashMap<String[], String> examples,
+       @NotNull final ManageAccountSubCommandType t, final
+       @NotNull String description,
+       @NotNull final String... args)
   {
     final ArrayList<String> argList = new ArrayList<>(10 + args.length);
     argList.add(t.getPrimaryName());
@@ -1713,8 +1859,8 @@ public final class ManageAccount
    *                             subcommand.
    */
   private void createSubCommand(
-                    final ManageAccountSubCommandType subcommandType,
-                    final String exampleDescription)
+                    @NotNull final ManageAccountSubCommandType subcommandType,
+                    @NotNull final String exampleDescription)
           throws ArgumentException
   {
     final ArgumentParser subcommandParser =
@@ -1740,9 +1886,9 @@ public final class ManageAccount
    *                             subcommand.
    */
   private void createSubCommand(
-                    final ManageAccountSubCommandType subcommandType,
-                    final ArgumentParser subcommandParser,
-                    final LinkedHashMap<String[],String> examples)
+                    @NotNull final ManageAccountSubCommandType subcommandType,
+                    @NotNull final ArgumentParser subcommandParser,
+                    @NotNull final LinkedHashMap<String[],String> examples)
           throws ArgumentException
   {
     final SubCommand subCommand = new SubCommand(
@@ -1763,6 +1909,7 @@ public final class ManageAccount
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPConnectionOptions getConnectionOptions()
   {
     return connectionOptions;
@@ -1774,6 +1921,7 @@ public final class ManageAccount
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     // If we should just generate a sample rate data file, then do that now.
@@ -2206,6 +2354,7 @@ public final class ManageAccount
    *
    * @return  The argument parser for this tool.
    */
+  @Nullable()
   ArgumentParser getArgumentParser()
   {
     return parser;
@@ -2271,7 +2420,8 @@ public final class ManageAccount
    * {@inheritDoc}
    */
   @Override()
-  protected void doShutdownHookProcessing(final ResultCode resultCode)
+  protected void doShutdownHookProcessing(
+                      @Nullable final ResultCode resultCode)
   {
     cancelRequested.set(true);
 
@@ -2298,10 +2448,11 @@ public final class ManageAccount
    *                     from the server.
    */
   @Override()
-  public void handleUnsolicitedNotification(final LDAPConnection connection,
-                                            final ExtendedResult notification)
+  public void handleUnsolicitedNotification(
+                   @NotNull final LDAPConnection connection,
+                   @NotNull final ExtendedResult notification)
   {
-    final String message = NOTE_MANAGE_ACCT_UNSOLICITED_NOTIFICATION.get(
+    final String message = INFO_MANAGE_ACCT_UNSOLICITED_NOTIFICATION.get(
          String.valueOf(connection), String.valueOf(notification));
     if (outputWriter == null)
     {
@@ -2330,6 +2481,7 @@ public final class ManageAccount
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> examples =

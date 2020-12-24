@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,11 +37,13 @@ package com.unboundid.util.ssl.cert;
 
 
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.LinkedBlockingQueue;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.X509TrustManager;
 
@@ -36,10 +53,12 @@ import com.unboundid.ldap.protocol.ExtendedResponseProtocolOp;
 import com.unboundid.ldap.protocol.LDAPMessage;
 import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.ExtendedResult;
+import com.unboundid.ldap.sdk.LDAPConnectionOptions;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.extensions.StartTLSExtendedRequest;
 import com.unboundid.ldap.sdk.unboundidds.tools.ResultUtils;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -74,7 +93,7 @@ final class ManageCertificatesServerCertificateCollector
   /**
    * A pre-allocated empty certificate array.
    */
-  private static final X509Certificate[] NO_CERTIFICATES =
+  @NotNull private static final X509Certificate[] NO_CERTIFICATES =
        new X509Certificate[0];
 
 
@@ -94,13 +113,13 @@ final class ManageCertificatesServerCertificateCollector
 
   // The queue that will be used to transfer the server certificate chain to the
   // caller.
-  private final LinkedBlockingQueue<Object> queue;
+  @NotNull private final LinkedBlockingQueue<Object> queue;
 
   // The associated manage-certificates tool instance.
-  private final ManageCertificates manageCertificates;
+  @NotNull private final ManageCertificates manageCertificates;
 
   // The address of the server to which the connection will be established.
-  private final String hostname;
+  @NotNull private final String hostname;
 
 
 
@@ -130,9 +149,10 @@ final class ManageCertificatesServerCertificateCollector
    *              {@link CertException} may be placed on the queue instead.
    */
   ManageCertificatesServerCertificateCollector(
-       final ManageCertificates manageCertificates, final String hostname,
-       final int port, final boolean useLDAPStartTLS, final boolean verbose,
-       final LinkedBlockingQueue<Object> queue)
+       @NotNull final ManageCertificates manageCertificates,
+       @NotNull final String hostname, final int port,
+       final boolean useLDAPStartTLS, final boolean verbose,
+       @NotNull final LinkedBlockingQueue<Object> queue)
   {
     setName("ManageCertificatesServerCertificateCollector background thread " +
          "for " + hostname + ':' + port);
@@ -171,7 +191,10 @@ final class ManageCertificatesServerCertificateCollector
     try
     {
       nonSecureSocket = new Socket();
-      nonSecureSocket.connect(new InetSocketAddress(hostname, port), 60);
+
+      final InetAddress address =
+           LDAPConnectionOptions.DEFAULT_NAME_RESOLVER.getByName(hostname);
+      nonSecureSocket.connect(new InetSocketAddress(address, port), 60_000);
       if (verbose)
       {
         manageCertificates.wrapOut(0, WRAP_COLUMN,
@@ -346,6 +369,27 @@ final class ManageCertificatesServerCertificateCollector
           queue.offer(new CertException(message));
           return;
         }
+
+
+        if (verbose)
+        {
+          final SSLSession sslSession = sslSocket.getSession();
+          final String negotiatedProtocol = sslSession.getProtocol();
+          if (negotiatedProtocol != null)
+          {
+            manageCertificates.wrapOut(0, WRAP_COLUMN,
+                 INFO_MANAGE_CERTS_CERT_COLLECTOR_NEGOTIATED_TLS_PROTOCOL.get(
+                      negotiatedProtocol));
+          }
+
+          final String negotiatedCipherSuite = sslSession.getCipherSuite();
+          if (negotiatedCipherSuite != null)
+          {
+            manageCertificates.wrapOut(0, WRAP_COLUMN,
+                 INFO_MANAGE_CERTS_CERT_COLLECTOR_NEGOTIATED_TLS_SUITE.get(
+                      negotiatedCipherSuite));
+          }
+        }
       }
       finally
       {
@@ -386,8 +430,8 @@ final class ManageCertificatesServerCertificateCollector
    *                                should not be trusted.
    */
   @Override()
-  public void checkClientTrusted(final X509Certificate[] chain,
-                                 final String authType)
+  public void checkClientTrusted(@NotNull final X509Certificate[] chain,
+                                 @NotNull final String authType)
          throws CertificateException
   {
     // No implementation is required.  We only care about server certificates,
@@ -405,8 +449,8 @@ final class ManageCertificatesServerCertificateCollector
    * @param  authType  The key exchange algorithm used.
    */
   @Override()
-  public void checkServerTrusted(final X509Certificate[] chain,
-                                 final String authType)
+  public void checkServerTrusted(@NotNull final X509Certificate[] chain,
+                                 @NotNull final String authType)
          throws CertificateException
   {
     try
@@ -466,6 +510,7 @@ final class ManageCertificatesServerCertificateCollector
    * @return  The accepted issuer certificates for this trust manager.
    */
   @Override()
+  @NotNull()
   public X509Certificate[] getAcceptedIssuers()
   {
     return NO_CERTIFICATES;

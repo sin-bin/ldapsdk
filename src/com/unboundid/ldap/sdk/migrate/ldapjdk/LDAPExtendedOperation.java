@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,8 @@ import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.ldap.sdk.ExtendedRequest;
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -57,10 +74,10 @@ public class LDAPExtendedOperation
 
 
   // The value for this extended operation, if available.
-  private final byte[] value;
+  @Nullable private final byte[] value;
 
   // The OID for this extended operation.
-  private final String oid;
+  @NotNull private final String oid;
 
 
 
@@ -71,7 +88,8 @@ public class LDAPExtendedOperation
    * @param  vals  The encoded value for this extended request, or {@code null}
    *               if there is none.
    */
-  public LDAPExtendedOperation(final String id, final byte[] vals)
+  public LDAPExtendedOperation(@NotNull final String id,
+                               @Nullable final byte[] vals)
   {
     oid   = id;
     value = vals;
@@ -85,7 +103,7 @@ public class LDAPExtendedOperation
    * @param  extendedRequest  The extended request to use to create this LDAP
    *                          extended operation.
    */
-  public LDAPExtendedOperation(final ExtendedRequest extendedRequest)
+  public LDAPExtendedOperation(@NotNull final ExtendedRequest extendedRequest)
   {
     oid = extendedRequest.getOID();
 
@@ -107,6 +125,7 @@ public class LDAPExtendedOperation
    *
    * @return  The OID for this LDaP extended operation.
    */
+  @NotNull()
   public String getID()
   {
     return oid;
@@ -121,6 +140,7 @@ public class LDAPExtendedOperation
    * @return  The encoded value for this LDAP extended operation, or
    *          {@code null} if there is none.
    */
+  @Nullable()
   public byte[] getValue()
   {
     return value;
@@ -134,6 +154,7 @@ public class LDAPExtendedOperation
    * @return  The {@code ExtendedRequest} object that is the equivalent of this
    *          LDAP extended response.
    */
+  @NotNull()
   public final ExtendedRequest toExtendedRequest()
   {
     if (value == null)
@@ -154,6 +175,7 @@ public class LDAPExtendedOperation
    * @return  A string representation of this extended operation.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();

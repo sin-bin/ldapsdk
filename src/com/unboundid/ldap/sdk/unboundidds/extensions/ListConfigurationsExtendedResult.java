@@ -1,9 +1,24 @@
 /*
- * Copyright 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2013-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,6 +52,8 @@ import com.unboundid.ldap.sdk.ExtendedResult;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -82,7 +99,7 @@ public final class ListConfigurationsExtendedResult
    * The OID (1.3.6.1.4.1.30221.2.6.27) for the list configurations extended
    * result.
    */
-  public static final String LIST_CONFIGS_RESULT_OID =
+  @NotNull public static final String LIST_CONFIGS_RESULT_OID =
        "1.3.6.1.4.1.30221.2.6.27";
 
 
@@ -119,13 +136,13 @@ public final class ListConfigurationsExtendedResult
 
 
   // The names of the archived configuration files.
-  private final List<String> archivedFileNames;
+  @Nullable private final List<String> archivedFileNames;
 
   // The name of the baseline configuration file.
-  private final List<String> baselineFileNames;
+  @Nullable private final List<String> baselineFileNames;
 
   // The name of the active configuration file.
-  private final String activeFileName;
+  @Nullable private final String activeFileName;
 
 
 
@@ -139,7 +156,7 @@ public final class ListConfigurationsExtendedResult
    * @throws LDAPException  If the provided extended result cannot be parsed as
    *                         a valid list configurations extended result.
    */
-  public ListConfigurationsExtendedResult(final ExtendedResult result)
+  public ListConfigurationsExtendedResult(@NotNull final ExtendedResult result)
        throws LDAPException
   {
     super(result);
@@ -248,12 +265,14 @@ public final class ListConfigurationsExtendedResult
    *                            available.
    */
   public ListConfigurationsExtendedResult(final int messageID,
-              final ResultCode resultCode, final String diagnosticMessage,
-              final String matchedDN, final String[] referralURLs,
-              final String activeFileName,
-              final Collection<String> baselineFileNames,
-              final Collection<String> archivedFileNames,
-              final Control... responseControls)
+              @NotNull final ResultCode resultCode,
+              @Nullable final String diagnosticMessage,
+              @Nullable final String matchedDN,
+              @Nullable final String[] referralURLs,
+              @Nullable final String activeFileName,
+              @Nullable final Collection<String> baselineFileNames,
+              @Nullable final Collection<String> archivedFileNames,
+              @Nullable final Control... responseControls)
   {
     super(messageID, resultCode, diagnosticMessage, matchedDN, referralURLs,
          ((activeFileName == null) ? null : LIST_CONFIGS_RESULT_OID),
@@ -304,9 +323,11 @@ public final class ListConfigurationsExtendedResult
    *          value for a list configurations extended result, or {@code null}
    *          if a result with the provided information should not have a value.
    */
-  public static ASN1OctetString encodeValue(final String activeFileName,
-                     final Collection<String> baselineFileNames,
-                     final Collection<String> archivedFileNames)
+  @Nullable()
+  public static ASN1OctetString encodeValue(
+              @Nullable final String activeFileName,
+              @Nullable final Collection<String> baselineFileNames,
+              @Nullable final Collection<String> archivedFileNames)
   {
     if (activeFileName == null)
     {
@@ -364,6 +385,7 @@ public final class ListConfigurationsExtendedResult
    * @return  The name of the active configuration file the server is
    *          currently using, or {@code null} this is not available.
    */
+  @Nullable()
   public String getActiveFileName()
   {
     return activeFileName;
@@ -379,6 +401,7 @@ public final class ListConfigurationsExtendedResult
    * @return  A list containing the names of the baseline configuration files,
    *          or an empty list if this is not available.
    */
+  @Nullable()
   public List<String> getBaselineFileNames()
   {
     return baselineFileNames;
@@ -393,6 +416,7 @@ public final class ListConfigurationsExtendedResult
    * @return  A list containing the names of the archived configuration files,
    *          or an empty list if this is not available.
    */
+  @Nullable()
   public List<String> getArchivedFileNames()
   {
     return archivedFileNames;
@@ -404,6 +428,7 @@ public final class ListConfigurationsExtendedResult
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedResultName()
   {
     return INFO_EXTENDED_RESULT_NAME_LIST_CONFIGS.get();
@@ -415,7 +440,7 @@ public final class ListConfigurationsExtendedResult
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ListConfigurationsExtendedResult(resultCode=");
     buffer.append(getResultCode());

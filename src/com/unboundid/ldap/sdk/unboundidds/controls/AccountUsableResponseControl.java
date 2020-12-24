@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,6 +53,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -107,7 +124,7 @@ public final class AccountUsableResponseControl
    * The OID (1.3.6.1.4.1.42.2.27.9.5.8) for the account usable response
    * control.
    */
-  public static final String ACCOUNT_USABLE_RESPONSE_OID =
+  @NotNull public static final String ACCOUNT_USABLE_RESPONSE_OID =
        "1.3.6.1.4.1.42.2.27.9.5.8";
 
 
@@ -189,7 +206,7 @@ public final class AccountUsableResponseControl
   private final boolean passwordIsExpired;
 
   // The list of reasons that this account may be considered unusable.
-  private final List<String> unusableReasons;
+  @NotNull private final List<String> unusableReasons;
 
   // The number of grace logins remaining.
   private final int remainingGraceLogins;
@@ -337,9 +354,9 @@ public final class AccountUsableResponseControl
    * @throws  LDAPException  If the provided control cannot be decoded as an
    *                         account usable response control.
    */
-  public AccountUsableResponseControl(final String oid,
+  public AccountUsableResponseControl(@NotNull final String oid,
                                       final boolean isCritical,
-                                      final ASN1OctetString value)
+                                      @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     super(oid, isCritical,  value);
@@ -561,6 +578,7 @@ public final class AccountUsableResponseControl
    *
    * @return  The ASN.1 octet string that may be used as the control value.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(final int secondsUntilExpiration)
   {
     final ASN1Integer sueInteger =
@@ -590,6 +608,7 @@ public final class AccountUsableResponseControl
    *
    * @return  The ASN.1 octet string that may be used as the control value.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(final boolean isInactive,
                                              final boolean mustChangePassword,
                                              final boolean passwordIsExpired,
@@ -636,9 +655,10 @@ public final class AccountUsableResponseControl
    * {@inheritDoc}
    */
   @Override()
-  public AccountUsableResponseControl decodeControl(final String oid,
-                                                    final boolean isCritical,
-                                                    final ASN1OctetString value)
+  @NotNull()
+  public AccountUsableResponseControl decodeControl(@NotNull final String oid,
+              final boolean isCritical,
+              @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     return new AccountUsableResponseControl(oid, isCritical, value);
@@ -661,7 +681,9 @@ public final class AccountUsableResponseControl
    *                         decode the account usable response control
    *                         contained in the provided result.
    */
-  public static AccountUsableResponseControl get(final SearchResultEntry entry)
+  @Nullable()
+  public static AccountUsableResponseControl get(
+                     @NotNull final SearchResultEntry entry)
          throws LDAPException
   {
     final Control c = entry.getControl(ACCOUNT_USABLE_RESPONSE_OID);
@@ -702,6 +724,7 @@ public final class AccountUsableResponseControl
    * @return  The list of reasons that this account may be unusable, or an empty
    *          list if the account is usable or no reasons are available.
    */
+  @NotNull()
   public List<String> getUnusableReasons()
   {
     return unusableReasons;
@@ -802,6 +825,7 @@ public final class AccountUsableResponseControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_ACCOUNT_USABLE_RESPONSE.get();
@@ -813,7 +837,7 @@ public final class AccountUsableResponseControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("AccountUsableResponseControl(isUsable=");
     buffer.append(isUsable);

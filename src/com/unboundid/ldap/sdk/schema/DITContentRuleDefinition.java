@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import java.util.LinkedHashMap;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -60,32 +77,32 @@ public final class DITContentRuleDefinition
   private final boolean isObsolete;
 
   // The set of extensions for this DIT content rule.
-  private final Map<String,String[]> extensions;
+  @NotNull private final Map<String,String[]> extensions;
 
   // The description for this DIT content rule.
-  private final String description;
+  @Nullable private final String description;
 
   // The string representation of this DIT content rule.
-  private final String ditContentRuleString;
+  @NotNull private final String ditContentRuleString;
 
   // The OID of the structural object class with which this DIT content rule is
   // associated.
-  private final String oid;
+  @NotNull private final String oid;
 
   // The names/OIDs of the allowed auxiliary classes.
-  private final String[] auxiliaryClasses;
+  @NotNull private final String[] auxiliaryClasses;
 
   // The set of names for this DIT content rule.
-  private final String[] names;
+  @NotNull private final String[] names;
 
   // The names/OIDs of the optional attributes.
-  private final String[] optionalAttributes;
+  @NotNull private final String[] optionalAttributes;
 
   // The names/OIDs of the prohibited attributes.
-  private final String[] prohibitedAttributes;
+  @NotNull private final String[] prohibitedAttributes;
 
   // The names/OIDs of the required attributes.
-  private final String[] requiredAttributes;
+  @NotNull private final String[] requiredAttributes;
 
 
 
@@ -99,7 +116,7 @@ public final class DITContentRuleDefinition
    * @throws  LDAPException  If the provided string cannot be decoded as a DIT
    *                         content rule definition.
    */
-  public DITContentRuleDefinition(final String s)
+  public DITContentRuleDefinition(@NotNull final String s)
          throws LDAPException
   {
     Validator.ensureNotNull(s);
@@ -184,7 +201,8 @@ public final class DITContentRuleDefinition
         if (nameList.isEmpty())
         {
           pos = skipSpaces(ditContentRuleString, pos, length);
-          pos = readQDStrings(ditContentRuleString, pos, length, nameList);
+          pos = readQDStrings(ditContentRuleString, pos, length, token,
+               nameList);
         }
         else
         {
@@ -200,7 +218,7 @@ public final class DITContentRuleDefinition
           pos = skipSpaces(ditContentRuleString, pos, length);
 
           buffer = new StringBuilder();
-          pos = readQDString(ditContentRuleString, pos, length, buffer);
+          pos = readQDString(ditContentRuleString, pos, length, token, buffer);
           descr = buffer.toString();
         }
         else
@@ -228,7 +246,7 @@ public final class DITContentRuleDefinition
         if (auxOCs.isEmpty())
         {
           pos = skipSpaces(ditContentRuleString, pos, length);
-          pos = readOIDs(ditContentRuleString, pos, length, auxOCs);
+          pos = readOIDs(ditContentRuleString, pos, length, token, auxOCs);
         }
         else
         {
@@ -242,7 +260,7 @@ public final class DITContentRuleDefinition
         if (reqAttrs.isEmpty())
         {
           pos = skipSpaces(ditContentRuleString, pos, length);
-          pos = readOIDs(ditContentRuleString, pos, length, reqAttrs);
+          pos = readOIDs(ditContentRuleString, pos, length, token, reqAttrs);
         }
         else
         {
@@ -256,7 +274,7 @@ public final class DITContentRuleDefinition
         if (optAttrs.isEmpty())
         {
           pos = skipSpaces(ditContentRuleString, pos, length);
-          pos = readOIDs(ditContentRuleString, pos, length, optAttrs);
+          pos = readOIDs(ditContentRuleString, pos, length, token, optAttrs);
         }
         else
         {
@@ -270,7 +288,7 @@ public final class DITContentRuleDefinition
         if (notAttrs.isEmpty())
         {
           pos = skipSpaces(ditContentRuleString, pos, length);
-          pos = readOIDs(ditContentRuleString, pos, length, notAttrs);
+          pos = readOIDs(ditContentRuleString, pos, length, token, notAttrs);
         }
         else
         {
@@ -284,7 +302,8 @@ public final class DITContentRuleDefinition
         pos = skipSpaces(ditContentRuleString, pos, length);
 
         final ArrayList<String> valueList = new ArrayList<>(5);
-        pos = readQDStrings(ditContentRuleString, pos, length, valueList);
+        pos = readQDStrings(ditContentRuleString, pos, length, token,
+             valueList);
 
         final String[] values = new String[valueList.size()];
         valueList.toArray(values);
@@ -358,13 +377,14 @@ public final class DITContentRuleDefinition
    *                               rule.  It may be {@code null} or empty if
    *                               there should not be any extensions.
    */
-  public DITContentRuleDefinition(final String oid, final String name,
-                                  final String description,
-                                  final String[] auxiliaryClasses,
-                                  final String[] requiredAttributes,
-                                  final String[] optionalAttributes,
-                                  final String[] prohibitedAttributes,
-                                  final Map<String,String[]> extensions)
+  public DITContentRuleDefinition(@NotNull final String oid,
+              @Nullable final String name,
+              @Nullable final String description,
+              @Nullable final String[] auxiliaryClasses,
+              @Nullable final String[] requiredAttributes,
+              @Nullable final String[] optionalAttributes,
+              @Nullable final String[] prohibitedAttributes,
+              @Nullable final Map<String,String[]> extensions)
   {
     this(oid, ((name == null) ? null : new String[] { name }), description,
          false, auxiliaryClasses, requiredAttributes, optionalAttributes,
@@ -401,13 +421,14 @@ public final class DITContentRuleDefinition
    *                               rule.  It may be {@code null} or empty if
    *                               there should not be any extensions.
    */
-  public DITContentRuleDefinition(final String oid, final String name,
-                                  final String description,
-                                  final Collection<String> auxiliaryClasses,
-                                  final Collection<String> requiredAttributes,
-                                  final Collection<String> optionalAttributes,
-                                  final Collection<String> prohibitedAttributes,
-                                  final Map<String,String[]> extensions)
+  public DITContentRuleDefinition(@NotNull final String oid,
+              @Nullable final String name,
+              @Nullable final String description,
+              @Nullable final Collection<String> auxiliaryClasses,
+              @Nullable final Collection<String> requiredAttributes,
+              @Nullable final Collection<String> optionalAttributes,
+              @Nullable final Collection<String> prohibitedAttributes,
+              @Nullable final Map<String,String[]> extensions)
   {
     this(oid, ((name == null) ? null : new String[] { name }), description,
          false, toArray(auxiliaryClasses), toArray(requiredAttributes),
@@ -448,14 +469,15 @@ public final class DITContentRuleDefinition
    *                               rule.  It may be {@code null} or empty if
    *                               there should not be any extensions.
    */
-  public DITContentRuleDefinition(final String oid, final String[] names,
-                                  final String description,
-                                  final boolean isObsolete,
-                                  final String[] auxiliaryClasses,
-                                  final String[] requiredAttributes,
-                                  final String[] optionalAttributes,
-                                  final String[] prohibitedAttributes,
-                                  final Map<String,String[]> extensions)
+  public DITContentRuleDefinition(@NotNull final String oid,
+              @Nullable final String[] names,
+              @Nullable final String description,
+              final boolean isObsolete,
+              @Nullable final String[] auxiliaryClasses,
+              @Nullable final String[] requiredAttributes,
+              @Nullable final String[] optionalAttributes,
+              @Nullable final String[] prohibitedAttributes,
+              @Nullable final Map<String,String[]> extensions)
   {
     Validator.ensureNotNull(oid);
 
@@ -531,7 +553,7 @@ public final class DITContentRuleDefinition
    * @param  buffer  The buffer in which to construct a string representation of
    *                 this DIT content rule definition.
    */
-  private void createDefinitionString(final StringBuilder buffer)
+  private void createDefinitionString(@NotNull final StringBuilder buffer)
   {
     buffer.append("( ");
     buffer.append(oid);
@@ -697,6 +719,7 @@ public final class DITContentRuleDefinition
    * @return  The OID for the structural object class associated with this DIT
    *          content rule.
    */
+  @NotNull()
   public String getOID()
   {
     return oid;
@@ -710,6 +733,7 @@ public final class DITContentRuleDefinition
    * @return  The set of names for this DIT content rule, or an empty array if
    *          it does not have any names.
    */
+  @NotNull()
   public String[] getNames()
   {
     return names;
@@ -725,6 +749,7 @@ public final class DITContentRuleDefinition
    * @return  The primary name that can be used to reference this DIT content
    *          rule.
    */
+  @NotNull()
   public String getNameOrOID()
   {
     if (names.length == 0)
@@ -749,7 +774,7 @@ public final class DITContentRuleDefinition
    * @return  {@code true} if the provided string matches the OID or any of the
    *          names for this DIT content rule, or {@code false} if not.
    */
-  public boolean hasNameOrOID(final String s)
+  public boolean hasNameOrOID(@NotNull final String s)
   {
     for (final String name : names)
     {
@@ -770,6 +795,7 @@ public final class DITContentRuleDefinition
    * @return  The description for this DIT content rule, or {@code null} if
    *          there is no description defined.
    */
+  @Nullable()
   public String getDescription()
   {
     return description;
@@ -799,6 +825,7 @@ public final class DITContentRuleDefinition
    *          present in entries containing the structural class for this DIT
    *          content rule.
    */
+  @NotNull()
   public String[] getAuxiliaryClasses()
   {
     return auxiliaryClasses;
@@ -816,6 +843,7 @@ public final class DITContentRuleDefinition
    *          DIT content rule, or an empty array if there are no required
    *          attributes.
    */
+  @NotNull()
   public String[] getRequiredAttributes()
   {
     return requiredAttributes;
@@ -833,6 +861,7 @@ public final class DITContentRuleDefinition
    *          this DIT content rule, or an empty array if there are no required
    *          attributes.
    */
+  @NotNull()
   public String[] getOptionalAttributes()
   {
     return optionalAttributes;
@@ -850,6 +879,7 @@ public final class DITContentRuleDefinition
    *          DIT content rule, or an empty array if there are no required
    *          attributes.
    */
+  @NotNull()
   public String[] getProhibitedAttributes()
   {
     return prohibitedAttributes;
@@ -864,9 +894,22 @@ public final class DITContentRuleDefinition
    *
    * @return  The set of extensions for this DIT content rule.
    */
+  @NotNull()
   public Map<String,String[]> getExtensions()
   {
     return extensions;
+  }
+
+
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override()
+  @NotNull()
+  public SchemaElementType getSchemaElementType()
+  {
+    return SchemaElementType.DIT_CONTENT_RULE;
   }
 
 
@@ -886,7 +929,7 @@ public final class DITContentRuleDefinition
    * {@inheritDoc}
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == null)
     {
@@ -928,6 +971,7 @@ public final class DITContentRuleDefinition
    * @return  A string representation of this DIT content rule definition.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return ditContentRuleString;

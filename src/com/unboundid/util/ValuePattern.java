@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -213,7 +228,7 @@ public final class ValuePattern
    * The URL to the publicly-accessible javadoc for this class, which provides
    * a detailed overview of the supported value pattern syntax.
    */
-  public static final String PUBLIC_JAVADOC_URL =
+  @NotNull public static final String PUBLIC_JAVADOC_URL =
        "https://docs.ldap.com/ldap-sdk/docs/javadoc/index.html?" +
             "com/unboundid/util/ValuePattern.html";
 
@@ -231,17 +246,17 @@ public final class ValuePattern
   private final boolean hasBackReference;
 
   // The string that was originally used to create this value pattern.
-  private final String pattern;
+  @NotNull private final String pattern;
 
   // The thread-local array list that will be used to hold values for
   // back-references.
-  private final ThreadLocal<ArrayList<String>> refLists;
+  @NotNull private final ThreadLocal<ArrayList<String>> refLists;
 
   // The thread-local string builder that will be used to build values.
-  private final ThreadLocal<StringBuilder> buffers;
+  @NotNull private final ThreadLocal<StringBuilder> buffers;
 
   // The value pattern components that will be used to generate values.
-  private final ValuePatternComponent[] components;
+  @NotNull private final ValuePatternComponent[] components;
 
 
 
@@ -254,7 +269,7 @@ public final class ValuePattern
    * @throws  ParseException  If the provided string cannot be parsed as a valid
    *                          value pattern string.
    */
-  public ValuePattern(final String s)
+  public ValuePattern(@NotNull final String s)
          throws ParseException
   {
     this(s, null);
@@ -273,7 +288,7 @@ public final class ValuePattern
    * @throws  ParseException  If the provided string cannot be parsed as a valid
    *                          value pattern string.
    */
-  public ValuePattern(final String s, final Long r)
+  public ValuePattern(@NotNull final String s, @Nullable final Long r)
          throws ParseException
   {
     Validator.ensureNotNull(s);
@@ -344,9 +359,10 @@ public final class ValuePattern
    * @throws  ParseException  If the provided string cannot be parsed as a valid
    *                          value pattern string.
    */
-  private static void parse(final String s, final int o,
-                            final ArrayList<ValuePatternComponent> l,
-                            final Random r, final AtomicBoolean ref)
+  private static void parse(@NotNull final String s, final int o,
+                            @NotNull final ArrayList<ValuePatternComponent> l,
+                            @NotNull final Random r,
+                            @NotNull final AtomicBoolean ref)
           throws ParseException
   {
     // Find the first occurrence of "[[".  Parse the portion of the string
@@ -573,9 +589,9 @@ public final class ValuePattern
    * @throws  ParseException  If the specified substring cannot be parsed as a
    *
    */
-  private static ValuePatternComponent parseNumericComponent(final String s,
-                                                             final int o,
-                                                             final Random r)
+  @NotNull()
+  private static ValuePatternComponent parseNumericComponent(
+               @NotNull final String s,final int o, @NotNull final Random r)
           throws ParseException
   {
     boolean delimiterFound = false;
@@ -927,6 +943,7 @@ incrementLoop:
    *
    * @return  The next value generated from the value pattern.
    */
+  @NotNull()
   public String nextValue()
   {
     StringBuilder buffer = buffers.get();
@@ -995,6 +1012,7 @@ incrementLoop:
    * @return  A string representation of this value pattern.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return pattern;

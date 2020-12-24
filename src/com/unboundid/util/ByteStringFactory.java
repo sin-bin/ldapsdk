@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -35,7 +50,8 @@ public final class ByteStringFactory
   /**
    * A pre-allocated ASN.1 octet string with no value.
    */
-  private static final ASN1OctetString EMPTY_VALUE = new ASN1OctetString();
+  @NotNull private static final ASN1OctetString EMPTY_VALUE =
+       new ASN1OctetString();
 
 
 
@@ -54,6 +70,7 @@ public final class ByteStringFactory
    *
    * @return  The created byte string.
    */
+  @NotNull()
   public static ByteString create()
   {
     return EMPTY_VALUE;
@@ -68,7 +85,8 @@ public final class ByteStringFactory
    *
    * @return  The created byte string.
    */
-  public static ByteString create(final byte[] value)
+  @NotNull()
+  public static ByteString create(@Nullable final byte[] value)
   {
     return new ASN1OctetString(value);
   }
@@ -90,7 +108,8 @@ public final class ByteStringFactory
    *
    * @return  The created byte string.
    */
-  public static ByteString create(final byte[] value, final int offset,
+  @NotNull()
+  public static ByteString create(@NotNull final byte[] value, final int offset,
                                   final int length)
   {
     return new ASN1OctetString(value, offset, length);
@@ -105,7 +124,8 @@ public final class ByteStringFactory
    *
    * @return  The created byte string.
    */
-  public static ByteString create(final String value)
+  @NotNull()
+  public static ByteString create(@Nullable final String value)
   {
     return new ASN1OctetString(value);
   }

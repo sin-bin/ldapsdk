@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,8 +46,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,6 +63,8 @@ import javax.security.auth.x500.X500Principal;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -129,7 +146,7 @@ public final class SSLUtil
    * set, then the default SSL protocol will be dynamically determined.  This
    * can be overridden via the {@link #setDefaultSSLProtocol(String)} method.
    */
-  public static final String PROPERTY_DEFAULT_SSL_PROTOCOL =
+  @NotNull public static final String PROPERTY_DEFAULT_SSL_PROTOCOL =
        "com.unboundid.util.SSLUtil.defaultSSLProtocol";
 
 
@@ -141,50 +158,62 @@ public final class SSLUtil
    * dynamically determined.  This can be overridden via the
    * {@link #setEnabledSSLProtocols(Collection)} method.
    */
-  public static final String PROPERTY_ENABLED_SSL_PROTOCOLS =
+  @NotNull public static final String PROPERTY_ENABLED_SSL_PROTOCOLS =
        "com.unboundid.util.SSLUtil.enabledSSLProtocols";
+
+
+
+  /**
+   * The name of the system property that can be used to provide the initial
+   * set of enabled SSL cipher suites that should be used, as a comma-delimited
+   * list.  If this is not set, then the enabled SSL cipher suites will be
+   * dynamically determined.  This can be overridden via the
+   * {@link #setEnabledSSLCipherSuites(Collection)} method.
+   */
+  @NotNull public static final String PROPERTY_ENABLED_SSL_CIPHER_SUITES =
+       "com.unboundid.util.SSLUtil.enabledSSLCipherSuites";
 
 
 
   /**
    * The name of the SSL protocol that can be used to request TLSv1.3.
    */
-  public static final String SSL_PROTOCOL_TLS_1_3 = "TLSv1.3";
+  @NotNull public static final String SSL_PROTOCOL_TLS_1_3 = "TLSv1.3";
 
 
 
   /**
    * The name of the SSL protocol that can be used to request TLSv1.2.
    */
-  public static final String SSL_PROTOCOL_TLS_1_2 = "TLSv1.2";
+  @NotNull public static final String SSL_PROTOCOL_TLS_1_2 = "TLSv1.2";
 
 
 
   /**
    * The name of the SSL protocol that can be used to request TLSv1.1.
    */
-  public static final String SSL_PROTOCOL_TLS_1_1 = "TLSv1.1";
+  @NotNull public static final String SSL_PROTOCOL_TLS_1_1 = "TLSv1.1";
 
 
 
   /**
    * The name of the SSL protocol that can be used to request TLSv1.
    */
-  public static final String SSL_PROTOCOL_TLS_1 = "TLSv1";
+  @NotNull public static final String SSL_PROTOCOL_TLS_1 = "TLSv1";
 
 
 
   /**
    * The name of the SSL protocol that can be used to request SSLv3.
    */
-  public static final String SSL_PROTOCOL_SSL_3 = "SSLv3";
+  @NotNull public static final String SSL_PROTOCOL_SSL_3 = "SSLv3";
 
 
 
   /**
    * The name of the SSL protocol that can be used to request SSLv2Hello.
    */
-  public static final String SSL_PROTOCOL_SSL_2_HELLO = "SSLv2Hello";
+  @NotNull public static final String SSL_PROTOCOL_SSL_2_HELLO = "SSLv2Hello";
 
 
 
@@ -192,8 +221,17 @@ public final class SSLUtil
    * The default protocol string that will be used to create SSL contexts when
    * no explicit protocol is specified.
    */
-  private static final AtomicReference<String> DEFAULT_SSL_PROTOCOL =
+  @NotNull private static final AtomicReference<String> DEFAULT_SSL_PROTOCOL =
        new AtomicReference<>(SSL_PROTOCOL_TLS_1);
+
+
+
+  /**
+   * The default set of SSL cipher suites that will be enabled for use if
+   * available for SSL sockets created within the LDAP SDK.
+   */
+  @NotNull private static final AtomicReference<Set<String>>
+       ENABLED_SSL_CIPHER_SUITES = new AtomicReference<>();
 
 
 
@@ -201,8 +239,8 @@ public final class SSLUtil
    * The default set of SSL protocols that will be enabled for use if available
    * for SSL sockets created within the LDAP SDK.
    */
-  private static final AtomicReference<Set<String>> ENABLED_SSL_PROTOCOLS =
-       new AtomicReference<>();
+  @NotNull private static final AtomicReference<Set<String>>
+       ENABLED_SSL_PROTOCOLS = new AtomicReference<>();
 
 
 
@@ -214,10 +252,10 @@ public final class SSLUtil
 
 
   // The set of key managers to be used.
-  private final KeyManager[] keyManagers;
+  @Nullable private final KeyManager[] keyManagers;
 
   // The set of trust managers to be used.
-  private final TrustManager[] trustManagers;
+  @Nullable private final TrustManager[] trustManagers;
 
 
 
@@ -246,7 +284,7 @@ public final class SSLUtil
    *                       It may be {@code null} if the default set of trust
    *                       managers should be used.
    */
-  public SSLUtil(final TrustManager trustManager)
+  public SSLUtil(@Nullable final TrustManager trustManager)
   {
     keyManagers = null;
 
@@ -273,7 +311,7 @@ public final class SSLUtil
    *                        the client.  It may be {@code null} or empty if the
    *                        default set of trust managers should be used.
    */
-  public SSLUtil(final TrustManager[] trustManagers)
+  public SSLUtil(@Nullable final TrustManager[] trustManagers)
   {
     keyManagers = null;
 
@@ -304,7 +342,8 @@ public final class SSLUtil
    *                       It may be {@code null} if the default set of trust
    *                       managers should be used.
    */
-  public SSLUtil(final KeyManager keyManager, final TrustManager trustManager)
+  public SSLUtil(@Nullable final KeyManager keyManager,
+                 @Nullable final TrustManager trustManager)
   {
     if (keyManager == null)
     {
@@ -342,8 +381,8 @@ public final class SSLUtil
    *                        the client.  It may be {@code null} or empty if the
    *                        default set of trust managers should be used.
    */
-  public SSLUtil(final KeyManager[] keyManagers,
-                 final TrustManager[] trustManagers)
+  public SSLUtil(@Nullable final KeyManager[] keyManagers,
+                 @Nullable final TrustManager[] trustManagers)
   {
     if ((keyManagers == null) || (keyManagers.length == 0))
     {
@@ -372,6 +411,7 @@ public final class SSLUtil
    * @return  The set of key managers configured for use by this class, or
    *          {@code null} if none were provided.
    */
+  @Nullable()
   public KeyManager[] getKeyManagers()
   {
     return keyManagers;
@@ -386,6 +426,7 @@ public final class SSLUtil
    * @return  The set of trust managers configured for use by this class, or
    *          {@code null} if none were provided.
    */
+  @Nullable()
   public TrustManager[] getTrustManagers()
   {
     return trustManagers;
@@ -403,6 +444,7 @@ public final class SSLUtil
    * @throws  GeneralSecurityException  If a problem occurs while creating or
    *                                    initializing the SSL context.
    */
+  @NotNull()
   public SSLContext createSSLContext()
          throws GeneralSecurityException
   {
@@ -427,7 +469,8 @@ public final class SSLUtil
    * @throws  GeneralSecurityException  If a problem occurs while creating or
    *                                    initializing the SSL context.
    */
-  public SSLContext createSSLContext(final String protocol)
+  @NotNull()
+  public SSLContext createSSLContext(@NotNull final String protocol)
          throws GeneralSecurityException
   {
     Validator.ensureNotNull(protocol);
@@ -456,8 +499,9 @@ public final class SSLUtil
    * @throws  GeneralSecurityException  If a problem occurs while creating or
    *                                    initializing the SSL context.
    */
-  public SSLContext createSSLContext(final String protocol,
-                                     final String provider)
+  @NotNull()
+  public SSLContext createSSLContext(@NotNull final String protocol,
+                                     @NotNull final String provider)
          throws GeneralSecurityException
   {
     Validator.ensureNotNull(protocol, provider);
@@ -479,12 +523,13 @@ public final class SSLUtil
    * @throws  GeneralSecurityException  If a problem occurs while creating or
    *                                    initializing the SSL socket factory.
    */
+  @NotNull()
   public SSLSocketFactory createSSLSocketFactory()
          throws GeneralSecurityException
   {
-    return new SetEnabledProtocolsSSLSocketFactory(
+    return new SetEnabledProtocolsAndCipherSuitesSSLSocketFactory(
          createSSLContext().getSocketFactory(),
-         ENABLED_SSL_PROTOCOLS.get());
+         ENABLED_SSL_PROTOCOLS.get(), ENABLED_SSL_CIPHER_SUITES.get());
   }
 
 
@@ -504,11 +549,14 @@ public final class SSLUtil
    * @throws  GeneralSecurityException  If a problem occurs while creating or
    *                                    initializing the SSL socket factory.
    */
-  public SSLSocketFactory createSSLSocketFactory(final String protocol)
+  @NotNull()
+  public SSLSocketFactory createSSLSocketFactory(
+                               @NotNull final String protocol)
          throws GeneralSecurityException
   {
-    return new SetEnabledProtocolsSSLSocketFactory(
-         createSSLContext(protocol).getSocketFactory(), protocol);
+    return new SetEnabledProtocolsAndCipherSuitesSSLSocketFactory(
+         createSSLContext(protocol).getSocketFactory(), protocol,
+         ENABLED_SSL_CIPHER_SUITES.get());
   }
 
 
@@ -529,8 +577,9 @@ public final class SSLUtil
    * @throws  GeneralSecurityException  If a problem occurs while creating or
    *                                    initializing the SSL socket factory.
    */
-  public SSLSocketFactory createSSLSocketFactory(final String protocol,
-                                                 final String provider)
+  @NotNull()
+  public SSLSocketFactory createSSLSocketFactory(@NotNull final String protocol,
+                                                 @NotNull final String provider)
          throws GeneralSecurityException
   {
     return createSSLContext(protocol, provider).getSocketFactory();
@@ -549,12 +598,13 @@ public final class SSLUtil
    *                                    initializing the SSL server socket
    *                                    factory.
    */
+  @NotNull()
   public SSLServerSocketFactory createSSLServerSocketFactory()
          throws GeneralSecurityException
   {
-    return new SetEnabledProtocolsSSLServerSocketFactory(
+    return new SetEnabledProtocolsAndCipherSuitesSSLServerSocketFactory(
          createSSLContext().getServerSocketFactory(),
-         ENABLED_SSL_PROTOCOLS.get());
+         ENABLED_SSL_PROTOCOLS.get(), ENABLED_SSL_CIPHER_SUITES.get());
   }
 
 
@@ -575,12 +625,14 @@ public final class SSLUtil
    *                                    initializing the SSL server socket
    *                                    factory.
    */
+  @NotNull()
   public SSLServerSocketFactory createSSLServerSocketFactory(
-                                     final String protocol)
+                                     @NotNull final String protocol)
          throws GeneralSecurityException
   {
-    return new SetEnabledProtocolsSSLServerSocketFactory(
-         createSSLContext(protocol).getServerSocketFactory(), protocol);
+    return new SetEnabledProtocolsAndCipherSuitesSSLServerSocketFactory(
+         createSSLContext(protocol).getServerSocketFactory(), protocol,
+         ENABLED_SSL_CIPHER_SUITES.get());
   }
 
 
@@ -603,9 +655,10 @@ public final class SSLUtil
    *                                    initializing the SSL server socket
    *                                    factory.
    */
+  @NotNull()
   public SSLServerSocketFactory createSSLServerSocketFactory(
-                                     final String protocol,
-                                     final String provider)
+                                     @NotNull final String protocol,
+                                     @NotNull final String provider)
          throws GeneralSecurityException
   {
     return createSSLContext(protocol, provider).getServerSocketFactory();
@@ -621,6 +674,7 @@ public final class SSLUtil
    * @return  The SSL protocol string that will be used by calls to create an
    *          SSL context that do not explicitly specify which protocol to use.
    */
+  @NotNull()
   public static String getDefaultSSLProtocol()
   {
     return DEFAULT_SSL_PROTOCOL.get();
@@ -638,7 +692,8 @@ public final class SSLUtil
    *                             explicitly specify which protocol to use.  It
    *                             must not be {@code null}.
    */
-  public static void setDefaultSSLProtocol(final String defaultSSLProtocol)
+  public static void setDefaultSSLProtocol(
+                          @NotNull final String defaultSSLProtocol)
   {
     Validator.ensureNotNull(defaultSSLProtocol);
 
@@ -654,6 +709,7 @@ public final class SSLUtil
    * @return  The set of SSL protocols that will be enabled for use, if
    *          available, for SSL sockets created within the LDAP SDK.
    */
+  @NotNull()
   public static Set<String> getEnabledSSLProtocols()
   {
     return ENABLED_SSL_PROTOCOLS.get();
@@ -678,7 +734,7 @@ public final class SSLUtil
    *                              protocols should be used for the socket.
    */
   public static void setEnabledSSLProtocols(
-                          final Collection<String> enabledSSLProtocols)
+              @Nullable final Collection<String> enabledSSLProtocols)
   {
     if (enabledSSLProtocols == null)
     {
@@ -687,7 +743,7 @@ public final class SSLUtil
     else
     {
       ENABLED_SSL_PROTOCOLS.set(Collections.unmodifiableSet(
-           new HashSet<>(enabledSSLProtocols)));
+           new LinkedHashSet<>(enabledSSLProtocols)));
     }
   }
 
@@ -698,7 +754,7 @@ public final class SSLUtil
    * protocols.  This will only have any effect for sockets that are instances
    * of {@code javax.net.ssl.SSLSocket}, but it is safe to call for any kind of
    * {@code java.net.Socket}.  This should be called before attempting any
-   * communication over the socket, as
+   * communication over the socket.
    *
    * @param  socket  The socket on which to apply the configured set of enabled
    *                 SSL protocols.
@@ -707,8 +763,8 @@ public final class SSLUtil
    *                         non-empty set but none of the values in that set
    *                         are supported by the socket.
    */
-  public static void applyEnabledSSLProtocols(final Socket socket)
-         throws LDAPException
+  public static void applyEnabledSSLProtocols(@NotNull final Socket socket)
+       throws LDAPException
   {
     try
     {
@@ -738,12 +794,12 @@ public final class SSLUtil
    * @throws  IOException  If a problem is encountered while applying the
    *                       desired set of enabled protocols to the given socket.
    */
-  static void applyEnabledSSLProtocols(final Socket socket,
-                                       final Set<String> protocols)
-         throws IOException
+  static void applyEnabledSSLProtocols(@Nullable final Socket socket,
+                                       @NotNull final Set<String> protocols)
+       throws IOException
   {
     if ((socket == null) || (!(socket instanceof SSLSocket)) ||
-        protocols.isEmpty())
+         protocols.isEmpty())
     {
       return;
     }
@@ -780,13 +836,14 @@ public final class SSLUtil
    *                       desired set of enabled protocols to the given server
    *                       socket.
    */
-  static void applyEnabledSSLProtocols(final ServerSocket serverSocket,
-                                       final Set<String> protocols)
-         throws IOException
+  static void applyEnabledSSLProtocols(
+                   @Nullable final ServerSocket serverSocket,
+                   @NotNull final Set<String> protocols)
+       throws IOException
   {
     if ((serverSocket == null) ||
-        (!(serverSocket instanceof SSLServerSocket)) ||
-        protocols.isEmpty())
+         (!(serverSocket instanceof SSLServerSocket)) ||
+         protocols.isEmpty())
     {
       return;
     }
@@ -820,13 +877,14 @@ public final class SSLUtil
    * @throws  IOException  If none of the desired values are included in the
    *                       supported set.
    */
+  @NotNull()
   private static String[] getSSLProtocolsToEnable(
-                               final Set<String> desiredProtocols,
-                               final String[] supportedProtocols)
-         throws IOException
+                               @NotNull final Set<String> desiredProtocols,
+                               @NotNull final String[] supportedProtocols)
+          throws IOException
   {
-    final Set<String> lowerProtocols =
-         new HashSet<>(StaticUtils.computeMapCapacity(desiredProtocols.size()));
+    final Set<String> lowerProtocols = new LinkedHashSet<>(
+         StaticUtils.computeMapCapacity(desiredProtocols.size()));
     for (final String s : desiredProtocols)
     {
       lowerProtocols.add(StaticUtils.toLowerCase(s));
@@ -886,6 +944,253 @@ public final class SSLUtil
 
 
   /**
+   * Retrieves the set of SSL cipher suites that will be enabled for use, if
+   * available, for SSL sockets created within the LDAP SDK.
+   *
+   * @return  The set of SSL cipher suites that will be enabled for use, if
+   *          available, for SSL sockets created within the LDAP SDK.
+   */
+  @NotNull()
+  public static Set<String> getEnabledSSLCipherSuites()
+  {
+    return ENABLED_SSL_CIPHER_SUITES.get();
+  }
+
+
+
+  /**
+   * Specifies the set of SSL cipher suites that will be enabled for SSL sockets
+   * created within the LDAP SDK.  When creating an SSL socket, the
+   * {@code SSLSocket.getSupportedCipherSuites} method will be used to determine
+   * which cipher suites are supported for that socket, and then the
+   * {@code SSLSocket.setEnabledCipherSuites} method will be used to enable
+   * those suites which are listed as both supported by the socket and included
+   * in this set.  If the provided set is {@code null} or empty, then the
+   * default set of enabled cipher suites will be used.
+   *
+   * @param  enabledSSLCipherSuites  The set of SSL cipher suites that will be
+   *                                 enabled for use for SSL sockets created
+   *                                 within the LDAP SDK.  It may be
+   *                                 {@code null} or empty to indicate that the
+   *                                 JDK-default set of enabled cipher suites
+   *                                 should be used for the socket.
+   */
+  public static void setEnabledSSLCipherSuites(
+              @Nullable final Collection<String> enabledSSLCipherSuites)
+  {
+    if (enabledSSLCipherSuites == null)
+    {
+      ENABLED_SSL_CIPHER_SUITES.set(Collections.<String>emptySet());
+    }
+    else
+    {
+      ENABLED_SSL_CIPHER_SUITES.set(Collections.unmodifiableSet(
+           new LinkedHashSet<>(enabledSSLCipherSuites)));
+    }
+  }
+
+
+
+  /**
+   * Updates the provided socket to apply the appropriate set of enabled SSL
+   * cipher suites.  This will only have any effect for sockets that are
+   * instances of {@code javax.net.ssl.SSLSocket}, but it is safe to call for
+   * any kind of {@code java.net.Socket}.  This should be called before
+   * attempting any communication over the socket.
+   *
+   * @param  socket  The socket on which to apply the configured set of enabled
+   *                 SSL cipher suites.
+   *
+   * @throws  LDAPException  If {@link #getEnabledSSLCipherSuites} returns a
+   *                         non-empty set but none of the values in that set
+   *                         are supported by the socket.
+   */
+  public static void applyEnabledSSLCipherSuites(@NotNull final Socket socket)
+         throws LDAPException
+  {
+    try
+    {
+      applyEnabledSSLCipherSuites(socket, ENABLED_SSL_CIPHER_SUITES.get());
+    }
+    catch (final IOException ioe)
+    {
+      Debug.debugException(ioe);
+      throw new LDAPException(ResultCode.CONNECT_ERROR, ioe.getMessage(), ioe);
+    }
+  }
+
+
+
+  /**
+   * Updates the provided socket to apply the appropriate set of enabled SSL
+   * cipher suites.  This will only have any effect for sockets that are
+   * instances of {@code javax.net.ssl.SSLSocket}, but it is safe to call for
+   * any kind of {@code java.net.Socket}.  This should be called before
+   * attempting any communication over the socket.
+   *
+   * @param  socket        The socket on which to apply the configured set of
+   *                       enabled SSL cipher suites.
+   * @param  cipherSuites  The set of cipher suites that should be enabled for
+   *                       the socket, if available.
+   *
+   * @throws  IOException  If a problem is encountered while applying the
+   *                       desired set of enabled cipher suites to the given
+   *                       socket.
+   */
+  static void applyEnabledSSLCipherSuites(@Nullable final Socket socket,
+                   @NotNull final Set<String> cipherSuites)
+         throws IOException
+  {
+    if ((socket == null) || (!(socket instanceof SSLSocket)) ||
+        cipherSuites.isEmpty())
+    {
+      return;
+    }
+
+    final SSLSocket sslSocket = (SSLSocket) socket;
+    final String[] cipherSuitesToEnable =
+         getSSLCipherSuitesToEnable(cipherSuites,
+              sslSocket.getSupportedCipherSuites());
+
+    try
+    {
+      sslSocket.setEnabledCipherSuites(cipherSuitesToEnable);
+    }
+    catch (final Exception e)
+    {
+      Debug.debugException(e);
+    }
+  }
+
+
+
+  /**
+   * Updates the provided server socket to apply the appropriate set of enabled
+   * SSL cipher suites.  This will only have any effect for server sockets that
+   * are instances of {@code javax.net.ssl.SSLServerSocket}, but it is safe to
+   * call for any kind of {@code java.net.ServerSocket}.  This should be called
+   * before attempting any communication over the socket.
+   *
+   * @param  serverSocket     The server socket on which to apply the configured
+   *                          set of enabled SSL cipher suites.
+   * @param  cipherSuites     The set of cipher suites that should be enabled
+   *                          for the server socket, if available.
+   *
+   * @throws  IOException  If a problem is encountered while applying the
+   *                       desired set of enabled cipher suites to the given
+   *                       server socket.
+   */
+  static void applyEnabledSSLCipherSuites(
+                   @Nullable final ServerSocket serverSocket,
+                   @NotNull final Set<String> cipherSuites)
+         throws IOException
+  {
+    if ((serverSocket == null) ||
+        (! (serverSocket instanceof SSLServerSocket)) ||
+        cipherSuites.isEmpty())
+    {
+      return;
+    }
+
+    final SSLServerSocket sslServerSocket = (SSLServerSocket) serverSocket;
+    final String[] cipherSuitesToEnable =
+         getSSLCipherSuitesToEnable(cipherSuites,
+         sslServerSocket.getSupportedCipherSuites());
+
+    try
+    {
+      sslServerSocket.setEnabledCipherSuites(cipherSuitesToEnable);
+    }
+    catch (final Exception e)
+    {
+      Debug.debugException(e);
+    }
+  }
+
+
+
+  /**
+   * Retrieves the names of the SSL cipher suites that should be enabled given
+   * the provided information.
+   *
+   * @param  desiredCipherSuites    The set of cipher suites that are desired to
+   *                                be enabled.
+   * @param  supportedCipherSuites  The set of all cipher suites that are
+   *                                supported.
+   *
+   * @return  The names of the SSL cipher suites that should be enabled.
+   *
+   * @throws  IOException  If none of the desired values are included in the
+   *                       supported set.
+   */
+  @NotNull()
+  private static String[] getSSLCipherSuitesToEnable(
+                               @NotNull final Set<String> desiredCipherSuites,
+                               @NotNull final String[] supportedCipherSuites)
+         throws IOException
+  {
+    final Set<String> upperCipherSuites = new LinkedHashSet<>(
+         StaticUtils.computeMapCapacity(desiredCipherSuites.size()));
+    for (final String s : desiredCipherSuites)
+    {
+      upperCipherSuites.add(StaticUtils.toUpperCase(s));
+    }
+
+    final ArrayList<String> enabledList =
+         new ArrayList<>(supportedCipherSuites.length);
+    for (final String supportedCipherSuite : supportedCipherSuites)
+    {
+      if (upperCipherSuites.contains(StaticUtils.toUpperCase(
+           supportedCipherSuite)))
+      {
+        enabledList.add(supportedCipherSuite);
+      }
+    }
+
+    if (enabledList.isEmpty())
+    {
+      final StringBuilder enabledBuffer = new StringBuilder();
+      final Iterator<String> enabledIterator = desiredCipherSuites.iterator();
+      while (enabledIterator.hasNext())
+      {
+        enabledBuffer.append('\'');
+        enabledBuffer.append(enabledIterator.next());
+        enabledBuffer.append('\'');
+
+        if (enabledIterator.hasNext())
+        {
+          enabledBuffer.append(", ");
+        }
+      }
+
+      final StringBuilder supportedBuffer = new StringBuilder();
+      for (int i=0; i < supportedCipherSuites.length; i++)
+      {
+        if (i > 0)
+        {
+          supportedBuffer.append(", ");
+        }
+
+        supportedBuffer.append('\'');
+        supportedBuffer.append(supportedCipherSuites[i]);
+        supportedBuffer.append('\'');
+      }
+
+      throw new IOException(
+           ERR_NO_ENABLED_SSL_CIPHER_SUITES_AVAILABLE_FOR_SOCKET.get(
+                enabledBuffer.toString(), supportedBuffer.toString(),
+                PROPERTY_ENABLED_SSL_CIPHER_SUITES,
+                SSLUtil.class.getName() + ".setEnabledSSLCipherSuites"));
+    }
+    else
+    {
+      return enabledList.toArray(StaticUtils.NO_STRINGS);
+    }
+  }
+
+
+
+  /**
    * Configures SSL default settings for the LDAP SDK.  This method is
    * non-private for purposes of easier test coverage.
    */
@@ -894,7 +1199,7 @@ public final class SSLUtil
     // See if there is a system property that specifies what the default SSL
     // protocol should be.  If not, then try to dynamically determine it.
     final String defaultPropValue =
-         System.getProperty(PROPERTY_DEFAULT_SSL_PROTOCOL);
+         StaticUtils.getSystemProperty(PROPERTY_DEFAULT_SSL_PROTOCOL);
     if ((defaultPropValue != null) && (! defaultPropValue.isEmpty()))
     {
       DEFAULT_SSL_PROTOCOL.set(defaultPropValue);
@@ -911,8 +1216,8 @@ public final class SSLUtil
         final String[] supportedProtocols =
              defaultContext.getSupportedSSLParameters().getProtocols();
 
-        final HashSet<String> protocolMap =
-             new HashSet<>(Arrays.asList(supportedProtocols));
+        final LinkedHashSet<String> protocolMap =
+             new LinkedHashSet<>(Arrays.asList(supportedProtocols));
         if (protocolMap.contains(SSL_PROTOCOL_TLS_1_3))
         {
           DEFAULT_SSL_PROTOCOL.set(SSL_PROTOCOL_TLS_1_3);
@@ -942,29 +1247,29 @@ public final class SSLUtil
     // enabled protocols will not include SSLv3 even if the JVM might otherwise
     // include it as a default enabled protocol because of known security
     // problems with SSLv3.
-    final HashSet<String> enabledProtocols =
-         new HashSet<>(StaticUtils.computeMapCapacity(10));
-    enabledProtocols.add(SSL_PROTOCOL_TLS_1);
+    final LinkedHashSet<String> enabledProtocols =
+         new LinkedHashSet<>(StaticUtils.computeMapCapacity(10));
     if (DEFAULT_SSL_PROTOCOL.get().equals(SSL_PROTOCOL_TLS_1_3))
     {
-      enabledProtocols.add(SSL_PROTOCOL_TLS_1_1);
-      enabledProtocols.add(SSL_PROTOCOL_TLS_1_2);
       enabledProtocols.add(SSL_PROTOCOL_TLS_1_3);
+      enabledProtocols.add(SSL_PROTOCOL_TLS_1_2);
+      enabledProtocols.add(SSL_PROTOCOL_TLS_1_1);
     }
     else if (DEFAULT_SSL_PROTOCOL.get().equals(SSL_PROTOCOL_TLS_1_2))
     {
-      enabledProtocols.add(SSL_PROTOCOL_TLS_1_1);
       enabledProtocols.add(SSL_PROTOCOL_TLS_1_2);
+      enabledProtocols.add(SSL_PROTOCOL_TLS_1_1);
     }
     else if (DEFAULT_SSL_PROTOCOL.get().equals(SSL_PROTOCOL_TLS_1_1))
     {
       enabledProtocols.add(SSL_PROTOCOL_TLS_1_1);
     }
+    enabledProtocols.add(SSL_PROTOCOL_TLS_1);
 
     // If there is a system property that specifies which enabled SSL protocols
     // to use, then it will override the defaults.
-    final String enabledPropValue =
-         System.getProperty(PROPERTY_ENABLED_SSL_PROTOCOLS);
+    String enabledPropValue =
+         StaticUtils.getSystemProperty(PROPERTY_ENABLED_SSL_PROTOCOLS);
     if ((enabledPropValue != null) && (! enabledPropValue.isEmpty()))
     {
       enabledProtocols.clear();
@@ -982,6 +1287,40 @@ public final class SSLUtil
     }
 
     ENABLED_SSL_PROTOCOLS.set(Collections.unmodifiableSet(enabledProtocols));
+
+
+    // Use the TLS cipher suite selector to set the default set of enabled
+    // cipher suites for any SSL sockets that are created.
+    ENABLED_SSL_CIPHER_SUITES.set(
+         TLSCipherSuiteSelector.getRecommendedCipherSuites());
+
+
+    // If there is a system property that specifies which SSL cipher suites to
+    // use, then it wil override the defaults.
+    enabledPropValue =
+         StaticUtils.getSystemProperty(PROPERTY_ENABLED_SSL_CIPHER_SUITES);
+    if ((enabledPropValue != null) && (! enabledPropValue.isEmpty()))
+    {
+      final LinkedHashSet<String> enabledCipherSuites =
+           new LinkedHashSet<>(StaticUtils.computeMapCapacity(50));
+
+      final StringTokenizer tokenizer = new StringTokenizer(enabledPropValue,
+           ", ", false);
+      while (tokenizer.hasMoreTokens())
+      {
+        final String token = tokenizer.nextToken();
+        if (! token.isEmpty())
+        {
+          enabledCipherSuites.add(token);
+        }
+      }
+
+      if (! enabledCipherSuites.isEmpty())
+      {
+        ENABLED_SSL_CIPHER_SUITES.set(
+             Collections.unmodifiableSet(enabledCipherSuites));
+      }
+    }
   }
 
 
@@ -994,7 +1333,9 @@ public final class SSLUtil
    *
    * @return  A string representation of the provided certificate.
    */
-  public static String certificateToString(final X509Certificate certificate)
+  @NotNull()
+  public static String certificateToString(
+                            @NotNull final X509Certificate certificate)
   {
     final StringBuilder buffer = new StringBuilder();
     certificateToString(certificate, buffer);
@@ -1012,8 +1353,9 @@ public final class SSLUtil
    * @param  buffer       The buffer to which to append the string
    *                      representation.
    */
-  public static void certificateToString(final X509Certificate certificate,
-                                         final StringBuilder buffer)
+  public static void certificateToString(
+                          @NotNull final X509Certificate certificate,
+                          @NotNull final StringBuilder buffer)
   {
     buffer.append("Certificate(subject='");
     buffer.append(

@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,8 @@ package com.unboundid.ldap.matchingrules;
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -46,7 +63,7 @@ public final class TelephoneNumberMatchingRule
    * The singleton instance that will be returned from the {@code getInstance}
    * method.
    */
-  private static final TelephoneNumberMatchingRule INSTANCE =
+  @NotNull private static final TelephoneNumberMatchingRule INSTANCE =
        new TelephoneNumberMatchingRule();
 
 
@@ -54,7 +71,8 @@ public final class TelephoneNumberMatchingRule
   /**
    * The name for the telephoneNumberMatch equality matching rule.
    */
-  public static final String EQUALITY_RULE_NAME = "telephoneNumberMatch";
+  @NotNull public static final String EQUALITY_RULE_NAME =
+       "telephoneNumberMatch";
 
 
 
@@ -62,7 +80,7 @@ public final class TelephoneNumberMatchingRule
    * The name for the telephoneNumberMatch equality matching rule, formatted in
    * all lowercase characters.
    */
-  static final String LOWER_EQUALITY_RULE_NAME =
+  @NotNull static final String LOWER_EQUALITY_RULE_NAME =
        StaticUtils.toLowerCase(EQUALITY_RULE_NAME);
 
 
@@ -70,14 +88,14 @@ public final class TelephoneNumberMatchingRule
   /**
    * The OID for the telephoneNumberMatch equality matching rule.
    */
-  public static final String EQUALITY_RULE_OID = "2.5.13.20";
+  @NotNull public static final String EQUALITY_RULE_OID = "2.5.13.20";
 
 
 
   /**
    * The name for the telephoneNumberSubstringsMatch substring matching rule.
    */
-  public static final String SUBSTRING_RULE_NAME =
+  @NotNull public static final String SUBSTRING_RULE_NAME =
        "telephoneNumberSubstringsMatch";
 
 
@@ -86,7 +104,7 @@ public final class TelephoneNumberMatchingRule
    * The name for the telephoneNumberSubstringsMatch substring matching rule,
    * formatted in all lowercase characters.
    */
-  static final String LOWER_SUBSTRING_RULE_NAME =
+  @NotNull static final String LOWER_SUBSTRING_RULE_NAME =
        StaticUtils.toLowerCase(SUBSTRING_RULE_NAME);
 
 
@@ -94,7 +112,7 @@ public final class TelephoneNumberMatchingRule
   /**
    * The OID for the telephoneNumberSubstringsMatch substring matching rule.
    */
-  public static final String SUBSTRING_RULE_OID = "2.5.13.21";
+  @NotNull public static final String SUBSTRING_RULE_OID = "2.5.13.21";
 
 
 
@@ -120,6 +138,7 @@ public final class TelephoneNumberMatchingRule
    *
    * @return  A singleton instance of this matching rule.
    */
+  @NotNull()
   public static TelephoneNumberMatchingRule getInstance()
   {
     return INSTANCE;
@@ -131,6 +150,7 @@ public final class TelephoneNumberMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getEqualityMatchingRuleName()
   {
     return EQUALITY_RULE_NAME;
@@ -142,6 +162,7 @@ public final class TelephoneNumberMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getEqualityMatchingRuleOID()
   {
     return EQUALITY_RULE_OID;
@@ -153,6 +174,7 @@ public final class TelephoneNumberMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public String getOrderingMatchingRuleName()
   {
     return null;
@@ -164,6 +186,7 @@ public final class TelephoneNumberMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public String getOrderingMatchingRuleOID()
   {
     return null;
@@ -175,6 +198,7 @@ public final class TelephoneNumberMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getSubstringMatchingRuleName()
   {
     return SUBSTRING_RULE_NAME;
@@ -186,6 +210,7 @@ public final class TelephoneNumberMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getSubstringMatchingRuleOID()
   {
     return SUBSTRING_RULE_OID;
@@ -197,8 +222,8 @@ public final class TelephoneNumberMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public int compareValues(final ASN1OctetString value1,
-                           final ASN1OctetString value2)
+  public int compareValues(@NotNull final ASN1OctetString value1,
+                           @NotNull final ASN1OctetString value2)
          throws LDAPException
   {
     throw new LDAPException(ResultCode.INAPPROPRIATE_MATCHING,
@@ -211,7 +236,8 @@ public final class TelephoneNumberMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public ASN1OctetString normalize(final ASN1OctetString value)
+  @NotNull()
+  public ASN1OctetString normalize(@NotNull final ASN1OctetString value)
          throws LDAPException
   {
     final byte[] valueBytes = value.getValue();
@@ -264,8 +290,10 @@ public final class TelephoneNumberMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public ASN1OctetString normalizeSubstring(final ASN1OctetString value,
-                                            final byte substringType)
+  @NotNull()
+  public ASN1OctetString normalizeSubstring(
+                              @NotNull final ASN1OctetString value,
+                              final byte substringType)
          throws LDAPException
   {
     return normalize(value);

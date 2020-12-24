@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,8 @@ package com.unboundid.ldap.sdk;
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -51,7 +68,7 @@ public class LDAPExtendedOperationException
 
 
   // The extended result for this exception.
-  private final ExtendedResult extendedResult;
+  @NotNull private final ExtendedResult extendedResult;
 
 
 
@@ -62,7 +79,8 @@ public class LDAPExtendedOperationException
    * @param  extendedResult  The extended result to use to create this
    *                         exception.
    */
-  public LDAPExtendedOperationException(final ExtendedResult extendedResult)
+  public LDAPExtendedOperationException(
+              @NotNull final ExtendedResult extendedResult)
   {
     super(extendedResult);
 
@@ -75,6 +93,7 @@ public class LDAPExtendedOperationException
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPResult toLDAPResult()
   {
     return extendedResult;
@@ -87,6 +106,7 @@ public class LDAPExtendedOperationException
    *
    * @return  The extended result that was returned by the server.
    */
+  @NotNull()
   public ExtendedResult getExtendedResult()
   {
     return extendedResult;
@@ -100,6 +120,7 @@ public class LDAPExtendedOperationException
    * @return  The response OID from the extended result, or {@code null} if the
    *          result did not include an OID.
    */
+  @Nullable()
   public String getResponseOID()
   {
     return extendedResult.getOID();
@@ -113,6 +134,7 @@ public class LDAPExtendedOperationException
    * @return  The response value from the extended result, or {@code null} if
    *          the result did not include a value.
    */
+  @Nullable()
   public ASN1OctetString getResponseValue()
   {
     return extendedResult.getValue();
@@ -124,7 +146,7 @@ public class LDAPExtendedOperationException
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     super.toString(buffer);
   }
@@ -135,7 +157,8 @@ public class LDAPExtendedOperationException
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer, final boolean includeCause,
+  public void toString(@NotNull final StringBuilder buffer,
+                       final boolean includeCause,
                        final boolean includeStackTrace)
   {
     buffer.append("LDAPException(resultCode=");

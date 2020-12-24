@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -81,7 +98,7 @@ public final class DeliverPasswordResetTokenExtendedResult
    * The OID (1.3.6.1.4.1.30221.2.6.46) for the deliver password reset token
    * extended result.
    */
-  public static final String DELIVER_PW_RESET_TOKEN_RESULT_OID =
+  @NotNull public static final String DELIVER_PW_RESET_TOKEN_RESULT_OID =
        "1.3.6.1.4.1.30221.2.6.46";
 
 
@@ -108,14 +125,14 @@ public final class DeliverPasswordResetTokenExtendedResult
 
 
   // The name of the mechanism by which the password reset token was delivered.
-  private final String deliveryMechanism;
+  @Nullable private final String deliveryMechanism;
 
   // An message providing additional information about the delivery of the
   // password reset token.
-  private final String deliveryMessage;
+  @Nullable private final String deliveryMessage;
 
   // An identifier for the recipient of the password reset token.
-  private final String recipientID;
+  @Nullable private final String recipientID;
 
 
 
@@ -152,10 +169,14 @@ public final class DeliverPasswordResetTokenExtendedResult
    *                            available.
    */
   public DeliverPasswordResetTokenExtendedResult(final int messageID,
-              final ResultCode resultCode, final String diagnosticMessage,
-              final String matchedDN, final String[] referralURLs,
-              final String deliveryMechanism, final String recipientID,
-              final String deliveryMessage, final Control... responseControls)
+              @NotNull final ResultCode resultCode,
+              @Nullable final String diagnosticMessage,
+              @Nullable final String matchedDN,
+              @Nullable final String[] referralURLs,
+              @Nullable final String deliveryMechanism,
+              @Nullable final String recipientID,
+              @Nullable final String deliveryMessage,
+              @Nullable final Control... responseControls)
   {
     super(messageID, resultCode, diagnosticMessage, matchedDN, referralURLs,
          ((deliveryMechanism == null)
@@ -180,7 +201,8 @@ public final class DeliverPasswordResetTokenExtendedResult
    * @throws LDAPException  If the provided extended result cannot be parsed as
    *                         a deliver password reset token result.
    */
-  public DeliverPasswordResetTokenExtendedResult(final ExtendedResult result)
+  public DeliverPasswordResetTokenExtendedResult(
+              @NotNull final ExtendedResult result)
        throws LDAPException
   {
     super(result);
@@ -267,9 +289,11 @@ public final class DeliverPasswordResetTokenExtendedResult
    * @return  An ASN.1 octet string containing the encoded value, or
    *          {@code null} if the extended result should not have a value.
    */
-  private static ASN1OctetString encodeValue(final String deliveryMechanism,
-                                             final String recipientID,
-                                             final String deliveryMessage)
+  @Nullable()
+  private static ASN1OctetString encodeValue(
+               @Nullable final String deliveryMechanism,
+               @Nullable final String recipientID,
+               @Nullable final String deliveryMessage)
   {
     if (deliveryMechanism == null)
     {
@@ -308,6 +332,7 @@ public final class DeliverPasswordResetTokenExtendedResult
    * @return  The name of the mechanism by which the password reset token was
    *          delivered to the user, or {@code null} if this is not available.
    */
+  @Nullable()
   public String getDeliveryMechanism()
   {
     return deliveryMechanism;
@@ -325,6 +350,7 @@ public final class DeliverPasswordResetTokenExtendedResult
    * @return  An identifier for the user to whom the password reset token was
    *          delivered, or {@code null} if this is not available.
    */
+  @Nullable()
   public String getRecipientID()
   {
     return recipientID;
@@ -339,6 +365,7 @@ public final class DeliverPasswordResetTokenExtendedResult
    * @return  A message providing additional information about the password
    *          reset token delivery, or {@code null} if this is not available.
    */
+  @Nullable()
   public String getDeliveryMessage()
   {
     return deliveryMessage;
@@ -350,6 +377,7 @@ public final class DeliverPasswordResetTokenExtendedResult
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public String getExtendedResultName()
   {
     return INFO_EXTENDED_RESULT_NAME_DELIVER_PW_RESET_TOKEN.get();
@@ -365,7 +393,7 @@ public final class DeliverPasswordResetTokenExtendedResult
    *                 extended result will be appended.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("DeliverPasswordResetTokenExtendedResult(resultCode=");
     buffer.append(getResultCode());

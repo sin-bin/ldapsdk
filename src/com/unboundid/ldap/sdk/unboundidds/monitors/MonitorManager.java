@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,6 +52,8 @@ import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -98,8 +115,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<MonitorEntry> getMonitorEntries(
-                                        final LDAPConnection connection)
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getMonitorEntries((LDAPInterface) connection);
@@ -118,8 +136,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<MonitorEntry> getMonitorEntries(
-                                        final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -153,8 +172,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static GeneralMonitorEntry getGeneralMonitorEntry(
-                                         final LDAPConnection connection)
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getGeneralMonitorEntry((LDAPInterface) connection);
@@ -174,8 +194,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static GeneralMonitorEntry getGeneralMonitorEntry(
-                                         final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createPresenceFilter("objectClass");
@@ -210,9 +231,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
-  public static ActiveOperationsMonitorEntry
-                     getActiveOperationsMonitorEntry(
-                          final LDAPConnection connection)
+  @Nullable()
+  public static ActiveOperationsMonitorEntry getActiveOperationsMonitorEntry(
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getActiveOperationsMonitorEntry((LDAPInterface) connection);
@@ -232,9 +253,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
-  public static ActiveOperationsMonitorEntry
-                     getActiveOperationsMonitorEntry(
-                          final LDAPInterface connection)
+  @Nullable()
+  public static ActiveOperationsMonitorEntry getActiveOperationsMonitorEntry(
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -277,8 +298,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<BackendMonitorEntry> getBackendMonitorEntries(
-                                               final LDAPConnection connection)
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getBackendMonitorEntries((LDAPInterface) connection);
@@ -299,8 +321,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<BackendMonitorEntry> getBackendMonitorEntries(
-                                               final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -334,9 +357,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
-  public static ClientConnectionMonitorEntry
-                     getClientConnectionMonitorEntry(
-                          final LDAPConnection connection)
+  @Nullable()
+  public static ClientConnectionMonitorEntry getClientConnectionMonitorEntry(
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getClientConnectionMonitorEntry((LDAPInterface) connection);
@@ -356,9 +379,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
-  public static ClientConnectionMonitorEntry
-                     getClientConnectionMonitorEntry(
-                          final LDAPInterface connection)
+  @Nullable()
+  public static ClientConnectionMonitorEntry getClientConnectionMonitorEntry(
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -401,9 +424,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<ConnectionHandlerMonitorEntry>
-                     getConnectionHandlerMonitorEntries(
-                          final LDAPConnection connection)
+              getConnectionHandlerMonitorEntries(
+                   @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getConnectionHandlerMonitorEntries((LDAPInterface) connection);
@@ -424,9 +448,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<ConnectionHandlerMonitorEntry>
-                     getConnectionHandlerMonitorEntries(
-                          final LDAPInterface connection)
+              getConnectionHandlerMonitorEntries(
+                   @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -460,8 +485,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static DiskSpaceUsageMonitorEntry getDiskSpaceUsageMonitorEntry(
-                                                final LDAPConnection connection)
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getDiskSpaceUsageMonitorEntry((LDAPInterface) connection);
@@ -481,8 +507,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static DiskSpaceUsageMonitorEntry getDiskSpaceUsageMonitorEntry(
-                                                final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -524,8 +551,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static EntryCacheMonitorEntry getEntryCacheMonitorEntry(
-                                            final LDAPConnection connection)
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getEntryCacheMonitorEntry((LDAPInterface) connection);
@@ -545,8 +573,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static EntryCacheMonitorEntry getEntryCacheMonitorEntry(
-                                            final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -587,8 +616,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<FIFOEntryCacheMonitorEntry>
-              getFIFOEntryCacheMonitorEntries(final LDAPConnection connection)
+              getFIFOEntryCacheMonitorEntries(
+                   @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getFIFOEntryCacheMonitorEntries((LDAPInterface) connection);
@@ -608,8 +639,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<FIFOEntryCacheMonitorEntry>
-              getFIFOEntryCacheMonitorEntries(final LDAPInterface connection)
+              getFIFOEntryCacheMonitorEntries(
+                   @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -645,8 +678,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<GaugeMonitorEntry> getGaugeMonitorEntries(
-                                             final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -687,8 +721,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static GroupCacheMonitorEntry getGroupCacheMonitorEntry(
-                                            final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -730,9 +765,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static HostSystemRecentCPUAndMemoryMonitorEntry
-                     getHostSystemRecentCPUAndMemoryMonitorEntry(
-                          final LDAPInterface connection)
+              getHostSystemRecentCPUAndMemoryMonitorEntry(
+                   @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -778,8 +814,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<IndexMonitorEntry> getIndexMonitorEntries(
-                                             final LDAPConnection connection)
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getIndexMonitorEntries((LDAPInterface) connection);
@@ -800,8 +837,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<IndexMonitorEntry> getIndexMonitorEntries(
-                                             final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -836,8 +874,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<IndicatorGaugeMonitorEntry>
-              getIndicatorGaugeMonitorEntries(final LDAPInterface connection)
+              getIndicatorGaugeMonitorEntries(
+                   @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -872,9 +912,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
-  public static List<JEEnvironmentMonitorEntry>
-                     getJEEnvironmentMonitorEntries(
-                          final LDAPConnection connection)
+  @NotNull()
+  public static List<JEEnvironmentMonitorEntry> getJEEnvironmentMonitorEntries(
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getJEEnvironmentMonitorEntries((LDAPInterface) connection);
@@ -895,9 +935,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
-  public static List<JEEnvironmentMonitorEntry>
-                     getJEEnvironmentMonitorEntries(
-                          final LDAPInterface connection)
+  @NotNull()
+  public static List<JEEnvironmentMonitorEntry> getJEEnvironmentMonitorEntries(
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -932,9 +972,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<LDAPExternalServerMonitorEntry>
-                     getLDAPExternalServerMonitorEntries(
-                          final LDAPConnection connection)
+              getLDAPExternalServerMonitorEntries(
+                   @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getLDAPExternalServerMonitorEntries((LDAPInterface) connection);
@@ -955,9 +996,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<LDAPExternalServerMonitorEntry>
-                     getLDAPExternalServerMonitorEntries(
-                          final LDAPInterface connection)
+              getLDAPExternalServerMonitorEntries(
+                   @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -992,9 +1034,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<LDAPStatisticsMonitorEntry>
-                     getLDAPStatisticsMonitorEntries(
-                          final LDAPConnection connection)
+              getLDAPStatisticsMonitorEntries(
+                   @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getLDAPStatisticsMonitorEntries((LDAPInterface) connection);
@@ -1015,9 +1058,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<LDAPStatisticsMonitorEntry>
-                     getLDAPStatisticsMonitorEntries(
-                          final LDAPInterface connection)
+              getLDAPStatisticsMonitorEntries(
+                   @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1052,9 +1096,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Proxy Server.
    */
+  @NotNull()
   public static List<LoadBalancingAlgorithmMonitorEntry>
-                     getLoadBalancingAlgorithmMonitorEntries(
-                          final LDAPConnection connection)
+              getLoadBalancingAlgorithmMonitorEntries(
+                   @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getLoadBalancingAlgorithmMonitorEntries((LDAPInterface) connection);
@@ -1075,9 +1120,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Proxy Server.
    */
+  @NotNull()
   public static List<LoadBalancingAlgorithmMonitorEntry>
-                     getLoadBalancingAlgorithmMonitorEntries(
-                          final LDAPInterface connection)
+              getLoadBalancingAlgorithmMonitorEntries(
+                   @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1112,8 +1158,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static MemoryUsageMonitorEntry getMemoryUsageMonitorEntry(
-                                             final LDAPConnection connection)
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getMemoryUsageMonitorEntry((LDAPInterface) connection);
@@ -1133,8 +1180,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static MemoryUsageMonitorEntry getMemoryUsageMonitorEntry(
-                                             final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1176,8 +1224,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<NumericGaugeMonitorEntry>
-              getNumericGaugeMonitorEntries(final LDAPInterface connection)
+              getNumericGaugeMonitorEntries(
+                   @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1213,9 +1263,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<PerApplicationProcessingTimeHistogramMonitorEntry>
-                     getPerApplicationProcessingTimeHistogramMonitorEntries(
-                          final LDAPConnection connection)
+              getPerApplicationProcessingTimeHistogramMonitorEntries(
+                   @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getPerApplicationProcessingTimeHistogramMonitorEntries(
@@ -1238,9 +1289,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<PerApplicationProcessingTimeHistogramMonitorEntry>
-                     getPerApplicationProcessingTimeHistogramMonitorEntries(
-                          final LDAPInterface connection)
+              getPerApplicationProcessingTimeHistogramMonitorEntries(
+                   @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1287,9 +1339,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static ProcessingTimeHistogramMonitorEntry
-                     getProcessingTimeHistogramMonitorEntry(
-                          final LDAPConnection connection)
+              getProcessingTimeHistogramMonitorEntry(
+                   @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getProcessingTimeHistogramMonitorEntry((LDAPInterface) connection);
@@ -1310,9 +1363,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static ProcessingTimeHistogramMonitorEntry
-                     getProcessingTimeHistogramMonitorEntry(
-                          final LDAPInterface connection)
+              getProcessingTimeHistogramMonitorEntry(
+                   @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1357,8 +1411,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<ReplicaMonitorEntry> getReplicaMonitorEntries(
-                                               final LDAPConnection connection)
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getReplicaMonitorEntries((LDAPInterface) connection);
@@ -1379,8 +1434,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<ReplicaMonitorEntry> getReplicaMonitorEntries(
-                                               final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1414,8 +1470,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static ReplicationServerMonitorEntry getReplicationServerMonitorEntry(
-                     final LDAPConnection connection)
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getReplicationServerMonitorEntry((LDAPInterface) connection);
@@ -1435,8 +1492,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static ReplicationServerMonitorEntry getReplicationServerMonitorEntry(
-                     final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1480,9 +1538,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<ReplicationSummaryMonitorEntry>
-                     getReplicationSummaryMonitorEntries(
-                          final LDAPConnection connection)
+              getReplicationSummaryMonitorEntries(
+                   @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getReplicationSummaryMonitorEntries((LDAPInterface) connection);
@@ -1503,9 +1562,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @NotNull()
   public static List<ReplicationSummaryMonitorEntry>
-                     getReplicationSummaryMonitorEntries(
-                          final LDAPInterface connection)
+              getReplicationSummaryMonitorEntries(
+                   @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1539,8 +1599,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static ResultCodeMonitorEntry getResultCodeMonitorEntry(
-                                            final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1580,8 +1641,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static SystemInfoMonitorEntry getSystemInfoMonitorEntry(
-                                            final LDAPConnection connection)
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getSystemInfoMonitorEntry((LDAPInterface) connection);
@@ -1601,8 +1663,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static SystemInfoMonitorEntry getSystemInfoMonitorEntry(
-                                            final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1643,8 +1706,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static StackTraceMonitorEntry getStackTraceMonitorEntry(
-                                            final LDAPConnection connection)
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getStackTraceMonitorEntry((LDAPInterface) connection);
@@ -1664,8 +1728,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static StackTraceMonitorEntry getStackTraceMonitorEntry(
-                                            final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1707,8 +1772,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static TraditionalWorkQueueMonitorEntry
-         getTraditionalWorkQueueMonitorEntry(final LDAPConnection connection)
+              getTraditionalWorkQueueMonitorEntry(
+                   @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getTraditionalWorkQueueMonitorEntry((LDAPInterface) connection);
@@ -1729,8 +1796,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static TraditionalWorkQueueMonitorEntry
-         getTraditionalWorkQueueMonitorEntry(final LDAPInterface connection)
+              getTraditionalWorkQueueMonitorEntry(
+                   @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1772,8 +1841,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static UnboundIDWorkQueueMonitorEntry
-         getUnboundIDWorkQueueMonitorEntry(final LDAPConnection connection)
+              getUnboundIDWorkQueueMonitorEntry(
+                   @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getUnboundIDWorkQueueMonitorEntry((LDAPInterface) connection);
@@ -1793,8 +1864,10 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static UnboundIDWorkQueueMonitorEntry
-         getUnboundIDWorkQueueMonitorEntry(final LDAPInterface connection)
+              getUnboundIDWorkQueueMonitorEntry(
+                   @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",
@@ -1836,8 +1909,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static VersionMonitorEntry getVersionMonitorEntry(
-                                         final LDAPConnection connection)
+              @NotNull final LDAPConnection connection)
          throws LDAPSearchException
   {
     return getVersionMonitorEntry((LDAPInterface) connection);
@@ -1857,8 +1931,9 @@ public final class MonitorManager
    * @throws  LDAPSearchException  If a problem occurs while communicating with
    *                               the Directory Server.
    */
+  @Nullable()
   public static VersionMonitorEntry getVersionMonitorEntry(
-                                         final LDAPInterface connection)
+              @NotNull final LDAPInterface connection)
          throws LDAPSearchException
   {
     final Filter filter = Filter.createEqualityFilter("objectClass",

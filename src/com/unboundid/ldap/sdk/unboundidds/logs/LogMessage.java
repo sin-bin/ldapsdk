@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -35,6 +50,8 @@ import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -67,7 +84,7 @@ public class LogMessage
    * The format string that will be used for log message timestamps
    * with seconds-level precision enabled.
    */
-  private static final String TIMESTAMP_SEC_FORMAT =
+  @NotNull private static final String TIMESTAMP_SEC_FORMAT =
           "'['dd/MMM/yyyy:HH:mm:ss Z']'";
 
 
@@ -76,7 +93,7 @@ public class LogMessage
    * The format string that will be used for log message timestamps
    * with seconds-level precision enabled.
    */
-  private static final String TIMESTAMP_MS_FORMAT =
+  @NotNull private static final String TIMESTAMP_MS_FORMAT =
           "'['dd/MMM/yyyy:HH:mm:ss.SSS Z']'";
 
 
@@ -84,7 +101,7 @@ public class LogMessage
   /**
    * The thread-local date formatter.
    */
-  private static final ThreadLocal<SimpleDateFormat> dateSecFormat =
+  @NotNull private static final ThreadLocal<SimpleDateFormat> dateSecFormat =
        new ThreadLocal<>();
 
 
@@ -92,7 +109,7 @@ public class LogMessage
   /**
    * The thread-local date formatter.
    */
-  private static final ThreadLocal<SimpleDateFormat> dateMsFormat =
+  @NotNull private static final ThreadLocal<SimpleDateFormat> dateMsFormat =
        new ThreadLocal<>();
 
 
@@ -105,16 +122,16 @@ public class LogMessage
 
 
   // The timestamp for this log message.
-  private final Date timestamp;
+  @NotNull private final Date timestamp;
 
   // The map of named fields contained in this log message.
-  private final Map<String,String> namedValues;
+  @NotNull private final Map<String,String> namedValues;
 
   // The set of unnamed values contained in this log message.
-  private final Set<String> unnamedValues;
+  @NotNull private final Set<String> unnamedValues;
 
   // The string representation of this log message.
-  private final String messageString;
+  @NotNull private final String messageString;
 
 
 
@@ -123,7 +140,7 @@ public class LogMessage
    *
    * @param  m  The log message to use to create this log message.
    */
-  protected LogMessage(final LogMessage m)
+  protected LogMessage(@NotNull final LogMessage m)
   {
     timestamp     = m.timestamp;
     unnamedValues = m.unnamedValues;
@@ -141,7 +158,7 @@ public class LogMessage
    * @throws  LogException  If the provided string cannot be parsed as a valid
    *                        log message.
    */
-  protected LogMessage(final String s)
+  protected LogMessage(@NotNull final String s)
             throws LogException
   {
     messageString = s;
@@ -217,9 +234,9 @@ public class LogMessage
    *
    * @throws  LogException  If a problem occurs while processing the tokens.
    */
-  private static void parseTokens(final String s, final int startPos,
-                                  final Map<String,String> named,
-                                  final Set<String> unnamed)
+  private static void parseTokens(@NotNull final String s, final int startPos,
+                                  @NotNull final Map<String,String> named,
+                                  @NotNull final Set<String> unnamed)
           throws LogException
   {
     boolean inQuotes = false;
@@ -263,9 +280,10 @@ public class LogMessage
    *
    * @throws  LogException  If a problem occurs while processing the token.
    */
-  private static void processToken(final String s, final String token,
-                                   final Map<String,String> named,
-                                   final Set<String> unnamed)
+  private static void processToken(@NotNull final String s,
+                                   @NotNull final String token,
+                                   @NotNull final Map<String,String> named,
+                                   @NotNull final Set<String> unnamed)
           throws LogException
   {
     // If the token contains an equal sign, then it's a named token.  Otherwise,
@@ -301,7 +319,9 @@ public class LogMessage
    *
    * @throws  LogException  If a problem occurs while processing the value.
    */
-  private static String processValue(final String s, final String v)
+  @NotNull()
+  private static String processValue(@NotNull final String s,
+                                     @NotNull final String v)
           throws LogException
   {
     final ByteStringBuffer b = new ByteStringBuffer();
@@ -410,7 +430,8 @@ public class LogMessage
    * @return  {@code true} if the given string includes a millisecond component,
    *          or {@code false} if not.
    */
-  private static boolean timestampIncludesMilliseconds(final String timestamp)
+  private static boolean timestampIncludesMilliseconds(
+                              @NotNull final String timestamp)
   {
     // The sec and ms format strings differ at the 22nd character.
     return ((timestamp.length() > 21) && (timestamp.charAt(21) == '.'));
@@ -423,6 +444,7 @@ public class LogMessage
    *
    * @return  The timestamp for this log message.
    */
+  @NotNull()
   public final Date getTimestamp()
   {
     return timestamp;
@@ -436,6 +458,7 @@ public class LogMessage
    *
    * @return  The set of named tokens for this log message.
    */
+  @NotNull()
   public final Map<String,String> getNamedValues()
   {
     return namedValues;
@@ -451,7 +474,8 @@ public class LogMessage
    * @return  The value of the token with the specified name, or {@code null} if
    *          there is no value with the specified name.
    */
-  public final String getNamedValue(final String name)
+  @Nullable()
+  public final String getNamedValue(@NotNull final String name)
   {
     return namedValues.get(name);
   }
@@ -468,7 +492,8 @@ public class LogMessage
    *          {@code Boolean}, or {@code null} if there is no value with the
    *          specified name or the value cannot be parsed as a {@code Boolean}.
    */
-  public final Boolean getNamedValueAsBoolean(final String name)
+  @Nullable()
+  public final Boolean getNamedValueAsBoolean(@NotNull final String name)
   {
     final String s = namedValues.get(name);
     if (s == null)
@@ -507,7 +532,8 @@ public class LogMessage
    *          {@code Double}, or {@code null} if there is no value with the
    *          specified name or the value cannot be parsed as a {@code Double}.
    */
-  public final Double getNamedValueAsDouble(final String name)
+  @Nullable()
+  public final Double getNamedValueAsDouble(@NotNull final String name)
   {
     final String s = namedValues.get(name);
     if (s == null)
@@ -539,7 +565,8 @@ public class LogMessage
    *          specified name or the value cannot be parsed as an
    *          {@code Integer}.
    */
-  public final Integer getNamedValueAsInteger(final String name)
+  @Nullable()
+  public final Integer getNamedValueAsInteger(@NotNull final String name)
   {
     final String s = namedValues.get(name);
     if (s == null)
@@ -569,7 +596,8 @@ public class LogMessage
    *          or {@code null} if there is no value with the specified name or
    *          the value cannot be parsed as a {@code Long}.
    */
-  public final Long getNamedValueAsLong(final String name)
+  @Nullable()
+  public final Long getNamedValueAsLong(@NotNull final String name)
   {
     final String s = namedValues.get(name);
     if (s == null)
@@ -595,6 +623,7 @@ public class LogMessage
    *
    * @return  The set of unnamed tokens for this log message.
    */
+  @NotNull()
   public final Set<String> getUnnamedValues()
   {
     return unnamedValues;
@@ -610,7 +639,7 @@ public class LogMessage
    * @return  {@code true} if this log message has the specified unnamed value,
    *          or {@code false} if not.
    */
-  public final boolean hasUnnamedValue(final String value)
+  public final boolean hasUnnamedValue(@NotNull final String value)
   {
     return unnamedValues.contains(value);
   }
@@ -623,6 +652,7 @@ public class LogMessage
    * @return  A string representation of this log message.
    */
   @Override()
+  @NotNull()
   public final String toString()
   {
     return messageString;

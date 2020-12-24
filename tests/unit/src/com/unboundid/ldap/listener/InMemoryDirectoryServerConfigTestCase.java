@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -23,12 +38,16 @@ package com.unboundid.ldap.listener;
 
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 
 import org.testng.annotations.Test;
 
+import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.DN;
 import com.unboundid.ldap.sdk.Entry;
+import com.unboundid.ldap.sdk.LDAPConnectionOptions;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.LDAPSDKTestCase;
 import com.unboundid.ldap.sdk.OperationType;
@@ -119,6 +138,9 @@ public final class InMemoryDirectoryServerConfigTestCase
 
     assertEquals(cfg.getMaxConnections(), 0);
 
+    assertEquals(cfg.getMaxMessageSizeBytes(),
+         new LDAPConnectionOptions().getMaxMessageSize());
+
     assertNotNull(cfg.getEqualityIndexAttributes());
     assertTrue(cfg.getEqualityIndexAttributes().isEmpty());
 
@@ -192,6 +214,9 @@ public final class InMemoryDirectoryServerConfigTestCase
     assertEquals(cfg.getMaxChangeLogEntries(), 0);
 
     assertEquals(cfg.getMaxConnections(), 0);
+
+    assertEquals(cfg.getMaxMessageSizeBytes(),
+         new LDAPConnectionOptions().getMaxMessageSize());
 
     assertNotNull(cfg.getEqualityIndexAttributes());
     assertTrue(cfg.getEqualityIndexAttributes().isEmpty());
@@ -1024,6 +1049,36 @@ public final class InMemoryDirectoryServerConfigTestCase
 
 
   /**
+   * Tests the behavior of the methods for limiting the maximum message size.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testMaxMessageSize()
+         throws Exception
+  {
+    final InMemoryDirectoryServerConfig cfg =
+         new InMemoryDirectoryServerConfig("dc=example,dc=com");
+
+    assertEquals(cfg.getMaxMessageSizeBytes(),
+         new LDAPConnectionOptions().getMaxMessageSize());
+
+    assertNotNull(cfg.toString());
+
+    cfg.setMaxMessageSizeBytes(123_456_789);
+    assertEquals(cfg.getMaxMessageSizeBytes(), 123_456_789);
+
+    assertNotNull(cfg.toString());
+
+    cfg.setMaxMessageSizeBytes(-1);
+    assertEquals(cfg.getMaxMessageSizeBytes(), Integer.MAX_VALUE);
+
+    assertNotNull(cfg.toString());
+  }
+
+
+
+  /**
    * Tests the behavior of the methods for interacting with the equality index
    * attributes.
    *
@@ -1209,5 +1264,56 @@ public final class InMemoryDirectoryServerConfigTestCase
 
     cfg.setRootDSEEntry(null);
     assertNull(cfg.getRootDSEEntry());
+  }
+
+
+
+  /**
+   * Tests the behavior of the methods that make it possible to get and set
+   * custom root DSE attributes.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testCustomRootDSEAttributes()
+         throws Exception
+  {
+    final InMemoryDirectoryServerConfig cfg =
+         new InMemoryDirectoryServerConfig("dc=example,dc=com");
+
+    assertNotNull(cfg.getCustomRootDSEAttributes());
+    assertTrue(cfg.getCustomRootDSEAttributes().isEmpty());
+
+    cfg.setCustomRootDSEAttributes(
+         Collections.singletonList(new Attribute("description", "foo")));
+
+    assertNotNull(cfg.getCustomRootDSEAttributes());
+    assertFalse(cfg.getCustomRootDSEAttributes().isEmpty());
+    assertEquals(cfg.getCustomRootDSEAttributes().size(), 1);
+    assertEquals(cfg.getCustomRootDSEAttributes(),
+         Collections.singletonList(new Attribute("description", "foo")));
+
+    cfg.setCustomRootDSEAttributes(Collections.<Attribute>emptyList());
+
+    assertNotNull(cfg.getCustomRootDSEAttributes());
+    assertTrue(cfg.getCustomRootDSEAttributes().isEmpty());
+
+    cfg.setCustomRootDSEAttributes(
+         Arrays.asList(
+              new Attribute("description", "bar", "baz"),
+              new Attribute("displayName", "Root DSE")));
+
+    assertNotNull(cfg.getCustomRootDSEAttributes());
+    assertFalse(cfg.getCustomRootDSEAttributes().isEmpty());
+    assertEquals(cfg.getCustomRootDSEAttributes().size(), 2);
+    assertEquals(cfg.getCustomRootDSEAttributes(),
+         Arrays.asList(
+              new Attribute("description", "bar", "baz"),
+              new Attribute("displayName", "Root DSE")));
+
+    cfg.setCustomRootDSEAttributes(null);
+
+    assertNotNull(cfg.getCustomRootDSEAttributes());
+    assertTrue(cfg.getCustomRootDSEAttributes().isEmpty());
   }
 }
