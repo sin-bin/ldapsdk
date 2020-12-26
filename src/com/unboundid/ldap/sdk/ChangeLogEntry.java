@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -44,6 +59,8 @@ import com.unboundid.ldap.matchingrules.OctetStringMatchingRule;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -70,7 +87,7 @@ public class ChangeLogEntry
    * The name of the attribute that contains the change number that identifies
    * the change and the order it was processed in the server.
    */
-  public static final String ATTR_CHANGE_NUMBER = "changeNumber";
+  @NotNull public static final String ATTR_CHANGE_NUMBER = "changeNumber";
 
 
 
@@ -78,7 +95,7 @@ public class ChangeLogEntry
    * The name of the attribute that contains the DN of the entry targeted by
    * the change.
    */
-  public static final String ATTR_TARGET_DN = "targetDN";
+  @NotNull public static final String ATTR_TARGET_DN = "targetDN";
 
 
 
@@ -86,7 +103,7 @@ public class ChangeLogEntry
    * The name of the attribute that contains the type of change made to the
    * target entry.
    */
-  public static final String ATTR_CHANGE_TYPE = "changeType";
+  @NotNull public static final String ATTR_CHANGE_TYPE = "changeType";
 
 
 
@@ -96,7 +113,7 @@ public class ChangeLogEntry
    * up the entry.  For a modify operation, this will be an LDIF representation
    * of the changes to the target entry.
    */
-  public static final String ATTR_CHANGES = "changes";
+  @NotNull public static final String ATTR_CHANGES = "changes";
 
 
 
@@ -104,7 +121,7 @@ public class ChangeLogEntry
    * The name of the attribute used to hold the new RDN for a modify DN
    * operation.
    */
-  public static final String ATTR_NEW_RDN = "newRDN";
+  @NotNull public static final String ATTR_NEW_RDN = "newRDN";
 
 
 
@@ -113,7 +130,7 @@ public class ChangeLogEntry
    * RDN value(s) should be removed from the target entry for a modify DN
    * operation.
    */
-  public static final String ATTR_DELETE_OLD_RDN = "deleteOldRDN";
+  @NotNull public static final String ATTR_DELETE_OLD_RDN = "deleteOldRDN";
 
 
 
@@ -121,7 +138,7 @@ public class ChangeLogEntry
    * The name of the attribute used to hold the new superior DN for a modify DN
    * operation.
    */
-  public static final String ATTR_NEW_SUPERIOR = "newSuperior";
+  @NotNull public static final String ATTR_NEW_SUPERIOR = "newSuperior";
 
 
 
@@ -129,7 +146,19 @@ public class ChangeLogEntry
    * The name of the attribute used to hold information about attributes from a
    * deleted entry, if available.
    */
-  public static final String ATTR_DELETED_ENTRY_ATTRS = "deletedEntryAttrs";
+  @NotNull public static final String ATTR_DELETED_ENTRY_ATTRS =
+       "deletedEntryAttrs";
+
+
+
+  /**
+   * The name of an alternative attribute that may be used to obtain information
+   * about attributes from a deleted entry if the deletedEntryAttrs attribute
+   * is not present.
+   */
+  @NotNull public static final String
+       ATTR_ALTERNATIVE_DELETED_ENTRY_ATTRS_INCLUDED_ATTRIBUTES =
+            "includedAttributes";
 
 
 
@@ -144,26 +173,26 @@ public class ChangeLogEntry
   private final boolean deleteOldRDN;
 
   // The change type for this changelog entry.
-  private final ChangeType changeType;
+  @NotNull private final ChangeType changeType;
 
   // A list of the attributes for an add, or the deleted entry attributes for a
   // delete operation.
-  private final List<Attribute> attributes;
+  @Nullable private final List<Attribute> attributes;
 
   // A list of the modifications for a modify operation.
-  private final List<Modification> modifications;
+  @Nullable private final List<Modification> modifications;
 
   // The change number for the changelog entry.
   private final long changeNumber;
 
   // The new RDN for a modify DN operation.
-  private final String newRDN;
+  @Nullable private final String newRDN;
 
   // The new superior DN for a modify DN operation.
-  private final String newSuperior;
+  @Nullable private final String newSuperior;
 
   // The DN of the target entry.
-  private final String targetDN;
+  @NotNull private final String targetDN;
 
 
 
@@ -175,7 +204,7 @@ public class ChangeLogEntry
    * @throws  LDAPException  If the provided entry cannot be parsed as a
    *                         changelog entry.
    */
-  public ChangeLogEntry(final Entry entry)
+  public ChangeLogEntry(@NotNull final Entry entry)
          throws LDAPException
   {
     super(entry);
@@ -309,8 +338,9 @@ public class ChangeLogEntry
    * @throws  LDAPException  If a problem is encountered while constructing the
    *                         changelog entry.
    */
+  @NotNull()
   public static ChangeLogEntry constructChangeLogEntry(final long changeNumber,
-                                    final LDIFChangeRecord changeRecord)
+                     @NotNull final LDIFChangeRecord changeRecord)
          throws LDAPException
   {
     final Entry e =
@@ -400,9 +430,11 @@ public class ChangeLogEntry
    * @throws  LDAPException  If an error occurs while parsing the attribute
    *                         list.
    */
-  protected static List<Attribute> parseAddAttributeList(final Entry entry,
-                                                         final String attrName,
-                                                         final String targetDN)
+  @NotNull()
+  protected static List<Attribute> parseAddAttributeList(
+                                        @NotNull final Entry entry,
+                                        @NotNull final String attrName,
+                                        @NotNull final String targetDN)
             throws LDAPException
   {
     final Attribute changesAttr = entry.getAttribute(attrName);
@@ -460,15 +492,22 @@ public class ChangeLogEntry
    * @throws  LDAPException  If an error occurs while parsing the deleted
    *                         attribute list.
    */
-  private static List<Attribute> parseDeletedAttributeList(final Entry entry,
-                                      final String targetDN)
+  @Nullable()
+  private static List<Attribute> parseDeletedAttributeList(
+                                      @NotNull final Entry entry,
+                                      @NotNull final String targetDN)
           throws LDAPException
   {
-    final Attribute deletedEntryAttrs =
+    Attribute deletedEntryAttrs =
          entry.getAttribute(ATTR_DELETED_ENTRY_ATTRS);
     if ((deletedEntryAttrs == null) || (! deletedEntryAttrs.hasValue()))
     {
-      return null;
+      deletedEntryAttrs = entry.getAttribute(
+           ATTR_ALTERNATIVE_DELETED_ENTRY_ATTRS_INCLUDED_ATTRIBUTES);
+      if ((deletedEntryAttrs == null) || (! deletedEntryAttrs.hasValue()))
+      {
+        return null;
+      }
     }
 
     final byte[] valueBytes = deletedEntryAttrs.getValueByteArray();
@@ -569,8 +608,10 @@ public class ChangeLogEntry
    * @throws  LDAPException  If an error occurs while parsing the modification
    *                         list.
    */
-  private static List<Modification> parseModificationList(final Entry entry,
-                                                          final String targetDN)
+  @Nullable()
+  private static List<Modification> parseModificationList(
+                                         @NotNull final Entry entry,
+                                         @NotNull final String targetDN)
           throws LDAPException
   {
     final Attribute changesAttr = entry.getAttribute(ATTR_CHANGES);
@@ -650,6 +691,7 @@ public class ChangeLogEntry
    *
    * @return  The target DN for this changelog entry.
    */
+  @NotNull()
   public final String getTargetDN()
   {
     return targetDN;
@@ -662,6 +704,7 @@ public class ChangeLogEntry
    *
    * @return  The change type for this changelog entry.
    */
+  @NotNull()
   public final ChangeType getChangeType()
   {
     return changeType;
@@ -675,6 +718,7 @@ public class ChangeLogEntry
    * @return  The attribute list for an add changelog entry, or {@code null} if
    *          this changelog entry does not represent an add operation.
    */
+  @Nullable()
   public final List<Attribute> getAddAttributes()
   {
     if (changeType == ChangeType.ADD)
@@ -700,6 +744,7 @@ public class ChangeLogEntry
    *          operation or no deleted entry attributes were included in the
    *          changelog entry.
    */
+  @Nullable()
   public final List<Attribute> getDeletedEntryAttributes()
   {
     if (changeType == ChangeType.DELETE)
@@ -725,6 +770,7 @@ public class ChangeLogEntry
    *          not represent a modify operation or a modify DN operation with
    *          additional changes.
    */
+  @Nullable
   public final List<Modification> getModifications()
   {
     return modifications;
@@ -738,6 +784,7 @@ public class ChangeLogEntry
    * @return  The new RDN for a modify DN changelog entry, or {@code null} if
    *          this changelog entry does not represent a modify DN operation.
    */
+  @Nullable()
   public final String getNewRDN()
   {
     return newRDN;
@@ -767,6 +814,7 @@ public class ChangeLogEntry
    *          {@code null} if there is no new superior DN, or if this changelog
    *          entry does not represent a modify DN operation.
    */
+  @Nullable()
   public final String getNewSuperior()
   {
     return newSuperior;
@@ -784,6 +832,7 @@ public class ChangeLogEntry
    * @return  The DN of the entry after the change has been processed, or
    *          {@code null} if the entry no longer exists.
    */
+  @Nullable()
   public final String getNewDN()
   {
     switch (changeType)
@@ -841,6 +890,7 @@ public class ChangeLogEntry
    * @return  An LDIF change record that is analogous to the operation
    *          represented by this changelog entry.
    */
+  @NotNull()
   public final LDIFChangeRecord toLDIFChangeRecord()
   {
     switch (changeType)
@@ -878,7 +928,8 @@ public class ChangeLogEntry
    * @throws  LDAPException  If the operation could not be processed
    *                         successfully.
    */
-  public final LDAPResult processChange(final LDAPInterface connection)
+  @NotNull()
+  public final LDAPResult processChange(@NotNull final LDAPInterface connection)
          throws LDAPException
   {
     switch (changeType)

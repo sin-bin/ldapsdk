@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,11 +46,8 @@ import com.unboundid.asn1.ASN1Sequence;
 import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
-import com.unboundid.ldap.sdk.unboundidds.extensions.
-            StartInteractiveTransactionExtendedRequest;
-import com.unboundid.ldap.sdk.unboundidds.extensions.
-            StartInteractiveTransactionExtendedResult;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -46,6 +58,25 @@ import static com.unboundid.ldap.sdk.unboundidds.controls.ControlMessages.*;
 
 
 /**
+ * <BLOCKQUOTE>
+ *   <B>NOTE:</B>  The use of interactive transactions is strongly discouraged
+ *   because it can create conditions which are prone to deadlocks between
+ *   operations that may significantly affect performance and will result in the
+ *   cancellation of one or both operations.  It is strongly recommended that
+ *   standard LDAP transactions (which may be started using a
+ *   {@link com.unboundid.ldap.sdk.extensions.StartTransactionExtendedRequest})
+ *   or a {@code MultiUpdateExtendedRequest} be used instead.  Although they
+ *   cannot include arbitrary read operations, LDAP transactions and
+ *   multi-update operations may be used in conjunction with the
+ *   {@link com.unboundid.ldap.sdk.controls.AssertionRequestControl},
+ *   {@link com.unboundid.ldap.sdk.controls.PreReadRequestControl}, and
+ *   {@link com.unboundid.ldap.sdk.controls.PostReadRequestControl} to
+ *   incorporate some read capability into a transaction, and in conjunction
+ *   with the {@link com.unboundid.ldap.sdk.ModificationType#INCREMENT}
+ *   modification type to increment integer values without the need to know the
+ *   precise value before or after the operation (although the pre-read and/or
+ *   post-read controls may be used to determine that).
+ * </BLOCKQUOTE>
  * This class provides an implementation of the interactive transaction
  * specification request control, which may be used to indicate that the
  * associated operation is part of an interactive transaction.  It may be used
@@ -70,7 +101,7 @@ import static com.unboundid.ldap.sdk.unboundidds.controls.ControlMessages.*;
  * <UL>
  *   <LI><CODE>txnID</CODE> -- The transaction ID for the transaction, which was
  *       obtained from a previous
- *       {@link StartInteractiveTransactionExtendedResult}.</LI>
+ *       {@code StartInteractiveTransactionExtendedResult}.</LI>
  *   <LI><CODE>abortOnFailure</CODE> -- Indicates whether the transaction should
  *       be aborted if the request associated with this control does not
  *       complete successfully.</LI>
@@ -81,9 +112,16 @@ import static com.unboundid.ldap.sdk.unboundidds.controls.ControlMessages.*;
  *       altered by a subsequent operation.</LI>
  * </UL>
  * See the documentation for the
- * {@link StartInteractiveTransactionExtendedRequest} class for an example of
+ * {@code StartInteractiveTransactionExtendedRequest} class for an example of
  * processing an interactive transaction.
+ *
+ * @deprecated  The use of interactive transactions is strongly discouraged
+ *              because it can create conditions which are prone to deadlocks
+ *              between operations that may significantly affect performance and
+ *              will result in the cancellation of one or both operations.
  */
+@Deprecated()
+@SuppressWarnings("deprecation")
 @NotMutable()
 @ThreadSafety(level=ThreadSafetyLevel.COMPLETELY_THREADSAFE)
 public final class InteractiveTransactionSpecificationRequestControl
@@ -93,8 +131,9 @@ public final class InteractiveTransactionSpecificationRequestControl
    * The OID (1.3.6.1.4.1.30221.2.5.4) for the interactive transaction
    * specification request control.
    */
-  public static final String INTERACTIVE_TRANSACTION_SPECIFICATION_REQUEST_OID =
-       "1.3.6.1.4.1.30221.2.5.4";
+  @NotNull public static final String
+       INTERACTIVE_TRANSACTION_SPECIFICATION_REQUEST_OID =
+            "1.3.6.1.4.1.30221.2.5.4";
 
 
 
@@ -127,7 +166,7 @@ public final class InteractiveTransactionSpecificationRequestControl
 
 
   // The transaction ID for the associated transaction.
-  private final ASN1OctetString transactionID;
+  @NotNull private final ASN1OctetString transactionID;
 
   // Indicates whether the transaction should be aborted if the associated
   // operation does not complete successfully.
@@ -150,7 +189,7 @@ public final class InteractiveTransactionSpecificationRequestControl
    *                         extended operation.  It must not be {@code null}.
    */
   public InteractiveTransactionSpecificationRequestControl(
-              final ASN1OctetString transactionID)
+              @NotNull final ASN1OctetString transactionID)
   {
     this(transactionID, false, true);
   }
@@ -175,7 +214,8 @@ public final class InteractiveTransactionSpecificationRequestControl
    *                         the transaction.
    */
   public InteractiveTransactionSpecificationRequestControl(
-              final ASN1OctetString transactionID, final boolean abortOnFailure,
+              @NotNull final ASN1OctetString transactionID,
+              final boolean abortOnFailure,
               final boolean writeLock)
   {
     super(INTERACTIVE_TRANSACTION_SPECIFICATION_REQUEST_OID, true,
@@ -200,7 +240,7 @@ public final class InteractiveTransactionSpecificationRequestControl
    *                         control.
    */
   public InteractiveTransactionSpecificationRequestControl(
-              final Control control)
+              @NotNull final Control control)
          throws LDAPException
   {
     super(control);
@@ -300,8 +340,9 @@ public final class InteractiveTransactionSpecificationRequestControl
    * @return  The ASN.1 octet string containing the encoded value for this
    *          control.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(
-                 final ASN1OctetString transactionID,
+                 @NotNull final ASN1OctetString transactionID,
                  final boolean abortOnFailure, final boolean writeLock)
   {
     Validator.ensureNotNull(transactionID);
@@ -329,6 +370,7 @@ public final class InteractiveTransactionSpecificationRequestControl
    *
    * @return  The transaction ID for the associated transaction.
    */
+  @NotNull()
   public ASN1OctetString getTransactionID()
   {
     return transactionID;
@@ -372,6 +414,7 @@ public final class InteractiveTransactionSpecificationRequestControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_INTERACTIVE_TXN_REQUEST.get();
@@ -383,7 +426,7 @@ public final class InteractiveTransactionSpecificationRequestControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("InteractiveTransactionSpecificationRequestControl(" +
                   "transactionID='");

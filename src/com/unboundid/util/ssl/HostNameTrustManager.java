@@ -1,9 +1,24 @@
 /*
- * Copyright 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2012-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,7 @@ import java.util.Set;
 import javax.net.ssl.X509TrustManager;
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -67,7 +83,7 @@ public final class HostNameTrustManager
   /**
    * A pre-allocated empty certificate array.
    */
-  private static final X509Certificate[] NO_CERTIFICATES =
+  @NotNull private static final X509Certificate[] NO_CERTIFICATES =
        new X509Certificate[0];
 
 
@@ -75,8 +91,14 @@ public final class HostNameTrustManager
   // Indicates whether to allow wildcard certificates (which
   private final boolean allowWildcards;
 
+  // Indicates whether to check the CN attribute in the peer certificate's
+  // subject DN if the certificate also contains a subject alternative name
+  // extension that contains at least dNSName, uniformResourceIdentifier, or
+  // iPAddress value.
+  private final boolean checkCNWhenSubjectAltNameIsPresent;
+
   // The set of hostname values that will be considered acceptable.
-  private final Set<String> acceptableHostNames;
+  @NotNull private final Set<String> acceptableHostNames;
 
 
 
@@ -96,7 +118,7 @@ public final class HostNameTrustManager
    *                              {@code null} or empty.
    */
   public HostNameTrustManager(final boolean allowWildcards,
-                              final String... acceptableHostNames)
+                              @NotNull final String... acceptableHostNames)
   {
     this(allowWildcards, StaticUtils.toList(acceptableHostNames));
   }
@@ -119,13 +141,52 @@ public final class HostNameTrustManager
    *                              {@code null} or empty.
    */
   public HostNameTrustManager(final boolean allowWildcards,
-                              final Collection<String> acceptableHostNames)
+              @NotNull final Collection<String> acceptableHostNames)
+  {
+    this(allowWildcards,
+         HostNameSSLSocketVerifier.
+              DEFAULT_CHECK_CN_WHEN_SUBJECT_ALT_NAME_IS_PRESENT,
+         acceptableHostNames);
+  }
+
+
+
+  /**
+   * Creates a new hostname trust manager with the provided information.
+   *
+   * @param  allowWildcards
+   *              Indicates whether to allow wildcard certificates that contain
+   *              an asterisk in the leftmost component of a hostname in the
+   *              dNSName or uniformResourceIdentifier of the subject
+   *              alternative name extension, or in the CN attribute of the
+   *              subject DN.
+   * @param  checkCNWhenSubjectAltNameIsPresent
+   *              Indicates whether to check the CN attribute in the peer
+   *              certificate's subject DN if the certificate also contains a
+   *              subject alternative name extension that contains at least one
+   *              dNSName, uniformResourceIdentifier, or iPAddress value.
+   *              Although RFC 6125 section 6.4.4 indicates that the CN
+   *              attribute should not be checked in certificates that have an
+   *              appropriate subject alternative name extension, LDAP clients
+   *              historically treat both sources as equally valid.
+   * @param  acceptableHostNames
+   *              The set of hostnames and/or IP addresses that will be
+   *              considered acceptable.  Only certificates with a CN or
+   *              subjectAltName value that exactly matches one of these names
+   *              (ignoring differences in capitalization) will be considered
+   *              acceptable.  It must not be {@code null} or empty.
+   */
+  public HostNameTrustManager(final boolean allowWildcards,
+              final boolean checkCNWhenSubjectAltNameIsPresent,
+              @NotNull final Collection<String> acceptableHostNames)
   {
     Validator.ensureNotNull(acceptableHostNames);
     Validator.ensureFalse(acceptableHostNames.isEmpty(),
          "The set of acceptable host names must not be empty.");
 
     this.allowWildcards = allowWildcards;
+    this.checkCNWhenSubjectAltNameIsPresent =
+         checkCNWhenSubjectAltNameIsPresent;
 
     final LinkedHashSet<String> nameSet = new LinkedHashSet<>(
          StaticUtils.computeMapCapacity(acceptableHostNames.size()));
@@ -158,6 +219,7 @@ public final class HostNameTrustManager
    *
    * @return  The set of hostnames that will be considered acceptable.
    */
+  @NotNull()
   public Set<String> getAcceptableHostNames()
   {
     return acceptableHostNames;
@@ -177,8 +239,8 @@ public final class HostNameTrustManager
    *                                should not be trusted.
    */
   @Override()
-  public void checkClientTrusted(final X509Certificate[] chain,
-                                 final String authType)
+  public void checkClientTrusted(@NotNull final X509Certificate[] chain,
+                                 @NotNull final String authType)
          throws CertificateException
   {
     final StringBuilder buffer = new StringBuilder();
@@ -186,7 +248,7 @@ public final class HostNameTrustManager
     {
       buffer.setLength(0);
       if (HostNameSSLSocketVerifier.certificateIncludesHostname(s, chain[0],
-           allowWildcards, buffer))
+           allowWildcards, checkCNWhenSubjectAltNameIsPresent, buffer))
       {
         return;
       }
@@ -210,8 +272,8 @@ public final class HostNameTrustManager
    *                                should not be trusted.
    */
   @Override()
-  public void checkServerTrusted(final X509Certificate[] chain,
-                                 final String authType)
+  public void checkServerTrusted(@NotNull final X509Certificate[] chain,
+                                 @NotNull final String authType)
          throws CertificateException
   {
     final StringBuilder buffer = new StringBuilder();
@@ -219,7 +281,7 @@ public final class HostNameTrustManager
     {
       buffer.setLength(0);
       if (HostNameSSLSocketVerifier.certificateIncludesHostname(s, chain[0],
-           allowWildcards, buffer))
+           allowWildcards, checkCNWhenSubjectAltNameIsPresent, buffer))
       {
         return;
       }
@@ -238,6 +300,7 @@ public final class HostNameTrustManager
    * @return  The accepted issuer certificates for this trust manager.
    */
   @Override()
+  @NotNull()
   public X509Certificate[] getAcceptedIssuers()
   {
     return NO_CERTIFICATES;

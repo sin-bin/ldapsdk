@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -53,7 +70,7 @@ public final class DITStructureRuleDefinition
   /**
    * A pre-allocated zero-element integer array.
    */
-  private static final int[] NO_INTS = new int[0];
+  @NotNull private static final int[] NO_INTS = new int[0];
 
 
 
@@ -71,23 +88,23 @@ public final class DITStructureRuleDefinition
   private final int ruleID;
 
   // The set of superior rule IDs for this DIT structure rule.
-  private final int[] superiorRuleIDs;
+  @NotNull private final int[] superiorRuleIDs;
 
   // The set of extensions for this DIT content rule.
-  private final Map<String,String[]> extensions;
+  @NotNull private final Map<String,String[]> extensions;
 
   // The description for this DIT content rule.
-  private final String description;
+  @Nullable private final String description;
 
   // The string representation of this DIT structure rule.
-  private final String ditStructureRuleString;
+  @NotNull private final String ditStructureRuleString;
 
   // The name/OID of the name form with which this DIT structure rule is
   // associated.
-  private final String nameFormID;
+  @NotNull private final String nameFormID;
 
   // The set of names for this DIT structure rule.
-  private final String[] names;
+  @NotNull private final String[] names;
 
 
 
@@ -101,7 +118,7 @@ public final class DITStructureRuleDefinition
    * @throws  LDAPException  If the provided string cannot be decoded as a DIT
    *                         structure rule definition.
    */
-  public DITStructureRuleDefinition(final String s)
+  public DITStructureRuleDefinition(@NotNull final String s)
          throws LDAPException
   {
     Validator.ensureNotNull(s);
@@ -196,7 +213,8 @@ public final class DITStructureRuleDefinition
         if (nameList.isEmpty())
         {
           pos = skipSpaces(ditStructureRuleString, pos, length);
-          pos = readQDStrings(ditStructureRuleString, pos, length, nameList);
+          pos = readQDStrings(ditStructureRuleString, pos, length, token,
+               nameList);
         }
         else
         {
@@ -212,7 +230,8 @@ public final class DITStructureRuleDefinition
           pos = skipSpaces(ditStructureRuleString, pos, length);
 
           buffer = new StringBuilder();
-          pos = readQDString(ditStructureRuleString, pos, length, buffer);
+          pos = readQDString(ditStructureRuleString, pos, length, token,
+               buffer);
           descr = buffer.toString();
         }
         else
@@ -259,7 +278,7 @@ public final class DITStructureRuleDefinition
           final ArrayList<String> supStrs = new ArrayList<>(1);
 
           pos = skipSpaces(ditStructureRuleString, pos, length);
-          pos = readOIDs(ditStructureRuleString, pos, length, supStrs);
+          pos = readOIDs(ditStructureRuleString, pos, length, token, supStrs);
 
           supList.ensureCapacity(supStrs.size());
           for (final String supStr : supStrs)
@@ -290,7 +309,8 @@ public final class DITStructureRuleDefinition
         pos = skipSpaces(ditStructureRuleString, pos, length);
 
         final ArrayList<String> valueList = new ArrayList<>(5);
-        pos = readQDStrings(ditStructureRuleString, pos, length, valueList);
+        pos = readQDStrings(ditStructureRuleString, pos, length, token,
+             valueList);
 
         final String[] values = new String[valueList.size()];
         valueList.toArray(values);
@@ -357,11 +377,12 @@ public final class DITStructureRuleDefinition
    *                         It may be {@code null} or empty if there are no
    *                         extensions.
    */
-  public DITStructureRuleDefinition(final int ruleID, final String name,
-                                    final String description,
-                                    final String nameFormID,
-                                    final Integer superiorRuleID,
-                                    final Map<String,String[]> extensions)
+  public DITStructureRuleDefinition(final int ruleID,
+              @Nullable final String name,
+              @Nullable final String description,
+              @NotNull final String nameFormID,
+              @Nullable final Integer superiorRuleID,
+              @Nullable final Map<String,String[]> extensions)
   {
     this(ruleID, ((name == null) ? null : new String[] { name }), description,
          false, nameFormID,
@@ -392,12 +413,13 @@ public final class DITStructureRuleDefinition
    *                          It may be {@code null} or empty if there are no
    *                          extensions.
    */
-  public DITStructureRuleDefinition(final int ruleID, final String[] names,
-                                    final String description,
-                                    final boolean isObsolete,
-                                    final String nameFormID,
-                                    final int[] superiorRuleIDs,
-                                    final Map<String,String[]> extensions)
+  public DITStructureRuleDefinition(final int ruleID,
+              @Nullable final String[] names,
+              @Nullable final String description,
+              final boolean isObsolete,
+              @NotNull final String nameFormID,
+              @Nullable final int[] superiorRuleIDs,
+              @Nullable final Map<String,String[]> extensions)
   {
     Validator.ensureNotNull(nameFormID);
 
@@ -447,7 +469,7 @@ public final class DITStructureRuleDefinition
    * @param  buffer  The buffer in which to construct a string representation of
    *                 this DIT content rule definition.
    */
-  private void createDefinitionString(final StringBuilder buffer)
+  private void createDefinitionString(@NotNull final StringBuilder buffer)
   {
     buffer.append("( ");
     buffer.append(ruleID);
@@ -551,6 +573,7 @@ public final class DITStructureRuleDefinition
    * @return  The set of names for this DIT structure rule, or an empty array if
    *          it does not have any names.
    */
+  @NotNull()
   public String[] getNames()
   {
     return names;
@@ -566,6 +589,7 @@ public final class DITStructureRuleDefinition
    * @return  The primary name that can be used to reference this DIT structure
    *          rule.
    */
+  @NotNull()
   public String getNameOrRuleID()
   {
     if (names.length == 0)
@@ -590,7 +614,7 @@ public final class DITStructureRuleDefinition
    * @return  {@code true} if the provided string matches the rule ID or any of
    *          the names for this DIT structure rule, or {@code false} if not.
    */
-  public boolean hasNameOrRuleID(final String s)
+  public boolean hasNameOrRuleID(@NotNull final String s)
   {
     for (final String name : names)
     {
@@ -611,6 +635,7 @@ public final class DITStructureRuleDefinition
    * @return  The description for this DIT structure rule, or {@code null} if
    *          there is no description defined.
    */
+  @Nullable()
   public String getDescription()
   {
     return description;
@@ -638,6 +663,7 @@ public final class DITStructureRuleDefinition
    * @return  The name or OID of the name form with which this DIT structure
    *          rule is associated.
    */
+  @NotNull()
   public String getNameFormID()
   {
     return nameFormID;
@@ -651,6 +677,7 @@ public final class DITStructureRuleDefinition
    * @return  The rule IDs of the superior rules for this DIT structure rule, or
    *          an empty array if there are no superior rule IDs.
    */
+  @NotNull()
   public int[] getSuperiorRuleIDs()
   {
     return superiorRuleIDs;
@@ -665,9 +692,22 @@ public final class DITStructureRuleDefinition
    *
    * @return  The set of extensions for this DIT structure rule.
    */
+  @NotNull()
   public Map<String,String[]> getExtensions()
   {
     return extensions;
+  }
+
+
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override()
+  @NotNull()
+  public SchemaElementType getSchemaElementType()
+  {
+    return SchemaElementType.DIT_STRUCTURE_RULE;
   }
 
 
@@ -687,7 +727,7 @@ public final class DITStructureRuleDefinition
    * {@inheritDoc}
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == null)
     {
@@ -747,6 +787,7 @@ public final class DITStructureRuleDefinition
    * @return  A string representation of this DIT structure rule definition.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return ditStructureRuleString;

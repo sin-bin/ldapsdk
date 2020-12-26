@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,6 +53,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -78,10 +95,10 @@ public final class IntermediateResponseProtocolOp
 
 
   // The value for this intermediate response.
-  private final ASN1OctetString value;
+  @Nullable private final ASN1OctetString value;
 
   // The OID for this intermediate response.
-  private final String oid;
+  @Nullable private final String oid;
 
 
 
@@ -94,8 +111,8 @@ public final class IntermediateResponseProtocolOp
    * @param  value  The value for this intermediate response, or {@code null} if
    *                there should not be a value.
    */
-  public IntermediateResponseProtocolOp(final String oid,
-                                        final ASN1OctetString value)
+  public IntermediateResponseProtocolOp(@Nullable final String oid,
+                                        @Nullable final ASN1OctetString value)
   {
     this.oid = oid;
 
@@ -118,7 +135,8 @@ public final class IntermediateResponseProtocolOp
    * @param  response  The intermediate response object to use to create this
    *                   protocol op.
    */
-  public IntermediateResponseProtocolOp(final IntermediateResponse response)
+  public IntermediateResponseProtocolOp(
+              @NotNull final IntermediateResponse response)
   {
     oid = response.getOID();
 
@@ -145,7 +163,7 @@ public final class IntermediateResponseProtocolOp
    * @throws  LDAPException  If a problem occurs while reading or parsing the
    *                         intermediate response.
    */
-  IntermediateResponseProtocolOp(final ASN1StreamReader reader)
+  IntermediateResponseProtocolOp(@NotNull final ASN1StreamReader reader)
        throws LDAPException
   {
     try
@@ -200,6 +218,7 @@ public final class IntermediateResponseProtocolOp
    * @return  The OID for this intermediate response, or {@code null} if there
    *          is no response OID.
    */
+  @Nullable()
   public String getOID()
   {
     return oid;
@@ -213,6 +232,7 @@ public final class IntermediateResponseProtocolOp
    * @return  The value for this intermediate response, or {@code null} if there
    *          is no response value.
    */
+  @Nullable()
   public ASN1OctetString getValue()
   {
     return value;
@@ -235,6 +255,7 @@ public final class IntermediateResponseProtocolOp
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ASN1Element encodeProtocolOp()
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(2);
@@ -265,8 +286,9 @@ public final class IntermediateResponseProtocolOp
    * @throws  LDAPException  If the provided ASN.1 element cannot be decoded as
    *                         a intermediate response protocol op.
    */
+  @NotNull()
   public static IntermediateResponseProtocolOp decodeProtocolOp(
-                                                    final ASN1Element element)
+                     @NotNull final ASN1Element element)
          throws LDAPException
   {
     try
@@ -314,7 +336,7 @@ public final class IntermediateResponseProtocolOp
    * {@inheritDoc}
    */
   @Override()
-  public void writeTo(final ASN1Buffer buffer)
+  public void writeTo(@NotNull final ASN1Buffer buffer)
   {
     final ASN1BufferSequence opSequence = buffer.beginSequence(
          LDAPMessage.PROTOCOL_OP_TYPE_INTERMEDIATE_RESPONSE);
@@ -343,7 +365,9 @@ public final class IntermediateResponseProtocolOp
    *
    * @return  The intermediate response that was created.
    */
-  public IntermediateResponse toIntermediateResponse(final Control... controls)
+  @NotNull()
+  public IntermediateResponse toIntermediateResponse(
+                                   @Nullable final Control... controls)
   {
     return new IntermediateResponse(-1, oid, value, controls);
   }
@@ -356,6 +380,7 @@ public final class IntermediateResponseProtocolOp
    * @return  A string representation of this protocol op.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -369,7 +394,7 @@ public final class IntermediateResponseProtocolOp
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("IntermediateResponseProtocolOp(");
 

@@ -1,9 +1,24 @@
 /*
- * Copyright 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2013-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -35,6 +50,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -156,7 +173,7 @@ public final class AssuredReplicationRequestControl
    * The OID (1.3.6.1.4.1.30221.2.5.28) for the assured replication request
    * control.
    */
-  public static final String ASSURED_REPLICATION_REQUEST_OID =
+  @NotNull public static final String ASSURED_REPLICATION_REQUEST_OID =
        "1.3.6.1.4.1.30221.2.5.28";
 
 
@@ -205,16 +222,16 @@ public final class AssuredReplicationRequestControl
 
 
   // The requested maximum local assurance level.
-  private final AssuredReplicationLocalLevel maximumLocalLevel;
+  @Nullable private final AssuredReplicationLocalLevel maximumLocalLevel;
 
   // The requested minimum local assurance level.
-  private final AssuredReplicationLocalLevel minimumLocalLevel;
+  @Nullable private final AssuredReplicationLocalLevel minimumLocalLevel;
 
   // The requested maximum remote assurance level.
-  private final AssuredReplicationRemoteLevel maximumRemoteLevel;
+  @Nullable private final AssuredReplicationRemoteLevel maximumRemoteLevel;
 
   // The requested minimum remote assurance level.
-  private final AssuredReplicationRemoteLevel minimumRemoteLevel;
+  @Nullable private final AssuredReplicationRemoteLevel minimumRemoteLevel;
 
   // Indicates whether the server should immediately send the operation response
   // without waiting for assurance processing.
@@ -222,7 +239,7 @@ public final class AssuredReplicationRequestControl
 
   // The maximum length of time in milliseconds that the server should wait for
   // the desired assurance level to be attained.
-  private final Long timeoutMillis;
+  @Nullable private final Long timeoutMillis;
 
 
 
@@ -254,9 +271,9 @@ public final class AssuredReplicationRequestControl
    *                             determine the timeout to use.
    */
   public AssuredReplicationRequestControl(
-       final AssuredReplicationLocalLevel minimumLocalLevel,
-       final AssuredReplicationRemoteLevel minimumRemoteLevel,
-       final Long timeoutMillis)
+       @Nullable final AssuredReplicationLocalLevel minimumLocalLevel,
+       @Nullable final AssuredReplicationRemoteLevel minimumRemoteLevel,
+       @Nullable final Long timeoutMillis)
   {
     this(false, minimumLocalLevel, null, minimumRemoteLevel, null,
          timeoutMillis, false);
@@ -320,11 +337,12 @@ public final class AssuredReplicationRequestControl
    *              waiting for the desired assurance to be satisfied.
    */
   public AssuredReplicationRequestControl(final boolean isCritical,
-              final AssuredReplicationLocalLevel minimumLocalLevel,
-              final AssuredReplicationLocalLevel maximumLocalLevel,
-              final AssuredReplicationRemoteLevel minimumRemoteLevel,
-              final AssuredReplicationRemoteLevel maximumRemoteLevel,
-              final Long timeoutMillis, final boolean sendResponseImmediately)
+              @Nullable final AssuredReplicationLocalLevel minimumLocalLevel,
+              @Nullable final AssuredReplicationLocalLevel maximumLocalLevel,
+              @Nullable final AssuredReplicationRemoteLevel minimumRemoteLevel,
+              @Nullable final AssuredReplicationRemoteLevel maximumRemoteLevel,
+              @Nullable final Long timeoutMillis,
+              final boolean sendResponseImmediately)
   {
     super(ASSURED_REPLICATION_REQUEST_OID, isCritical,
          encodeValue(minimumLocalLevel, maximumLocalLevel, minimumRemoteLevel,
@@ -350,7 +368,7 @@ public final class AssuredReplicationRequestControl
    * @throws  LDAPException  If the provided generic control cannot be parsed as
    *                         an assured replication request control.
    */
-  public AssuredReplicationRequestControl(final Control c)
+  public AssuredReplicationRequestControl(@NotNull final Control c)
          throws LDAPException
   {
     super(c);
@@ -514,13 +532,14 @@ public final class AssuredReplicationRequestControl
    *
    * @return  The ASN.1 octet string containing the encoded value.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(
-                      final AssuredReplicationLocalLevel minimumLocalLevel,
-                      final AssuredReplicationLocalLevel maximumLocalLevel,
-                      final AssuredReplicationRemoteLevel minimumRemoteLevel,
-                      final AssuredReplicationRemoteLevel maximumRemoteLevel,
-                      final boolean sendResponseImmediately,
-                      final Long timeoutMillis)
+               @Nullable final AssuredReplicationLocalLevel minimumLocalLevel,
+               @Nullable final AssuredReplicationLocalLevel maximumLocalLevel,
+               @Nullable final AssuredReplicationRemoteLevel minimumRemoteLevel,
+               @Nullable final AssuredReplicationRemoteLevel maximumRemoteLevel,
+               final boolean sendResponseImmediately,
+               @Nullable final Long timeoutMillis)
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(6);
 
@@ -574,6 +593,7 @@ public final class AssuredReplicationRequestControl
    *          servers, or {@code null} if the server should determine the
    *          minimum local assurance level for the operation.
    */
+  @Nullable()
   public AssuredReplicationLocalLevel getMinimumLocalLevel()
   {
     return minimumLocalLevel;
@@ -592,6 +612,7 @@ public final class AssuredReplicationRequestControl
    *          servers, or {@code null} if the server should determine the
    *          maximum local assurance level for the operation.
    */
+  @Nullable()
   public AssuredReplicationLocalLevel getMaximumLocalLevel()
   {
     return maximumLocalLevel;
@@ -610,6 +631,7 @@ public final class AssuredReplicationRequestControl
    *          servers, or {@code null} if the server should determine the
    *          minimum remote assurance level for the operation.
    */
+  @Nullable()
   public AssuredReplicationRemoteLevel getMinimumRemoteLevel()
   {
     return minimumRemoteLevel;
@@ -628,6 +650,7 @@ public final class AssuredReplicationRequestControl
    *          servers, or {@code null} if the server should determine the
    *          maximum remote assurance level for the operation.
    */
+  @Nullable()
   public AssuredReplicationRemoteLevel getMaximumRemoteLevel()
   {
     return maximumRemoteLevel;
@@ -661,6 +684,7 @@ public final class AssuredReplicationRequestControl
    *          response should be delayed while waiting for the desired level of
    *          assurance to be attained.
    */
+  @Nullable()
   public Long getTimeoutMillis()
   {
     return timeoutMillis;
@@ -672,6 +696,7 @@ public final class AssuredReplicationRequestControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_ASSURED_REPLICATION_REQUEST.get();
@@ -683,7 +708,7 @@ public final class AssuredReplicationRequestControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("AssuredReplicationRequestControl(isCritical=");
     buffer.append(isCritical());

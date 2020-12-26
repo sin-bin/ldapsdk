@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -35,6 +50,8 @@ import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.RDN;
 import com.unboundid.ldap.sdk.schema.Schema;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -105,16 +122,16 @@ public final class FlattenSubtreeTransformation
   private final boolean addOmittedRDNAttributesToRDN;
 
   // The base DN below which to flatten the DIT.
-  private final DN flattenBaseDN;
+  @NotNull  private final DN flattenBaseDN;
 
   // A filter that can be used to identify which entries to exclude.
-  private final Filter excludeFilter;
+  @Nullable private final Filter excludeFilter;
 
   // The RDNs that comprise the flatten base DN.
-  private final RDN[] flattenBaseRDNs;
+  @NotNull private final RDN[] flattenBaseRDNs;
 
   // The schema to use when processing.
-  private final Schema schema;
+  @Nullable private final Schema schema;
 
 
 
@@ -164,11 +181,11 @@ public final class FlattenSubtreeTransformation
    *                                         needed in the flattened
    *                                         representation of the DIT.
    */
-  public FlattenSubtreeTransformation(final Schema schema,
-              final DN flattenBaseDN,
+  public FlattenSubtreeTransformation(@Nullable final Schema schema,
+              @NotNull final DN flattenBaseDN,
               final boolean addOmittedRDNAttributesToEntry,
               final boolean addOmittedRDNAttributesToRDN,
-              final Filter excludeFilter)
+              @Nullable final Filter excludeFilter)
   {
     this.flattenBaseDN                  = flattenBaseDN;
     this.addOmittedRDNAttributesToEntry = addOmittedRDNAttributesToEntry;
@@ -202,7 +219,8 @@ public final class FlattenSubtreeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry transformEntry(final Entry e)
+  @Nullable()
+  public Entry transformEntry(@NotNull final Entry e)
   {
     // If the provided entry was null, then just return null.
     if (e == null)
@@ -322,8 +340,9 @@ public final class FlattenSubtreeTransformation
    * @return  The transformed DN, or the original DN if no alteration is
    *          necessary.
    */
-  private DN transformDN(final DN dn,
-                  final Set<ObjectPair<String,String>> omittedRDNValues)
+  @NotNull()
+  private DN transformDN(@NotNull final DN dn,
+       @Nullable final Set<ObjectPair<String,String>> omittedRDNValues)
   {
     // Get the number of RDNs to omit.  If we shouldn't omit any, then return
     // the provided DN without alterations.
@@ -419,8 +438,9 @@ public final class FlattenSubtreeTransformation
    * @return  The transformed attribute, or the original attribute if no
    *          alteration is necessary.
    */
-  private Attribute transformAttribute(final Attribute a,
-                         final Set<ObjectPair<String,String>> omittedRDNValues)
+  @NotNull()
+  private Attribute transformAttribute(@NotNull final Attribute a,
+       @Nullable final Set<ObjectPair<String,String>> omittedRDNValues)
   {
     // Assume that the attribute doesn't have any values that are DNs, and that
     // we won't need to create a new attribute.  This should be the common case.
@@ -489,7 +509,9 @@ public final class FlattenSubtreeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry translate(final Entry original, final long firstLineNumber)
+  @Nullable()
+  public Entry translate(@NotNull final Entry original,
+                         final long firstLineNumber)
   {
     return transformEntry(original);
   }
@@ -500,7 +522,8 @@ public final class FlattenSubtreeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry translateEntryToWrite(final Entry original)
+  @Nullable()
+  public Entry translateEntryToWrite(@NotNull final Entry original)
   {
     return transformEntry(original);
   }

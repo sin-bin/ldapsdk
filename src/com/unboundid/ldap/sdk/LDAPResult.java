@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,6 +49,8 @@ import com.unboundid.ldap.protocol.LDAPResponse;
 import com.unboundid.util.Debug;
 import com.unboundid.util.Extensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -99,26 +116,26 @@ public class LDAPResult
 
 
   // The protocol op type for this result, if available.
-  private final Byte protocolOpType;
+  @Nullable private final Byte protocolOpType;
 
   // The set of controls from the response.
-  private final Control[] responseControls;
+  @NotNull private final Control[] responseControls;
 
   // The message ID for the LDAP message that is associated with this LDAP
   // result.
   private final int messageID;
 
   // The result code from the response.
-  private final ResultCode resultCode;
+  @NotNull private final ResultCode resultCode;
 
   // The diagnostic message from the response, if available.
-  private final String diagnosticMessage;
+  @Nullable private final String diagnosticMessage;
 
   // The matched DN from the response, if available.
-  private final String matchedDN;
+  @Nullable private final String matchedDN;
 
   // The set of referral URLs from the response, if available.
-  private final String[] referralURLs;
+  @NotNull private final String[] referralURLs;
 
 
 
@@ -127,7 +144,7 @@ public class LDAPResult
    *
    * @param  result  The LDAP result object to use to initialize this result.
    */
-  protected LDAPResult(final LDAPResult result)
+  protected LDAPResult(@NotNull final LDAPResult result)
   {
     protocolOpType    = result.protocolOpType;
     messageID         = result.messageID;
@@ -148,7 +165,7 @@ public class LDAPResult
    *                     with this LDAP result.
    * @param  resultCode  The result code from the response.
    */
-  public LDAPResult(final int messageID, final ResultCode resultCode)
+  public LDAPResult(final int messageID, @NotNull final ResultCode resultCode)
   {
     this(null, messageID, resultCode, null, null, StaticUtils.NO_STRINGS,
          NO_CONTROLS);
@@ -170,10 +187,11 @@ public class LDAPResult
    * @param  responseControls   The set of controls from the response, if
    *                            available.
    */
-  public LDAPResult(final int messageID, final ResultCode resultCode,
-                    final String diagnosticMessage, final String matchedDN,
-                    final String[] referralURLs,
-                    final Control[] responseControls)
+  public LDAPResult(final int messageID, @NotNull final ResultCode resultCode,
+                    @Nullable final String diagnosticMessage,
+                    @Nullable final String matchedDN,
+                    @Nullable final String[] referralURLs,
+                    @Nullable final Control[] responseControls)
   {
     this(null, messageID, resultCode, diagnosticMessage, matchedDN,
          referralURLs, responseControls);
@@ -195,10 +213,11 @@ public class LDAPResult
    * @param  responseControls   The set of controls from the response, if
    *                            available.
    */
-  public LDAPResult(final int messageID, final ResultCode resultCode,
-                    final String diagnosticMessage, final String matchedDN,
-                    final List<String> referralURLs,
-                    final List<Control> responseControls)
+  public LDAPResult(final int messageID, @NotNull final ResultCode resultCode,
+                    @Nullable final String diagnosticMessage,
+                    @Nullable final String matchedDN,
+                    @Nullable final List<String> referralURLs,
+                    @Nullable final List<Control> responseControls)
   {
     this(null, messageID, resultCode, diagnosticMessage, matchedDN,
          referralURLs, responseControls);
@@ -222,11 +241,12 @@ public class LDAPResult
    * @param  responseControls   The set of controls from the response, if
    *                            available.
    */
-  private LDAPResult(final Byte protocolOpType, final int messageID,
-                     final ResultCode resultCode,
-                     final String diagnosticMessage, final String matchedDN,
-                     final String[] referralURLs,
-                     final Control[] responseControls)
+  private LDAPResult(@Nullable final Byte protocolOpType, final int messageID,
+                     @NotNull final ResultCode resultCode,
+                     @Nullable final String diagnosticMessage,
+                     @Nullable final String matchedDN,
+                     @Nullable final String[] referralURLs,
+                     @Nullable final Control[] responseControls)
   {
     this.protocolOpType    = protocolOpType;
     this.messageID         = messageID;
@@ -271,11 +291,12 @@ public class LDAPResult
    * @param  responseControls   The set of controls from the response, if
    *                            available.
    */
-  private LDAPResult(final Byte protocolOpType, final int messageID,
-                     final ResultCode resultCode,
-                     final String diagnosticMessage, final String matchedDN,
-                     final List<String> referralURLs,
-                     final List<Control> responseControls)
+  private LDAPResult(@Nullable final Byte protocolOpType, final int messageID,
+                     @NotNull final ResultCode resultCode,
+                     @Nullable final String diagnosticMessage,
+                     @Nullable final String matchedDN,
+                     @Nullable final List<String> referralURLs,
+                     @Nullable final List<Control> responseControls)
   {
     this.protocolOpType    = protocolOpType;
     this.messageID         = messageID;
@@ -322,9 +343,10 @@ public class LDAPResult
    * @throws  LDAPException  If a problem occurs while reading or decoding data
    *                         from the ASN.1 stream reader.
    */
+  @NotNull()
   static LDAPResult readLDAPResultFrom(final int messageID,
-                         final ASN1StreamReaderSequence messageSequence,
-                         final ASN1StreamReader reader)
+              @NotNull final ASN1StreamReaderSequence messageSequence,
+              @NotNull final ASN1StreamReader reader)
          throws LDAPException
   {
     try
@@ -415,10 +437,50 @@ public class LDAPResult
 
 
   /**
+   * Retrieves the type of operation that triggered this result, if available.
+   *
+   * @return  The type of operation that triggered this result, or {@code null}
+   *          if the operation type is not available.
+   *
+   * Retrieves the BER type for the LDAP protocol op from which this
+   */
+  @Nullable()
+  public final OperationType getOperationType()
+  {
+    if (protocolOpType != null)
+    {
+      switch (protocolOpType)
+      {
+        case LDAPMessage.PROTOCOL_OP_TYPE_ADD_RESPONSE:
+          return OperationType.ADD;
+        case LDAPMessage.PROTOCOL_OP_TYPE_BIND_RESPONSE:
+          return OperationType.BIND;
+        case LDAPMessage.PROTOCOL_OP_TYPE_COMPARE_RESPONSE:
+          return OperationType.COMPARE;
+        case LDAPMessage.PROTOCOL_OP_TYPE_DELETE_RESPONSE:
+          return OperationType.DELETE;
+        case LDAPMessage.PROTOCOL_OP_TYPE_EXTENDED_RESPONSE:
+          return OperationType.EXTENDED;
+        case LDAPMessage.PROTOCOL_OP_TYPE_MODIFY_RESPONSE:
+          return OperationType.MODIFY;
+        case LDAPMessage.PROTOCOL_OP_TYPE_MODIFY_DN_RESPONSE:
+          return OperationType.MODIFY_DN;
+        case LDAPMessage.PROTOCOL_OP_TYPE_SEARCH_RESULT_DONE:
+          return OperationType.SEARCH;
+      }
+    }
+
+    return null;
+  }
+
+
+
+  /**
    * Retrieves the result code from the response.
    *
    * @return  The result code from the response.
    */
+  @NotNull()
   public final ResultCode getResultCode()
   {
     return resultCode;
@@ -432,6 +494,7 @@ public class LDAPResult
    * @return  The diagnostic message from the response, or {@code null} if none
    *          was provided.
    */
+  @Nullable()
   public final String getDiagnosticMessage()
   {
     return diagnosticMessage;
@@ -445,6 +508,7 @@ public class LDAPResult
    * @return  The matched DN from the response, or {@code null} if none was
    *          provided.
    */
+  @Nullable()
   public final String getMatchedDN()
   {
     return matchedDN;
@@ -458,6 +522,7 @@ public class LDAPResult
    * @return  The set of referral URLs from the response.  The array returned
    *          may be empty if the response did not include any referral URLs.
    */
+  @NotNull()
   public final String[] getReferralURLs()
   {
     return referralURLs;
@@ -473,6 +538,7 @@ public class LDAPResult
    * @return  The set of controls from the response.  The array returned may be
    *          empty if the response did not include any controls.
    */
+  @NotNull()
   public final Control[] getResponseControls()
   {
     return responseControls;
@@ -503,7 +569,7 @@ public class LDAPResult
    * @return  {@code true} if this result contains at least one control with
    *          the specified OID, or {@code false} if not.
    */
-  public final boolean hasResponseControl(final String oid)
+  public final boolean hasResponseControl(@NotNull final String oid)
   {
     for (final Control c : responseControls)
     {
@@ -528,7 +594,8 @@ public class LDAPResult
    * @return  The requested response control, or {@code null} if there is no
    *          such response control.
    */
-  public final Control getResponseControl(final String oid)
+  @Nullable()
+  public final Control getResponseControl(@NotNull final String oid)
   {
     for (final Control c : responseControls)
     {
@@ -550,6 +617,7 @@ public class LDAPResult
    *
    * @return  A string representation of this LDAP result.
    */
+  @NotNull()
   public String getResultString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -601,6 +669,7 @@ public class LDAPResult
    * @return  A string representation of this LDAP result.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -617,7 +686,7 @@ public class LDAPResult
    *                 this LDAP result.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("LDAPResult(resultCode=");
     buffer.append(resultCode);

@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -39,16 +54,16 @@ public final class LDAPSDKThreadFactory
        implements ThreadFactory
 {
   // The counter that will be used for the thread number.
-  private final AtomicLong threadCounter;
+  @NotNull private final AtomicLong threadCounter;
 
   // Indicates whether the threads should be created as daemon threads.
   private final boolean daemon;
 
   // The base name to use for newly-created threads.
-  private final String baseName;
+  @NotNull private final String baseName;
 
   // The thread group that should be used for the threads.
-  private final ThreadGroup threadGroup;
+  @Nullable private final ThreadGroup threadGroup;
 
 
 
@@ -60,7 +75,8 @@ public final class LDAPSDKThreadFactory
    * @param  daemon    Indicates whether the threads should be created as daemon
    *                   threads.
    */
-  public LDAPSDKThreadFactory(final String baseName, final boolean daemon)
+  public LDAPSDKThreadFactory(@NotNull final String baseName,
+                              final boolean daemon)
   {
     this(baseName, daemon, null);
   }
@@ -78,8 +94,9 @@ public final class LDAPSDKThreadFactory
    *                      factory.  It may be {@code null} if the default thread
    *                      group should be used.
    */
-  public LDAPSDKThreadFactory(final String baseName, final boolean daemon,
-                              final ThreadGroup threadGroup)
+  public LDAPSDKThreadFactory(@NotNull final String baseName,
+                              final boolean daemon,
+                              @Nullable final ThreadGroup threadGroup)
   {
     this.baseName     = baseName;
     this.daemon       = daemon;
@@ -100,7 +117,8 @@ public final class LDAPSDKThreadFactory
    * @return  The newly-created (but not yet started) thread.
    */
   @Override()
-  public Thread newThread(final Runnable r)
+  @NotNull()
+  public Thread newThread(@NotNull final Runnable r)
   {
     final String name = baseName + ' ' + threadCounter.getAndIncrement();
     final Thread t = new Thread(threadGroup, r, name);

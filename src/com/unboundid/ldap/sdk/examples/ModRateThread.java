@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,7 @@ package com.unboundid.ldap.sdk.examples;
 
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -37,6 +53,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.controls.ProxiedAuthorizationV2RequestControl;
 import com.unboundid.util.Debug;
 import com.unboundid.util.FixedRateBarrier;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ResultCodeCounter;
 import com.unboundid.util.ValuePattern;
 
@@ -50,38 +68,41 @@ final class ModRateThread
       extends Thread
 {
   // Indicates whether a request has been made to stop running.
-  private final AtomicBoolean stopRequested;
+  @NotNull private final AtomicBoolean stopRequested;
+
+  // The number of modrate threads that are currently running.
+  @NotNull private final AtomicInteger runningThreads;
 
   // The counter used to track the number of errors encountered while
   // processing modifications.
-  private final AtomicLong errorCounter;
+  @NotNull private final AtomicLong errorCounter;
 
   // The counter used to track the number of modifications performed.
-  private final AtomicLong modCounter;
+  @NotNull private final AtomicLong modCounter;
 
   // The value that will be updated with total duration of the modifications.
-  private final AtomicLong modDurations;
+  @NotNull private final AtomicLong modDurations;
 
   // The counter used to track the number of iterations remaining on the
   // current connection.
-  private final AtomicLong remainingIterationsBeforeReconnect;
+  @Nullable private final AtomicLong remainingIterationsBeforeReconnect;
 
   // The result code for this thread.
-  private final AtomicReference<ResultCode> resultCode;
+  @NotNull private final AtomicReference<ResultCode> resultCode;
 
   // Indicates whether to generate increment modifications instead of replace
   // modifications.
   private final boolean increment;
 
   // The set of request controls to include in modify requests.
-  private final Control[] modifyControls;
+  @NotNull private final Control[] modifyControls;
 
   // The barrier that will be used to coordinate starting among all the threads.
-  private final CyclicBarrier startBarrier;
+  @NotNull private final CyclicBarrier startBarrier;
 
   // The barrier to use for controlling the rate of modifies.  null if no
   // rate-limiting should be used.
-  private final FixedRateBarrier fixedRateBarrier;
+  @Nullable private final FixedRateBarrier fixedRateBarrier;
 
   // The amount by which to increment values.
   private final int incrementAmount;
@@ -90,7 +111,7 @@ final class ModRateThread
   private final int valueCount;
 
   // The connection to use for the modifications.
-  private LDAPConnection connection;
+  @Nullable private LDAPConnection connection;
 
   // The number of iterations to request on a connection before closing and
   // re-establishing it.
@@ -98,25 +119,25 @@ final class ModRateThread
 
   // A reference to the associated modrate tool that can be used when attempting
   // to establish connections.
-  private final ModRate modRate;
+  @NotNull private final ModRate modRate;
 
   // The result code counter to use for failed operations.
-  private final ResultCodeCounter rcCounter;
+  @NotNull private final ResultCodeCounter rcCounter;
 
   // The names of the attributes to modify.
-  private final String[] attributes;
+  @NotNull private final String[] attributes;
 
   // The thread that is actually performing the modifications.
-  private final AtomicReference<Thread> modThread;
+  @NotNull private final AtomicReference<Thread> modThread;
 
   // The value pattern to use for proxied authorization.
-  private final ValuePattern authzID;
+  @Nullable private final ValuePattern authzID;
 
   // The value pattern to use for the entry DNs.
-  private final ValuePattern entryDN;
+  @NotNull private final ValuePattern entryDN;
 
   // The value pattern to use to generate values.
-  private final ValuePattern valuePattern;
+  @NotNull private final ValuePattern valuePattern;
 
 
 
@@ -150,6 +171,9 @@ final class ModRateThread
    *                                    processed on a connection before it is
    *                                    closed and replaced with a
    *                                    newly-established connection.
+   * @param  runningThreads             An atomic integer that will be
+   *                                    incremented when this thread starts,
+   *                                    and decremented when it completes.
    * @param  startBarrier               A barrier used to coordinate starting
    *                                    between all of the threads.
    * @param  modCounter                 A value that will be used to keep track
@@ -168,17 +192,23 @@ final class ModRateThread
    *                                    rate of modifies.  {@code null} if no
    *                                    rate-limiting should be used.
    */
-  ModRateThread(final ModRate modRate, final int threadNumber,
-                final LDAPConnection connection, final ValuePattern entryDN,
-                final String[] attributes, final ValuePattern valuePattern,
+  ModRateThread(@NotNull final ModRate modRate, final int threadNumber,
+                @NotNull final LDAPConnection connection,
+                @NotNull final ValuePattern entryDN,
+                @NotNull final String[] attributes,
+                @NotNull final ValuePattern valuePattern,
                 final int valueCount, final boolean increment,
-                final int incrementAmount, final Control[] modifyControls,
-                final ValuePattern authzID,
+                final int incrementAmount,
+                @NotNull final Control[] modifyControls,
+                @Nullable final ValuePattern authzID,
                 final long iterationsBeforeReconnect,
-                final CyclicBarrier startBarrier, final AtomicLong modCounter,
-                final AtomicLong modDurations, final AtomicLong errorCounter,
-                final ResultCodeCounter rcCounter,
-                final FixedRateBarrier rateBarrier)
+                @NotNull final AtomicInteger runningThreads,
+                @NotNull final CyclicBarrier startBarrier,
+                @NotNull final AtomicLong modCounter,
+                @NotNull final AtomicLong modDurations,
+                @NotNull final AtomicLong errorCounter,
+                @NotNull final ResultCodeCounter rcCounter,
+                @Nullable final FixedRateBarrier rateBarrier)
   {
     setName("ModRate Thread " + threadNumber);
     setDaemon(true);
@@ -198,6 +228,7 @@ final class ModRateThread
     this.modDurations              = modDurations;
     this.errorCounter              = errorCounter;
     this.rcCounter                 = rcCounter;
+    this.runningThreads            = runningThreads;
     this.startBarrier              = startBarrier;
     fixedRateBarrier               = rateBarrier;
 
@@ -226,134 +257,141 @@ final class ModRateThread
   @Override()
   public void run()
   {
-    modThread.set(currentThread());
-
-    final Modification[] mods = new Modification[attributes.length];
-    final String[] values = new String[valueCount];
-
-    if (increment)
-    {
-      values[0] = String.valueOf(incrementAmount);
-
-      for (int i=0; i < attributes.length; i++)
-      {
-        mods[i] = new Modification(ModificationType.INCREMENT, attributes[i],
-             values);
-      }
-    }
-
-    final ModifyRequest modifyRequest = new ModifyRequest("", mods);
-
     try
     {
-      startBarrier.await();
-    }
-    catch (final Exception e)
-    {
-      Debug.debugException(e);
-    }
+      modThread.set(currentThread());
+      runningThreads.incrementAndGet();
 
-    while (! stopRequested.get())
-    {
-      if ((iterationsBeforeReconnect > 0L) &&
-          (remainingIterationsBeforeReconnect.decrementAndGet() <= 0))
+      final Modification[] mods = new Modification[attributes.length];
+      final String[] values = new String[valueCount];
+
+      if (increment)
       {
-        remainingIterationsBeforeReconnect.set(iterationsBeforeReconnect);
-        if (connection != null)
+        values[0] = String.valueOf(incrementAmount);
+
+        for (int i=0; i < attributes.length; i++)
         {
-          connection.close();
-          connection = null;
+          mods[i] = new Modification(ModificationType.INCREMENT, attributes[i],
+               values);
         }
       }
 
-      if (connection == null)
+      final ModifyRequest modifyRequest = new ModifyRequest("", mods);
+
+      try
       {
+        startBarrier.await();
+      }
+      catch (final Exception e)
+      {
+        Debug.debugException(e);
+      }
+
+      while (! stopRequested.get())
+      {
+        if ((iterationsBeforeReconnect > 0L) &&
+             (remainingIterationsBeforeReconnect.decrementAndGet() <= 0))
+        {
+          remainingIterationsBeforeReconnect.set(iterationsBeforeReconnect);
+          if (connection != null)
+          {
+            connection.close();
+            connection = null;
+          }
+        }
+
+        if (connection == null)
+        {
+          try
+          {
+            connection = modRate.getConnection();
+          }
+          catch (final LDAPException le)
+          {
+            Debug.debugException(le);
+
+            errorCounter.incrementAndGet();
+
+            final ResultCode rc = le.getResultCode();
+            rcCounter.increment(rc);
+            resultCode.compareAndSet(null, rc);
+
+            if (fixedRateBarrier != null)
+            {
+              fixedRateBarrier.await();
+            }
+
+            continue;
+          }
+        }
+
+        modifyRequest.setDN(entryDN.nextValue());
+
+        if (! increment)
+        {
+          for (int i=0; i < valueCount; i++)
+          {
+            values[i] = valuePattern.nextValue();
+          }
+
+          for (int i=0; i < attributes.length; i++)
+          {
+            mods[i] = new Modification(ModificationType.REPLACE, attributes[i],
+                 values);
+          }
+          modifyRequest.setModifications(mods);
+        }
+
+        modifyRequest.setControls(modifyControls);
+        if (authzID != null)
+        {
+          modifyRequest.addControl(new ProxiedAuthorizationV2RequestControl(
+               authzID.nextValue()));
+        }
+
+
+        // If we're trying for a specific target rate, then we might need to
+        // wait until issuing the next modify.
+        if (fixedRateBarrier != null)
+        {
+          fixedRateBarrier.await();
+        }
+
+        final long startTime = System.nanoTime();
         try
         {
-          connection = modRate.getConnection();
+          connection.modify(modifyRequest);
         }
         catch (final LDAPException le)
         {
           Debug.debugException(le);
-
           errorCounter.incrementAndGet();
 
           final ResultCode rc = le.getResultCode();
           rcCounter.increment(rc);
           resultCode.compareAndSet(null, rc);
 
-          if (fixedRateBarrier != null)
+          if (! le.getResultCode().isConnectionUsable())
           {
-            fixedRateBarrier.await();
+            connection.close();
+            connection = null;
           }
-
-          continue;
-        }
-      }
-
-      modifyRequest.setDN(entryDN.nextValue());
-
-      if (! increment)
-      {
-        for (int i=0; i < valueCount; i++)
-        {
-          values[i] = valuePattern.nextValue();
         }
 
-        for (int i=0; i < attributes.length; i++)
-        {
-          mods[i] = new Modification(ModificationType.REPLACE, attributes[i],
-               values);
-        }
-        modifyRequest.setModifications(mods);
+        modCounter.incrementAndGet();
+        modDurations.addAndGet(System.nanoTime() - startTime);
       }
-
-      modifyRequest.setControls(modifyControls);
-      if (authzID != null)
-      {
-        modifyRequest.addControl(new ProxiedAuthorizationV2RequestControl(
-             authzID.nextValue()));
-      }
-
-
-      // If we're trying for a specific target rate, then we might need to
-      // wait until issuing the next modify.
-      if (fixedRateBarrier != null)
-      {
-        fixedRateBarrier.await();
-      }
-
-      final long startTime = System.nanoTime();
-      try
-      {
-        connection.modify(modifyRequest);
-      }
-      catch (final LDAPException le)
-      {
-        Debug.debugException(le);
-        errorCounter.incrementAndGet();
-
-        final ResultCode rc = le.getResultCode();
-        rcCounter.increment(rc);
-        resultCode.compareAndSet(null, rc);
-
-        if (! le.getResultCode().isConnectionUsable())
-        {
-          connection.close();
-          connection = null;
-        }
-      }
-
-      modCounter.incrementAndGet();
-      modDurations.addAndGet(System.nanoTime() - startTime);
     }
-
-    if (connection != null)
+    finally
     {
-      connection.close();
-    }
+      if (connection != null)
+      {
+        connection.close();
+      }
 
-    modThread.set(null);
+      modThread.set(null);
+      runningThreads.decrementAndGet();
+    }
   }
 
 
@@ -364,8 +402,10 @@ final class ModRateThread
    * @return  A result code that provides information about whether any errors
    *          were encountered during processing.
    */
+  @NotNull()
   public ResultCode stopRunning()
   {
+    final Thread t = modThread.get();
     stopRequested.set(true);
 
     if (fixedRateBarrier != null)
@@ -373,7 +413,6 @@ final class ModRateThread
       fixedRateBarrier.shutdownRequested();
     }
 
-    final Thread t = modThread.get();
     if (t != null)
     {
       try

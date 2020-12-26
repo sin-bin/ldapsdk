@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -40,6 +55,8 @@ import com.unboundid.ldap.sdk.unboundidds.UnboundIDChangeLogEntry;
 import com.unboundid.util.Base64;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -83,8 +100,8 @@ public final class ChangelogEntryIntermediateResponse
    * The OID (1.3.6.1.4.1.30221.2.6.11) for the get stream directory values
    * intermediate response.
    */
-  public static final String CHANGELOG_ENTRY_INTERMEDIATE_RESPONSE_OID =
-       "1.3.6.1.4.1.30221.2.6.11";
+  @NotNull public static final String
+       CHANGELOG_ENTRY_INTERMEDIATE_RESPONSE_OID = "1.3.6.1.4.1.30221.2.6.11";
 
 
 
@@ -97,13 +114,13 @@ public final class ChangelogEntryIntermediateResponse
 
   // A token that may be used to start retrieving changelog entries
   // immediately after this entry.
-  private final ASN1OctetString resumeToken;
+  @NotNull private final ASN1OctetString resumeToken;
 
   // The changelog entry included in this intermediate response.
-  private final UnboundIDChangeLogEntry changeLogEntry;
+  @NotNull private final UnboundIDChangeLogEntry changeLogEntry;
 
   // The server ID for the server from which the changelog entry was retrieved.
-  private final String serverID;
+  @NotNull private final String serverID;
 
 
 
@@ -124,9 +141,10 @@ public final class ChangelogEntryIntermediateResponse
    *                         be included.
    */
   public ChangelogEntryIntermediateResponse(
-              final ChangeLogEntry changeLogEntry,
-              final String serverID, final ASN1OctetString resumeToken,
-              final Control... controls)
+              @NotNull final ChangeLogEntry changeLogEntry,
+              @NotNull final String serverID,
+              @NotNull final ASN1OctetString resumeToken,
+              @Nullable final Control... controls)
   {
     super(CHANGELOG_ENTRY_INTERMEDIATE_RESPONSE_OID,
           encodeValue(changeLogEntry, serverID, resumeToken), controls);
@@ -164,7 +182,8 @@ public final class ChangelogEntryIntermediateResponse
    * @throws  LDAPException  If the provided intermediate response cannot be
    *                         decoded as a changelog entry response.
    */
-  public ChangelogEntryIntermediateResponse(final IntermediateResponse r)
+  public ChangelogEntryIntermediateResponse(
+              @NotNull final IntermediateResponse r)
          throws LDAPException
   {
     super(r);
@@ -243,10 +262,11 @@ public final class ChangelogEntryIntermediateResponse
    *
    * @return  The encoded value.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(
-                                      final ChangeLogEntry changeLogEntry,
-                                      final String serverID,
-                                      final ASN1OctetString resumeToken)
+               @NotNull final ChangeLogEntry changeLogEntry,
+               @NotNull final String serverID,
+               @NotNull final ASN1OctetString resumeToken)
   {
     Validator.ensureNotNull(changeLogEntry);
     Validator.ensureNotNull(serverID);
@@ -276,6 +296,7 @@ public final class ChangelogEntryIntermediateResponse
    *
    * @return  The changelog entry contained in this intermediate response.
    */
+  @NotNull()
   public UnboundIDChangeLogEntry getChangeLogEntry()
   {
     return changeLogEntry;
@@ -290,6 +311,7 @@ public final class ChangelogEntryIntermediateResponse
    * @return  The server ID for the server from which the changelog entry was
    *          retrieved.
    */
+  @NotNull()
   public String getServerID()
   {
     return serverID;
@@ -304,6 +326,7 @@ public final class ChangelogEntryIntermediateResponse
    * @return  A token that may be used to resume the process of retrieving
    *          changes at the point immediately after this change.
    */
+  @NotNull()
   public ASN1OctetString getResumeToken()
   {
     return resumeToken;
@@ -315,6 +338,7 @@ public final class ChangelogEntryIntermediateResponse
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getIntermediateResponseName()
   {
     return INFO_CHANGELOG_ENTRY_IR_NAME.get();
@@ -326,6 +350,7 @@ public final class ChangelogEntryIntermediateResponse
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String valueToString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -351,7 +376,7 @@ public final class ChangelogEntryIntermediateResponse
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ChangelogEntryIntermediateResponse(");
 

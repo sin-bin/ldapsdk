@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -53,7 +68,7 @@ public final class Validator
    *
    * @throws  LDAPSDKUsageException  If the provided object is {@code null}.
    */
-  public static void ensureNotNull(final Object o)
+  public static void ensureNotNull(@Nullable final Object o)
          throws LDAPSDKUsageException
   {
     if (o == null)
@@ -78,8 +93,8 @@ public final class Validator
    *
    * @throws  LDAPSDKUsageException  If the provided object is {@code null}.
    */
-  public static void ensureNotNullWithMessage(final Object o,
-                                              final String message)
+  public static void ensureNotNullWithMessage(@Nullable final Object o,
+                                              @NotNull final String message)
          throws LDAPSDKUsageException
   {
     if (o == null)
@@ -104,7 +119,8 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If any of the provided objects is
    *                                 {@code null}.
    */
-  public static void ensureNotNull(final Object o1, final Object o2)
+  public static void ensureNotNull(@Nullable final Object o1,
+                                   @Nullable final Object o2)
          throws LDAPSDKUsageException
   {
     if ((o1 == null) || (o2 == null))
@@ -140,8 +156,9 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If any of the provided objects is
    *                                 {@code null}.
    */
-  public static void ensureNotNull(final Object o1, final Object o2,
-                                   final Object o3)
+  public static void ensureNotNull(@Nullable final Object o1,
+                                   @Nullable final Object o2,
+                                   @Nullable final Object o3)
          throws LDAPSDKUsageException
   {
     if ((o1 == null) || (o2 == null) || (o3 == null))
@@ -182,8 +199,10 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If any of the provided objects is
    *                                 {@code null}.
    */
-  public static void ensureNotNull(final Object o1, final Object o2,
-                                   final Object o3, final Object o4)
+  public static void ensureNotNull(@Nullable final Object o1,
+                                   @Nullable final Object o2,
+                                   @Nullable final Object o3,
+                                   @Nullable final Object o4)
          throws LDAPSDKUsageException
   {
     if ((o1 == null) || (o2 == null) || (o3 == null) || (o4 == null))
@@ -229,9 +248,11 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If any of the provided objects is
    *                                 {@code null}.
    */
-  public static void ensureNotNull(final Object o1, final Object o2,
-                                   final Object o3, final Object o4,
-                                   final Object o5)
+  public static void ensureNotNull(@Nullable final Object o1,
+                                   @Nullable final Object o2,
+                                   @Nullable final Object o3,
+                                   @Nullable final Object o4,
+                                   @Nullable final Object o5)
          throws LDAPSDKUsageException
   {
     if ((o1 == null) || (o2 == null) || (o3 == null) || (o4 == null) ||
@@ -279,7 +300,8 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided collection is {@code null}
    *                                 or empty.
    */
-  public static void ensureNotNullOrEmpty(final Collection<?> collection)
+  public static void ensureNotNullOrEmpty(
+                          @Nullable final Collection<?> collection)
   {
     if (collection == null)
     {
@@ -312,8 +334,9 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided collection is {@code null}
    *                                 or empty.
    */
-  public static void ensureNotNullOrEmpty(final Collection<?> collection,
-                                          final String message)
+  public static void ensureNotNullOrEmpty(
+                          @Nullable final Collection<?> collection,
+                          @NotNull final String message)
   {
     if (collection == null)
     {
@@ -346,7 +369,7 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided map is {@code null} or
    *                                 empty.
    */
-  public static void ensureNotNullOrEmpty(final Map<?,?> map)
+  public static void ensureNotNullOrEmpty(@Nullable final Map<?,?> map)
   {
     if (map == null)
     {
@@ -379,8 +402,8 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided map is {@code null} or
    *                                 empty.
    */
-  public static void ensureNotNullOrEmpty(final Map<?,?> map,
-                                          final String message)
+  public static void ensureNotNullOrEmpty(@Nullable final Map<?,?> map,
+                                          @NotNull final String message)
   {
     if (map == null)
     {
@@ -413,7 +436,7 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided array is {@code null} or
    *                                 empty.
    */
-  public static void ensureNotNullOrEmpty(final Object[] array)
+  public static void ensureNotNullOrEmpty(@Nullable final Object[] array)
   {
     if (array == null)
     {
@@ -446,8 +469,8 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided array is {@code null} or
    *                                 empty.
    */
-  public static void ensureNotNullOrEmpty(final Object[] array,
-                                          final String message)
+  public static void ensureNotNullOrEmpty(@Nullable final Object[] array,
+                                          @NotNull final String message)
   {
     if (array == null)
     {
@@ -480,7 +503,7 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided array is {@code null} or
    *                                 empty.
    */
-  public static void ensureNotNullOrEmpty(final byte[] array)
+  public static void ensureNotNullOrEmpty(@Nullable final byte[] array)
   {
     if (array == null)
     {
@@ -513,8 +536,8 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided array is {@code null} or
    *                                 empty.
    */
-  public static void ensureNotNullOrEmpty(final byte[] array,
-                                          final String message)
+  public static void ensureNotNullOrEmpty(@Nullable final byte[] array,
+                                          @NotNull final String message)
   {
     if (array == null)
     {
@@ -547,7 +570,7 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided array is {@code null} or
    *                                 empty.
    */
-  public static void ensureNotNullOrEmpty(final char[] array)
+  public static void ensureNotNullOrEmpty(@Nullable final char[] array)
   {
     if (array == null)
     {
@@ -580,8 +603,8 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided array is {@code null} or
    *                                 empty.
    */
-  public static void ensureNotNullOrEmpty(final char[] array,
-                                          final String message)
+  public static void ensureNotNullOrEmpty(@Nullable final char[] array,
+                                          @NotNull final String message)
   {
     if (array == null)
     {
@@ -614,7 +637,7 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided array is {@code null} or
    *                                 empty.
    */
-  public static void ensureNotNullOrEmpty(final int[] array)
+  public static void ensureNotNullOrEmpty(@Nullable final int[] array)
   {
     if (array == null)
     {
@@ -647,8 +670,8 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided array is {@code null} or
    *                                 empty.
    */
-  public static void ensureNotNullOrEmpty(final int[] array,
-                                          final String message)
+  public static void ensureNotNullOrEmpty(@Nullable final int[] array,
+                                          @NotNull final String message)
   {
     if (array == null)
     {
@@ -681,7 +704,7 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided array is {@code null} or
    *                                 empty.
    */
-  public static void ensureNotNullOrEmpty(final long[] array)
+  public static void ensureNotNullOrEmpty(@Nullable final long[] array)
   {
     if (array == null)
     {
@@ -714,8 +737,8 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided array is {@code null} or
    *                                 empty.
    */
-  public static void ensureNotNullOrEmpty(final long[] array,
-                                          final String message)
+  public static void ensureNotNullOrEmpty(@Nullable final long[] array,
+                                          @NotNull final String message)
   {
     if (array == null)
     {
@@ -748,7 +771,8 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided character sequence is
    *                                 {@code null} or empty.
    */
-  public static void ensureNotNullOrEmpty(final CharSequence charSequence)
+  public static void ensureNotNullOrEmpty(
+                          @Nullable final CharSequence charSequence)
   {
     if (charSequence == null)
     {
@@ -782,8 +806,9 @@ public final class Validator
    * @throws  LDAPSDKUsageException  If the provided character sequence is
    *                                 {@code null} or empty.
    */
-  public static void ensureNotNullOrEmpty(final CharSequence charSequence,
-                                          final String message)
+  public static void ensureNotNullOrEmpty(
+                          @Nullable final CharSequence charSequence,
+                          @NotNull final String message)
   {
     if (charSequence == null)
     {
@@ -838,7 +863,8 @@ public final class Validator
    *
    * @throws  LDAPSDKUsageException  If the provided condition is {@code false}.
    */
-  public static void ensureTrue(final boolean condition, final String message)
+  public static void ensureTrue(final boolean condition,
+                                @NotNull final String message)
          throws LDAPSDKUsageException
   {
     if (! condition)
@@ -885,7 +911,8 @@ public final class Validator
    *
    * @throws  LDAPSDKUsageException  If the provided condition is {@code true}.
    */
-  public static void ensureFalse(final boolean condition, final String message)
+  public static void ensureFalse(final boolean condition,
+                                 @NotNull final String message)
          throws LDAPSDKUsageException
   {
     if (condition)
@@ -910,7 +937,7 @@ public final class Validator
    *
    * @throws  LDAPSDKUsageException  To indicate that a violation occurred.
    */
-  public static void violation(final String message)
+  public static void violation(@NotNull final String message)
          throws LDAPSDKUsageException
   {
     violation(message, null);
@@ -929,7 +956,8 @@ public final class Validator
    *
    * @throws  LDAPSDKUsageException  To indicate that a violation occurred.
    */
-  public static void violation(final String message, final Throwable cause)
+  public static void violation(@NotNull final String message,
+                               @Nullable final Throwable cause)
          throws LDAPSDKUsageException
   {
     final LDAPSDKUsageException e = new LDAPSDKUsageException(message, cause);

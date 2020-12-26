@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,7 +39,11 @@ package com.unboundid.util.ssl;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
@@ -650,5 +669,68 @@ public final class JVMDefaultTrustManagerTestCase
 
       assertNotNull(JVMDefaultTrustManager.chainToString(chain));
     }
+  }
+
+
+
+  /**
+   * Verifies that we can establish an HTTPS connection to the server with the
+   * provided address.
+   *
+   * @param  hostname  The address of the server to which the connection should
+   *                   be established.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(dataProvider = "testServers")
+  public void testConnectToPublicServer(final String hostname)
+         throws Exception
+  {
+    final SSLUtil sslUtil = new SSLUtil(JVMDefaultTrustManager.getInstance());
+
+    try (Socket socket = sslUtil.createSSLSocketFactory().createSocket())
+    {
+      socket.connect(new InetSocketAddress(hostname, 443), 30_000);
+      socket.setSoTimeout(30_000);
+
+      try (final InputStream inputStream = socket.getInputStream();
+           final OutputStream outputStream = socket.getOutputStream())
+      {
+        final byte[] requestBytes = StaticUtils.getBytes(
+             StaticUtils.linesToString(
+                  "GET / HTTP/1.1",
+                  "HOST: " + hostname,
+                  "CONNECTION: close",
+                  ""));
+        outputStream.write(requestBytes);
+        outputStream.flush();
+
+        final byte[] readBuffer = new byte[8192];
+        final int bytesRead = inputStream.read(readBuffer);
+        assertTrue(bytesRead > 0);
+      }
+    }
+  }
+
+
+
+  /**
+   * Retrieves a set of server addresses to use for testing.
+   *
+   * @return  A set of server addresses to use for testing.
+   */
+  @DataProvider(name = "testServers")
+  public Object[][] getTestServers()
+  {
+    return new Object[][]
+    {
+      new Object[] { "www.google.com" },
+      new Object[] { "letsencrypt.org" },
+      new Object[] { "www.verisign.com" },
+      new Object[] { "www.digicert.com" },
+      new Object[] { "www.godaddy.com" },
+      new Object[] { "www.comodo.com" },
+      new Object[] { "www.networksolutions.com" }
+    };
   }
 }

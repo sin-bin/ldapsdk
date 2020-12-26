@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -56,17 +71,18 @@ final class StreamFileValuePatternComponent
 
   // A value that tracks the position at which the next line of data should be
   // read from the file.
-  private final AtomicLong nextReadPosition;
+  @NotNull private final AtomicLong nextReadPosition;
 
   // A reference that holds this thread and makes it available to the associated
   // StreamFileValuePatternComponent.
-  private final AtomicReference<StreamFileValuePatternReaderThread> threadRef;
+  @NotNull private final AtomicReference<StreamFileValuePatternReaderThread>
+       threadRef;
 
   // The file from which the data will be read.
-  private final File file;
+  @NotNull private final File file;
 
   // The queue that will be used to hold the lines of data read from the file.
-  private final LinkedBlockingQueue<String> lineQueue;
+  @NotNull private final LinkedBlockingQueue<String> lineQueue;
 
   // The maximum length of time in milliseconds that an attempt to offer a
   // string to the queue will be allowed to block before the associated reader
@@ -85,10 +101,10 @@ final class StreamFileValuePatternComponent
    * @throws  IOException  If a problem is encountered while trying to open the
    *                       specified file for reading.
    */
-  StreamFileValuePatternComponent(final String path)
+  StreamFileValuePatternComponent(@NotNull final String path)
        throws IOException
   {
-    this(path, 1000, 60_000L);
+    this(path, 10_000, 60_000L);
   }
 
 
@@ -112,7 +128,8 @@ final class StreamFileValuePatternComponent
    * @throws  IOException  If a problem is encountered while trying to open the
    *                       specified file for reading.
    */
-  StreamFileValuePatternComponent(final String path, final int queueSize,
+  StreamFileValuePatternComponent(@NotNull final String path,
+                                  final int queueSize,
                                   final long maxOfferBlockTimeMillis)
        throws IOException
   {
@@ -158,7 +175,7 @@ final class StreamFileValuePatternComponent
    * {@inheritDoc}
    */
   @Override()
-  void append(final StringBuilder buffer)
+  void append(@NotNull final StringBuilder buffer)
   {
     String line = lineQueue.poll();
     if (line != null)
@@ -167,13 +184,14 @@ final class StreamFileValuePatternComponent
       return;
     }
 
-    synchronized (this)
+    while (true)
     {
-      while (true)
+      try
       {
-        try
+        StreamFileValuePatternReaderThread readerThread;
+        synchronized (this)
         {
-          StreamFileValuePatternReaderThread readerThread = threadRef.get();
+          readerThread = threadRef.get();
           if (readerThread == null)
           {
             readerThread = new StreamFileValuePatternReaderThread(file,
@@ -182,24 +200,24 @@ final class StreamFileValuePatternComponent
             threadRef.set(readerThread);
             readerThread.start();
           }
+        }
 
-          line = lineQueue.poll(10L, TimeUnit.MILLISECONDS);
-          if (line != null)
-          {
-            buffer.append(line);
-            return;
-          }
-        }
-        catch (final Exception e)
+        line = lineQueue.poll(10L, TimeUnit.MILLISECONDS);
+        if (line != null)
         {
-          Debug.debugException(e);
-          throw new LDAPRuntimeException(
-               new LDAPException(ResultCode.LOCAL_ERROR,
-                    ERR_STREAM_FILE_VALUE_PATTERN_ERROR_GETTING_NEXT_VALUE.get(
-                         file.getAbsolutePath(),
-                         StaticUtils.getExceptionMessage(e)),
-                    e));
+          buffer.append(line);
+          return;
         }
+      }
+      catch (final Exception e)
+      {
+        Debug.debugException(e);
+        throw new LDAPRuntimeException(
+             new LDAPException(ResultCode.LOCAL_ERROR,
+                  ERR_STREAM_FILE_VALUE_PATTERN_ERROR_GETTING_NEXT_VALUE.get(
+                       file.getAbsolutePath(),
+                       StaticUtils.getExceptionMessage(e)),
+                  e));
       }
     }
   }

@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,6 +52,8 @@ import com.unboundid.ldif.LDIFChangeRecord;
 import com.unboundid.ldif.LDIFException;
 import com.unboundid.ldif.LDIFReader;
 import com.unboundid.util.LDAPCommandLineTool;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -97,17 +114,17 @@ public final class LDAPModify
 
 
   // Indicates whether processing should continue even if an error has occurred.
-  private BooleanArgument continueOnError;
+  @Nullable private BooleanArgument continueOnError;
 
   // Indicates whether LDIF records without a changetype should be considered
   // add records.
-  private BooleanArgument defaultAdd;
+  @Nullable private BooleanArgument defaultAdd;
 
   // The argument used to specify any bind controls that should be used.
-  private ControlArgument bindControls;
+  @Nullable private ControlArgument bindControls;
 
   // The LDIF file to be processed.
-  private FileArgument ldifFile;
+  @Nullable private FileArgument ldifFile;
 
 
 
@@ -117,7 +134,7 @@ public final class LDAPModify
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String[] args)
+  public static void main(@NotNull final String[] args)
   {
     final ResultCode resultCode = main(args, System.out, System.err);
     if (resultCode != ResultCode.SUCCESS)
@@ -142,9 +159,10 @@ public final class LDAPModify
    *
    * @return  A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args,
-                                final OutputStream outStream,
-                                final OutputStream errStream)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream)
   {
     final LDAPModify ldapModify = new LDAPModify(outStream, errStream);
     return ldapModify.runTool(args);
@@ -162,7 +180,8 @@ public final class LDAPModify
    *                    written.  It may be {@code null} if error messages
    *                    should be suppressed.
    */
-  public LDAPModify(final OutputStream outStream, final OutputStream errStream)
+  public LDAPModify(@Nullable final OutputStream outStream,
+                    @Nullable final OutputStream errStream)
   {
     super(outStream, errStream);
   }
@@ -175,6 +194,7 @@ public final class LDAPModify
    * @return  The name for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "ldapmodify";
@@ -188,6 +208,7 @@ public final class LDAPModify
    * @return  The description for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return "Perform add, delete, modify, and modify " +
@@ -202,6 +223,7 @@ public final class LDAPModify
    * @return  The version string for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -318,6 +340,24 @@ public final class LDAPModify
 
 
   /**
+   * Indicates whether this tool should provide a command-line argument that
+   * allows for low-level SSL debugging.  If this returns {@code true}, then an
+   * "--enableSSLDebugging}" argument will be added that sets the
+   * "javax.net.debug" system property to "all" before attempting any
+   * communication.
+   *
+   * @return  {@code true} if this tool should offer an "--enableSSLDebugging"
+   *          argument, or {@code false} if not.
+   */
+  @Override()
+  protected boolean supportsSSLDebugging()
+  {
+    return true;
+  }
+
+
+
+  /**
    * {@inheritDoc}
    */
   @Override()
@@ -337,7 +377,7 @@ public final class LDAPModify
    * @throws  ArgumentException  If a problem occurs while adding the arguments.
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     String description = "Treat LDIF records that do not contain a " +
@@ -377,6 +417,7 @@ public final class LDAPModify
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<Control> getBindControls()
   {
     return bindControls.getValues();
@@ -392,6 +433,7 @@ public final class LDAPModify
    * @return  The result code for the processing that was performed.
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     // Set up the LDIF reader that will be used to read the changes to apply.
@@ -527,6 +569,7 @@ public final class LDAPModify
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> examples =

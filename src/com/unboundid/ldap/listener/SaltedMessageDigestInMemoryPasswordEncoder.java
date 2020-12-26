@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.Modification;
 import com.unboundid.ldap.sdk.ReadOnlyEntry;
 import com.unboundid.ldap.sdk.ResultCode;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -66,10 +83,10 @@ public final class SaltedMessageDigestInMemoryPasswordEncoder
 
   // The message digest instance tha will be used to actually perform the
   // encoding.
-  private final MessageDigest messageDigest;
+  @NotNull private final MessageDigest messageDigest;
 
   // The secure random number generator used for generating salts.
-  private final SecureRandom random;
+  @NotNull private final SecureRandom random;
 
 
 
@@ -112,10 +129,11 @@ public final class SaltedMessageDigestInMemoryPasswordEncoder
    *                                 will consist of the concatenation of the
    *                                 salt and the message digest.
    */
-  public SaltedMessageDigestInMemoryPasswordEncoder(final String prefix,
-              final PasswordEncoderOutputFormatter outputFormatter,
-              final MessageDigest messageDigest, final int numSaltBytes,
-              final boolean saltAfterClearPassword,
+  public SaltedMessageDigestInMemoryPasswordEncoder(
+              @NotNull final String prefix,
+              @Nullable final PasswordEncoderOutputFormatter outputFormatter,
+              @NotNull final MessageDigest messageDigest,
+              final int numSaltBytes, final boolean saltAfterClearPassword,
               final boolean saltAfterMessageDigest)
   {
     super(prefix, outputFormatter);
@@ -145,6 +163,7 @@ public final class SaltedMessageDigestInMemoryPasswordEncoder
    *
    * @return  The message digest
    */
+  @NotNull()
   public String getDigestAlgorithm()
   {
     return messageDigest.getAlgorithm();
@@ -215,9 +234,10 @@ public final class SaltedMessageDigestInMemoryPasswordEncoder
    * {@inheritDoc}
    */
   @Override()
-  protected byte[] encodePassword(final byte[] clearPassword,
-                                  final ReadOnlyEntry userEntry,
-                                  final List<Modification> modifications)
+  @NotNull()
+  protected byte[] encodePassword(@NotNull final byte[] clearPassword,
+                        @NotNull final ReadOnlyEntry userEntry,
+                        @NotNull final List<Modification> modifications)
             throws LDAPException
   {
     final byte[] salt = new byte[numSaltBytes];
@@ -256,7 +276,9 @@ public final class SaltedMessageDigestInMemoryPasswordEncoder
    *
    * @return  A byte array containing the concatenation.
    */
-  private static byte[] concatenate(final byte[] b1, final byte[] b2)
+  @NotNull()
+  private static byte[] concatenate(@NotNull final byte[] b1,
+                                    @NotNull final byte[] b2)
   {
     final byte[] combined = new byte[b1.length + b2.length];
     System.arraycopy(b1, 0, combined, 0, b1.length);
@@ -271,10 +293,10 @@ public final class SaltedMessageDigestInMemoryPasswordEncoder
    */
   @Override()
   protected void ensurePreEncodedPasswordAppearsValid(
-                      final byte[] unPrefixedUnFormattedEncodedPasswordBytes,
-                      final ReadOnlyEntry userEntry,
-                      final List<Modification> modifications)
-            throws LDAPException
+       @NotNull final byte[] unPrefixedUnFormattedEncodedPasswordBytes,
+       @NotNull final ReadOnlyEntry userEntry,
+       @NotNull final List<Modification> modifications)
+       throws LDAPException
   {
     // Make sure that the encoded password is longer than the digest length
     // so that there is room for some amount of salt.
@@ -294,10 +316,10 @@ public final class SaltedMessageDigestInMemoryPasswordEncoder
    * {@inheritDoc}
    */
   @Override()
-  protected boolean passwordMatches(final byte[] clearPasswordBytes,
-                         final byte[] unPrefixedUnFormattedEncodedPasswordBytes,
-                         final ReadOnlyEntry userEntry)
-            throws LDAPException
+  protected boolean passwordMatches(@NotNull final byte[] clearPasswordBytes,
+       @NotNull final byte[] unPrefixedUnFormattedEncodedPasswordBytes,
+       @NotNull final ReadOnlyEntry userEntry)
+       throws LDAPException
   {
     // Subtract the digest length from the encoded password to get the number
     // of salt bytes.  If the number of salt bytes is less than or equal to
@@ -356,9 +378,10 @@ public final class SaltedMessageDigestInMemoryPasswordEncoder
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected byte[] extractClearPassword(
-                 final byte[] unPrefixedUnFormattedEncodedPasswordBytes,
-                 final ReadOnlyEntry userEntry)
+       @NotNull final byte[] unPrefixedUnFormattedEncodedPasswordBytes,
+       @NotNull final ReadOnlyEntry userEntry)
             throws LDAPException
   {
     throw new LDAPException(ResultCode.NOT_SUPPORTED,
@@ -371,7 +394,7 @@ public final class SaltedMessageDigestInMemoryPasswordEncoder
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("SaltedMessageDigestInMemoryPasswordEncoder(prefix='");
     buffer.append(getPrefix());

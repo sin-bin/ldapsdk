@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.LDAPSDKTestCase;
 import com.unboundid.util.LDAPSDKUsageException;
+
+import static com.unboundid.util.StaticUtils.toUTF8String;
 
 
 
@@ -63,7 +80,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -146,7 +163,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -233,7 +250,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getSubInitialValue(), "bar");
 
     assertNotNull(f.getSubInitialValueBytes());
-    assertEquals(new String(f.getSubInitialValueBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubInitialValueBytes()), "bar");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "bar");
@@ -294,7 +311,7 @@ public class MatchedValuesFilterTestCase
 
     assertNotNull(f.getSubAnyValueBytes());
     assertEquals(f.getSubAnyValueBytes().length, 1);
-    assertEquals(new String(f.getSubAnyValueBytes()[0]), "bar");
+    assertEquals(toUTF8String(f.getSubAnyValueBytes()[0]), "bar");
 
     assertNotNull(f.getRawSubAnyValues());
     assertEquals(f.getRawSubAnyValues().length, 1);
@@ -348,8 +365,8 @@ public class MatchedValuesFilterTestCase
 
     assertNotNull(f.getSubAnyValueBytes());
     assertEquals(f.getSubAnyValueBytes().length, 2);
-    assertEquals(new String(f.getSubAnyValueBytes()[0]), "a");
-    assertEquals(new String(f.getSubAnyValueBytes()[1]), "b");
+    assertEquals(toUTF8String(f.getSubAnyValueBytes()[0]), "a");
+    assertEquals(toUTF8String(f.getSubAnyValueBytes()[1]), "b");
 
     assertNotNull(f.getRawSubAnyValues());
     assertEquals(f.getRawSubAnyValues().length, 2);
@@ -408,7 +425,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getSubFinalValue(), "bar");
 
     assertNotNull(f.getSubFinalValueBytes());
-    assertEquals(new String(f.getSubFinalValueBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubFinalValueBytes()), "bar");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "bar");
@@ -450,7 +467,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getSubInitialValue(), "a");
 
     assertNotNull(f.getSubInitialValueBytes());
-    assertEquals(new String(f.getSubInitialValueBytes()), "a");
+    assertEquals(toUTF8String(f.getSubInitialValueBytes()), "a");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "a");
@@ -462,8 +479,8 @@ public class MatchedValuesFilterTestCase
 
     assertNotNull(f.getSubAnyValueBytes());
     assertEquals(f.getSubAnyValueBytes().length, 2);
-    assertEquals(new String(f.getSubAnyValueBytes()[0]), "b");
-    assertEquals(new String(f.getSubAnyValueBytes()[1]), "c");
+    assertEquals(toUTF8String(f.getSubAnyValueBytes()[0]), "b");
+    assertEquals(toUTF8String(f.getSubAnyValueBytes()[1]), "c");
 
     assertNotNull(f.getRawSubAnyValues());
     assertEquals(f.getRawSubAnyValues().length, 2);
@@ -474,7 +491,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getSubFinalValue(), "d");
 
     assertNotNull(f.getSubFinalValueBytes());
-    assertEquals(new String(f.getSubFinalValueBytes()), "d");
+    assertEquals(toUTF8String(f.getSubFinalValueBytes()), "d");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "d");
@@ -561,7 +578,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getSubInitialValue(), "bar");
 
     assertNotNull(f.getSubInitialValueBytes());
-    assertEquals(new String(f.getSubInitialValueBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubInitialValueBytes()), "bar");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "bar");
@@ -621,7 +638,7 @@ public class MatchedValuesFilterTestCase
 
     assertNotNull(f.getSubAnyValueBytes());
     assertEquals(f.getSubAnyValueBytes().length, 1);
-    assertEquals(new String(f.getSubAnyValueBytes()[0]), "bar");
+    assertEquals(toUTF8String(f.getSubAnyValueBytes()[0]), "bar");
 
     assertNotNull(f.getRawSubAnyValues());
     assertEquals(f.getRawSubAnyValues().length, 1);
@@ -675,8 +692,8 @@ public class MatchedValuesFilterTestCase
 
     assertNotNull(f.getSubAnyValueBytes());
     assertEquals(f.getSubAnyValueBytes().length, 2);
-    assertEquals(new String(f.getSubAnyValueBytes()[0]), "a");
-    assertEquals(new String(f.getSubAnyValueBytes()[1]), "b");
+    assertEquals(toUTF8String(f.getSubAnyValueBytes()[0]), "a");
+    assertEquals(toUTF8String(f.getSubAnyValueBytes()[1]), "b");
 
     assertNotNull(f.getRawSubAnyValues());
     assertEquals(f.getRawSubAnyValues().length, 2);
@@ -736,7 +753,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getSubFinalValue(), "bar");
 
     assertNotNull(f.getSubFinalValueBytes());
-    assertEquals(new String(f.getSubFinalValueBytes()), "bar");
+    assertEquals(toUTF8String(f.getSubFinalValueBytes()), "bar");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "bar");
@@ -778,7 +795,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getSubInitialValue(), "a");
 
     assertNotNull(f.getSubInitialValueBytes());
-    assertEquals(new String(f.getSubInitialValueBytes()), "a");
+    assertEquals(toUTF8String(f.getSubInitialValueBytes()), "a");
 
     assertNotNull(f.getRawSubInitialValue());
     assertEquals(f.getRawSubInitialValue().stringValue(), "a");
@@ -790,8 +807,8 @@ public class MatchedValuesFilterTestCase
 
     assertNotNull(f.getSubAnyValueBytes());
     assertEquals(f.getSubAnyValueBytes().length, 2);
-    assertEquals(new String(f.getSubAnyValueBytes()[0]), "b");
-    assertEquals(new String(f.getSubAnyValueBytes()[1]), "c");
+    assertEquals(toUTF8String(f.getSubAnyValueBytes()[0]), "b");
+    assertEquals(toUTF8String(f.getSubAnyValueBytes()[1]), "c");
 
     assertNotNull(f.getRawSubAnyValues());
     assertEquals(f.getRawSubAnyValues().length, 2);
@@ -802,7 +819,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getSubFinalValue(), "d");
 
     assertNotNull(f.getSubFinalValueBytes());
-    assertEquals(new String(f.getSubFinalValueBytes()), "d");
+    assertEquals(toUTF8String(f.getSubFinalValueBytes()), "d");
 
     assertNotNull(f.getRawSubFinalValue());
     assertEquals(f.getRawSubFinalValue().stringValue(), "d");
@@ -884,7 +901,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -968,7 +985,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -1052,7 +1069,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -1136,7 +1153,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -1280,7 +1297,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -1364,7 +1381,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -1448,7 +1465,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -1500,7 +1517,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -1554,7 +1571,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "baz");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "baz");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "baz");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "baz");
@@ -1639,7 +1656,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -1692,7 +1709,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "bar");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "bar");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "bar");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "bar");
@@ -1747,7 +1764,7 @@ public class MatchedValuesFilterTestCase
     assertEquals(f.getAssertionValue(), "baz");
 
     assertNotNull(f.getAssertionValueBytes());
-    assertEquals(new String(f.getAssertionValueBytes(), "UTF-8"), "baz");
+    assertEquals(toUTF8String(f.getAssertionValueBytes()), "baz");
 
     assertNotNull(f.getRawAssertionValue());
     assertEquals(f.getRawAssertionValue().stringValue(), "baz");

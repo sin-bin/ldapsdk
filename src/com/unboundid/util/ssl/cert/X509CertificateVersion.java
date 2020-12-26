@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,6 +37,8 @@ package com.unboundid.util.ssl.cert;
 
 
 
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -60,7 +77,7 @@ public enum X509CertificateVersion
   private final int intValue;
 
   // The name for this X.509 certificate version.
-  private final String name;
+  @NotNull private final String name;
 
 
 
@@ -76,7 +93,7 @@ public enum X509CertificateVersion
    * @param  name      The name for this certificate version.  It must not be
    *                   {@code null}.
    */
-  X509CertificateVersion(final int intValue, final String name)
+  X509CertificateVersion(final int intValue, @NotNull final String name)
   {
     this.intValue = intValue;
     this.name = name;
@@ -104,6 +121,7 @@ public enum X509CertificateVersion
    *
    * @return  The name for this certificate version.
    */
+  @NotNull()
   public String getName()
   {
     return name;
@@ -125,6 +143,7 @@ public enum X509CertificateVersion
    *          {@code null} if the provided version does not correspond to any
    *          known certificate value.
    */
+  @Nullable()
   static X509CertificateVersion valueOf(final int intValue)
   {
     for (final X509CertificateVersion v : values())
@@ -149,7 +168,8 @@ public enum X509CertificateVersion
    * @return  The requested X.509 certificate version, or {@code null} if no
    *          such version is defined.
    */
-  public static X509CertificateVersion forName(final String name)
+  @Nullable()
+  public static X509CertificateVersion forName(@NotNull final String name)
   {
     switch (StaticUtils.toLowerCase(name))
     {

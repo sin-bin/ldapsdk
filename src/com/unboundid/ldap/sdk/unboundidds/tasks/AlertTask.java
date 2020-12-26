@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,8 @@ import java.util.Map;
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -81,7 +98,7 @@ public final class AlertTask
   /**
    * The fully-qualified name of the Java class that is used for the alert task.
    */
-  static final String ALERT_TASK_CLASS =
+  @NotNull static final String ALERT_TASK_CLASS =
        "com.unboundid.directory.server.tasks.AlertTask";
 
 
@@ -90,7 +107,7 @@ public final class AlertTask
    * The name of the attribute used to specify the alert type for the alert to
    * generate.
    */
-  private static final String ATTR_ALERT_TYPE = "ds-task-alert-type";
+  @NotNull private static final String ATTR_ALERT_TYPE = "ds-task-alert-type";
 
 
 
@@ -98,7 +115,8 @@ public final class AlertTask
    * The name of the attribute used to specify the message for the alert to
    * generate.
    */
-  private static final String ATTR_ALERT_MESSAGE = "ds-task-alert-message";
+  @NotNull private static final String ATTR_ALERT_MESSAGE =
+       "ds-task-alert-message";
 
 
 
@@ -106,7 +124,7 @@ public final class AlertTask
    * The name of the attribute used to specify the alert type(s) to add to the
    * set of degraded alert types.
    */
-  private static final String ATTR_ADD_DEGRADED_TYPE =
+  @NotNull private static final String ATTR_ADD_DEGRADED_TYPE =
        "ds-task-alert-add-degraded-type";
 
 
@@ -115,7 +133,7 @@ public final class AlertTask
    * The name of the attribute used to specify the alert type(s) to remove from
    * the set of degraded alert types.
    */
-  private static final String ATTR_REMOVE_DEGRADED_TYPE =
+  @NotNull private static final String ATTR_REMOVE_DEGRADED_TYPE =
        "ds-task-alert-remove-degraded-type";
 
 
@@ -124,7 +142,7 @@ public final class AlertTask
    * The name of the attribute used to specify the alert type(s) to add to the
    * set of unavailable alert types.
    */
-  private static final String ATTR_ADD_UNAVAILABLE_TYPE =
+  @NotNull private static final String ATTR_ADD_UNAVAILABLE_TYPE =
        "ds-task-alert-add-unavailable-type";
 
 
@@ -133,7 +151,7 @@ public final class AlertTask
    * The name of the attribute used to specify the alert type(s) to remove from
    * the set of unavailable alert types.
    */
-  private static final String ATTR_REMOVE_UNAVAILABLE_TYPE =
+  @NotNull private static final String ATTR_REMOVE_UNAVAILABLE_TYPE =
        "ds-task-alert-remove-unavailable-type";
 
 
@@ -141,14 +159,14 @@ public final class AlertTask
   /**
    * The name of the object class used in alert task entries.
    */
-  private static final String OC_ALERT_TASK = "ds-task-alert";
+  @NotNull private static final String OC_ALERT_TASK = "ds-task-alert";
 
 
 
   /**
    * The task property that will be used for the alert type.
    */
-  private static final TaskProperty PROPERTY_ALERT_TYPE =
+  @NotNull private static final TaskProperty PROPERTY_ALERT_TYPE =
      new TaskProperty(ATTR_ALERT_TYPE, INFO_ALERT_DISPLAY_NAME_TYPE.get(),
           INFO_ALERT_DESCRIPTION_TYPE.get(), String.class, false, false,
           false);
@@ -158,7 +176,7 @@ public final class AlertTask
   /**
    * The task property that will be used for the alert message.
    */
-  private static final TaskProperty PROPERTY_ALERT_MESSAGE =
+  @NotNull private static final TaskProperty PROPERTY_ALERT_MESSAGE =
      new TaskProperty(ATTR_ALERT_MESSAGE, INFO_ALERT_DISPLAY_NAME_MESSAGE.get(),
           INFO_ALERT_DESCRIPTION_MESSAGE.get(), String.class, false, false,
           false);
@@ -168,7 +186,7 @@ public final class AlertTask
   /**
    * The task property that will be used for the add degraded alert types.
    */
-  private static final TaskProperty PROPERTY_ADD_DEGRADED_TYPE =
+  @NotNull private static final TaskProperty PROPERTY_ADD_DEGRADED_TYPE =
      new TaskProperty(ATTR_ADD_DEGRADED_TYPE,
           INFO_ALERT_DISPLAY_NAME_ADD_DEGRADED.get(),
           INFO_ALERT_DESCRIPTION_ADD_DEGRADED.get(), String.class, false, true,
@@ -179,7 +197,7 @@ public final class AlertTask
   /**
    * The task property that will be used for the remove degraded alert types.
    */
-  private static final TaskProperty PROPERTY_REMOVE_DEGRADED_TYPE =
+  @NotNull private static final TaskProperty PROPERTY_REMOVE_DEGRADED_TYPE =
      new TaskProperty(ATTR_REMOVE_DEGRADED_TYPE,
           INFO_ALERT_DISPLAY_NAME_REMOVE_DEGRADED.get(),
           INFO_ALERT_DESCRIPTION_REMOVE_DEGRADED.get(), String.class, false,
@@ -190,7 +208,7 @@ public final class AlertTask
   /**
    * The task property that will be used for the add unavailable alert types.
    */
-  private static final TaskProperty PROPERTY_ADD_UNAVAILABLE_TYPE =
+  @NotNull private static final TaskProperty PROPERTY_ADD_UNAVAILABLE_TYPE =
      new TaskProperty(ATTR_ADD_UNAVAILABLE_TYPE,
           INFO_ALERT_DISPLAY_NAME_ADD_UNAVAILABLE.get(),
           INFO_ALERT_DESCRIPTION_ADD_UNAVAILABLE.get(), String.class, false,
@@ -201,7 +219,7 @@ public final class AlertTask
   /**
    * The task property that will be used for the remove unavailable alert types.
    */
-  private static final TaskProperty PROPERTY_REMOVE_UNAVAILABLE_TYPE =
+  @NotNull private static final TaskProperty PROPERTY_REMOVE_UNAVAILABLE_TYPE =
      new TaskProperty(ATTR_REMOVE_UNAVAILABLE_TYPE,
           INFO_ALERT_DISPLAY_NAME_REMOVE_UNAVAILABLE.get(),
           INFO_ALERT_DESCRIPTION_REMOVE_UNAVAILABLE.get(), String.class, false,
@@ -217,22 +235,22 @@ public final class AlertTask
 
 
   // The alert types to add to the set of degraded alert types.
-  private final List<String> addDegradedTypes;
+  @NotNull private final List<String> addDegradedTypes;
 
   // The alert types to add to the set of unavailable alert types.
-  private final List<String> addUnavailableTypes;
+  @NotNull private final List<String> addUnavailableTypes;
 
   // The alert types to remove from the set of degraded alert types.
-  private final List<String> removeDegradedTypes;
+  @NotNull private final List<String> removeDegradedTypes;
 
   // The alert types to remove from the set of unavailable alert types.
-  private final List<String> removeUnavailableTypes;
+  @NotNull private final List<String> removeUnavailableTypes;
 
   // The message for the alert to be generated.
-  private final String alertMessage;
+  @Nullable private final String alertMessage;
 
   // The name of the alert type for the alert to be generated.
-  private final String alertType;
+  @Nullable private final String alertType;
 
 
 
@@ -263,7 +281,8 @@ public final class AlertTask
    * @param  alertMessage  The message to use for the generated alert.  It must
    *                       not be {@code null}.
    */
-  public AlertTask(final String alertType, final String alertMessage)
+  public AlertTask(@NotNull final String alertType,
+                   @NotNull final String alertMessage)
   {
     this(null, alertType, alertMessage, null, null, null, null, null, null,
          null, null, null);
@@ -305,11 +324,12 @@ public final class AlertTask
    *                                 empty if no unavailable alert types should
    *                                 be removed.
    */
-  public AlertTask(final String alertType, final String alertMessage,
-                   final List<String> addDegradedTypes,
-                   final List<String> removeDegradedTypes,
-                   final List<String> addUnavailableTypes,
-                   final List<String> removeUnavailableTypes)
+  public AlertTask(@Nullable final String alertType,
+                   @Nullable final String alertMessage,
+                   @Nullable final List<String> addDegradedTypes,
+                   @Nullable final List<String> removeDegradedTypes,
+                   @Nullable final List<String> addUnavailableTypes,
+                   @Nullable final List<String> removeUnavailableTypes)
   {
     this(null, alertType, alertMessage, addDegradedTypes, removeDegradedTypes,
          addUnavailableTypes, removeUnavailableTypes, null, null, null,
@@ -369,17 +389,18 @@ public final class AlertTask
    *                                 that should be notified if this task does
    *                                 not complete successfully.
    */
-  public AlertTask(final String taskID, final String alertType,
-                   final String alertMessage,
-                   final List<String> addDegradedTypes,
-                   final List<String> removeDegradedTypes,
-                   final List<String> addUnavailableTypes,
-                   final List<String> removeUnavailableTypes,
-                   final Date scheduledStartTime,
-                   final List<String> dependencyIDs,
-                   final FailedDependencyAction failedDependencyAction,
-                   final List<String> notifyOnCompletion,
-                   final List<String> notifyOnError)
+  public AlertTask(@Nullable final String taskID,
+              @Nullable final String alertType,
+              @Nullable final String alertMessage,
+              @Nullable final List<String> addDegradedTypes,
+              @Nullable final List<String> removeDegradedTypes,
+              @Nullable final List<String> addUnavailableTypes,
+              @Nullable final List<String> removeUnavailableTypes,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnError)
   {
     this(taskID, alertType, alertMessage, addDegradedTypes, removeDegradedTypes,
          addUnavailableTypes, removeUnavailableTypes, scheduledStartTime,
@@ -454,20 +475,23 @@ public final class AlertTask
    *                                 alert notification if this task fails to
    *                                 complete successfully.
    */
-  public AlertTask(final String taskID, final String alertType,
-                   final String alertMessage,
-                   final List<String> addDegradedTypes,
-                   final List<String> removeDegradedTypes,
-                   final List<String> addUnavailableTypes,
-                   final List<String> removeUnavailableTypes,
-                   final Date scheduledStartTime,
-                   final List<String> dependencyIDs,
-                   final FailedDependencyAction failedDependencyAction,
-                   final List<String> notifyOnStart,
-                   final List<String> notifyOnCompletion,
-                   final List<String> notifyOnSuccess,
-                   final List<String> notifyOnError, final Boolean alertOnStart,
-                   final Boolean alertOnSuccess, final Boolean alertOnError)
+  public AlertTask(@Nullable final String taskID,
+              @Nullable final String alertType,
+              @Nullable final String alertMessage,
+              @Nullable final List<String> addDegradedTypes,
+              @Nullable final List<String> removeDegradedTypes,
+              @Nullable final List<String> addUnavailableTypes,
+              @Nullable final List<String> removeUnavailableTypes,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnStart,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnSuccess,
+              @Nullable final List<String> notifyOnError,
+              @Nullable final Boolean alertOnStart,
+              @Nullable final Boolean alertOnSuccess,
+              @Nullable final Boolean alertOnError)
   {
     super(taskID, ALERT_TASK_CLASS, scheduledStartTime, dependencyIDs,
          failedDependencyAction, notifyOnStart, notifyOnCompletion,
@@ -504,7 +528,7 @@ public final class AlertTask
    * @throws  TaskException  If the provided entry cannot be parsed as an alert
    *                         task entry.
    */
-  public AlertTask(final Entry entry)
+  public AlertTask(@NotNull final Entry entry)
          throws TaskException
   {
     super(entry);
@@ -547,7 +571,7 @@ public final class AlertTask
    * @throws  TaskException  If the provided set of properties cannot be used to
    *                         create a valid alert task.
    */
-  public AlertTask(final Map<TaskProperty,List<Object>> properties)
+  public AlertTask(@NotNull final Map<TaskProperty,List<Object>> properties)
          throws TaskException
   {
     super(ALERT_TASK_CLASS, properties);
@@ -633,6 +657,7 @@ public final class AlertTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskName()
   {
     return INFO_TASK_NAME_ALERT.get();
@@ -644,6 +669,7 @@ public final class AlertTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskDescription()
   {
     return INFO_TASK_DESCRIPTION_ALERT.get();
@@ -658,6 +684,7 @@ public final class AlertTask
    * @return  The name of the alert type to use for the alert notification to be
    *          generated, or {@code null} if no alert should be generated.
    */
+  @Nullable()
   public String getAlertType()
   {
     return alertType;
@@ -672,6 +699,7 @@ public final class AlertTask
    * @return  The message to use for the alert notification to be generated, or
    *          {@code null} if no alert should be generated.
    */
+  @Nullable()
   public String getAlertMessage()
   {
     return alertMessage;
@@ -687,6 +715,7 @@ public final class AlertTask
    *          degraded alert types, or an empty list if no degraded alert types
    *          should be added.
    */
+  @NotNull()
   public List<String> getAddDegradedAlertTypes()
   {
     return addDegradedTypes;
@@ -702,6 +731,7 @@ public final class AlertTask
    *          of degraded alert types, or an empty list if no degraded alert
    *          types should be removed.
    */
+  @NotNull()
   public List<String> getRemoveDegradedAlertTypes()
   {
     return removeDegradedTypes;
@@ -717,6 +747,7 @@ public final class AlertTask
    *          unavailable alert types, or an empty list if no unavailable alert
    *          types should be added.
    */
+  @NotNull()
   public List<String> getAddUnavailableAlertTypes()
   {
     return addUnavailableTypes;
@@ -732,6 +763,7 @@ public final class AlertTask
    *          of unavailable alert types, or an empty list if no unavailable
    *          alert types should be removed.
    */
+  @NotNull()
   public List<String> getRemoveUnavailableAlertTypes()
   {
     return removeUnavailableTypes;
@@ -743,6 +775,7 @@ public final class AlertTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<String> getAdditionalObjectClasses()
   {
     return Collections.singletonList(OC_ALERT_TASK);
@@ -754,6 +787,7 @@ public final class AlertTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<Attribute> getAdditionalAttributes()
   {
     final LinkedList<Attribute> attrList = new LinkedList<>();
@@ -796,6 +830,7 @@ public final class AlertTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<TaskProperty> getTaskSpecificProperties()
   {
     return Collections.unmodifiableList(Arrays.asList(
@@ -810,6 +845,7 @@ public final class AlertTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<TaskProperty,List<Object>> getTaskPropertyValues()
   {
     final LinkedHashMap<TaskProperty,List<Object>> props =
@@ -861,7 +897,8 @@ public final class AlertTask
    *
    * @return  The resulting string list.
    */
-  private static List<String> getStringList(final List<String> l)
+  @NotNull()
+  private static List<String> getStringList(@Nullable final List<String> l)
   {
     if (l == null)
     {

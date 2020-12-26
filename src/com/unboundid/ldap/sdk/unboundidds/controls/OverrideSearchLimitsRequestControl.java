@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -36,6 +51,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -83,7 +100,7 @@ public final class OverrideSearchLimitsRequestControl
    * The OID (1.3.6.1.4.1.30221.2.5.56) for the override search limits request
    * control.
    */
-  public static final String OVERRIDE_SEARCH_LIMITS_REQUEST_OID =
+  @NotNull public static final String OVERRIDE_SEARCH_LIMITS_REQUEST_OID =
        "1.3.6.1.4.1.30221.2.5.56";
 
 
@@ -96,7 +113,7 @@ public final class OverrideSearchLimitsRequestControl
 
 
   // The set of properties included in this control.
-  private final Map<String,String> properties;
+  @NotNull private final Map<String,String> properties;
 
 
 
@@ -109,8 +126,8 @@ public final class OverrideSearchLimitsRequestControl
    * @param  propertyValue  The value for the specified property.  It must not
    *                        be {@code null} or empty.
    */
-  public OverrideSearchLimitsRequestControl(final String propertyName,
-                                            final String propertyValue)
+  public OverrideSearchLimitsRequestControl(@NotNull final String propertyName,
+                                            @NotNull final String propertyValue)
   {
     this(Collections.singletonMap(propertyName, propertyValue), false);
   }
@@ -127,8 +144,9 @@ public final class OverrideSearchLimitsRequestControl
    * @param  isCritical  Indicates whether the control should be considered
    *                     critical.
    */
-  public OverrideSearchLimitsRequestControl(final Map<String,String> properties,
-                                            final boolean isCritical)
+  public OverrideSearchLimitsRequestControl(
+              @NotNull final Map<String,String> properties,
+              final boolean isCritical)
   {
     super(OVERRIDE_SEARCH_LIMITS_REQUEST_OID, isCritical,
          encodeValue(properties));
@@ -149,7 +167,7 @@ public final class OverrideSearchLimitsRequestControl
    * @throws  LDAPException  If the provided control cannot be decoded as an
    *                         override search limits request control.
    */
-  public OverrideSearchLimitsRequestControl(final Control control)
+  public OverrideSearchLimitsRequestControl(@NotNull final Control control)
          throws LDAPException
   {
     super(control);
@@ -233,7 +251,9 @@ public final class OverrideSearchLimitsRequestControl
    *
    * @return  The ASN.1 octet string containing the encoded value.
    */
-  static ASN1OctetString encodeValue(final Map<String,String> properties)
+  @NotNull()
+  static ASN1OctetString encodeValue(
+              @NotNull final Map<String,String> properties)
   {
     Validator.ensureTrue(((properties != null) && (! properties.isEmpty())),
          "OverrideSearchLimitsRequestControl.<init>properties must not be " +
@@ -269,6 +289,7 @@ public final class OverrideSearchLimitsRequestControl
    *
    * @return  A map of the properties included in this request control.
    */
+  @NotNull()
   public Map<String,String> getProperties()
   {
     return properties;
@@ -286,7 +307,8 @@ public final class OverrideSearchLimitsRequestControl
    * @return  The value of the requested property, or {@code null} if the
    *          property is not set in the control.
    */
-  public String getProperty(final String propertyName)
+  @Nullable()
+  public String getProperty(@NotNull final String propertyName)
   {
     Validator.ensureTrue(((propertyName != null) && (! propertyName.isEmpty())),
          "OverrideSearchLimitsRequestControl.getProperty.propertyName must " +
@@ -312,8 +334,9 @@ public final class OverrideSearchLimitsRequestControl
    *          default value if the property is not set or if its value cannot be
    *          parsed as a {@code Boolean}.
    */
-  public Boolean getPropertyAsBoolean(final String propertyName,
-                                      final Boolean defaultValue)
+  @Nullable()
+  public Boolean getPropertyAsBoolean(@NotNull final String propertyName,
+                                      @Nullable final Boolean defaultValue)
   {
     final String propertyValue = getProperty(propertyName);
     if (propertyValue == null)
@@ -359,8 +382,9 @@ public final class OverrideSearchLimitsRequestControl
    *          default value if the property is not set or if its value cannot be
    *          parsed as an {@code Integer}.
    */
-  public Integer getPropertyAsInteger(final String propertyName,
-                                      final Integer defaultValue)
+  @Nullable()
+  public Integer getPropertyAsInteger(@NotNull final String propertyName,
+                                      @Nullable final Integer defaultValue)
   {
     final String propertyValue = getProperty(propertyName);
     if (propertyValue == null)
@@ -396,8 +420,9 @@ public final class OverrideSearchLimitsRequestControl
    *          value if the property is not set or if its value cannot be parsed
    *          as a {@code Long}.
    */
-  public Long getPropertyAsLong(final String propertyName,
-                                final Long defaultValue)
+  @Nullable()
+  public Long getPropertyAsLong(@NotNull final String propertyName,
+                                @Nullable final Long defaultValue)
   {
     final String propertyValue = getProperty(propertyName);
     if (propertyValue == null)
@@ -426,6 +451,7 @@ public final class OverrideSearchLimitsRequestControl
    *          user-friendly name is available.
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_OVERRIDE_SEARCH_LIMITS_REQUEST_CONTROL_NAME.get();
@@ -441,7 +467,7 @@ public final class OverrideSearchLimitsRequestControl
    *                 this buffer.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("OverrideSearchLimitsRequestControl(oid='");
     buffer.append(getOID());

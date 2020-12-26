@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,7 @@ package com.unboundid.util.ssl.cert;
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.OID;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -51,7 +67,20 @@ public final class SubjectKeyIdentifierExtension
   /**
    * The OID (2.5.29.14) for subject key identifier extensions.
    */
-  public static final OID SUBJECT_KEY_IDENTIFIER_OID = new OID("2.5.29.14");
+  @NotNull public static final OID SUBJECT_KEY_IDENTIFIER_OID =
+       new OID("2.5.29.14");
+
+
+
+  /**
+   * The name of the message digest algorithm that will be used to generate a
+   * certificate's subject key identifier from its public key.  Note that we're
+   * using SHA-1 rather than something better (like SHA-256) because it appears
+   * that the Microsoft CA cannot handle a 256-bit identifier but will accept a
+   * 160-bit identifier.
+   */
+  @NotNull static final String SUBJECT_KEY_IDENTIFIER_DIGEST_ALGORITHM =
+       "SHA-1";
 
 
 
@@ -63,7 +92,7 @@ public final class SubjectKeyIdentifierExtension
 
 
   // The key identifier for this extension.
-  private final ASN1OctetString keyIdentifier;
+  @NotNull private final ASN1OctetString keyIdentifier;
 
 
 
@@ -77,7 +106,7 @@ public final class SubjectKeyIdentifierExtension
    *                        be {@code null}.
    */
   SubjectKeyIdentifierExtension(final boolean isCritical,
-                                final ASN1OctetString keyIdentifier)
+                                @NotNull final ASN1OctetString keyIdentifier)
   {
     super(SUBJECT_KEY_IDENTIFIER_OID, isCritical,
          keyIdentifier.encode());
@@ -97,7 +126,8 @@ public final class SubjectKeyIdentifierExtension
    * @throws  CertException  If the provided extension cannot be decoded as a
    *                         subject alternative name extension.
    */
-  SubjectKeyIdentifierExtension(final X509CertificateExtension extension)
+  SubjectKeyIdentifierExtension(
+       @NotNull final X509CertificateExtension extension)
        throws CertException
   {
     super(extension);
@@ -123,6 +153,7 @@ public final class SubjectKeyIdentifierExtension
    *
    * @return  The key identifier for this extension.
    */
+  @NotNull()
   public ASN1OctetString getKeyIdentifier()
   {
     return keyIdentifier;
@@ -134,6 +165,7 @@ public final class SubjectKeyIdentifierExtension
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtensionName()
   {
     return INFO_SUBJECT_KEY_IDENTIFIER_EXTENSION_NAME.get();
@@ -145,7 +177,7 @@ public final class SubjectKeyIdentifierExtension
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("SubjectKeyIdentifierExtension(oid='");
     buffer.append(getOID());

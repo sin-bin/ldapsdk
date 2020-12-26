@@ -1,9 +1,24 @@
 /*
- * Copyright 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2013-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -106,7 +123,7 @@ public final class ActiveDirectoryDirSyncControl
   /**
    * The OID (1.2.840.113556.1.4.841) for the DirSync control.
    */
-  public static final String DIRSYNC_OID = "1.2.840.113556.1.4.841";
+  @NotNull public static final String DIRSYNC_OID = "1.2.840.113556.1.4.841";
 
 
 
@@ -150,7 +167,7 @@ public final class ActiveDirectoryDirSyncControl
 
 
   // A cookie that may be used to resume a previous DirSync search.
-  private final ASN1OctetString cookie;
+  @Nullable private final ASN1OctetString cookie;
 
   // The value of the flags that should be used for DirSync operation.
   private final int flags;
@@ -188,7 +205,7 @@ public final class ActiveDirectoryDirSyncControl
   public ActiveDirectoryDirSyncControl(final boolean isCritical,
                                        final int flags,
                                        final int maxAttributeCount,
-                                       final ASN1OctetString cookie)
+                                       @Nullable final ASN1OctetString cookie)
   {
     super(DIRSYNC_OID, isCritical,
          encodeValue(flags, maxAttributeCount, cookie));
@@ -220,9 +237,9 @@ public final class ActiveDirectoryDirSyncControl
    *                         decode the control value as appropriate for a
    *                         DirSync control.
    */
-  public ActiveDirectoryDirSyncControl(final String oid,
+  public ActiveDirectoryDirSyncControl(@NotNull final String oid,
                                        final boolean isCritical,
-                                       final ASN1OctetString value)
+                                       @Nullable final ASN1OctetString value)
        throws LDAPException
   {
     super(oid, isCritical, value);
@@ -269,9 +286,10 @@ public final class ActiveDirectoryDirSyncControl
    *
    * @return  An ASN.1 octet string containing the encoded control value.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(final int flags,
-                                             final int maxAttributeCount,
-                                             final ASN1OctetString cookie)
+                                      final int maxAttributeCount,
+                                      @Nullable final ASN1OctetString cookie)
   {
     final ASN1Element[] valueElements = new ASN1Element[3];
     valueElements[0] = new ASN1Integer(flags);
@@ -295,9 +313,9 @@ public final class ActiveDirectoryDirSyncControl
    * {@inheritDoc}
    */
   @Override()
-  public ActiveDirectoryDirSyncControl decodeControl(final String oid,
-                                            final boolean isCritical,
-                                            final ASN1OctetString value)
+  @NotNull()
+  public ActiveDirectoryDirSyncControl decodeControl(@NotNull final String oid,
+              final boolean isCritical, @Nullable final ASN1OctetString value)
           throws LDAPException
   {
     return new ActiveDirectoryDirSyncControl(oid, isCritical, value);
@@ -336,6 +354,7 @@ public final class ActiveDirectoryDirSyncControl
    * @return  A cookie that may be used to resume a previous DirSync search, or
    *          a zero-length cookie if there is none.
    */
+  @Nullable()
   public ASN1OctetString getCookie()
   {
     return cookie;
@@ -357,7 +376,9 @@ public final class ActiveDirectoryDirSyncControl
    *                         decode the DirSync response control contained in
    *                         the provided result.
    */
-  public static ActiveDirectoryDirSyncControl get(final SearchResult result)
+  @Nullable()
+  public static ActiveDirectoryDirSyncControl get(
+                     @NotNull final SearchResult result)
          throws LDAPException
   {
     final Control c = result.getResponseControl(DIRSYNC_OID);
@@ -383,6 +404,7 @@ public final class ActiveDirectoryDirSyncControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_DIRSYNC.get();
@@ -394,7 +416,7 @@ public final class ActiveDirectoryDirSyncControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ActiveDirectoryDirSyncControl(isCritical=");
     buffer.append(isCritical());

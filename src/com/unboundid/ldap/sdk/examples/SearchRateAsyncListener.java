@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchResultReference;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ResultCodeCounter;
 
 
@@ -51,29 +68,29 @@ final class SearchRateAsyncListener
 
 
   // The counter used to track the number of entries returned.
-  private final AtomicLong entryCounter;
+  @NotNull private final AtomicLong entryCounter;
 
   // The counter used to track the number of errors encountered while searching.
-  private final AtomicLong errorCounter;
+  @NotNull private final AtomicLong errorCounter;
 
   // The counter used to track the number of searches performed.
-  private final AtomicLong searchCounter;
+  @NotNull private final AtomicLong searchCounter;
 
   // The value that will be updated with total duration of the searches.
-  private final AtomicLong searchDurations;
+  @NotNull private final AtomicLong searchDurations;
 
   // The result code for the search.
-  private final AtomicReference<ResultCode> resultCode;
+  @NotNull private final AtomicReference<ResultCode> resultCode;
 
   // The time that the search was invoked, in nanoseconds.
   private final long startTime;
 
   // The result code counter to use for failed operations.
-  private final ResultCodeCounter rcCounter;
+  @NotNull private final ResultCodeCounter rcCounter;
 
   // The semaphore used to limit total number of outstanding asynchronous
   // requests.
-  private final Semaphore asyncSemaphore;
+  @Nullable private final Semaphore asyncSemaphore;
 
 
 
@@ -94,13 +111,13 @@ final class SearchRateAsyncListener
    *                          outstanding asynchronous requests.
    * @param  resultCode       The result code for the search thread.
    */
-  SearchRateAsyncListener(final AtomicLong searchCounter,
-                          final AtomicLong entryCounter,
-                          final AtomicLong searchDurations,
-                          final AtomicLong errorCounter,
-                          final ResultCodeCounter rcCounter,
-                          final Semaphore asyncSemaphore,
-                          final AtomicReference<ResultCode> resultCode)
+  SearchRateAsyncListener(@NotNull final AtomicLong searchCounter,
+                          @NotNull final AtomicLong entryCounter,
+                          @NotNull final AtomicLong searchDurations,
+                          @NotNull final AtomicLong errorCounter,
+                          @NotNull final ResultCodeCounter rcCounter,
+                          @Nullable final Semaphore asyncSemaphore,
+                          @NotNull final AtomicReference<ResultCode> resultCode)
   {
     this.searchCounter   = searchCounter;
     this.entryCounter    = entryCounter;
@@ -119,7 +136,7 @@ final class SearchRateAsyncListener
    * {@inheritDoc}
    */
   @Override()
-  public void searchEntryReturned(final SearchResultEntry searchEntry)
+  public void searchEntryReturned(@NotNull final SearchResultEntry searchEntry)
   {
     // No implementation required.
   }
@@ -131,7 +148,7 @@ final class SearchRateAsyncListener
    */
   @Override()
   public void searchReferenceReturned(
-                   final SearchResultReference searchReference)
+@NotNull                    final SearchResultReference searchReference)
   {
     // No implementation required.
   }
@@ -142,8 +159,8 @@ final class SearchRateAsyncListener
    * {@inheritDoc}
    */
   @Override()
-  public void searchResultReceived(final AsyncRequestID requestID,
-                                   final SearchResult searchResult)
+  public void searchResultReceived(@NotNull final AsyncRequestID requestID,
+                                   @NotNull final SearchResult searchResult)
   {
     searchDurations.addAndGet(System.nanoTime() - startTime);
 

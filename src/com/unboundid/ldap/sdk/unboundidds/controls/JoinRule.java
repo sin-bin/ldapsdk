@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,6 +49,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -127,7 +144,7 @@ public final class JoinRule
    * An empty array of join rules that will be used as the set of components
    * for DN and equality join rules.
    */
-  private static final JoinRule[] NO_RULES = new JoinRule[0];
+  @NotNull private static final JoinRule[] NO_RULES = new JoinRule[0];
 
 
 
@@ -146,13 +163,13 @@ public final class JoinRule
   private final byte type;
 
   // The set of subordinate components for this join rule.
-  private final JoinRule[] components;
+  @NotNull private final JoinRule[] components;
 
   // The name of the source attribute for this join rule.
-  private final String sourceAttribute;
+  @Nullable private final String sourceAttribute;
 
   // The name of the target attribute for this join rule.
-  private final String targetAttribute;
+  @Nullable private final String targetAttribute;
 
 
 
@@ -170,8 +187,9 @@ public final class JoinRule
    *                          source attribute must be present in the target
    *                          entry for it to be considered a match.
    */
-  private JoinRule(final byte type, final JoinRule[] components,
-                   final String sourceAttribute, final String targetAttribute,
+  private JoinRule(final byte type, @NotNull final JoinRule[] components,
+                   @Nullable final String sourceAttribute,
+                   @Nullable final String targetAttribute,
                    final boolean matchAll)
   {
     this.type            = type;
@@ -192,7 +210,8 @@ public final class JoinRule
    *
    * @return  The created AND join rule.
    */
-  public static JoinRule createANDRule(final JoinRule... components)
+  @NotNull()
+  public static JoinRule createANDRule(@NotNull final JoinRule... components)
   {
     Validator.ensureNotNull(components);
     Validator.ensureFalse(components.length == 0);
@@ -211,7 +230,8 @@ public final class JoinRule
    *
    * @return  The created AND join rule.
    */
-  public static JoinRule createANDRule(final List<JoinRule> components)
+  @NotNull()
+  public static JoinRule createANDRule(@NotNull final List<JoinRule> components)
   {
     Validator.ensureNotNull(components);
     Validator.ensureFalse(components.isEmpty());
@@ -232,7 +252,8 @@ public final class JoinRule
    *
    * @return  The created OR join rule.
    */
-  public static JoinRule createORRule(final JoinRule... components)
+  @NotNull()
+  public static JoinRule createORRule(@NotNull final JoinRule... components)
   {
     Validator.ensureNotNull(components);
     Validator.ensureFalse(components.length == 0);
@@ -251,7 +272,8 @@ public final class JoinRule
    *
    * @return  The created OR join rule.
    */
-  public static JoinRule createORRule(final List<JoinRule> components)
+  @NotNull()
+  public static JoinRule createORRule(@NotNull final List<JoinRule> components)
   {
     Validator.ensureNotNull(components);
     Validator.ensureFalse(components.isEmpty());
@@ -276,7 +298,8 @@ public final class JoinRule
    *
    * @return  The created DN join rule.
    */
-  public static JoinRule createDNJoin(final String sourceAttribute)
+  @NotNull()
+  public static JoinRule createDNJoin(@NotNull final String sourceAttribute)
   {
     Validator.ensureNotNull(sourceAttribute);
 
@@ -303,9 +326,11 @@ public final class JoinRule
    *
    * @return  The created equality join rule.
    */
-  public static JoinRule createEqualityJoin(final String sourceAttribute,
-                                            final String targetAttribute,
-                                            final boolean matchAll)
+  @NotNull()
+  public static JoinRule createEqualityJoin(
+              @NotNull final String sourceAttribute,
+              @NotNull final String targetAttribute,
+              final boolean matchAll)
   {
     Validator.ensureNotNull(sourceAttribute, targetAttribute);
 
@@ -334,9 +359,11 @@ public final class JoinRule
    *
    * @return  The created equality join rule.
    */
-  public static JoinRule createContainsJoin(final String sourceAttribute,
-                                            final String targetAttribute,
-                                            final boolean matchAll)
+  @NotNull()
+  public static JoinRule createContainsJoin(
+              @NotNull final String sourceAttribute,
+              @NotNull final String targetAttribute,
+              final boolean matchAll)
   {
     Validator.ensureNotNull(sourceAttribute, targetAttribute);
 
@@ -359,7 +386,9 @@ public final class JoinRule
    *
    * @return  The created reverse DN join rule.
    */
-  public static JoinRule createReverseDNJoin(final String targetAttribute)
+  @NotNull()
+  public static JoinRule createReverseDNJoin(
+              @NotNull final String targetAttribute)
   {
     Validator.ensureNotNull(targetAttribute);
 
@@ -387,6 +416,7 @@ public final class JoinRule
    * @return  The set of subordinate components for this AND or OR join rule, or
    *          an empty list if this is not an AND or OR join rule.
    */
+  @NotNull()
   public JoinRule[] getComponents()
   {
     return components;
@@ -402,6 +432,7 @@ public final class JoinRule
    *          contains join rule, or {@code null} if this is some other type of
    *          join rule.
    */
+  @Nullable()
   public String getSourceAttribute()
   {
     return sourceAttribute;
@@ -417,6 +448,7 @@ public final class JoinRule
    *          contains join rule, or {@code null} if this is some other type of
    *          join rule.
    */
+  @Nullable()
   public String getTargetAttribute()
   {
     return targetAttribute;
@@ -448,6 +480,7 @@ public final class JoinRule
    *
    * @return  The encoded representation of this join rule.
    */
+  @NotNull()
   ASN1Element encode()
   {
     switch (type)
@@ -500,7 +533,8 @@ public final class JoinRule
    * @throws  LDAPException  If a problem occurs while attempting to decode the
    *                         provided element as a join rule.
    */
-  static JoinRule decode(final ASN1Element element)
+  @NotNull()
+  static JoinRule decode(@NotNull final ASN1Element element)
          throws LDAPException
   {
     final byte elementType = element.getType();
@@ -589,6 +623,7 @@ public final class JoinRule
    * @return  A string representation of this join rule.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -603,7 +638,7 @@ public final class JoinRule
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     switch (type)
     {

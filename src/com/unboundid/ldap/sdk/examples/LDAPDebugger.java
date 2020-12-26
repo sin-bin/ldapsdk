@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,10 +37,10 @@ package com.unboundid.ldap.sdk.examples;
 
 
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.net.InetAddress;
 import java.util.LinkedHashMap;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
@@ -37,13 +52,18 @@ import com.unboundid.ldap.listener.LDAPListenerRequestHandler;
 import com.unboundid.ldap.listener.LDAPListener;
 import com.unboundid.ldap.listener.LDAPListenerConfig;
 import com.unboundid.ldap.listener.ProxyRequestHandler;
+import com.unboundid.ldap.listener.SelfSignedCertificateGenerator;
 import com.unboundid.ldap.listener.ToCodeRequestHandler;
+import com.unboundid.ldap.sdk.LDAPConnectionOptions;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.Version;
 import com.unboundid.util.Debug;
 import com.unboundid.util.LDAPCommandLineTool;
 import com.unboundid.util.MinimalLogFormatter;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
+import com.unboundid.util.ObjectPair;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -54,6 +74,9 @@ import com.unboundid.util.args.BooleanArgument;
 import com.unboundid.util.args.FileArgument;
 import com.unboundid.util.args.IntegerArgument;
 import com.unboundid.util.args.StringArgument;
+import com.unboundid.util.ssl.KeyStoreKeyManager;
+import com.unboundid.util.ssl.SSLUtil;
+import com.unboundid.util.ssl.TrustAllTrustManager;
 
 
 
@@ -105,29 +128,36 @@ public final class LDAPDebugger
 
 
 
+  // The argument parser for this tool.
+  @Nullable private ArgumentParser parser;
+
   // The argument used to specify the output file for the decoded content.
-  private BooleanArgument listenUsingSSL;
+  @Nullable private BooleanArgument listenUsingSSL;
+
+  // The argument used to indicate that the listener should generate a
+  // self-signed certificate instead of using an existing keystore.
+  @Nullable private BooleanArgument generateSelfSignedCertificate;
 
   // The argument used to specify the code log file to use, if any.
-  private FileArgument codeLogFile;
+  @Nullable private FileArgument codeLogFile;
 
   // The argument used to specify the output file for the decoded content.
-  private FileArgument outputFile;
+  @Nullable private FileArgument outputFile;
 
   // The argument used to specify the port on which to listen for client
   // connections.
-  private IntegerArgument listenPort;
+  @Nullable private IntegerArgument listenPort;
 
   // The shutdown hook that will be used to stop the listener when the JVM
   // exits.
-  private LDAPDebuggerShutdownListener shutdownListener;
+  @Nullable private LDAPDebuggerShutdownListener shutdownListener;
 
   // The listener used to intercept and decode the client communication.
-  private LDAPListener listener;
+  @Nullable private LDAPListener listener;
 
   // The argument used to specify the address on which to listen for client
   // connections.
-  private StringArgument listenAddress;
+  @Nullable private StringArgument listenAddress;
 
 
 
@@ -137,7 +167,7 @@ public final class LDAPDebugger
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String[] args)
+  public static void main(@NotNull final String[] args)
   {
     final ResultCode resultCode = main(args, System.out, System.err);
     if (resultCode != ResultCode.SUCCESS)
@@ -162,9 +192,10 @@ public final class LDAPDebugger
    *
    * @return  A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args,
-                                final OutputStream outStream,
-                                final OutputStream errStream)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream)
   {
     final LDAPDebugger ldapDebugger = new LDAPDebugger(outStream, errStream);
     return ldapDebugger.runTool(args);
@@ -182,8 +213,8 @@ public final class LDAPDebugger
    *                    written.  It may be {@code null} if error messages
    *                    should be suppressed.
    */
-  public LDAPDebugger(final OutputStream outStream,
-                      final OutputStream errStream)
+  public LDAPDebugger(@Nullable final OutputStream outStream,
+                      @Nullable final OutputStream errStream)
   {
     super(outStream, errStream);
   }
@@ -196,6 +227,7 @@ public final class LDAPDebugger
    * @return  The name for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "ldap-debugger";
@@ -209,6 +241,7 @@ public final class LDAPDebugger
    * @return  The description for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return "Intercept and decode LDAP communication.";
@@ -222,6 +255,7 @@ public final class LDAPDebugger
    * @return  The version string for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -318,6 +352,24 @@ public final class LDAPDebugger
 
 
   /**
+   * Indicates whether this tool should provide a command-line argument that
+   * allows for low-level SSL debugging.  If this returns {@code true}, then an
+   * "--enableSSLDebugging}" argument will be added that sets the
+   * "javax.net.debug" system property to "all" before attempting any
+   * communication.
+   *
+   * @return  {@code true} if this tool should offer an "--enableSSLDebugging"
+   *          argument, or {@code false} if not.
+   */
+  @Override()
+  protected boolean supportsSSLDebugging()
+  {
+    return true;
+  }
+
+
+
+  /**
    * Adds the arguments used by this program that aren't already provided by the
    * generic {@code LDAPCommandLineTool} framework.
    *
@@ -326,9 +378,11 @@ public final class LDAPDebugger
    * @throws  ArgumentException  If a problem occurs while adding the arguments.
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
+    this.parser = parser;
+
     String description = "The address on which to listen for client " +
          "connections.  If this is not provided, then it will listen on " +
          "all interfaces.";
@@ -349,11 +403,23 @@ public final class LDAPDebugger
 
     description = "Use SSL when accepting client connections.  This is " +
          "independent of the '--useSSL' option, which applies only to " +
-         "communication between the LDAP debugger and the backend server.";
+         "communication between the LDAP debugger and the backend server.  " +
+         "If this argument is provided, then either the --keyStorePath or " +
+         "the --generateSelfSignedCertificate argument must also be provided.";
     listenUsingSSL = new BooleanArgument('S', "listenUsingSSL", 1,
          description);
     listenUsingSSL.addLongIdentifier("listen-using-ssl", true);
     parser.addArgument(listenUsingSSL);
+
+
+    description = "Generate a self-signed certificate to present to clients " +
+         "when the --listenUsingSSL argument is provided.  This argument " +
+         "cannot be used in conjunction with the --keyStorePath argument.";
+    generateSelfSignedCertificate = new BooleanArgument(null,
+         "generateSelfSignedCertificate", 1, description);
+    generateSelfSignedCertificate.addLongIdentifier(
+         "generate-self-signed-certificate", true);
+    parser.addArgument(generateSelfSignedCertificate);
 
 
     description = "The path to the output file to be written.  If no value " +
@@ -374,24 +440,30 @@ public final class LDAPDebugger
     parser.addArgument(codeLogFile);
 
 
-    // If --listenUsingSSL is provided, then the --keyStorePath argument must
-    // also be provided.
+    // If --listenUsingSSL is provided, then either the --keyStorePath argument
+    // or the --generateSelfSignedCertificate argument must also be provided.
     final Argument keyStorePathArgument =
          parser.getNamedArgument("keyStorePath");
-    parser.addDependentArgumentSet(listenUsingSSL, keyStorePathArgument);
+    parser.addDependentArgumentSet(listenUsingSSL, keyStorePathArgument,
+         generateSelfSignedCertificate);
 
 
-    // If the listenUsingSSL argument is provided, then one of the
-    // --keyStorePassword, --keyStorePasswordFile, or
-    // --promptForKeyStorePassword arguments.
+    // The --generateSelfSignedCertificate argument cannot be used with any of
+    // the arguments pertaining to a key store path.
     final Argument keyStorePasswordArgument =
          parser.getNamedArgument("keyStorePassword");
     final Argument keyStorePasswordFileArgument =
          parser.getNamedArgument("keyStorePasswordFile");
     final Argument promptForKeyStorePasswordArgument =
          parser.getNamedArgument("promptForKeyStorePassword");
-    parser.addDependentArgumentSet(listenUsingSSL, keyStorePasswordArgument,
-         keyStorePasswordFileArgument, promptForKeyStorePasswordArgument);
+    parser.addExclusiveArgumentSet(generateSelfSignedCertificate,
+         keyStorePathArgument);
+    parser.addExclusiveArgumentSet(generateSelfSignedCertificate,
+         keyStorePasswordArgument);
+    parser.addExclusiveArgumentSet(generateSelfSignedCertificate,
+         keyStorePasswordFileArgument);
+    parser.addExclusiveArgumentSet(generateSelfSignedCertificate,
+         promptForKeyStorePasswordArgument);
   }
 
 
@@ -404,6 +476,7 @@ public final class LDAPDebugger
    * @return  The result code for the processing that was performed.
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     // Create the proxy request handler that will be used to forward requests to
@@ -440,7 +513,7 @@ public final class LDAPDebugger
     {
       logHandler = new ConsoleHandler();
     }
-    logHandler.setLevel(Level.INFO);
+    StaticUtils.setLogHandlerLevel(logHandler, Level.INFO);
     logHandler.setFormatter(new MinimalLogFormatter(
          MinimalLogFormatter.DEFAULT_TIMESTAMP_FORMAT, false, false, true));
 
@@ -477,8 +550,8 @@ public final class LDAPDebugger
     {
       try
       {
-        config.setListenAddress(
-             InetAddress.getByName(listenAddress.getValue()));
+        config.setListenAddress(LDAPConnectionOptions.DEFAULT_NAME_RESOLVER.
+             getByName(listenAddress.getValue()));
       }
       catch (final Exception e)
       {
@@ -492,8 +565,25 @@ public final class LDAPDebugger
     {
       try
       {
-        config.setServerSocketFactory(
-             createSSLUtil(true).createSSLServerSocketFactory());
+        final SSLUtil sslUtil;
+        if (generateSelfSignedCertificate.isPresent())
+        {
+          final ObjectPair<File,char[]> keyStoreInfo =
+               SelfSignedCertificateGenerator.
+                    generateTemporarySelfSignedCertificate(getToolName(),
+                         "JKS");
+
+          sslUtil = new SSLUtil(
+               new KeyStoreKeyManager(keyStoreInfo.getFirst(),
+                    keyStoreInfo.getSecond(), "JKS", null, true),
+               new TrustAllTrustManager(false));
+        }
+        else
+        {
+          sslUtil = createSSLUtil(true);
+        }
+
+        config.setServerSocketFactory(sslUtil.createSSLServerSocketFactory());
       }
       catch (final Exception e)
       {
@@ -564,6 +654,7 @@ public final class LDAPDebugger
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> examples =
@@ -594,6 +685,7 @@ public final class LDAPDebugger
    * @return  The LDAP listener used to decode the communication, or
    *          {@code null} if the tool is not running.
    */
+  @Nullable()
   public LDAPListener getListener()
   {
     return listener;

@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,7 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -68,7 +84,7 @@ public final class NotificationDestinationChangeSelectionCriteria
 
 
   // The entryUUID for the for the notification destination to target.
-  private final String destinationEntryUUID;
+  @NotNull private final String destinationEntryUUID;
 
 
 
@@ -81,7 +97,7 @@ public final class NotificationDestinationChangeSelectionCriteria
    *                               {@code null}.
    */
   public NotificationDestinationChangeSelectionCriteria(
-              final String destinationEntryUUID)
+              @NotNull final String destinationEntryUUID)
   {
     Validator.ensureNotNull(destinationEntryUUID);
 
@@ -104,8 +120,9 @@ public final class NotificationDestinationChangeSelectionCriteria
    *                         the provided element as the inner element of an all
    *                         attributes change selection criteria value.
    */
+  @NotNull()
   static NotificationDestinationChangeSelectionCriteria decodeInnerElement(
-              final ASN1Element innerElement)
+              @NotNull final ASN1Element innerElement)
          throws LDAPException
   {
     try
@@ -130,6 +147,7 @@ public final class NotificationDestinationChangeSelectionCriteria
    *
    * @return  The entryUUID for the target notification destination.
    */
+  @NotNull()
   public String getDestinationEntryUUID()
   {
     return destinationEntryUUID;
@@ -141,6 +159,7 @@ public final class NotificationDestinationChangeSelectionCriteria
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ASN1Element encodeInnerElement()
   {
     return new ASN1OctetString(TYPE_SELECTION_CRITERIA_NOTIFICATION_DESTINATION,
@@ -153,7 +172,7 @@ public final class NotificationDestinationChangeSelectionCriteria
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("NotificationDestinationChangeSelectionCriteria(" +
          "destinationEntryUUID='");

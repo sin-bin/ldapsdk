@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,7 @@ import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -51,7 +67,7 @@ final class CompactAttribute
   /**
    * A set of cached attribute names to conserve space.
    */
-  private static final ConcurrentHashMap<String,String> cachedNames =
+  @NotNull private static final ConcurrentHashMap<String,String> cachedNames =
        new ConcurrentHashMap<>(
             StaticUtils.computeMapCapacity(MAX_CACHED_NAMES));
 
@@ -65,10 +81,10 @@ final class CompactAttribute
 
 
   // The set of values for this attribute.
-  private final byte[][] values;
+  @NotNull private final byte[][] values;
 
   // The name for this attribute.
-  private final String name;
+  @NotNull private final String name;
 
 
 
@@ -77,7 +93,7 @@ final class CompactAttribute
    *
    * @param  attribute  The attribute to use to create this compact attribute.
    */
-  CompactAttribute(final Attribute attribute)
+  CompactAttribute(@NotNull final Attribute attribute)
   {
     name = internName(attribute.getName());
     values = attribute.getValueByteArrays();
@@ -94,7 +110,8 @@ final class CompactAttribute
    *
    * @return  The internalized representation of the provided name.
    */
-  private static String internName(final String name)
+  @NotNull()
+  private static String internName(@NotNull final String name)
   {
     String s = cachedNames.get(name);
     if (s == null)
@@ -118,6 +135,7 @@ final class CompactAttribute
    *
    * @return  The name for this attribute.
    */
+  @NotNull()
   String getName()
   {
     return name;
@@ -126,10 +144,11 @@ final class CompactAttribute
 
 
   /**
-   * Retrieves the set of values for this attribute as byte arrays..
+   * Retrieves the set of values for this attribute as byte arrays.
    *
    * @return  The set of values for this attribute as byte arrays.
    */
+  @NotNull()
   byte[][] getByteValues()
   {
     return values;
@@ -138,10 +157,11 @@ final class CompactAttribute
 
 
   /**
-   * Retrieves the set of values for this attribute as strings..
+   * Retrieves the set of values for this attribute as strings.
    *
    * @return  The set of values for this attribute as strings.
    */
+  @NotNull()
   String[] getStringValues()
   {
     final String[] stringValues = new String[values.length];
@@ -160,6 +180,7 @@ final class CompactAttribute
    *
    * @return  An attribute that is equivalent to this compact attribute.
    */
+  @NotNull()
   Attribute toAttribute()
   {
     return new Attribute(name, values);

@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -83,7 +100,7 @@ public final class IntermediateClientResponseControl
    * The OID (1.3.6.1.4.1.30221.2.5.2) for the intermediate client response
    * control.
    */
-  public static final String INTERMEDIATE_CLIENT_RESPONSE_OID =
+  @NotNull public static final String INTERMEDIATE_CLIENT_RESPONSE_OID =
        "1.3.6.1.4.1.30221.2.5.2";
 
 
@@ -96,7 +113,7 @@ public final class IntermediateClientResponseControl
 
 
   // The value for this intermediate client response control.
-  private final IntermediateClientResponseValue value;
+  @NotNull private final IntermediateClientResponseValue value;
 
 
 
@@ -142,10 +159,12 @@ public final class IntermediateClientResponseControl
    *                                response identifier.
    */
   public IntermediateClientResponseControl(
-              final IntermediateClientResponseValue upstreamResponse,
-              final String upstreamServerAddress,
-              final Boolean upstreamServerSecure, final String serverName,
-              final String serverSessionID, final String serverResponseID)
+              @Nullable final IntermediateClientResponseValue upstreamResponse,
+              @Nullable final String upstreamServerAddress,
+              @Nullable final Boolean upstreamServerSecure,
+              @Nullable final String serverName,
+              @Nullable final String serverSessionID,
+              @Nullable final String serverResponseID)
   {
     this(false,
          new IntermediateClientResponseValue(upstreamResponse,
@@ -168,9 +187,9 @@ public final class IntermediateClientResponseControl
    * @throws  LDAPException  If the provided control cannot be decoded as an
    *                         intermediate client response control.
    */
-  public IntermediateClientResponseControl(final String oid,
-                                           final boolean isCritical,
-                                           final ASN1OctetString value)
+  public IntermediateClientResponseControl(@NotNull final String oid,
+              final boolean isCritical,
+              @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     super(oid, isCritical, value);
@@ -208,7 +227,7 @@ public final class IntermediateClientResponseControl
    *                control.  It must not be {@code null}.
    */
   public IntermediateClientResponseControl(
-              final IntermediateClientResponseValue value)
+              @NotNull final IntermediateClientResponseValue value)
   {
     this(false, value);
   }
@@ -225,7 +244,7 @@ public final class IntermediateClientResponseControl
    *                     control.  It must not be {@code null}.
    */
   public IntermediateClientResponseControl(final boolean isCritical,
-              final IntermediateClientResponseValue value)
+              @NotNull final IntermediateClientResponseValue value)
   {
     super(INTERMEDIATE_CLIENT_RESPONSE_OID, isCritical,
           new ASN1OctetString(value.encode().encode()));
@@ -239,8 +258,11 @@ public final class IntermediateClientResponseControl
    * {@inheritDoc}
    */
   @Override()
-  public IntermediateClientResponseControl decodeControl(final String oid,
-              final boolean isCritical, final ASN1OctetString value)
+  @NotNull()
+  public IntermediateClientResponseControl decodeControl(
+              @NotNull final String oid,
+              final boolean isCritical,
+              @Nullable final ASN1OctetString value)
           throws LDAPException
   {
     return new IntermediateClientResponseControl(oid, isCritical, value);
@@ -262,7 +284,9 @@ public final class IntermediateClientResponseControl
    *                         decode the intermediate client response control
    *                         contained in the provided result.
    */
-  public static IntermediateClientResponseControl get(final LDAPResult result)
+  @Nullable()
+  public static IntermediateClientResponseControl get(
+                     @NotNull final LDAPResult result)
          throws LDAPException
   {
     final Control c =
@@ -290,6 +314,7 @@ public final class IntermediateClientResponseControl
    *
    * @return  The value for this intermediate client response.
    */
+  @NotNull()
   public IntermediateClientResponseValue getResponseValue()
   {
     return value;
@@ -303,6 +328,7 @@ public final class IntermediateClientResponseControl
    * @return  The wrapped response from an upstream server, or {@code null} if
    *          there is none.
    */
+  @Nullable()
   public IntermediateClientResponseValue getUpstreamResponse()
   {
     return value.getUpstreamResponse();
@@ -318,6 +344,7 @@ public final class IntermediateClientResponseControl
    *          {@code null} if there is no upstream server or its address is not
    *          available.
    */
+  @Nullable()
   public String getUpstreamServerAddress()
   {
     return value.getUpstreamServerAddress();
@@ -337,6 +364,7 @@ public final class IntermediateClientResponseControl
    *          {@code null} if there is no upstream server or it is not known
    *          whether the communication is secure.
    */
+  @Nullable()
   public Boolean upstreamServerSecure()
   {
     return value.upstreamServerSecure();
@@ -351,6 +379,7 @@ public final class IntermediateClientResponseControl
    * @return  A string that may be used to identify the server application that
    *          created this intermediate client response value.
    */
+  @Nullable()
   public String getServerName()
   {
     return value.getServerName();
@@ -365,6 +394,7 @@ public final class IntermediateClientResponseControl
    * @return  A string that may be used to identify the session in the server
    *          application, or {@code null} if there is none.
    */
+  @Nullable()
   public String getServerSessionID()
   {
     return value.getServerSessionID();
@@ -379,6 +409,7 @@ public final class IntermediateClientResponseControl
    * @return  A string that may be used to identify the response in the server
    *          application, or {@code null} if there is none.
    */
+  @Nullable()
   public String getServerResponseID()
   {
     return value.getServerResponseID();
@@ -390,6 +421,7 @@ public final class IntermediateClientResponseControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_INTERMEDIATE_CLIENT_RESPONSE.get();
@@ -401,7 +433,7 @@ public final class IntermediateClientResponseControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("IntermediateClientResponseControl(isCritical=");
     buffer.append(isCritical());

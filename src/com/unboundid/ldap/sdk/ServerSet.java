@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,8 @@ package com.unboundid.ldap.sdk;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.Extensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -100,6 +117,7 @@ public abstract class ServerSet
    * @throws  LDAPException  If it is not possible to establish a connection to
    *                         any of the servers in this server set.
    */
+  @NotNull()
   public abstract LDAPConnection getConnection()
          throws LDAPException;
 
@@ -138,8 +156,9 @@ public abstract class ServerSet
    * @throws  LDAPException  If it is not possible to establish a connection to
    *                         any of the servers in this server set.
    */
+  @NotNull()
   public LDAPConnection getConnection(
-                             final LDAPConnectionPoolHealthCheck healthCheck)
+              @Nullable final LDAPConnectionPoolHealthCheck healthCheck)
          throws LDAPException
   {
     final LDAPConnection c = getConnection();
@@ -223,10 +242,10 @@ public abstract class ServerSet
    *                         will have been closed.
    */
   protected static void doBindPostConnectAndHealthCheckProcessing(
-                             final LDAPConnection connection,
-                             final BindRequest bindRequest,
-                             final PostConnectProcessor postConnectProcessor,
-                             final LDAPConnectionPoolHealthCheck healthCheck)
+                 @NotNull final LDAPConnection connection,
+                 @Nullable final BindRequest bindRequest,
+                 @Nullable final PostConnectProcessor postConnectProcessor,
+                 @Nullable final LDAPConnectionPoolHealthCheck healthCheck)
             throws LDAPException
   {
     try
@@ -284,11 +303,63 @@ public abstract class ServerSet
 
 
   /**
+   * Updates the provided connection to indicate that it was created by this
+   * server set.
+   *
+   * @param  connection  The connection to be updated to indicate it was created
+   *                     by this server set.
+   */
+  protected final void associateConnectionWithThisServerSet(
+                            @NotNull final LDAPConnection connection)
+  {
+    if (connection != null)
+    {
+      connection.setServerSet(this);
+    }
+  }
+
+
+
+  /**
+   * Performs any processing that may be required when the provided connection
+   * is closed.  This will only be invoked for connections created by this
+   * server set, and only if the {@link #associateConnectionWithThisServerSet}
+   * method was called on the connection when it was created by this server set.
+   *
+   * @param  connection      The connection that has been closed.
+   * @param  host            The address of the server to which the connection
+   *                         had been established.
+   * @param  port            The port of the server to which the connection had
+   *                         been established.
+   * @param  disconnectType  The disconnect type, which provides general
+   *                         information about the nature of the disconnect.
+   * @param  message         A message that may be associated with the
+   *                         disconnect.  It may be {@code null} if no message
+   *                         is available.
+   * @param  cause           A {@code Throwable} that was caught and triggered
+   *                         the disconnect.  It may be {@code null} if the
+   *                         disconnect was not triggered by a client-side
+   *                         exception or error.
+   */
+  protected void handleConnectionClosed(
+                      @NotNull final LDAPConnection connection,
+                      @NotNull final String host, final int port,
+                      @NotNull final DisconnectType disconnectType,
+                      @Nullable final String message,
+                      @Nullable final Throwable cause)
+  {
+    // No action is taken by default.
+  }
+
+
+
+  /**
    * Retrieves a string representation of this server set.
    *
    * @return  A string representation of this server set.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -304,7 +375,7 @@ public abstract class ServerSet
    * @param  buffer  The buffer to which the string representation should be
    *                 appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ServerSet(className=");
     buffer.append(getClass().getName());

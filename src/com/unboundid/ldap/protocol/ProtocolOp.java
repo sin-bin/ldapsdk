@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,7 @@ import com.unboundid.asn1.ASN1Buffer;
 import com.unboundid.asn1.ASN1Element;
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -58,6 +74,7 @@ public interface ProtocolOp
    *
    * @return  The ASN.1 element containing the encoded protocol op.
    */
+  @NotNull()
   ASN1Element encodeProtocolOp();
 
 
@@ -70,7 +87,7 @@ public interface ProtocolOp
    * @param  buffer  The ASN.1 buffer to which the encoded representation should
    *                 be written.
    */
-  void writeTo(ASN1Buffer buffer);
+  void writeTo(@NotNull ASN1Buffer buffer);
 
 
 
@@ -81,5 +98,5 @@ public interface ProtocolOp
    * @param  buffer  The buffer to which the string representation should be
    *                 appended.
    */
-  void toString(StringBuilder buffer);
+  void toString(@NotNull StringBuilder buffer);
 }

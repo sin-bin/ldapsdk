@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.unboundid.ldap.sdk.Control;
@@ -52,6 +68,8 @@ import com.unboundid.util.FixedRateBarrier;
 import com.unboundid.util.FormattableColumn;
 import com.unboundid.util.HorizontalAlignment;
 import com.unboundid.util.LDAPCommandLineTool;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.OutputFormat;
 import com.unboundid.util.RateAdjustor;
@@ -190,107 +208,107 @@ public final class SearchAndModRate
 
 
   // Indicates whether a request has been made to stop running.
-  private final AtomicBoolean stopRequested;
+  @NotNull private final AtomicBoolean stopRequested;
+
+  // The number of search-and-mod-rate threads that are currently running.
+  @NotNull private final AtomicInteger runningThreads;
 
   // The argument used to indicate whether to generate output in CSV format.
-  private BooleanArgument csvFormat;
+  @Nullable private BooleanArgument csvFormat;
 
   // Indicates that modify requests should include the permissive modify request
   // control.
-  private BooleanArgument permissiveModify;
+  @Nullable private BooleanArgument permissiveModify;
 
   // The argument used to indicate whether to suppress information about error
   // result codes.
-  private BooleanArgument suppressErrors;
+  @Nullable private BooleanArgument suppressErrors;
 
   // The argument used to specify a set of generic controls to include in modify
   // requests.
-  private ControlArgument modifyControl;
+  @Nullable private ControlArgument modifyControl;
 
   // The argument used to specify a set of generic controls to include in search
   // requests.
-  private ControlArgument searchControl;
+  @Nullable private ControlArgument searchControl;
 
   // The argument used to specify a variable rate file.
-  private FileArgument sampleRateFile;
+  @Nullable private FileArgument sampleRateFile;
 
   // The argument used to specify a variable rate file.
-  private FileArgument variableRateData;
+  @Nullable private FileArgument variableRateData;
 
   // The argument used to specify an LDAP assertion filter for modify requests.
-  private FilterArgument modifyAssertionFilter;
+  @Nullable private FilterArgument modifyAssertionFilter;
 
   // The argument used to specify an LDAP assertion filter for search requests.
-  private FilterArgument searchAssertionFilter;
+  @Nullable private FilterArgument searchAssertionFilter;
 
   // The argument used to specify the collection interval.
-  private IntegerArgument collectionInterval;
+  @Nullable private IntegerArgument collectionInterval;
 
   // The argument used to specify the number of search and modify iterations on
   // a connection before it is closed and re-established.
-  private IntegerArgument iterationsBeforeReconnect;
+  @Nullable private IntegerArgument iterationsBeforeReconnect;
 
   // The argument used to specify the number of intervals.
-  private IntegerArgument numIntervals;
+  @Nullable private IntegerArgument numIntervals;
 
   // The argument used to specify the number of threads.
-  private IntegerArgument numThreads;
+  @Nullable private IntegerArgument numThreads;
 
   // The argument used to specify the seed to use for the random number
   // generator.
-  private IntegerArgument randomSeed;
+  @Nullable private IntegerArgument randomSeed;
 
   // The target rate of operations per second.
-  private IntegerArgument ratePerSecond;
+  @Nullable private IntegerArgument ratePerSecond;
 
   // The argument used to indicate that the search should use the simple paged
   // results control with the specified page size.
-  private IntegerArgument simplePageSize;
+  @Nullable private IntegerArgument simplePageSize;
 
   // The argument used to specify the length of the values to generate.
-  private IntegerArgument valueLength;
+  @Nullable private IntegerArgument valueLength;
 
   // The number of warm-up intervals to perform.
-  private IntegerArgument warmUpIntervals;
+  @Nullable private IntegerArgument warmUpIntervals;
 
   // The argument used to specify the scope for the searches.
-  private ScopeArgument scopeArg;
+  @Nullable private ScopeArgument scopeArg;
 
   // The argument used to specify the base DNs for the searches.
-  private StringArgument baseDN;
+  @Nullable private StringArgument baseDN;
 
   // The argument used to specify the set of characters to use when generating
   // values.
-  private StringArgument characterSet;
+  @Nullable private StringArgument characterSet;
 
   // The argument used to specify the filters for the searches.
-  private StringArgument filter;
+  @Nullable private StringArgument filter;
 
   // The argument used to specify the attributes to modify.
-  private StringArgument modifyAttributes;
+  @Nullable private StringArgument modifyAttributes;
 
   // Indicates that modify requests should include the post-read request control
   // to request the specified attribute.
-  private StringArgument postReadAttribute;
+  @Nullable private StringArgument postReadAttribute;
 
   // Indicates that modify requests should include the pre-read request control
   // to request the specified attribute.
-  private StringArgument preReadAttribute;
+  @Nullable private StringArgument preReadAttribute;
 
   // The argument used to specify the proxied authorization identity.
-  private StringArgument proxyAs;
+  @Nullable private StringArgument proxyAs;
 
   // The argument used to specify the attributes to return.
-  private StringArgument returnAttributes;
+  @Nullable private StringArgument returnAttributes;
 
   // The argument used to specify the timestamp format.
-  private StringArgument timestampFormat;
-
-  // The thread currently being used to run the searchrate tool.
-  private volatile Thread runningThread;
+  @Nullable private StringArgument timestampFormat;
 
   // A wakeable sleeper that will be used to sleep between reporting intervals.
-  private final WakeableSleeper sleeper;
+  @NotNull private final WakeableSleeper sleeper;
 
 
 
@@ -300,7 +318,7 @@ public final class SearchAndModRate
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String[] args)
+  public static void main(@NotNull final String[] args)
   {
     final ResultCode resultCode = main(args, System.out, System.err);
     if (resultCode != ResultCode.SUCCESS)
@@ -325,9 +343,10 @@ public final class SearchAndModRate
    *
    * @return  A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args,
-                                final OutputStream outStream,
-                                final OutputStream errStream)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream)
   {
     final SearchAndModRate searchAndModRate =
          new SearchAndModRate(outStream, errStream);
@@ -346,12 +365,13 @@ public final class SearchAndModRate
    *                    written.  It may be {@code null} if error messages
    *                    should be suppressed.
    */
-  public SearchAndModRate(final OutputStream outStream,
-                          final OutputStream errStream)
+  public SearchAndModRate(@Nullable final OutputStream outStream,
+                          @Nullable final OutputStream errStream)
   {
     super(outStream, errStream);
 
     stopRequested = new AtomicBoolean(false);
+    runningThreads = new AtomicInteger(0);
     sleeper = new WakeableSleeper();
   }
 
@@ -363,6 +383,7 @@ public final class SearchAndModRate
    * @return  The name for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "search-and-mod-rate";
@@ -376,6 +397,7 @@ public final class SearchAndModRate
    * @return  The description for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return "Perform repeated searches against an " +
@@ -390,6 +412,7 @@ public final class SearchAndModRate
    * @return  The version string for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -525,7 +548,7 @@ public final class SearchAndModRate
    * @throws  ArgumentException  If a problem occurs while adding the arguments.
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     String description = "The base DN to use for the searches.  It may be a " +
@@ -848,6 +871,7 @@ public final class SearchAndModRate
    *          for use with this tool.
    */
   @Override()
+  @NotNull()
   public LDAPConnectionOptions getConnectionOptions()
   {
     final LDAPConnectionOptions options = new LDAPConnectionOptions();
@@ -865,30 +889,8 @@ public final class SearchAndModRate
    * @return  The result code for the processing that was performed.
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
-  {
-    runningThread = Thread.currentThread();
-
-    try
-    {
-      return doToolProcessingInternal();
-    }
-    finally
-    {
-      runningThread = null;
-    }
-  }
-
-
-
-  /**
-   * Performs the actual processing for this tool.  In this case, it gets a
-   * connection to the directory server and uses it to perform the requested
-   * searches.
-   *
-   * @return  The result code for the processing that was performed.
-   */
-  private ResultCode doToolProcessingInternal()
   {
     // If the sample rate file argument was specified, then generate the sample
     // variable rate data file and return.
@@ -1183,9 +1185,9 @@ public final class SearchAndModRate
            scopeArg.getValue(), filterPattern, returnAttrs, modAttrs,
            valueLength.getValue(), charSet, authzIDPattern,
            simplePageSize.getValue(), searchControls, modifyControls,
-           iterationsBeforeReconnect.getValue(), random.nextLong(), barrier,
-           searchCounter, modCounter, searchDurations, modDurations,
-           errorCounter, rcCounter, fixedRateBarrier);
+           iterationsBeforeReconnect.getValue(), random.nextLong(),
+           runningThreads, barrier, searchCounter, modCounter, searchDurations,
+           modDurations, errorCounter, rcCounter, fixedRateBarrier);
       threads[i].start();
     }
 
@@ -1421,21 +1423,19 @@ public final class SearchAndModRate
     stopRequested.set(true);
     sleeper.wakeup();
 
-    final Thread t = runningThread;
-    if (t != null)
+    while (true)
     {
-      try
+      final int stillRunning = runningThreads.get();
+      if (stillRunning <= 0)
       {
-        t.join();
+        break;
       }
-      catch (final Exception e)
+      else
       {
-        Debug.debugException(e);
-
-        if (e instanceof InterruptedException)
+        try
         {
-          Thread.currentThread().interrupt();
-        }
+          Thread.sleep(1L);
+        } catch (final Exception e) {}
       }
     }
   }
@@ -1446,6 +1446,7 @@ public final class SearchAndModRate
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> examples =

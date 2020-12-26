@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -41,6 +56,8 @@ import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -110,7 +127,7 @@ public final class DIGESTMD5BindRequest
   /**
    * The name for the DIGEST-MD5 SASL mechanism.
    */
-  public static final String DIGESTMD5_MECHANISM_NAME = "DIGEST-MD5";
+  @NotNull public static final String DIGESTMD5_MECHANISM_NAME = "DIGEST-MD5";
 
 
 
@@ -122,27 +139,27 @@ public final class DIGESTMD5BindRequest
 
 
   // The password for this bind request.
-  private final ASN1OctetString password;
+  @NotNull private final ASN1OctetString password;
 
   // The message ID from the last LDAP message sent from this request.
   private int messageID = -1;
 
   // The SASL quality of protection value(s) allowed for the DIGEST-MD5 bind
   // request.
-  private final List<SASLQualityOfProtection> allowedQoP;
+  @NotNull private final List<SASLQualityOfProtection> allowedQoP;
 
   // A list that will be updated with messages about any unhandled callbacks
   // encountered during processing.
-  private final List<String> unhandledCallbackMessages;
+  @NotNull private final List<String> unhandledCallbackMessages;
 
   // The authentication ID string for this bind request.
-  private final String authenticationID;
+  @NotNull private final String authenticationID;
 
   // The authorization ID string for this bind request, if available.
-  private final String authorizationID;
+  @Nullable private final String authorizationID;
 
   // The realm form this bind request, if available.
-  private final String realm;
+  @Nullable private final String realm;
 
 
 
@@ -156,8 +173,8 @@ public final class DIGESTMD5BindRequest
    * @param  password          The password for this bind request.  It must not
    *                           be {@code null}.
    */
-  public DIGESTMD5BindRequest(final String authenticationID,
-                              final String password)
+  public DIGESTMD5BindRequest(@NotNull final String authenticationID,
+                              @NotNull final String password)
   {
     this(authenticationID, null, new ASN1OctetString(password), null,
          NO_CONTROLS);
@@ -177,8 +194,8 @@ public final class DIGESTMD5BindRequest
    * @param  password          The password for this bind request.  It must not
    *                           be {@code null}.
    */
-  public DIGESTMD5BindRequest(final String authenticationID,
-                              final byte[] password)
+  public DIGESTMD5BindRequest(@NotNull final String authenticationID,
+                              @NotNull final byte[] password)
   {
     this(authenticationID, null, new ASN1OctetString(password), null,
          NO_CONTROLS);
@@ -198,8 +215,8 @@ public final class DIGESTMD5BindRequest
    * @param  password          The password for this bind request.  It must not
    *                           be {@code null}.
    */
-  public DIGESTMD5BindRequest(final String authenticationID,
-                              final ASN1OctetString password)
+  public DIGESTMD5BindRequest(@NotNull final String authenticationID,
+                              @NotNull final ASN1OctetString password)
   {
     this(authenticationID, null, password, null, NO_CONTROLS);
   }
@@ -221,10 +238,11 @@ public final class DIGESTMD5BindRequest
    *                           realm.
    * @param  controls          The set of controls to include in the request.
    */
-  public DIGESTMD5BindRequest(final String authenticationID,
-                              final String authorizationID,
-                              final String password, final String realm,
-                              final Control... controls)
+  public DIGESTMD5BindRequest(@NotNull final String authenticationID,
+                              @Nullable final String authorizationID,
+                              @NotNull final String password,
+                              @Nullable final String realm,
+                              @Nullable final Control... controls)
   {
     this(authenticationID, authorizationID, new ASN1OctetString(password),
          realm, controls);
@@ -249,10 +267,11 @@ public final class DIGESTMD5BindRequest
    *                           realm.
    * @param  controls          The set of controls to include in the request.
    */
-  public DIGESTMD5BindRequest(final String authenticationID,
-                              final String authorizationID,
-                              final byte[] password, final String realm,
-                              final Control... controls)
+  public DIGESTMD5BindRequest(@NotNull final String authenticationID,
+                              @Nullable final String authorizationID,
+                              @NotNull final byte[] password,
+                              @Nullable final String realm,
+                              @Nullable final Control... controls)
   {
     this(authenticationID, authorizationID, new ASN1OctetString(password),
          realm, controls);
@@ -277,10 +296,11 @@ public final class DIGESTMD5BindRequest
    *                           realm.
    * @param  controls          The set of controls to include in the request.
    */
-  public DIGESTMD5BindRequest(final String authenticationID,
-                              final String authorizationID,
-                              final ASN1OctetString password,
-                              final String realm, final Control... controls)
+  public DIGESTMD5BindRequest(@NotNull final String authenticationID,
+                              @Nullable final String authorizationID,
+                              @NotNull final ASN1OctetString password,
+                              @Nullable final String realm, final
+                              @Nullable Control... controls)
   {
     super(controls);
 
@@ -305,8 +325,9 @@ public final class DIGESTMD5BindRequest
    * @param  properties  The properties to use for this
    * @param  controls    The set of controls to include in the request.
    */
-  public DIGESTMD5BindRequest(final DIGESTMD5BindRequestProperties properties,
-                              final Control... controls)
+  public DIGESTMD5BindRequest(
+              @NotNull final DIGESTMD5BindRequestProperties properties,
+              @Nullable final Control... controls)
   {
     super(controls);
 
@@ -327,6 +348,7 @@ public final class DIGESTMD5BindRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getSASLMechanismName()
   {
     return DIGESTMD5_MECHANISM_NAME;
@@ -339,6 +361,7 @@ public final class DIGESTMD5BindRequest
    *
    * @return  The authentication ID for this bind request.
    */
+  @NotNull()
   public String getAuthenticationID()
   {
     return authenticationID;
@@ -352,6 +375,7 @@ public final class DIGESTMD5BindRequest
    * @return  The authorization ID for this bind request, or {@code null} if
    *          there should not be a separate authorization identity.
    */
+  @Nullable()
   public String getAuthorizationID()
   {
     return authorizationID;
@@ -364,6 +388,7 @@ public final class DIGESTMD5BindRequest
    *
    * @return  The string representation of the password for this bind request.
    */
+  @NotNull()
   public String getPasswordString()
   {
     return password.stringValue();
@@ -376,6 +401,7 @@ public final class DIGESTMD5BindRequest
    *
    * @return  The bytes that comprise the password for this bind request.
    */
+  @NotNull()
   public byte[] getPasswordBytes()
   {
     return password.getValue();
@@ -389,6 +415,7 @@ public final class DIGESTMD5BindRequest
    * @return  The realm for this bind request, or {@code null} if none was
    *          defined and the server should use the default realm.
    */
+  @Nullable()
   public String getRealm()
   {
     return realm;
@@ -406,6 +433,7 @@ public final class DIGESTMD5BindRequest
    *          authentication has completed, in order from most preferred to
    *          least preferred.
    */
+  @NotNull()
   public List<SASLQualityOfProtection> getAllowedQoP()
   {
     return allowedQoP;
@@ -429,7 +457,9 @@ public final class DIGESTMD5BindRequest
    *                         reading the response.
    */
   @Override()
-  protected BindResult process(final LDAPConnection connection, final int depth)
+  @NotNull()
+  protected BindResult process(@NotNull final LDAPConnection connection,
+                               final int depth)
             throws LDAPException
   {
     unhandledCallbackMessages.clear();
@@ -457,17 +487,17 @@ public final class DIGESTMD5BindRequest
            e);
     }
 
-    final SASLHelper helper = new SASLHelper(this, connection,
-         DIGESTMD5_MECHANISM_NAME, saslClient, getControls(),
+    final SASLClientBindHandler bindHandler = new SASLClientBindHandler(this,
+         connection, DIGESTMD5_MECHANISM_NAME, saslClient, getControls(),
          getResponseTimeoutMillis(connection), unhandledCallbackMessages);
 
     try
     {
-      return helper.processSASLBind();
+      return bindHandler.processSASLBind();
     }
     finally
     {
-      messageID = helper.getMessageID();
+      messageID = bindHandler.getMessageID();
     }
   }
 
@@ -477,7 +507,8 @@ public final class DIGESTMD5BindRequest
    * {@inheritDoc}
    */
   @Override()
-  public DIGESTMD5BindRequest getRebindRequest(final String host,
+  @NotNull()
+  public DIGESTMD5BindRequest getRebindRequest(@NotNull final String host,
                                                final int port)
   {
     final DIGESTMD5BindRequestProperties properties =
@@ -498,7 +529,7 @@ public final class DIGESTMD5BindRequest
    */
   @InternalUseOnly()
   @Override()
-  public void handle(final Callback[] callbacks)
+  public void handle(@NotNull final Callback[] callbacks)
   {
     for (final Callback callback : callbacks)
     {
@@ -591,6 +622,7 @@ public final class DIGESTMD5BindRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public DIGESTMD5BindRequest duplicate()
   {
     return duplicate(getControls());
@@ -602,7 +634,8 @@ public final class DIGESTMD5BindRequest
    * {@inheritDoc}
    */
   @Override()
-  public DIGESTMD5BindRequest duplicate(final Control[] controls)
+  @NotNull()
+  public DIGESTMD5BindRequest duplicate(@Nullable final Control[] controls)
   {
     final DIGESTMD5BindRequestProperties properties =
          new DIGESTMD5BindRequestProperties(authenticationID, password);
@@ -622,7 +655,7 @@ public final class DIGESTMD5BindRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("DIGESTMD5BindRequest(authenticationID='");
     buffer.append(authenticationID);
@@ -671,7 +704,8 @@ public final class DIGESTMD5BindRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toCode(final List<String> lineList, final String requestID,
+  public void toCode(@NotNull final List<String> lineList,
+                     @NotNull final String requestID,
                      final int indentSpaces, final boolean includeProcessing)
   {
     // Create and update the bind request properties object.

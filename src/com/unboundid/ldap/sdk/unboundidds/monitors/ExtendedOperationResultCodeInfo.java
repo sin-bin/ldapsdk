@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,8 @@ import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.ldap.sdk.OperationType;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -65,30 +82,31 @@ public final class ExtendedOperationResultCodeInfo
 
 
   // The percentage of all extended operations that failed.
-  private final Double failedPercent;
+  @Nullable private final Double failedPercent;
 
   // The total number of operations of the associated type that failed.
-  private final Long failedCount;
+  @Nullable private final Long failedCount;
 
   // The total number of operations of the associated type.
-  private final Long totalCount;
+  @Nullable private final Long totalCount;
 
   // The percentage of extended operations that failed, indexed by OID.
-  private final Map<String,Double> failedPercentsByOID;
+  @NotNull private final Map<String,Double> failedPercentsByOID;
 
   // The number of extended operations that failed, indexed by OID.
-  private final Map<String,Long> failedCountsByOID;
+  @NotNull private final Map<String,Long> failedCountsByOID;
 
   // The number of extended operations processed, indexed by OID.
-  private final Map<String,Long> totalCountsByOID;
+  @NotNull private final Map<String,Long> totalCountsByOID;
 
   // Information about each result code returned for each type of extended
   // operation, indexed first by extended request OID, then by the result code's
   // integer value.
-  private final Map<String,Map<Integer,ResultCodeInfo>> resultCodeInfoMap;
+  @NotNull private final Map<String,Map<Integer,ResultCodeInfo>>
+       resultCodeInfoMap;
 
   // The names of the types of extended operations processed, indexed by OID.
-  private final Map<String,String> requestNamesByOID;
+  @NotNull private final Map<String,String> requestNamesByOID;
 
 
 
@@ -99,7 +117,7 @@ public final class ExtendedOperationResultCodeInfo
    * @param  entry  The monitor entry to use to obtain the result code
    *                information.
    */
-  ExtendedOperationResultCodeInfo(final MonitorEntry entry)
+  ExtendedOperationResultCodeInfo(@NotNull final MonitorEntry entry)
   {
     totalCount = entry.getLong("extended-op-total-count");
     failedCount = entry.getLong("extended-op-failed-count");
@@ -165,8 +183,10 @@ public final class ExtendedOperationResultCodeInfo
    * @return  A map with result code information for a particular type of
    *          extended operation.
    */
-  private static Map<Integer,ResultCodeInfo> getRCMap(final Entry entry,
-                                                      final String prefix)
+  @NotNull()
+  private static Map<Integer,ResultCodeInfo> getRCMap(
+               @NotNull final Entry entry,
+               @NotNull final String prefix)
   {
     final TreeMap<Integer,ResultCodeInfo> m = new TreeMap<>();
 
@@ -214,6 +234,7 @@ public final class ExtendedOperationResultCodeInfo
    *          been processed, or {@code null} if this information was not in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getTotalCount()
   {
     return totalCount;
@@ -229,6 +250,7 @@ public final class ExtendedOperationResultCodeInfo
    *          processed, or an empty map if this information was not in the
    *          monitor entry.
    */
+  @NotNull()
   public Map<String,Long> getTotalCountsByOID()
   {
     return totalCountsByOID;
@@ -244,6 +266,7 @@ public final class ExtendedOperationResultCodeInfo
    *          failure, or {@code null} if this information was not in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getFailedCount()
   {
     return failedCount;
@@ -259,6 +282,7 @@ public final class ExtendedOperationResultCodeInfo
    *          failure, or an empty map if this information was not in the
    *          monitor entry.
    */
+  @NotNull()
   public Map<String,Long> getFailedCountsByOID()
   {
     return failedCountsByOID;
@@ -274,6 +298,7 @@ public final class ExtendedOperationResultCodeInfo
    *          failure, or {@code null} if this information was not in the
    *          monitor entry.
    */
+  @Nullable()
   public Double getFailedPercent()
   {
     return failedPercent;
@@ -289,6 +314,7 @@ public final class ExtendedOperationResultCodeInfo
    *          failure, or an empty map if this information was not in the
    *          monitor entry.
    */
+  @NotNull()
   public Map<String,Double> getFailedPercentsByOID()
   {
     return failedPercentsByOID;
@@ -305,6 +331,7 @@ public final class ExtendedOperationResultCodeInfo
    *          returned for extended operations of each type, or an empty map if
    *          this information was not in the monitor entry.
    */
+  @NotNull()
   public Map<String,Map<Integer,ResultCodeInfo>> getResultCodeInfoMap()
   {
     return resultCodeInfoMap;
@@ -320,6 +347,7 @@ public final class ExtendedOperationResultCodeInfo
    *          request, or an empty map if this information was not in the
    *          monitor entry.
    */
+  @NotNull()
   public Map<String,String> getExtendedRequestNamesByOID()
   {
     return requestNamesByOID;

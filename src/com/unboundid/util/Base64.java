@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -80,7 +95,7 @@ public final class Base64
   /**
    * The set of characters in the base64 alphabet.
    */
-  private static final char[] BASE64_ALPHABET =
+  @NotNull private static final char[] BASE64_ALPHABET =
        ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" +
         "0123456789+/").toCharArray();
 
@@ -89,7 +104,7 @@ public final class Base64
   /**
    * The set of characters in the base64url alphabet.
    */
-  private static final char[] BASE64URL_ALPHABET =
+  @NotNull private static final char[] BASE64URL_ALPHABET =
        ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" +
         "0123456789-_").toCharArray();
 
@@ -112,7 +127,8 @@ public final class Base64
    *
    * @return  The base64-encoded representation of the provided data.
    */
-  public static String encode(final String data)
+  @NotNull()
+  public static String encode(@NotNull final String data)
   {
     Validator.ensureNotNull(data);
 
@@ -128,7 +144,8 @@ public final class Base64
    *
    * @return  The base64-encoded representation of the provided data.
    */
-  public static String encode(final byte[] data)
+  @NotNull()
+  public static String encode(@NotNull final byte[] data)
   {
     Validator.ensureNotNull(data);
 
@@ -147,7 +164,8 @@ public final class Base64
    * @param  buffer  The buffer to which the base64-encoded data is to be
    *                 written.
    */
-  public static void encode(final String data, final StringBuilder buffer)
+  public static void encode(@NotNull final String data,
+                            @NotNull final StringBuilder buffer)
   {
     Validator.ensureNotNull(data);
 
@@ -164,7 +182,8 @@ public final class Base64
    * @param  buffer  The buffer to which the base64-encoded data is to be
    *                 written.
    */
-  public static void encode(final String data, final ByteStringBuffer buffer)
+  public static void encode(@NotNull final String data,
+                            @NotNull final ByteStringBuffer buffer)
   {
     Validator.ensureNotNull(data);
 
@@ -181,7 +200,8 @@ public final class Base64
    * @param  buffer  The buffer to which the base64-encoded data is to be
    *                 written.
    */
-  public static void encode(final byte[] data, final StringBuilder buffer)
+  public static void encode(@NotNull final byte[] data,
+                            @NotNull final StringBuilder buffer)
   {
     encode(BASE64_ALPHABET, data, 0, data.length, buffer, "=");
   }
@@ -199,8 +219,9 @@ public final class Base64
    * @param  buffer  The buffer to which the base64-encoded data is to be
    *                 written.
    */
-  public static void encode(final byte[] data, final int off, final int length,
-                            final StringBuilder buffer)
+  public static void encode(@NotNull final byte[] data, final int off,
+                            final int length,
+                            @NotNull final StringBuilder buffer)
   {
     encode(BASE64_ALPHABET, data, off, length, buffer, "=");
   }
@@ -215,7 +236,8 @@ public final class Base64
    * @param  buffer  The buffer to which the base64-encoded data is to be
    *                 written.
    */
-  public static void encode(final byte[] data, final ByteStringBuffer buffer)
+  public static void encode(@NotNull final byte[] data,
+                            @NotNull final ByteStringBuffer buffer)
   {
     encode(BASE64_ALPHABET, data, 0, data.length, buffer, "=");
   }
@@ -232,8 +254,9 @@ public final class Base64
    * @param  buffer  The buffer to which the base64-encoded data is to be
    *                 written.
    */
-  public static void encode(final byte[] data, final int off, final int length,
-                            final ByteStringBuffer buffer)
+  public static void encode(@NotNull final byte[] data, final int off,
+                            final int length,
+                            @NotNull final ByteStringBuffer buffer)
   {
     encode(BASE64_ALPHABET, data, off, length, buffer, "=");
   }
@@ -252,7 +275,8 @@ public final class Base64
    * @return  A base64url-encoded representation of the provided data to the
    *          given buffer.
    */
-  public static String urlEncode(final String data, final boolean pad)
+  @NotNull()
+  public static String urlEncode(@NotNull final String data, final boolean pad)
   {
     return urlEncode(StaticUtils.getBytes(data), pad);
   }
@@ -270,7 +294,8 @@ public final class Base64
    *                 will use "%3d", as the URL-escaped representation of the
    *                 equal sign.
    */
-  public static void urlEncode(final String data, final StringBuilder buffer,
+  public static void urlEncode(@NotNull final String data,
+                               @NotNull final StringBuilder buffer,
                                final boolean pad)
   {
     final byte[] dataBytes = StaticUtils.getBytes(data);
@@ -291,7 +316,8 @@ public final class Base64
    *                 will use "%3d", as the URL-escaped representation of the
    *                 equal sign.
    */
-  public static void urlEncode(final String data, final ByteStringBuffer buffer,
+  public static void urlEncode(@NotNull final String data,
+                               @NotNull final ByteStringBuffer buffer,
                                final boolean pad)
   {
     final byte[] dataBytes = StaticUtils.getBytes(data);
@@ -313,7 +339,8 @@ public final class Base64
    * @return  A base64url-encoded representation of the provided data to the
    *          given buffer.
    */
-  public static String urlEncode(final byte[] data, final boolean pad)
+  @NotNull()
+  public static String urlEncode(@NotNull final byte[] data, final boolean pad)
   {
     final StringBuilder buffer = new StringBuilder(4*data.length/3+6);
     encode(BASE64URL_ALPHABET, data, 0, data.length, buffer,
@@ -336,8 +363,9 @@ public final class Base64
    *                 will use "%3d", as the URL-escaped representation of the
    *                 equal sign.
    */
-  public static void urlEncode(final byte[] data, final int off,
-                               final int length, final StringBuilder buffer,
+  public static void urlEncode(@NotNull final byte[] data, final int off,
+                               final int length,
+                               @NotNull final StringBuilder buffer,
                                final boolean pad)
   {
     encode(BASE64URL_ALPHABET, data, off, length, buffer, (pad ? "%3d" : null));
@@ -358,8 +386,9 @@ public final class Base64
    *                 will use "%3d", as the URL-escaped representation of the
    *                 equal sign.
    */
-  public static void urlEncode(final byte[] data, final int off,
-                               final int length, final ByteStringBuffer buffer,
+  public static void urlEncode(@NotNull final byte[] data, final int off,
+                               final int length,
+                               @NotNull final ByteStringBuffer buffer,
                                final boolean pad)
   {
     encode(BASE64URL_ALPHABET, data, off, length, buffer, (pad ? "%3d" : null));
@@ -382,9 +411,11 @@ public final class Base64
    * @param  padStr    The string to use for padding.  It may be {@code null} if
    *                   no padding should be applied.
    */
-  private static void encode(final char[] alphabet, final byte[] data,
+  private static void encode(@NotNull final char[] alphabet,
+                             @NotNull final byte[] data,
                              final int off, final int length,
-                             final Appendable buffer, final String padStr)
+                             @NotNull final Appendable buffer,
+                             @Nullable final String padStr)
   {
     Validator.ensureNotNull(data);
     Validator.ensureTrue(data.length >= off);
@@ -457,7 +488,8 @@ public final class Base64
    * @throws  ParseException  If the contents of the provided string cannot be
    *                          parsed as base64-encoded data.
    */
-  public static byte[] decode(final String data)
+  @NotNull()
+  public static byte[] decode(@NotNull final String data)
          throws ParseException
   {
     Validator.ensureNotNull(data);
@@ -744,7 +776,8 @@ public final class Base64
    *                          parsed as base64-encoded data using the UTF-8
    *                          encoding.
    */
-  public static String decodeToString(final String data)
+  @NotNull()
+  public static String decodeToString(@NotNull final String data)
          throws ParseException
   {
     Validator.ensureNotNull(data);
@@ -766,7 +799,8 @@ public final class Base64
    * @throws  ParseException  If the contents of the provided string cannot be
    *                          parsed as base64url-encoded data.
    */
-  public static byte[] urlDecode(final String data)
+  @NotNull()
+  public static byte[] urlDecode(@NotNull final String data)
          throws ParseException
   {
     Validator.ensureNotNull(data);
@@ -1051,7 +1085,8 @@ decodeLoop:
    *                          parsed as base64-encoded data using the UTF-8
    *                          encoding.
    */
-  public static String urlDecodeToString(final String data)
+  @NotNull()
+  public static String urlDecodeToString(@NotNull final String data)
          throws ParseException
   {
     Validator.ensureNotNull(data);

@@ -1,9 +1,24 @@
 /*
- * Copyright 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2012-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,6 +52,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -81,8 +98,9 @@ public final class ListNotificationSubscriptionsExtendedResult
    * The OID (1.3.6.1.4.1.30221.2.6.41) for the list notification subscriptions
    * extended result.
    */
-  public static final String LIST_NOTIFICATION_SUBSCRIPTIONS_RESULT_OID =
-       "1.3.6.1.4.1.30221.2.6.41";
+  @NotNull public static final String
+       LIST_NOTIFICATION_SUBSCRIPTIONS_RESULT_OID =
+            "1.3.6.1.4.1.30221.2.6.41";
 
 
 
@@ -94,7 +112,7 @@ public final class ListNotificationSubscriptionsExtendedResult
 
 
   // The notification destination details for this result.
-  private final List<NotificationDestinationDetails> destinations;
+  @NotNull private final List<NotificationDestinationDetails> destinations;
 
 
 
@@ -110,7 +128,7 @@ public final class ListNotificationSubscriptionsExtendedResult
    *                         multi-update result.
    */
   public ListNotificationSubscriptionsExtendedResult(
-              final ExtendedResult extendedResult)
+              @NotNull final ExtendedResult extendedResult)
          throws LDAPException
   {
     super(extendedResult);
@@ -212,11 +230,13 @@ public final class ListNotificationSubscriptionsExtendedResult
    *                         operation type.
    */
   public ListNotificationSubscriptionsExtendedResult(final int messageID,
-              final ResultCode resultCode, final String diagnosticMessage,
-              final String matchedDN, final String[] referralURLs,
-              final Collection<NotificationDestinationDetails> destinations,
-              final Control... controls)
-         throws LDAPException
+       @NotNull final ResultCode resultCode,
+       @Nullable final String diagnosticMessage,
+       @Nullable final String matchedDN,
+       @Nullable final String[] referralURLs,
+       @Nullable final Collection<NotificationDestinationDetails> destinations,
+       @Nullable final Control... controls)
+       throws LDAPException
   {
     super(messageID, resultCode, diagnosticMessage, matchedDN, referralURLs,
          LIST_NOTIFICATION_SUBSCRIPTIONS_RESULT_OID, encodeValue(destinations),
@@ -246,8 +266,9 @@ public final class ListNotificationSubscriptionsExtendedResult
    * @return  An ASN.1 element suitable for use as the value of the extended
    *          result.
    */
+  @Nullable()
   private static ASN1OctetString encodeValue(
-               final Collection<NotificationDestinationDetails> destinations)
+       @Nullable final Collection<NotificationDestinationDetails> destinations)
   {
     if ((destinations == null) || destinations.isEmpty())
     {
@@ -287,6 +308,7 @@ public final class ListNotificationSubscriptionsExtendedResult
    * @return  A list of the defined notification destinations and their
    *          associated subscriptions.
    */
+  @NotNull()
   public List<NotificationDestinationDetails> getDestinations()
   {
     return destinations;
@@ -298,6 +320,7 @@ public final class ListNotificationSubscriptionsExtendedResult
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedResultName()
   {
     return INFO_EXTENDED_RESULT_NAME_LIST_NOTIFICATION_SUBS.get();
@@ -313,7 +336,7 @@ public final class ListNotificationSubscriptionsExtendedResult
    *                 extended result will be appended.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ListNotificationSubscriptionsExtendedResult(resultCode=");
     buffer.append(getResultCode());

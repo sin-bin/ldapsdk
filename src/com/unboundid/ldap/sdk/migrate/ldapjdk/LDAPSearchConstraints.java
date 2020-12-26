@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,8 @@ package com.unboundid.ldap.sdk.migrate.ldapjdk;
 
 import com.unboundid.util.Mutable;
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -101,7 +118,8 @@ public class LDAPSearchConstraints
    */
   public LDAPSearchConstraints(final int msLimit, final int dereference,
                                final int maxResults, final boolean doReferrals,
-                               final int batchSize, final LDAPRebind rebindProc,
+                               final int batchSize,
+                               @Nullable final LDAPRebind rebindProc,
                                final int hopLimit)
   {
     this();
@@ -139,7 +157,8 @@ public class LDAPSearchConstraints
   public LDAPSearchConstraints(final int msLimit, final int timeLimit,
                                final int dereference,
                                final int maxResults, final boolean doReferrals,
-                               final int batchSize, final LDAPRebind rebindProc,
+                               final int batchSize,
+                               @Nullable final LDAPRebind rebindProc,
                                final int hopLimit)
   {
     this();
@@ -177,7 +196,8 @@ public class LDAPSearchConstraints
   public LDAPSearchConstraints(final int msLimit, final int timeLimit,
                                final int dereference,
                                final int maxResults, final boolean doReferrals,
-                               final int batchSize, final LDAPBind bindProc,
+                               final int batchSize,
+                               @Nullable final LDAPBind bindProc,
                                final int hopLimit)
   {
     this();
@@ -326,6 +346,7 @@ public class LDAPSearchConstraints
    * @return  A duplicate of this search constraints object.
    */
   @Override()
+  @NotNull()
   public LDAPSearchConstraints duplicate()
   {
     final LDAPSearchConstraints c = new LDAPSearchConstraints();
@@ -354,6 +375,7 @@ public class LDAPSearchConstraints
    * @return  A string representation of this search constraints object.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();

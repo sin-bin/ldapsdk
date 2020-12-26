@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,7 @@ import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldif.LDIFException;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -61,13 +77,13 @@ final class SplitLDIFRDNHashTranslator
       extends SplitLDIFTranslator
 {
   // A map of the names that will be used for each of the sets.
-  private final Map<Integer,Set<String>> setNames;
+  @NotNull private final Map<Integer,Set<String>> setNames;
 
   // The sets in which entries outside the split base should be placed.
-  private final Set<String> outsideSplitBaseSetNames;
+  @NotNull private final Set<String> outsideSplitBaseSetNames;
 
   // The sets in which the split base entry should be placed.
-  private final Set<String> splitBaseEntrySetNames;
+  @NotNull private final Set<String> splitBaseEntrySetNames;
 
 
 
@@ -85,7 +101,8 @@ final class SplitLDIFRDNHashTranslator
    *                                               outside the split should be
    *                                               added to all sets.
    */
-  SplitLDIFRDNHashTranslator(final DN splitBaseDN, final int numSets,
+  SplitLDIFRDNHashTranslator(@NotNull final DN splitBaseDN,
+                             final int numSets,
                              final boolean addEntriesOutsideSplitToAllSets,
                              final boolean addEntriesOutsideSplitToDedicatedSet)
   {
@@ -122,7 +139,8 @@ final class SplitLDIFRDNHashTranslator
    * {@inheritDoc}
    */
   @Override()
-  public SplitLDIFEntry translate(final Entry original,
+  @NotNull()
+  public SplitLDIFEntry translate(@NotNull final Entry original,
                                   final long firstLineNumber)
          throws LDIFException
   {

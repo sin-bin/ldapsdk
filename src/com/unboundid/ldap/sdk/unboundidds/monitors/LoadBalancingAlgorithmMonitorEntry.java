@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import java.util.Map;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -80,7 +97,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
   /**
    * The structural object class used in LDAP external server monitor entries.
    */
-  protected static final String LOAD_BALANCING_ALGORITHM_MONITOR_OC =
+  @NotNull protected static final String LOAD_BALANCING_ALGORITHM_MONITOR_OC =
        "ds-load-balancing-algorithm-monitor-entry";
 
 
@@ -89,7 +106,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * The name of the attribute used to provide the name of the load-balancing
    * algorithm.
    */
-  private static final String ATTR_ALGORITHM_NAME = "algorithm-name";
+  @NotNull private static final String ATTR_ALGORITHM_NAME = "algorithm-name";
 
 
 
@@ -97,7 +114,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * The name of the attribute used to provide the DN of the configuration entry
    * for the load-balancing algorithm.
    */
-  private static final String ATTR_CONFIG_ENTRY_DN = "config-entry-dn";
+  @NotNull private static final String ATTR_CONFIG_ENTRY_DN = "config-entry-dn";
 
 
 
@@ -105,7 +122,8 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * The name of the attribute used to provide the aggregate health check state
    * for the load-balancing algorithm.
    */
-  private static final String ATTR_HEALTH_CHECK_STATE = "health-check-state";
+  @NotNull private static final String ATTR_HEALTH_CHECK_STATE =
+       "health-check-state";
 
 
 
@@ -114,7 +132,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * check states of each of the LDAP external servers associated with the
    * load-balancing algorithm.
    */
-  private static final String ATTR_LDAP_EXTERNAL_SERVER =
+  @NotNull private static final String ATTR_LDAP_EXTERNAL_SERVER =
        "ldap-external-server";
 
 
@@ -123,7 +141,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * The name of the attribute used to provide the aggregate health check state
    * for local servers for the load-balancing algorithm.
    */
-  private static final String ATTR_LOCAL_SERVERS_HEALTH_CHECK_STATE =
+  @NotNull private static final String ATTR_LOCAL_SERVERS_HEALTH_CHECK_STATE =
        "local-servers-health-check-state";
 
 
@@ -132,8 +150,9 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * The name of the attribute used to provide the aggregate health check state
    * for non-local servers for the load-balancing algorithm.
    */
-  private static final String ATTR_NON_LOCAL_SERVERS_HEALTH_CHECK_STATE =
-       "non-local-servers-health-check-state";
+  @NotNull private static final String
+       ATTR_NON_LOCAL_SERVERS_HEALTH_CHECK_STATE =
+            "non-local-servers-health-check-state";
 
 
 
@@ -141,7 +160,8 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * The name of the attribute used to provide the number of servers associated
    * with the load-balancing algorithm with a health check state of AVAILABLE.
    */
-  private static final String ATTR_NUM_AVAILABLE = "num-available-servers";
+  @NotNull private static final String ATTR_NUM_AVAILABLE =
+       "num-available-servers";
 
 
 
@@ -149,7 +169,8 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * The name of the attribute used to provide the number of servers associated
    * with the load-balancing algorithm with a health check state of DEGRADED.
    */
-  private static final String ATTR_NUM_DEGRADED = "num-degraded-servers";
+  @NotNull private static final String ATTR_NUM_DEGRADED =
+       "num-degraded-servers";
 
 
 
@@ -157,7 +178,8 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * The name of the attribute used to provide the number of servers associated
    * with the load-balancing algorithm with a health check state of UNAVAILABLE.
    */
-  private static final String ATTR_NUM_UNAVAILABLE = "num-unavailable-servers";
+  @NotNull private static final String ATTR_NUM_UNAVAILABLE =
+       "num-unavailable-servers";
 
 
 
@@ -169,34 +191,34 @@ public final class LoadBalancingAlgorithmMonitorEntry
 
 
   // The aggregate health check state for the load-balancing algorithm.
-  private final HealthCheckState healthCheckState;
+  @Nullable private final HealthCheckState healthCheckState;
 
   // The aggregate health check state for local servers for the load-balancing
   // algorithm.
-  private final HealthCheckState localServersHealthCheckState;
+  @Nullable private final HealthCheckState localServersHealthCheckState;
 
   // The aggregate health check state for non-local servers for the
   // load-balancing algorithm.
-  private final HealthCheckState nonLocalServersHealthCheckState;
+  @Nullable private final HealthCheckState nonLocalServersHealthCheckState;
 
   // The list of server availability objects.
-  private final List<LoadBalancingAlgorithmServerAvailabilityData>
+  @NotNull private final List<LoadBalancingAlgorithmServerAvailabilityData>
        serverAvailabilityData;
 
   // The number of servers with a health check state of AVAILABLE.
-  private final Long numAvailableServers;
+  @Nullable private final Long numAvailableServers;
 
   // The number of servers with a health check state of DEGRADED.
-  private final Long numDegradedServers;
+  @Nullable private final Long numDegradedServers;
 
   // The number of servers with a health check state of UNAVAILABLE.
-  private final Long numUnavailableServers;
+  @Nullable private final Long numUnavailableServers;
 
   // The name of the load-balancing algorithm.
-  private final String algorithmName;
+  @Nullable private final String algorithmName;
 
   // The DN of the configuration entry for the load-balancing algorithm.
-  private final String configEntryDN;
+  @Nullable private final String configEntryDN;
 
 
 
@@ -207,7 +229,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * @param  entry  The entry to be parsed as a load-balancing algorithm monitor
    *                entry.  It must not be {@code null}.
    */
-  public LoadBalancingAlgorithmMonitorEntry(final Entry entry)
+  public LoadBalancingAlgorithmMonitorEntry(@NotNull final Entry entry)
   {
     super(entry);
 
@@ -276,6 +298,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * @return  The name of the load-balancing algorithm, or {@code null} if it
    *          was not included in the monitor entry.
    */
+  @Nullable()
   public String getAlgorithmName()
   {
     return algorithmName;
@@ -291,6 +314,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    *          algorithm, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public String getConfigEntryDN()
   {
     return configEntryDN;
@@ -306,6 +330,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    *          or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public HealthCheckState getHealthCheckState()
   {
     return healthCheckState;
@@ -321,6 +346,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    *          load-balancing algorithm, or {@code null} if it was not included
    *          in the monitor entry.
    */
+  @Nullable()
   public HealthCheckState getLocalServersHealthCheckState()
   {
     return localServersHealthCheckState;
@@ -336,6 +362,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    *          load-balancing algorithm, or {@code null} if it was not included
    *          in the monitor entry.
    */
+  @Nullable()
   public HealthCheckState getNonLocalServersHealthCheckState()
   {
     return nonLocalServersHealthCheckState;
@@ -351,6 +378,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    *          external servers associated with the load-balancing algorithm, or
    *          an empty list if it was not included in the monitor entry.
    */
+  @NotNull()
   public List<LoadBalancingAlgorithmServerAvailabilityData>
               getServerAvailabilityData()
   {
@@ -367,6 +395,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    *          that have a health check state of AVAILABLE, or {@code null} if it
    *          was not included in the monitor entry.
    */
+  @Nullable()
   public Long getNumAvailableServers()
   {
     return numAvailableServers;
@@ -382,6 +411,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    *          that have a health check state of DEGRADED, or {@code null} if it
    *          was not included in the monitor entry.
    */
+  @Nullable()
   public Long getNumDegradedServers()
   {
     return numDegradedServers;
@@ -397,6 +427,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    *          that have a health check state of UNAVAILABLE, or {@code null} if
    *          it was not included in the monitor entry.
    */
+  @Nullable()
   public Long getNumUnavailableServers()
   {
     return numUnavailableServers;
@@ -408,6 +439,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDisplayName()
   {
     return INFO_LOAD_BALANCING_ALGORITHM_MONITOR_DISPNAME.get();
@@ -419,6 +451,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDescription()
   {
     return INFO_LOAD_BALANCING_ALGORITHM_MONITOR_DESC.get();
@@ -430,6 +463,7 @@ public final class LoadBalancingAlgorithmMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<String,MonitorAttribute> getMonitorAttributes()
   {
     final LinkedHashMap<String,MonitorAttribute> attrs =

@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,8 @@ import java.util.Date;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -60,32 +77,32 @@ public final class ReplicationSummaryReplicationServer
 
 
   // The date of the last successful connection to this replication server.
-  private final Date replicationServerLastConnected;
+  @Nullable private final Date replicationServerLastConnected;
 
   // The date of the last failed connection to this replication server.
-  private final Date replicationServerLastFailed;
+  @Nullable private final Date replicationServerLastFailed;
 
   // The number of times connection attempts to this replication server have
   // failed. The counter is reset after a successful connection.
-  private final Long replicationServerFailedAttempts;
+  @Nullable private final Long replicationServerFailedAttempts;
 
   // The port number for this replication server.
-  private final Long replicationServerPort;
+  @Nullable private final Long replicationServerPort;
 
   // The generation ID for this replication server.
-  private final String generationID;
+  @Nullable private final String generationID;
 
   // The address for this replication server.
-  private final String replicationServerAddress;
+  @Nullable private final String replicationServerAddress;
 
   // The replication server ID for this replication server.
-  private final String replicationServerID;
+  @Nullable private final String replicationServerID;
 
   // The status for this replication server.
-  private final String replicationServerStatus;
+  @Nullable private final String replicationServerStatus;
 
   // The value used to create this replication summary replica object.
-  private final String stringRepresentation;
+  @NotNull private final String stringRepresentation;
 
 
 
@@ -96,7 +113,7 @@ public final class ReplicationSummaryReplicationServer
    * @param  value  The value string to be parsed as a replication summary
    *                replication server object.
    */
-  public ReplicationSummaryReplicationServer(final String value)
+  public ReplicationSummaryReplicationServer(@NotNull final String value)
   {
     stringRepresentation = value;
 
@@ -150,7 +167,9 @@ public final class ReplicationSummaryReplicationServer
    * @return  The value for the specified element in the replica string, or
    *          {@code null} if it was not present or could not be determined.
    */
-  private static String getElementValue(final String s, final String n)
+  @Nullable()
+  private static String getElementValue(@NotNull final String s,
+                                        @NotNull final String n)
   {
     final String nPlusEQ = n + "=\"";
 
@@ -183,7 +202,9 @@ public final class ReplicationSummaryReplicationServer
    *          {@code Date}, or {@code null} if it was not present or could not
    *          be determined or parsed as a {@code Date}.
    */
-  private static Date getElementDateValue(final String s, final String n)
+  @Nullable()
+  private static Date getElementDateValue(@NotNull final String s,
+                                          @NotNull final String n)
   {
     final String stringValue = getElementValue(s, n);
     if (stringValue == null)
@@ -217,7 +238,9 @@ public final class ReplicationSummaryReplicationServer
    *          {@code Long}, or {@code null} if it was not present or could not
    *          be determined or parsed as a {@code Long}.
    */
-  private static Long getElementLongValue(final String s, final String n)
+  @Nullable()
+  private static Long getElementLongValue(@NotNull final String s,
+                                          @NotNull final String n)
   {
     final String stringValue = getElementValue(s, n);
     if (stringValue == null)
@@ -244,6 +267,7 @@ public final class ReplicationSummaryReplicationServer
    * @return  The replication server ID for this replication server, or
    *          {@code null} if that information is not available.
    */
+  @Nullable()
   public String getReplicationServerID()
   {
     return replicationServerID;
@@ -257,6 +281,7 @@ public final class ReplicationSummaryReplicationServer
    * @return  The address used to communicate with this replication server, or
    *          {@code null} if that information is not available.
    */
+  @Nullable()
   public String getReplicationServerAddress()
   {
     return replicationServerAddress;
@@ -270,6 +295,7 @@ public final class ReplicationSummaryReplicationServer
    * @return  The port number used to communicate with this replication server,
    *          or {@code null} if that information is not available.
    */
+  @Nullable()
   public Long getReplicationServerPort()
   {
     return replicationServerPort;
@@ -283,6 +309,7 @@ public final class ReplicationSummaryReplicationServer
    * @return  The generation ID for this replication server, or {@code null} if
    *          that information is not available.
    */
+  @Nullable()
   public String getGenerationID()
   {
     return generationID;
@@ -296,6 +323,7 @@ public final class ReplicationSummaryReplicationServer
    * @return  The status for this replication server, or {@code null} if
    *          that information is not available.
    */
+  @Nullable()
   public String getReplicationServerStatus()
   {
     return replicationServerStatus;
@@ -310,6 +338,7 @@ public final class ReplicationSummaryReplicationServer
    * @return  The the date of the last successful connection to this replication
    *          server, or {@code null} if that information is not available.
    */
+  @Nullable()
   public Date getReplicationServerLastConnected()
   {
     return replicationServerLastConnected;
@@ -324,6 +353,7 @@ public final class ReplicationSummaryReplicationServer
    * @return  The the date of the last failed connection to this replication
    *          server, or {@code null} if that information is not available.
    */
+  @Nullable()
   public Date getReplicationServerLastFailed()
   {
     return replicationServerLastFailed;
@@ -339,6 +369,7 @@ public final class ReplicationSummaryReplicationServer
    *          connection to this replication server, or {@code null} if that
    *          information is not available.
    */
+  @Nullable()
   public Long getReplicationServerFailedAttempts()
   {
     return replicationServerFailedAttempts;
@@ -352,6 +383,7 @@ public final class ReplicationSummaryReplicationServer
    * @return  A string representation of this replication summary replica.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return stringRepresentation;

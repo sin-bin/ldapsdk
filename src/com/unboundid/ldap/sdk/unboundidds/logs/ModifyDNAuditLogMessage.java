@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -42,6 +57,8 @@ import com.unboundid.ldif.LDIFModifyDNChangeRecord;
 import com.unboundid.ldif.LDIFException;
 import com.unboundid.ldif.LDIFReader;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -78,10 +95,10 @@ public final class ModifyDNAuditLogMessage
 
   // An LDIF change record that encapsulates the change represented by this
   // modify DN audit log message.
-  private final LDIFModifyDNChangeRecord modifyDNChangeRecord;
+  @NotNull private final LDIFModifyDNChangeRecord modifyDNChangeRecord;
 
   // The attribute modifications associated with this modify DN operation.
-  private final List<Modification> attributeModifications;
+  @Nullable private final List<Modification> attributeModifications;
 
 
 
@@ -99,7 +116,7 @@ public final class ModifyDNAuditLogMessage
    * @throws  AuditLogException  If a problem is encountered while processing
    *                             the provided list of log message lines.
    */
-  public ModifyDNAuditLogMessage(final String... logMessageLines)
+  public ModifyDNAuditLogMessage(@NotNull final String... logMessageLines)
          throws AuditLogException
   {
     this(StaticUtils.toList(logMessageLines), logMessageLines);
@@ -121,7 +138,7 @@ public final class ModifyDNAuditLogMessage
    * @throws  AuditLogException  If a problem is encountered while processing
    *                             audit provided list of log message lines.
    */
-  public ModifyDNAuditLogMessage(final List<String> logMessageLines)
+  public ModifyDNAuditLogMessage(@NotNull final List<String> logMessageLines)
          throws AuditLogException
   {
     this(logMessageLines, StaticUtils.toArray(logMessageLines, String.class));
@@ -140,8 +157,9 @@ public final class ModifyDNAuditLogMessage
    * @throws  AuditLogException  If a problem is encountered while processing
    *                             the provided list of log message lines.
    */
-  private ModifyDNAuditLogMessage(final List<String> logMessageLineList,
-                                  final String[] logMessageLineArray)
+  private ModifyDNAuditLogMessage(
+               @NotNull final List<String> logMessageLineList,
+               @NotNull final String[] logMessageLineArray)
           throws AuditLogException
   {
     super(logMessageLineList);
@@ -192,9 +210,9 @@ public final class ModifyDNAuditLogMessage
    * @throws  AuditLogException  If a problem is encountered while processing
    *                             the provided list of log message lines.
    */
-  ModifyDNAuditLogMessage(final List<String> logMessageLines,
-                          final LDIFModifyDNChangeRecord modifyDNChangeRecord)
-         throws AuditLogException
+  ModifyDNAuditLogMessage(@NotNull final List<String> logMessageLines,
+       @NotNull final LDIFModifyDNChangeRecord modifyDNChangeRecord)
+       throws AuditLogException
   {
     super(logMessageLines);
 
@@ -224,9 +242,10 @@ public final class ModifyDNAuditLogMessage
    * @return  The list of attribute modifications from the audit log message, or
    *          {@code null} if there were no modifications.
    */
+  @Nullable()
   private static List<Modification> decodeAttributeModifications(
-                      final List<String> logMessageLines,
-                      final LDIFModifyDNChangeRecord modifyDNChangeRecord)
+               @NotNull final List<String> logMessageLines,
+               @NotNull final LDIFModifyDNChangeRecord modifyDNChangeRecord)
   {
     List<String> ldifLines = null;
     for (final String line : logMessageLines)
@@ -295,6 +314,7 @@ public final class ModifyDNAuditLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getDN()
   {
     return modifyDNChangeRecord.getDN();
@@ -307,6 +327,7 @@ public final class ModifyDNAuditLogMessage
    *
    * @return  The new RDN for the associated modify DN operation.
    */
+  @NotNull()
   public String getNewRDN()
   {
     return modifyDNChangeRecord.getNewRDN();
@@ -334,6 +355,7 @@ public final class ModifyDNAuditLogMessage
    * @return  The new superior DN for the associated modify DN operation, or
    *          {@code null} if there was no new superior DN.
    */
+  @Nullable()
   public String getNewSuperiorDN()
   {
     return modifyDNChangeRecord.getNewSuperiorDN();
@@ -350,6 +372,7 @@ public final class ModifyDNAuditLogMessage
    *          known that there were no attribute modifications, then an empty
    *          list will be returned.
    */
+  @Nullable()
   public List<Modification> getAttributeModifications()
   {
     return attributeModifications;
@@ -361,6 +384,7 @@ public final class ModifyDNAuditLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ChangeType getChangeType()
   {
     return ChangeType.MODIFY_DN;
@@ -372,6 +396,7 @@ public final class ModifyDNAuditLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDIFModifyDNChangeRecord getChangeRecord()
   {
     return modifyDNChangeRecord;
@@ -464,6 +489,7 @@ public final class ModifyDNAuditLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<LDIFChangeRecord> getRevertChangeRecords()
          throws AuditLogException
   {
@@ -692,7 +718,7 @@ public final class ModifyDNAuditLogMessage
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append(getUncommentedHeaderLine());
     buffer.append("; changeType=modify-dn; dn=\"");

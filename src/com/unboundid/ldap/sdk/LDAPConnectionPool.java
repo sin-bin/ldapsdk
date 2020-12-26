@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,6 +53,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.unboundid.ldap.protocol.LDAPResponse;
 import com.unboundid.ldap.sdk.schema.Schema;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -206,7 +223,7 @@ public final class LDAPConnectionPool
    * particular connection should have a different maximum connection age than
    * the default for this pool.
    */
-  static final String ATTACHMENT_NAME_MAX_CONNECTION_AGE =
+  @NotNull static final String ATTACHMENT_NAME_MAX_CONNECTION_AGE =
        LDAPConnectionPool.class.getName() + ".maxConnectionAge";
 
 
@@ -215,11 +232,12 @@ public final class LDAPConnectionPool
   // replace a defunct connection.  It may also be initialized to the difference
   // between the initial and maximum number of connections that should be
   // included in the pool.
-  private final AtomicInteger failedReplaceCount;
+  @NotNull private final AtomicInteger failedReplaceCount;
 
   // The types of operations that should be retried if they fail in a manner
   // that may be the result of a connection that is no longer valid.
-  private final AtomicReference<Set<OperationType>> retryOperationTypes;
+  @NotNull private final AtomicReference<Set<OperationType>>
+       retryOperationTypes;
 
   // Indicates whether this connection pool has been closed.
   private volatile boolean closed;
@@ -239,7 +257,7 @@ public final class LDAPConnectionPool
 
   // The bind request to use to perform authentication whenever a new connection
   // is established.
-  private volatile BindRequest bindRequest;
+  @Nullable private volatile BindRequest bindRequest;
 
   // The number of connections to be held in this pool.
   private final int numConnections;
@@ -250,17 +268,18 @@ public final class LDAPConnectionPool
 
   // The health check implementation that should be used for this connection
   // pool.
-  private LDAPConnectionPoolHealthCheck healthCheck;
+  @NotNull private LDAPConnectionPoolHealthCheck healthCheck;
 
   // The thread that will be used to perform periodic background health checks
   // for this connection pool.
-  private final LDAPConnectionPoolHealthCheckThread healthCheckThread;
+  @NotNull private final LDAPConnectionPoolHealthCheckThread healthCheckThread;
 
   // The statistics for this connection pool.
-  private final LDAPConnectionPoolStatistics poolStatistics;
+  @NotNull private final LDAPConnectionPoolStatistics poolStatistics;
 
   // The set of connections that are currently available for use.
-  private final LinkedBlockingQueue<LDAPConnection> availableConnections;
+  @NotNull private final LinkedBlockingQueue<LDAPConnection>
+       availableConnections;
 
   // The length of time in milliseconds between periodic health checks against
   // the available connections in this pool.
@@ -276,7 +295,7 @@ public final class LDAPConnectionPool
 
   // The maximum connection age that should be used for connections created to
   // replace connections that are released as defunct.
-  private volatile Long maxDefunctReplacementConnectionAge;
+  @Nullable private volatile Long maxDefunctReplacementConnectionAge;
 
   // The maximum length of time in milliseconds to wait for a connection to be
   // available.
@@ -288,16 +307,16 @@ public final class LDAPConnectionPool
 
   // The schema that should be shared for connections in this pool, along with
   // its expiration time.
-  private volatile ObjectPair<Long,Schema> pooledSchema;
+  @Nullable private volatile ObjectPair<Long,Schema> pooledSchema;
 
   // The post-connect processor for this connection pool, if any.
-  private final PostConnectProcessor postConnectProcessor;
+  @Nullable private final PostConnectProcessor postConnectProcessor;
 
   // The server set to use for establishing connections for use by this pool.
-  private volatile ServerSet serverSet;
+  @NotNull private volatile ServerSet serverSet;
 
   // The user-friendly name assigned to this connection pool.
-  private String connectionPoolName;
+  @Nullable private String connectionPoolName;
 
 
 
@@ -328,7 +347,7 @@ public final class LDAPConnectionPool
    *                         with the pool (including the one provided as an
    *                         argument) will be closed.
    */
-  public LDAPConnectionPool(final LDAPConnection connection,
+  public LDAPConnectionPool(@NotNull final LDAPConnection connection,
                             final int numConnections)
          throws LDAPException
   {
@@ -367,7 +386,7 @@ public final class LDAPConnectionPool
    *                         with the pool (including the one provided as an
    *                         argument) will be closed.
    */
-  public LDAPConnectionPool(final LDAPConnection connection,
+  public LDAPConnectionPool(@NotNull final LDAPConnection connection,
                             final int initialConnections,
                             final int maxConnections)
          throws LDAPException
@@ -415,10 +434,10 @@ public final class LDAPConnectionPool
    *                         with the pool (including the one provided as an
    *                         argument) will be closed.
    */
-  public LDAPConnectionPool(final LDAPConnection connection,
-                            final int initialConnections,
-                            final int maxConnections,
-                            final PostConnectProcessor postConnectProcessor)
+  public LDAPConnectionPool(@NotNull final LDAPConnection connection,
+              final int initialConnections,
+              final int maxConnections,
+              @Nullable final PostConnectProcessor postConnectProcessor)
          throws LDAPException
   {
     this(connection, initialConnections, maxConnections,  postConnectProcessor,
@@ -474,11 +493,10 @@ public final class LDAPConnectionPool
    *                         with the pool (including the one provided as an
    *                         argument) will be closed.
    */
-  public LDAPConnectionPool(final LDAPConnection connection,
-                            final int initialConnections,
-                            final int maxConnections,
-                            final PostConnectProcessor postConnectProcessor,
-                            final boolean throwOnConnectFailure)
+  public LDAPConnectionPool(@NotNull final LDAPConnection connection,
+              final int initialConnections, final int maxConnections,
+              @Nullable final PostConnectProcessor postConnectProcessor,
+              final boolean throwOnConnectFailure)
          throws LDAPException
   {
     this(connection, initialConnections, maxConnections, 1,
@@ -539,12 +557,11 @@ public final class LDAPConnectionPool
    *                         with the pool (including the one provided as an
    *                         argument) will be closed.
    */
-  public LDAPConnectionPool(final LDAPConnection connection,
-                            final int initialConnections,
-                            final int maxConnections,
-                            final int initialConnectThreads,
-                            final PostConnectProcessor postConnectProcessor,
-                            final boolean throwOnConnectFailure)
+  public LDAPConnectionPool(@NotNull final LDAPConnection connection,
+              final int initialConnections, final int maxConnections,
+              final int initialConnectThreads,
+              @Nullable final PostConnectProcessor postConnectProcessor,
+              final boolean throwOnConnectFailure)
          throws LDAPException
   {
     this(connection, initialConnections, maxConnections, initialConnectThreads,
@@ -609,13 +626,12 @@ public final class LDAPConnectionPool
    *                         with the pool (including the one provided as an
    *                         argument) will be closed.
    */
-  public LDAPConnectionPool(final LDAPConnection connection,
-                            final int initialConnections,
-                            final int maxConnections,
-                            final int initialConnectThreads,
-                            final PostConnectProcessor postConnectProcessor,
-                            final boolean throwOnConnectFailure,
-                            final LDAPConnectionPoolHealthCheck healthCheck)
+  public LDAPConnectionPool(@NotNull final LDAPConnection connection,
+              final int initialConnections, final int maxConnections,
+              final int initialConnectThreads,
+              @Nullable final PostConnectProcessor postConnectProcessor,
+              final boolean throwOnConnectFailure,
+              @Nullable final LDAPConnectionPoolHealthCheck healthCheck)
          throws LDAPException
   {
     Validator.ensureNotNull(connection);
@@ -791,8 +807,8 @@ public final class LDAPConnectionPool
    *                         all connections associated with the pool will be
    *                         closed.
    */
-  public LDAPConnectionPool(final ServerSet serverSet,
-                            final BindRequest bindRequest,
+  public LDAPConnectionPool(@NotNull final ServerSet serverSet,
+                            @Nullable final BindRequest bindRequest,
                             final int numConnections)
          throws LDAPException
   {
@@ -838,8 +854,8 @@ public final class LDAPConnectionPool
    *                         all connections associated with the pool will be
    *                         closed.
    */
-  public LDAPConnectionPool(final ServerSet serverSet,
-                            final BindRequest bindRequest,
+  public LDAPConnectionPool(@NotNull final ServerSet serverSet,
+                            @Nullable final BindRequest bindRequest,
                             final int initialConnections,
                             final int maxConnections)
          throws LDAPException
@@ -894,11 +910,10 @@ public final class LDAPConnectionPool
    *                         all connections associated with the pool will be
    *                         closed.
    */
-  public LDAPConnectionPool(final ServerSet serverSet,
-                            final BindRequest bindRequest,
-                            final int initialConnections,
-                            final int maxConnections,
-                            final PostConnectProcessor postConnectProcessor)
+  public LDAPConnectionPool(@NotNull final ServerSet serverSet,
+              @Nullable final BindRequest bindRequest,
+              final int initialConnections, final int maxConnections,
+              @Nullable final PostConnectProcessor postConnectProcessor)
          throws LDAPException
   {
     this(serverSet, bindRequest, initialConnections, maxConnections,
@@ -963,12 +978,11 @@ public final class LDAPConnectionPool
    *                         thrown, then all connections associated with the
    *                         pool will be closed.
    */
-  public LDAPConnectionPool(final ServerSet serverSet,
-                            final BindRequest bindRequest,
-                            final int initialConnections,
-                            final int maxConnections,
-                            final PostConnectProcessor postConnectProcessor,
-                            final boolean throwOnConnectFailure)
+  public LDAPConnectionPool(@NotNull final ServerSet serverSet,
+              @Nullable final BindRequest bindRequest,
+              final int initialConnections, final int maxConnections,
+              @Nullable final PostConnectProcessor postConnectProcessor,
+              final boolean throwOnConnectFailure)
          throws LDAPException
   {
     this(serverSet, bindRequest, initialConnections, maxConnections, 1,
@@ -1038,13 +1052,12 @@ public final class LDAPConnectionPool
    *                         thrown, then all connections associated with the
    *                         pool will be closed.
    */
-  public LDAPConnectionPool(final ServerSet serverSet,
-                            final BindRequest bindRequest,
-                            final int initialConnections,
-                            final int maxConnections,
-                            final int initialConnectThreads,
-                            final PostConnectProcessor postConnectProcessor,
-                            final boolean throwOnConnectFailure)
+  public LDAPConnectionPool(@NotNull final ServerSet serverSet,
+              @Nullable final BindRequest bindRequest,
+              final int initialConnections, final int maxConnections,
+              final int initialConnectThreads,
+              @Nullable final PostConnectProcessor postConnectProcessor,
+              final boolean throwOnConnectFailure)
          throws LDAPException
   {
     this(serverSet, bindRequest, initialConnections, maxConnections,
@@ -1119,14 +1132,13 @@ public final class LDAPConnectionPool
    *                         thrown, then all connections associated with the
    *                         pool will be closed.
    */
-  public LDAPConnectionPool(final ServerSet serverSet,
-                            final BindRequest bindRequest,
-                            final int initialConnections,
-                            final int maxConnections,
-                            final int initialConnectThreads,
-                            final PostConnectProcessor postConnectProcessor,
-                            final boolean throwOnConnectFailure,
-                            final LDAPConnectionPoolHealthCheck healthCheck)
+  public LDAPConnectionPool(@NotNull final ServerSet serverSet,
+              @Nullable final BindRequest bindRequest,
+              final int initialConnections, final int maxConnections,
+              final int initialConnectThreads,
+              @Nullable final PostConnectProcessor postConnectProcessor,
+              final boolean throwOnConnectFailure,
+              @Nullable final LDAPConnectionPoolHealthCheck healthCheck)
          throws LDAPException
   {
     Validator.ensureNotNull(serverSet);
@@ -1165,6 +1177,8 @@ public final class LDAPConnectionPool
     retryOperationTypes = new AtomicReference<>(
          Collections.unmodifiableSet(EnumSet.noneOf(OperationType.class)));
     minConnectionGoal   = 0;
+    numConnections = maxConnections;
+    availableConnections = new LinkedBlockingQueue<>(numConnections);
 
     if (healthCheck == null)
     {
@@ -1219,10 +1233,6 @@ public final class LDAPConnectionPool
       }
     }
 
-    numConnections = maxConnections;
-
-    availableConnections =
-         new LinkedBlockingQueue<>(numConnections);
     availableConnections.addAll(connList);
 
     failedReplaceCount                 =
@@ -1252,6 +1262,7 @@ public final class LDAPConnectionPool
    *                         it will be closed.
    */
   @SuppressWarnings("deprecation")
+  @NotNull()
   LDAPConnection createConnection()
                  throws LDAPException
   {
@@ -1275,8 +1286,9 @@ public final class LDAPConnectionPool
    *                         it will be closed.
    */
   @SuppressWarnings("deprecation")
+  @NotNull()
   private LDAPConnection createConnection(
-                              final LDAPConnectionPoolHealthCheck healthCheck)
+                @Nullable final LDAPConnectionPoolHealthCheck healthCheck)
           throws LDAPException
   {
     final LDAPConnection c;
@@ -1288,6 +1300,8 @@ public final class LDAPConnectionPool
     {
       Debug.debugException(le);
       poolStatistics.incrementNumFailedConnectionAttempts();
+      Debug.debugConnectionPool(Level.SEVERE, this, null,
+           "Unable to create a new pooled connection", le);
       throw le;
     }
     c.setConnectionPool(this);
@@ -1318,6 +1332,8 @@ public final class LDAPConnectionPool
         try
         {
           poolStatistics.incrementNumFailedConnectionAttempts();
+          Debug.debugConnectionPool(Level.SEVERE, this, c,
+               "Exception in pre-authentication post-connect processing", e);
           c.setDisconnectInfo(DisconnectType.POOL_CREATION_FAILURE, null, e);
           c.setClosed();
         }
@@ -1379,6 +1395,18 @@ public final class LDAPConnectionPool
         try
         {
           poolStatistics.incrementNumFailedConnectionAttempts();
+          if (bindResult.getResultCode() != ResultCode.SUCCESS)
+          {
+            Debug.debugConnectionPool(Level.SEVERE, this, c,
+                 "Failed to authenticate a new pooled connection", le);
+          }
+          else
+          {
+            Debug.debugConnectionPool(Level.SEVERE, this, c,
+                 "A new pooled connection failed its post-authentication " +
+                      "health check",
+                 le);
+          }
           c.setDisconnectInfo(DisconnectType.BIND_FAILED, null, le);
           c.setClosed();
         }
@@ -1405,6 +1433,8 @@ public final class LDAPConnectionPool
         try
         {
           poolStatistics.incrementNumFailedConnectionAttempts();
+          Debug.debugConnectionPool(Level.SEVERE, this, c,
+               "Exception in post-authentication post-connect processing", e);
           c.setDisconnectInfo(DisconnectType.POOL_CREATION_FAILURE, null, e);
           c.setClosed();
         }
@@ -1474,6 +1504,8 @@ public final class LDAPConnectionPool
     // Finish setting up the connection.
     c.setConnectionPoolName(connectionPoolName);
     poolStatistics.incrementNumSuccessfulConnectionAttempts();
+    Debug.debugConnectionPool(Level.INFO, this, c,
+         "Successfully created a new pooled connection", null);
 
     return c;
   }
@@ -1497,46 +1529,57 @@ public final class LDAPConnectionPool
   @Override()
   public void close(final boolean unbind, final int numThreads)
   {
-    final boolean healthCheckThreadAlreadySignaled = closed;
-    closed = true;
-    healthCheckThread.stopRunning(! healthCheckThreadAlreadySignaled);
-
-    if (numThreads > 1)
+    try
     {
-      final ArrayList<LDAPConnection> connList =
-           new ArrayList<>(availableConnections.size());
-      availableConnections.drainTo(connList);
+      final boolean healthCheckThreadAlreadySignaled = closed;
+      closed = true;
+      healthCheckThread.stopRunning(! healthCheckThreadAlreadySignaled);
 
-      if (! connList.isEmpty())
+      if (numThreads > 1)
       {
-        final ParallelPoolCloser closer =
-             new ParallelPoolCloser(connList, unbind, numThreads);
-        closer.closeConnections();
-      }
-    }
-    else
-    {
-      while (true)
-      {
-        final LDAPConnection conn = availableConnections.poll();
-        if (conn == null)
+        final ArrayList<LDAPConnection> connList =
+             new ArrayList<>(availableConnections.size());
+        availableConnections.drainTo(connList);
+
+        if (! connList.isEmpty())
         {
-          return;
+          final ParallelPoolCloser closer =
+               new ParallelPoolCloser(connList, unbind, numThreads);
+          closer.closeConnections();
         }
-        else
+      }
+      else
+      {
+        while (true)
         {
-          poolStatistics.incrementNumConnectionsClosedUnneeded();
-          conn.setDisconnectInfo(DisconnectType.POOL_CLOSED, null, null);
-          if (unbind)
+          final LDAPConnection conn = availableConnections.poll();
+          if (conn == null)
           {
-            conn.terminate(null);
+            return;
           }
           else
           {
-            conn.setClosed();
+            poolStatistics.incrementNumConnectionsClosedUnneeded();
+            Debug.debugConnectionPool(Level.INFO, this, conn,
+                 "Closed a connection as part of closing the connection pool",
+                 null);
+            conn.setDisconnectInfo(DisconnectType.POOL_CLOSED, null, null);
+            if (unbind)
+            {
+              conn.terminate(null);
+            }
+            else
+            {
+              conn.setClosed();
+            }
           }
         }
       }
+    }
+    finally
+    {
+      Debug.debugConnectionPool(Level.INFO, this, null,
+           "Closed the connection pool", null);
     }
   }
 
@@ -1576,9 +1619,10 @@ public final class LDAPConnectionPool
    *                         problem occurs while sending the request or reading
    *                         the response.
    */
-  public BindResult bindAndRevertAuthentication(final String bindDN,
-                                                final String password,
-                                                final Control... controls)
+  @NotNull()
+  public BindResult bindAndRevertAuthentication(@Nullable final String bindDN,
+                         @Nullable final String password,
+                         @Nullable final Control... controls)
          throws LDAPException
   {
     return bindAndRevertAuthentication(
@@ -1609,7 +1653,9 @@ public final class LDAPConnectionPool
    *                         problem occurs while sending the request or reading
    *                         the response.
    */
-  public BindResult bindAndRevertAuthentication(final BindRequest bindRequest)
+  @NotNull()
+  public BindResult bindAndRevertAuthentication(
+                         @NotNull final BindRequest bindRequest)
          throws LDAPException
   {
     LDAPConnection conn = getConnection();
@@ -1723,12 +1769,15 @@ public final class LDAPConnectionPool
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPConnection getConnection()
          throws LDAPException
   {
     if (closed)
     {
       poolStatistics.incrementNumFailedCheckouts();
+      Debug.debugConnectionPool(Level.SEVERE, this, null,
+           "Failed to get a connection to a closed connection pool", null);
       throw new LDAPException(ResultCode.CONNECT_ERROR,
                               ERR_POOL_CLOSED.get());
     }
@@ -1736,21 +1785,28 @@ public final class LDAPConnectionPool
     LDAPConnection conn = availableConnections.poll();
     if (conn != null)
     {
+      Exception connException = null;
       if (conn.isConnected())
       {
         try
         {
           healthCheck.ensureConnectionValidForCheckout(conn);
           poolStatistics.incrementNumSuccessfulCheckoutsWithoutWaiting();
+          Debug.debugConnectionPool(Level.INFO, this, conn,
+               "Checked out an immediately available pooled connection", null);
           return conn;
         }
         catch (final LDAPException le)
         {
           Debug.debugException(le);
+          connException = le;
         }
       }
 
       poolStatistics.incrementNumConnectionsClosedDefunct();
+      Debug.debugConnectionPool(Level.WARNING, this, conn,
+           "Closing a defunct connection encountered during checkout",
+           connException);
       handleDefunctConnection(conn);
       for (int i=0; i < numConnections; i++)
       {
@@ -1765,18 +1821,27 @@ public final class LDAPConnectionPool
           {
             healthCheck.ensureConnectionValidForCheckout(conn);
             poolStatistics.incrementNumSuccessfulCheckoutsWithoutWaiting();
+            Debug.debugConnectionPool(Level.INFO, this, conn,
+                 "Checked out an immediately available pooled connection",
+                 null);
             return conn;
           }
           catch (final LDAPException le)
           {
             Debug.debugException(le);
             poolStatistics.incrementNumConnectionsClosedDefunct();
+            Debug.debugConnectionPool(Level.WARNING, this, conn,
+                 "Closing a defunct connection encountered during checkout",
+                 le);
             handleDefunctConnection(conn);
           }
         }
         else
         {
           poolStatistics.incrementNumConnectionsClosedDefunct();
+          Debug.debugConnectionPool(Level.WARNING, this, conn,
+               "Closing a defunct connection encountered during checkout",
+               null);
           handleDefunctConnection(conn);
         }
       }
@@ -1791,6 +1856,8 @@ public final class LDAPConnectionPool
         {
           conn = createConnection();
           poolStatistics.incrementNumSuccessfulCheckoutsNewConnection();
+          Debug.debugConnectionPool(Level.INFO, this, conn,
+               "Checked out a newly created connection", null);
           return conn;
         }
         catch (final LDAPException le)
@@ -1798,15 +1865,14 @@ public final class LDAPConnectionPool
           Debug.debugException(le);
           failedReplaceCount.incrementAndGet();
           poolStatistics.incrementNumFailedCheckouts();
+          Debug.debugConnectionPool(Level.SEVERE, this, conn,
+               "Unable to create a new connection for checkout", le);
           throw le;
         }
       }
       else
       {
         failedReplaceCount.incrementAndGet();
-        poolStatistics.incrementNumFailedCheckouts();
-        throw new LDAPException(ResultCode.CONNECT_ERROR,
-                                ERR_POOL_NO_CONNECTIONS.get());
       }
     }
 
@@ -1814,19 +1880,30 @@ public final class LDAPConnectionPool
     {
       try
       {
+        final long startWaitTime = System.currentTimeMillis();
         conn = availableConnections.poll(maxWaitTime, TimeUnit.MILLISECONDS);
+        final long elapsedWaitTime = System.currentTimeMillis() - startWaitTime;
         if (conn != null)
         {
           try
           {
             healthCheck.ensureConnectionValidForCheckout(conn);
             poolStatistics.incrementNumSuccessfulCheckoutsAfterWaiting();
+            Debug.debugConnectionPool(Level.INFO, this, conn,
+                 "Checked out an existing connection after waiting " +
+                      elapsedWaitTime + "ms for it to become available",
+                 null);
             return conn;
           }
           catch (final LDAPException le)
           {
             Debug.debugException(le);
             poolStatistics.incrementNumConnectionsClosedDefunct();
+            Debug.debugConnectionPool(Level.WARNING, this, conn,
+                 "Got a connection for checkout after waiting " +
+                      elapsedWaitTime + "ms for it to become available, but " +
+                      "the connection failed the checkout health check",
+                 le);
             handleDefunctConnection(conn);
           }
         }
@@ -1846,18 +1923,25 @@ public final class LDAPConnectionPool
       {
         conn = createConnection();
         poolStatistics.incrementNumSuccessfulCheckoutsNewConnection();
+        Debug.debugConnectionPool(Level.INFO, this, conn,
+             "Checked out a newly created connection", null);
         return conn;
       }
       catch (final LDAPException le)
       {
         Debug.debugException(le);
         poolStatistics.incrementNumFailedCheckouts();
+        Debug.debugConnectionPool(Level.SEVERE, this, null,
+             "Unable to create a new connection for checkout", le);
         throw le;
       }
     }
     else
     {
       poolStatistics.incrementNumFailedCheckouts();
+      Debug.debugConnectionPool(Level.SEVERE, this, null,
+           "Unable to check out a connection because none are available",
+           null);
       throw new LDAPException(ResultCode.CONNECT_ERROR,
                               ERR_POOL_NO_CONNECTIONS.get());
     }
@@ -1882,11 +1966,15 @@ public final class LDAPConnectionPool
    *          {@code null} if there are no available connections established to
    *          the specified server.
    */
-  public LDAPConnection getConnection(final String host, final int port)
+  @Nullable()
+  public LDAPConnection getConnection(@NotNull final String host,
+                                               final int port)
   {
     if (closed)
     {
       poolStatistics.incrementNumFailedCheckouts();
+      Debug.debugConnectionPool(Level.WARNING, this, null,
+           "Failed to get a connection to a closed connection pool", null);
       return null;
     }
 
@@ -1898,13 +1986,26 @@ public final class LDAPConnectionPool
       if (conn == null)
       {
         poolStatistics.incrementNumFailedCheckouts();
+        Debug.debugConnectionPool(Level.SEVERE, this, null,
+             "Failed to get an existing connection to " + host + ':' + port +
+                  " because no connections are immediately available",
+             null);
         return null;
       }
 
       if (examinedConnections.contains(conn))
       {
-        availableConnections.offer(conn);
+        if (! availableConnections.offer(conn))
+        {
+          discardConnection(conn);
+        }
+
         poolStatistics.incrementNumFailedCheckouts();
+        Debug.debugConnectionPool(Level.WARNING, this, null,
+             "Failed to get an existing connection to " + host + ':' + port +
+                  " because none of the available connections are " +
+                  "established to that server",
+             null);
         return null;
       }
 
@@ -1915,12 +2016,21 @@ public final class LDAPConnectionPool
         {
           healthCheck.ensureConnectionValidForCheckout(conn);
           poolStatistics.incrementNumSuccessfulCheckoutsWithoutWaiting();
+          Debug.debugConnectionPool(Level.INFO, this, conn,
+               "Successfully checked out an existing connection to requested " +
+                    "server " + host + ':' + port,
+               null);
           return conn;
         }
         catch (final LDAPException le)
         {
           Debug.debugException(le);
           poolStatistics.incrementNumConnectionsClosedDefunct();
+          Debug.debugConnectionPool(Level.WARNING, this, conn,
+               "Closing an existing connection to requested server " + host +
+                    ':' + port + " because it failed the checkout health " +
+                    "check",
+               le);
           handleDefunctConnection(conn);
           continue;
         }
@@ -1929,6 +2039,10 @@ public final class LDAPConnectionPool
       if (availableConnections.offer(conn))
       {
         examinedConnections.add(conn);
+      }
+      else
+      {
+        discardConnection(conn);
       }
     }
   }
@@ -1939,7 +2053,7 @@ public final class LDAPConnectionPool
    * {@inheritDoc}
    */
   @Override()
-  public void releaseConnection(final LDAPConnection connection)
+  public void releaseConnection(@NotNull final LDAPConnection connection)
   {
     if (connection == null)
     {
@@ -1958,6 +2072,8 @@ public final class LDAPConnectionPool
                null, null);
           connection.terminate(null);
           poolStatistics.incrementNumConnectionsClosedExpired();
+          Debug.debugConnectionPool(Level.WARNING, this, connection,
+               "Closing a released connection because it is expired", null);
           lastExpiredDisconnectTime = System.currentTimeMillis();
         }
         else
@@ -1966,6 +2082,9 @@ public final class LDAPConnectionPool
                DisconnectType.POOLED_CONNECTION_UNNEEDED, null, null);
           newConnection.terminate(null);
           poolStatistics.incrementNumConnectionsClosedUnneeded();
+          Debug.debugConnectionPool(Level.WARNING, this, connection,
+               "Closing a released connection because the pool is already full",
+               null);
         }
       }
       catch (final LDAPException le)
@@ -1988,6 +2107,8 @@ public final class LDAPConnectionPool
     if (availableConnections.offer(connection))
     {
       poolStatistics.incrementNumReleasedValid();
+      Debug.debugConnectionPool(Level.INFO, this, connection,
+           "Released a connection back to the pool", null);
     }
     else
     {
@@ -1998,6 +2119,9 @@ public final class LDAPConnectionPool
       connection.setDisconnectInfo(DisconnectType.POOLED_CONNECTION_UNNEEDED,
                                    null, null);
       poolStatistics.incrementNumConnectionsClosedUnneeded();
+      Debug.debugConnectionPool(Level.WARNING, this, connection,
+           "Closing a released connection because the pool is already full",
+           null);
       connection.terminate(null);
       return;
     }
@@ -2017,7 +2141,7 @@ public final class LDAPConnectionPool
    *
    * @param  connection  The connection to be discarded.
    */
-  public void discardConnection(final LDAPConnection connection)
+  public void discardConnection(@NotNull final LDAPConnection connection)
   {
     if (connection == null)
     {
@@ -2028,6 +2152,8 @@ public final class LDAPConnectionPool
          null, null);
     connection.terminate(null);
     poolStatistics.incrementNumConnectionsClosedUnneeded();
+    Debug.debugConnectionPool(Level.INFO, this, connection,
+         "Discareded a connection that is no longer needed", null);
 
     if (availableConnections.remainingCapacity() > 0)
     {
@@ -2054,7 +2180,7 @@ public final class LDAPConnectionPool
    *                     being re-authenticated.
    */
   public void releaseAndReAuthenticateConnection(
-                   final LDAPConnection connection)
+                   @NotNull final LDAPConnection connection)
   {
     if (connection == null)
     {
@@ -2123,7 +2249,7 @@ public final class LDAPConnectionPool
    * {@inheritDoc}
    */
   @Override()
-  public void releaseDefunctConnection(final LDAPConnection connection)
+  public void releaseDefunctConnection(@NotNull final LDAPConnection connection)
   {
     if (connection == null)
     {
@@ -2132,6 +2258,8 @@ public final class LDAPConnectionPool
 
     connection.setConnectionPoolName(connectionPoolName);
     poolStatistics.incrementNumConnectionsClosedDefunct();
+    Debug.debugConnectionPool(Level.WARNING, this, connection,
+         "Releasing a defunct connection", null);
     handleDefunctConnection(connection);
   }
 
@@ -2149,8 +2277,9 @@ public final class LDAPConnectionPool
    *          made available and the caller must not rely on it being unused for
    *          any other purpose.
    */
+  @NotNull()
   private LDAPConnection handleDefunctConnection(
-                              final LDAPConnection connection)
+                              @NotNull final LDAPConnection connection)
   {
     connection.setDisconnectInfo(DisconnectType.POOLED_CONNECTION_DEFUNCT, null,
                                  null);
@@ -2208,11 +2337,14 @@ public final class LDAPConnectionPool
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPConnection replaceDefunctConnection(
-                             final LDAPConnection connection)
+                             @NotNull final LDAPConnection connection)
          throws LDAPException
   {
     poolStatistics.incrementNumConnectionsClosedDefunct();
+    Debug.debugConnectionPool(Level.WARNING, this, connection,
+         "Releasing a defunct connection that is to be replaced", null);
     connection.setDisconnectInfo(DisconnectType.POOLED_CONNECTION_DEFUNCT, null,
                                  null);
     connection.setClosed();
@@ -2240,6 +2372,7 @@ public final class LDAPConnectionPool
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Set<OperationType> getOperationTypesToRetryDueToInvalidConnections()
   {
     return retryOperationTypes.get();
@@ -2252,7 +2385,7 @@ public final class LDAPConnectionPool
    */
   @Override()
   public void setRetryFailedOperationsDueToInvalidConnections(
-                   final Set<OperationType> operationTypes)
+                   @Nullable final Set<OperationType> operationTypes)
   {
     if ((operationTypes == null) || operationTypes.isEmpty())
     {
@@ -2277,7 +2410,7 @@ public final class LDAPConnectionPool
    * @return  {@code true} if the provided connection should be considered
    *          expired, or {@code false} if not.
    */
-  private boolean connectionIsExpired(final LDAPConnection connection)
+  private boolean connectionIsExpired(@NotNull final LDAPConnection connection)
   {
     // There may be a custom maximum connection age for the connection.  If that
     // is the case, then use that custom max age rather than the pool-default
@@ -2331,7 +2464,7 @@ public final class LDAPConnectionPool
    *                      may be {@code null} if new connections should be
    *                      unauthenticated.
    */
-  public void setBindRequest(final BindRequest bindRequest)
+  public void setBindRequest(@Nullable final BindRequest bindRequest)
   {
     this.bindRequest = bindRequest;
   }
@@ -2347,7 +2480,7 @@ public final class LDAPConnectionPool
    *                    connections for use in this connection pool.  It must
    *                    not be {@code null}.
    */
-  public void setServerSet(final ServerSet serverSet)
+  public void setServerSet(@Nullable final ServerSet serverSet)
   {
     Validator.ensureNotNull(serverSet);
     this.serverSet = serverSet;
@@ -2359,6 +2492,7 @@ public final class LDAPConnectionPool
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public String getConnectionPoolName()
   {
     return connectionPoolName;
@@ -2370,7 +2504,7 @@ public final class LDAPConnectionPool
    * {@inheritDoc}
    */
   @Override()
-  public void setConnectionPoolName(final String connectionPoolName)
+  public void setConnectionPoolName(@Nullable final String connectionPoolName)
   {
     this.connectionPoolName = connectionPoolName;
     for (final LDAPConnection c : availableConnections)
@@ -2517,6 +2651,7 @@ public final class LDAPConnectionPool
    *          {@code null} if the value returned by the
    *          {@link #getMaxConnectionAgeMillis()} method should be used.
    */
+  @Nullable()
   public Long getMaxDefunctReplacementConnectionAgeMillis()
   {
     return maxDefunctReplacementConnectionAge;
@@ -2545,7 +2680,7 @@ public final class LDAPConnectionPool
    *              {@link #getMaxConnectionAgeMillis()} method should be used.
    */
   public void setMaxDefunctReplacementConnectionAgeMillis(
-                   final Long maxDefunctReplacementConnectionAge)
+                   @Nullable final Long maxDefunctReplacementConnectionAge)
   {
     if (maxDefunctReplacementConnectionAge == null)
     {
@@ -2681,6 +2816,7 @@ public final class LDAPConnectionPool
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPConnectionPoolHealthCheck getHealthCheck()
   {
     return healthCheck;
@@ -2694,7 +2830,8 @@ public final class LDAPConnectionPool
    * @param  healthCheck  The health check implementation for this connection
    *                      pool.  It must not be {@code null}.
    */
-  public void setHealthCheck(final LDAPConnectionPoolHealthCheck healthCheck)
+  public void setHealthCheck(
+                   @NotNull final LDAPConnectionPoolHealthCheck healthCheck)
   {
     Validator.ensureNotNull(healthCheck);
     this.healthCheck = healthCheck;
@@ -2799,8 +2936,9 @@ public final class LDAPConnectionPool
    * @return  An object with information about the result of the health check
    *          processing.
    */
+  @NotNull()
   public LDAPConnectionPoolHealthCheckResult invokeHealthCheck(
-              final LDAPConnectionPoolHealthCheck healthCheck,
+              @Nullable final LDAPConnectionPoolHealthCheck healthCheck,
               final boolean checkForExpiration)
   {
     return invokeHealthCheck(healthCheck, checkForExpiration,
@@ -2840,8 +2978,9 @@ public final class LDAPConnectionPool
    * @return  An object with information about the result of the health check
    *          processing.
    */
+  @NotNull()
   public LDAPConnectionPoolHealthCheckResult invokeHealthCheck(
-              final LDAPConnectionPoolHealthCheck healthCheck,
+              @Nullable final LDAPConnectionPoolHealthCheck healthCheck,
               final boolean checkForExpiration,
               final boolean checkMinConnectionGoal)
   {
@@ -2880,6 +3019,9 @@ public final class LDAPConnectionPool
           conn.setDisconnectInfo(DisconnectType.POOLED_CONNECTION_UNNEEDED,
                                  null, null);
           poolStatistics.incrementNumConnectionsClosedUnneeded();
+          Debug.debugConnectionPool(Level.INFO, this, conn,
+               "Closing a connection that had just been health checked " +
+                    "because the pool is now full", null);
           conn.terminate(null);
         }
         break;
@@ -2890,6 +3032,10 @@ public final class LDAPConnectionPool
       {
         numDefunct++;
         poolStatistics.incrementNumConnectionsClosedDefunct();
+        Debug.debugConnectionPool(Level.WARNING, this, conn,
+             "Closing a connection that was identified as not established " +
+                  "during health check processing",
+             null);
         conn = handleDefunctConnection(conn);
         if (conn != null)
         {
@@ -2912,6 +3058,10 @@ public final class LDAPConnectionPool
                    null, null);
               conn.terminate(null);
               poolStatistics.incrementNumConnectionsClosedExpired();
+              Debug.debugConnectionPool(Level.INFO, this, conn,
+                   "Closing a connection that was identified as expired " +
+                        "during health check processing",
+                   null);
               lastExpiredDisconnectTime = System.currentTimeMillis();
               continue;
             }
@@ -2921,6 +3071,11 @@ public final class LDAPConnectionPool
                    DisconnectType.POOLED_CONNECTION_UNNEEDED, null, null);
               newConnection.terminate(null);
               poolStatistics.incrementNumConnectionsClosedUnneeded();
+              Debug.debugConnectionPool(Level.INFO, this, newConnection,
+                   "Closing a newly created connection created to replace " +
+                        "an expired connection because the pool is already " +
+                        "full",
+                   null);
             }
           }
           catch (final LDAPException le)
@@ -2952,6 +3107,10 @@ public final class LDAPConnectionPool
               conn.setDisconnectInfo(DisconnectType.POOLED_CONNECTION_DEFUNCT,
                    ERR_POOL_HEALTH_CHECK_CONN_CLOSED.get(), null);
               poolStatistics.incrementNumConnectionsClosedDefunct();
+              Debug.debugConnectionPool(Level.WARNING, this, conn,
+                   "Closing existing connection discovered to be " +
+                        "disconnected during health check processing",
+                   null);
               conn = handleDefunctConnection(conn);
               if (conn != null)
               {
@@ -2982,6 +3141,11 @@ public final class LDAPConnectionPool
                 conn.setDisconnectInfo(DisconnectType.POOLED_CONNECTION_DEFUNCT,
                      ERR_POOL_HEALTH_CHECK_CONN_CLOSED.get(), null);
                 poolStatistics.incrementNumConnectionsClosedDefunct();
+                Debug.debugConnectionPool(Level.WARNING, this, conn,
+                     "Closing existing connection discovered to be invalid " +
+                          "with result " + r + " during health check " +
+                          "processing",
+                     null);
                 conn = handleDefunctConnection(conn);
                 if (conn != null)
                 {
@@ -3005,6 +3169,10 @@ public final class LDAPConnectionPool
                    ERR_POOL_HEALTH_CHECK_READ_FAILURE.get(
                         StaticUtils.getExceptionMessage(le)), le);
               poolStatistics.incrementNumConnectionsClosedDefunct();
+              Debug.debugConnectionPool(Level.WARNING, this, conn,
+                   "Closing existing connection discovered to be invalid " +
+                        "during health check processing",
+                   le);
               conn = handleDefunctConnection(conn);
               if (conn != null)
               {
@@ -3022,6 +3190,11 @@ public final class LDAPConnectionPool
                       StaticUtils.getExceptionMessage(e)),
                  e);
             poolStatistics.incrementNumConnectionsClosedDefunct();
+            Debug.debugConnectionPool(Level.SEVERE, this, conn,
+                 "Closing existing connection discovered to be invalid " +
+                      "with an unexpected exception type during health check " +
+                      "processing",
+                 e);
             conn = handleDefunctConnection(conn);
             if (conn != null)
             {
@@ -3047,6 +3220,11 @@ public final class LDAPConnectionPool
                 conn.setDisconnectInfo(DisconnectType.POOLED_CONNECTION_DEFUNCT,
                      null, e);
                 poolStatistics.incrementNumConnectionsClosedDefunct();
+                Debug.debugConnectionPool(Level.SEVERE, this, conn,
+                     "Closing existing connection during health check " +
+                          "processing because an error occurred while " +
+                          "attempting to set the SO_TIMEOUT",
+                     e);
                 conn = handleDefunctConnection(conn);
                 if (conn != null)
                 {
@@ -3070,6 +3248,10 @@ public final class LDAPConnectionPool
             conn.setDisconnectInfo(DisconnectType.POOLED_CONNECTION_UNNEEDED,
                                    null, null);
             poolStatistics.incrementNumConnectionsClosedUnneeded();
+            Debug.debugConnectionPool(Level.INFO, this, conn,
+                 "Closing existing connection that passed health check " +
+                      "processing because the pool is already full",
+                 null);
             conn.terminate(null);
           }
         }
@@ -3078,6 +3260,10 @@ public final class LDAPConnectionPool
           Debug.debugException(e);
           numDefunct++;
           poolStatistics.incrementNumConnectionsClosedDefunct();
+          Debug.debugConnectionPool(Level.WARNING, this, conn,
+               "Closing existing connection that failed health check " +
+                    "processing",
+               e);
           conn = handleDefunctConnection(conn);
           if (conn != null)
           {
@@ -3101,6 +3287,12 @@ public final class LDAPConnectionPool
             conn.setDisconnectInfo(DisconnectType.POOLED_CONNECTION_UNNEEDED,
                                    null, null);
             poolStatistics.incrementNumConnectionsClosedUnneeded();
+            Debug.debugConnectionPool(Level.INFO, this, conn,
+                 "Closing a new connection that was created during health " +
+                      "check processing in achieve the minimum connection " +
+                      "goal, but the pool had already become full after the " +
+                      "connection was created",
+                 null);
             conn.terminate(null);
             break;
           }
@@ -3190,6 +3382,7 @@ public final class LDAPConnectionPool
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPConnectionPoolStatistics getConnectionPoolStatistics()
   {
     return poolStatistics;
@@ -3255,7 +3448,7 @@ public final class LDAPConnectionPool
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("LDAPConnectionPool(");
 

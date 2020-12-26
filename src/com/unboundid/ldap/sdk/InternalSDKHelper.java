@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,20 +37,33 @@ package com.unboundid.ldap.sdk;
 
 
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 
 import com.unboundid.asn1.ASN1StreamReader;
 import com.unboundid.asn1.ASN1StreamReaderSequence;
 import com.unboundid.ldap.protocol.LDAPMessage;
 import com.unboundid.ldap.sdk.extensions.CancelExtendedRequest;
 import com.unboundid.ldap.sdk.schema.Schema;
+import com.unboundid.ldap.sdk.unboundidds.TopologyRegistryTrustManager;
 import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.InternalUseOnly;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
+import com.unboundid.util.ssl.AggregateTrustManager;
+import com.unboundid.util.ssl.JVMDefaultTrustManager;
+import com.unboundid.util.ssl.PromptTrustManager;
+import com.unboundid.util.ssl.TrustStoreTrustManager;
 
 import static com.unboundid.ldap.sdk.LDAPMessages.*;
 
@@ -74,7 +102,7 @@ public final class InternalSDKHelper
    * @throws  LDAPException  If a problem is encountered while attempting to
    *                         get the SO_TIMEOUT value.
    */
-  public static int getSoTimeout(final LDAPConnection connection)
+  public static int getSoTimeout(@NotNull final LDAPConnection connection)
          throws LDAPException
   {
     try
@@ -109,7 +137,7 @@ public final class InternalSDKHelper
    *                         set the SO_TIMEOUT value.
    */
   @InternalUseOnly()
-  public static void setSoTimeout(final LDAPConnection connection,
+  public static void setSoTimeout(@NotNull final LDAPConnection connection,
                                   final int soTimeout)
          throws LDAPException
   {
@@ -160,8 +188,8 @@ public final class InternalSDKHelper
    *                         connection to use TLS.
    */
   @InternalUseOnly()
-  public static void convertToTLS(final LDAPConnection connection,
-                                  final SSLSocketFactory sslSocketFactory)
+  public static void convertToTLS(@NotNull final LDAPConnection connection,
+                          @NotNull final SSLSocketFactory sslSocketFactory)
          throws LDAPException
   {
     connection.convertToTLS(sslSocketFactory);
@@ -180,8 +208,9 @@ public final class InternalSDKHelper
    * @return  The new asynchronous request ID.
    */
   @InternalUseOnly()
+  @NotNull()
   public static AsyncRequestID createAsyncRequestID(final int targetMessageID,
-                                    final LDAPConnection connection)
+                                    @NotNull final LDAPConnection connection)
   {
     return new AsyncRequestID(targetMessageID, connection);
   }
@@ -203,15 +232,23 @@ public final class InternalSDKHelper
    *                         request.
    */
   @InternalUseOnly()
-  public static void cancel(final LDAPConnection connection,
+  public static void cancel(@NotNull final LDAPConnection connection,
                             final int targetMessageID,
-                            final Control... controls)
+                            @Nullable final Control... controls)
          throws LDAPException
   {
     final int messageID = connection.nextMessageID();
     final CancelExtendedRequest cancelRequest =
          new CancelExtendedRequest(targetMessageID);
     Debug.debugLDAPRequest(Level.INFO, cancelRequest, messageID, connection);
+
+    final LDAPConnectionLogger logger =
+         connection.getConnectionOptions().getConnectionLogger();
+    if (logger != null)
+    {
+      logger.logExtendedRequest(connection, messageID, cancelRequest);
+    }
+
     connection.sendMessage(
          new LDAPMessage(messageID, new ExtendedRequest(cancelRequest),
               controls),
@@ -239,9 +276,10 @@ public final class InternalSDKHelper
    *                         from the ASN.1 stream reader.
    */
   @InternalUseOnly()
+  @NotNull()
   public static LDAPResult readLDAPResultFrom(final int messageID,
-                                final ASN1StreamReaderSequence messageSequence,
-                                final ASN1StreamReader reader)
+                     @NotNull final ASN1StreamReaderSequence messageSequence,
+                     @NotNull final ASN1StreamReader reader)
          throws LDAPException
   {
     return LDAPResult.readLDAPResultFrom(messageID, messageSequence, reader);
@@ -266,9 +304,10 @@ public final class InternalSDKHelper
    *                         from the ASN.1 stream reader.
    */
   @InternalUseOnly()
+  @NotNull()
   public static BindResult readBindResultFrom(final int messageID,
-                                final ASN1StreamReaderSequence messageSequence,
-                                final ASN1StreamReader reader)
+                     @NotNull final ASN1StreamReaderSequence messageSequence,
+                     @NotNull final ASN1StreamReader reader)
          throws LDAPException
   {
     return BindResult.readBindResultFrom(messageID, messageSequence, reader);
@@ -293,9 +332,10 @@ public final class InternalSDKHelper
    *                         from the ASN.1 stream reader.
    */
   @InternalUseOnly()
+  @NotNull()
   public static CompareResult readCompareResultFrom(final int messageID,
-                     final ASN1StreamReaderSequence messageSequence,
-                     final ASN1StreamReader reader)
+                     @NotNull final ASN1StreamReaderSequence messageSequence,
+                     @NotNull final ASN1StreamReader reader)
          throws LDAPException
   {
     return CompareResult.readCompareResultFrom(messageID, messageSequence,
@@ -321,9 +361,10 @@ public final class InternalSDKHelper
    *                         from the ASN.1 stream reader.
    */
   @InternalUseOnly()
+  @NotNull()
   public static ExtendedResult readExtendedResultFrom(final int messageID,
-                     final ASN1StreamReaderSequence messageSequence,
-                     final ASN1StreamReader reader)
+                     @NotNull final ASN1StreamReaderSequence messageSequence,
+                     @NotNull final ASN1StreamReader reader)
          throws LDAPException
   {
     return ExtendedResult.readExtendedResultFrom(messageID, messageSequence,
@@ -353,9 +394,11 @@ public final class InternalSDKHelper
    *                         from the ASN.1 stream reader.
    */
   @InternalUseOnly()
+  @NotNull()
   public static SearchResultEntry readSearchResultEntryFrom(final int messageID,
-                     final ASN1StreamReaderSequence messageSequence,
-                     final ASN1StreamReader reader, final Schema schema)
+                     @NotNull final ASN1StreamReaderSequence messageSequence,
+                     @NotNull final ASN1StreamReader reader,
+                     @Nullable final Schema schema)
          throws LDAPException
   {
     return SearchResultEntry.readSearchEntryFrom(messageID, messageSequence,
@@ -381,10 +424,11 @@ public final class InternalSDKHelper
    *                         from the ASN.1 stream reader.
    */
   @InternalUseOnly()
+  @NotNull()
   public static SearchResultReference readSearchResultReferenceFrom(
                      final int messageID,
-                     final ASN1StreamReaderSequence messageSequence,
-                     final ASN1StreamReader reader)
+                     @NotNull final ASN1StreamReaderSequence messageSequence,
+                     @NotNull final ASN1StreamReader reader)
          throws LDAPException
   {
     return SearchResultReference.readSearchReferenceFrom(messageID,
@@ -412,9 +456,10 @@ public final class InternalSDKHelper
    *                         from the ASN.1 stream reader.
    */
   @InternalUseOnly()
+  @NotNull()
   public static SearchResult readSearchResultFrom(final int messageID,
-                     final ASN1StreamReaderSequence messageSequence,
-                     final ASN1StreamReader reader)
+                     @NotNull final ASN1StreamReaderSequence messageSequence,
+                     @NotNull final ASN1StreamReader reader)
          throws LDAPException
   {
     return SearchResult.readSearchResultFrom(messageID, messageSequence,
@@ -440,10 +485,11 @@ public final class InternalSDKHelper
    *                         from the ASN.1 stream reader.
    */
   @InternalUseOnly()
+  @NotNull()
   public static IntermediateResponse readIntermediateResponseFrom(
                      final int messageID,
-                     final ASN1StreamReaderSequence messageSequence,
-                     final ASN1StreamReader reader)
+                     @NotNull final ASN1StreamReaderSequence messageSequence,
+                     @NotNull final ASN1StreamReader reader)
          throws LDAPException
   {
     return IntermediateResponse.readFrom(messageID, messageSequence, reader);
@@ -462,7 +508,9 @@ public final class InternalSDKHelper
    *          a per-request behavior is not specified.
    */
   @InternalUseOnly()
-  public static Boolean followReferralsInternal(final LDAPRequest request)
+  @Nullable()
+  public static Boolean followReferralsInternal(
+                             @NotNull final LDAPRequest request)
   {
     return request.followReferralsInternal();
   }
@@ -481,8 +529,9 @@ public final class InternalSDKHelper
    *          used if necessary.
    */
   @InternalUseOnly()
+  @Nullable()
   public static ReferralConnector getReferralConnectorInternal(
-                                       final LDAPRequest request)
+                                       @NotNull final LDAPRequest request)
   {
     return request.getReferralConnectorInternal();
   }
@@ -501,7 +550,7 @@ public final class InternalSDKHelper
    *          established.
    */
   @InternalUseOnly()
-  public static int nextMessageID(final LDAPConnection connection)
+  public static int nextMessageID(@NotNull final LDAPConnection connection)
   {
     return connection.nextMessageID();
   }
@@ -520,7 +569,9 @@ public final class InternalSDKHelper
    *          on the connection, or if the last bind attempt was not successful.
    */
   @InternalUseOnly()
-  public static BindRequest getLastBindRequest(final LDAPConnection connection)
+  @Nullable()
+  public static BindRequest getLastBindRequest(
+                                 @NotNull final LDAPConnection connection)
   {
     return connection.getLastBindRequest();
   }
@@ -537,8 +588,122 @@ public final class InternalSDKHelper
    *          {@code null} if no schema was provided for the entry.
    */
   @InternalUseOnly()
-  public static Schema getEntrySchema(final Entry entry)
+  @Nullable()
+  public static Schema getEntrySchema(@NotNull final Entry entry)
   {
     return entry.getSchema();
+  }
+
+
+
+  /**
+   * Retrieves the path to the instance root directory for the Ping Identity
+   * Directory Server (or related Ping Identity server product) with which this
+   * instance of the LDAP SDK is associated.
+   *
+   * @return  The path to the associated Ping Identity server instance root, or
+   *          {@code null} if the LDAP SDK is not running with knowledge of an
+   *          associated Ping Identity server instance.
+   */
+  @InternalUseOnly()
+  @Nullable()
+  public static File getPingIdentityServerRoot()
+  {
+    final String propertyValue = StaticUtils.getSystemProperty(
+         "com.unboundid.directory.server.ServerRoot");
+    if (propertyValue != null)
+    {
+      try
+      {
+        final File f = new File(propertyValue);
+        if (f.exists() && f.isDirectory())
+        {
+          return f;
+        }
+      }
+      catch (final Exception e)
+      {
+        Debug.debugException(e);
+      }
+    }
+
+    final String environmentVariableValue =
+         StaticUtils.getEnvironmentVariable("INSTANCE_ROOT");
+    if (environmentVariableValue != null)
+    {
+      try
+      {
+        final File f = new File(environmentVariableValue);
+        if (f.exists() && f.isDirectory())
+        {
+          return f;
+        }
+      }
+      catch (final Exception e)
+      {
+        Debug.debugException(e);
+      }
+    }
+
+    return null;
+  }
+
+
+
+  /**
+   * Retrieves an aggregate trust manager that can be used to interactively
+   * prompt the user about whether to trust a presented certificate chain as a
+   * last resort, but will try other alternatives first, including the
+   * JVM-default trust store and, if the tool is run with access to a Ping
+   * Identity Directory Server instance, then it will also try to use the
+   * server's default trust store and information in the topology registry.
+   *
+   * @param  expectedAddresses  An optional collection of the addresses that the
+   *                            client is expected to use to connect to one of
+   *                            the target servers.  This may be {@code null} or
+   *                            empty if no expected addresses are available, if
+   *                            this trust manager is only expected to be used
+   *                            to validate client certificates, or if no server
+   *                            address validation should be performed.  If a
+   *                            non-empty collection is provided, then the trust
+   *                            manager may issue a warning if the certificate
+   *                            does not contain any of these addresses.
+   *
+   * @return  An aggregate trust manager that can be used to interactively
+   *          prompt the user about whether to trust a presented certificate
+   *          chain as a last resort, but will try other alternatives first.
+   */
+  @InternalUseOnly()
+  @NotNull()
+  public static AggregateTrustManager getPreferredPromptTrustManagerChain(
+                     @Nullable final Collection<String> expectedAddresses)
+  {
+    final List<X509TrustManager> trustManagers = new ArrayList<>(4);
+    trustManagers.add(JVMDefaultTrustManager.getInstance());
+
+    final File pingIdentityServerRoot =
+         InternalSDKHelper.getPingIdentityServerRoot();
+    if (pingIdentityServerRoot != null)
+    {
+      final File serverTrustStore = StaticUtils.constructPath(
+           pingIdentityServerRoot, "config", "truststore");
+      if (serverTrustStore.exists())
+      {
+        trustManagers.add(new TrustStoreTrustManager(serverTrustStore));
+      }
+
+      final File serverConfigFile = StaticUtils.constructPath(
+           pingIdentityServerRoot, "config", "config.ldif");
+      if (serverConfigFile.exists())
+      {
+        trustManagers.add(new TopologyRegistryTrustManager(serverConfigFile,
+             TimeUnit.MINUTES.toMillis(5L)));
+      }
+    }
+
+    trustManagers.add(new PromptTrustManager(null, true, expectedAddresses,
+         null, null));
+
+    return new AggregateTrustManager(false, trustManagers);
   }
 }

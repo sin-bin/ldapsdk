@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,7 @@ import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -71,16 +87,16 @@ public final class SetterInfo
   private final boolean supportsMultipleValues;
 
   // The class that contains the associated method.
-  private final Class<?> containingClass;
+  @NotNull private final Class<?> containingClass;
 
   // The method with which this object is associated.
-  private final Method method;
+  @NotNull private final Method method;
 
   // The encoder used for this method.
-  private final ObjectEncoder encoder;
+  @NotNull private final ObjectEncoder encoder;
 
   // The name of the associated attribute type.
-  private final String attributeName;
+  @NotNull private final String attributeName;
 
 
 
@@ -93,7 +109,7 @@ public final class SetterInfo
    * @throws  LDAPPersistException  If a problem occurs while processing the
    *                                given method.
    */
-  SetterInfo(final Method m, final Class<?> c)
+  SetterInfo(@NotNull final Method m, @NotNull final Class<?> c)
        throws LDAPPersistException
   {
     Validator.ensureNotNull(m, c);
@@ -184,6 +200,7 @@ public final class SetterInfo
    *
    * @return  The method with which this object is associated.
    */
+  @NotNull()
   public Method getMethod()
   {
     return method;
@@ -197,6 +214,7 @@ public final class SetterInfo
    *
    * @return  The class that contains the associated field.
    */
+  @NotNull()
   public Class<?> getContainingClass()
   {
     return containingClass;
@@ -245,6 +263,7 @@ public final class SetterInfo
    *
    * @return  The encoder that should be used for the associated method.
    */
+  @NotNull()
   public ObjectEncoder getEncoder()
   {
     return encoder;
@@ -259,6 +278,7 @@ public final class SetterInfo
    * @return  The name of the LDAP attribute used to hold values for the
    *          associated method.
    */
+  @NotNull()
   public String getAttributeName()
   {
     return attributeName;
@@ -292,8 +312,8 @@ public final class SetterInfo
    * @return  {@code true} if the decode process was completely successful, or
    *          {@code false} if there were one or more failures.
    */
-  boolean invokeSetter(final Object o, final Entry e,
-                       final List<String> failureReasons)
+  boolean invokeSetter(@NotNull final Object o, @NotNull final Entry e,
+                       @NotNull final List<String> failureReasons)
   {
     boolean successful = true;
 

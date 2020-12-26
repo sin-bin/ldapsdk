@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,9 +47,13 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.StartTLSPostConnectProcessor;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
+import com.unboundid.util.ssl.AggregateTrustManager;
+import com.unboundid.util.ssl.JVMDefaultTrustManager;
 import com.unboundid.util.ssl.KeyStoreKeyManager;
 import com.unboundid.util.ssl.PKCS11KeyManager;
 import com.unboundid.util.ssl.SSLUtil;
@@ -61,7 +80,7 @@ final class SecurityOptions
    * absent, then a client certificate will be automatically selected if
    * necessary.
    */
-  private static final String FIELD_CLIENT_CERT_ALIAS =
+  @NotNull private static final String FIELD_CLIENT_CERT_ALIAS =
        "client-certificate-alias";
 
 
@@ -72,7 +91,7 @@ final class SecurityOptions
    * path to a key store file in a supported format.  If it is absent, then no
    * key store file will be used.
    */
-  private static final String FIELD_KEY_STORE_FILE = "key-store-file";
+  @NotNull private static final String FIELD_KEY_STORE_FILE = "key-store-file";
 
 
 
@@ -85,7 +104,7 @@ final class SecurityOptions
    * present, and neither field may be present unless the key-store-file field
    * is present or the key-store-type field is present with a value of "PKCS11".
    */
-  private static final String FIELD_KEY_STORE_PIN = "key-store-pin";
+  @NotNull private static final String FIELD_KEY_STORE_PIN = "key-store-pin";
 
 
 
@@ -99,7 +118,8 @@ final class SecurityOptions
    * be present unless the key-store-file field is present or the key-store-type
    * field is present with a value of "PKCS11".
    */
-  private static final String FIELD_KEY_STORE_PIN_FILE = "key-store-pin-file";
+  @NotNull private static final String FIELD_KEY_STORE_PIN_FILE =
+       "key-store-pin-file";
 
 
 
@@ -112,7 +132,7 @@ final class SecurityOptions
    * absent, then a default key store type of "JKS" will be assumed if a
    * key-store-file field is present.
    */
-  private static final String FIELD_KEY_STORE_TYPE = "key-store-type";
+  @NotNull private static final String FIELD_KEY_STORE_TYPE = "key-store-type";
 
 
 
@@ -126,7 +146,7 @@ final class SecurityOptions
    * used.  If the value of "none" is used (or assumed as the default value),
    * then none of the other fields may be present.
    */
-  private static final String FIELD_SECURITY_TYPE = "security-type";
+  @NotNull private static final String FIELD_SECURITY_TYPE = "security-type";
 
 
 
@@ -136,11 +156,12 @@ final class SecurityOptions
    * purposes, but is not recommended for production use because it does not
    * provide any protection against man-in-the-middle attacks.  If present, the
    * value should be a boolean, and if the value is {@code true} then the
-   * trust-store-file, trust-store-pin, trust-store-pin-file, and
-   * trust-store-type fields must not be provided.  If it is absent, then a
-   * default of {@code false} will be used.
+   * trust-jvm-default-issuers, trust-store-file, trust-store-pin,
+   * trust-store-pin-file, and trust-store-type fields must not be provided.  If
+   * it is absent, then a default of {@code false} will be used.
    */
-  private static final String FIELD_TRUST_ALL_CERTS = "trust-all-certificates";
+  @NotNull private static final String FIELD_TRUST_ALL_CERTS =
+       "trust-all-certificates";
 
 
 
@@ -156,8 +177,18 @@ final class SecurityOptions
    * validity window even if the trust-all-certificates field is present with a
    * value of true.
    */
-  private static final String FIELD_TRUST_EXPIRED_CERTS =
+  @NotNull private static final String FIELD_TRUST_EXPIRED_CERTS =
        "trust-expired-certificates";
+
+
+
+  /**
+   * The name of the field that indicates whether to trust any certificate
+   * signed by one of the JVM's default trusted issuers.  If present, the value
+   * should be a boolean.
+   */
+  @NotNull private static final String FIELD_USE_JVM_DEFAULT_TRUST_STORE =
+       "use-jvm-default-trust-store";
 
 
 
@@ -167,7 +198,8 @@ final class SecurityOptions
    * store file in a recognized format.  If this is absent, then no trust store
    * will be accessed and the JVM's default trust mechanism will be used.
    */
-  private static final String FIELD_TRUST_STORE_FILE = "trust-store-file";
+  @NotNull private static final String FIELD_TRUST_STORE_FILE =
+       "trust-store-file";
 
 
 
@@ -180,7 +212,8 @@ final class SecurityOptions
    * be present, and neither field may be present unless the trust-store-file
    * field is present.
    */
-  private static final String FIELD_TRUST_STORE_PIN = "trust-store-pin";
+  @NotNull private static final String FIELD_TRUST_STORE_PIN =
+       "trust-store-pin";
 
 
 
@@ -193,7 +226,7 @@ final class SecurityOptions
    * trust-store-pin-file fields must not both be present, and neither field may
    * be present unless the trust-store-file field is present.
    */
-  private static final String FIELD_TRUST_STORE_PIN_FILE =
+  @NotNull private static final String FIELD_TRUST_STORE_PIN_FILE =
        "trust-store-pin-file";
 
 
@@ -204,7 +237,8 @@ final class SecurityOptions
    * "PKCS12".  If it is absent, then a default trust store type of "JKS" will
    * be used if the trust-store-file field is present.
    */
-  private static final String FIELD_TRUST_STORE_TYPE = "trust-store-type";
+  @NotNull private static final String FIELD_TRUST_STORE_TYPE =
+       "trust-store-type";
 
 
 
@@ -218,7 +252,7 @@ final class SecurityOptions
    * subjectAltName extension in the certificate.  If it is not present, a
    * default value of {@code false} will be used.
    */
-  private static final String FIELD_VERIFY_ADDRESS =
+  @NotNull private static final String FIELD_VERIFY_ADDRESS =
        "verify-address-in-certificate";
 
 
@@ -227,11 +261,11 @@ final class SecurityOptions
   private final boolean verifyAddressInCertificate;
 
   // The socket factory to use when creating connections.
-  private final SocketFactory socketFactory;
+  @NotNull private final SocketFactory socketFactory;
 
   // The post-connect processor to use if StartTLS-protected connections are to
   // be used in a connection pool.
-  private final StartTLSPostConnectProcessor postConnectProcessor;
+  @Nullable private final StartTLSPostConnectProcessor postConnectProcessor;
 
 
 
@@ -245,20 +279,21 @@ final class SecurityOptions
    * @throws  LDAPException  If there is a problem with the security options
    *                         data in the provided JSON object.
    */
-  SecurityOptions(final JSONObject connectionDetailsObject)
+  SecurityOptions(@NotNull final JSONObject connectionDetailsObject)
        throws LDAPException
   {
-    boolean useSSL         = false;
-    boolean useStartTLS    = false;
-    boolean trustAll       = false;
-    boolean trustExpired   = false;
-    boolean verifyAddress  = false;
-    String  certAlias      = null;
-    String  keyStoreFile   = null;
-    String  keyStorePIN    = null;
-    String  keyStoreType   = null;
+    boolean useSSL = false;
+    boolean useStartTLS = false;
+    boolean trustAll = false;
+    boolean trustExpired = false;
+    boolean useJVMDefaultTrustStore = false;
+    boolean verifyAddress = false;
+    String  certAlias = null;
+    String  keyStoreFile = null;
+    String  keyStorePIN = null;
+    String  keyStoreType = null;
     String  trustStoreFile = null;
-    String  trustStorePIN  = null;
+    String  trustStorePIN = null;
     String  trustStoreType = null;
 
     final JSONObject o = LDAPConnectionDetailsJSONSpecification.getObject(
@@ -280,6 +315,7 @@ final class SecurityOptions
            FIELD_TRUST_STORE_PIN,
            FIELD_TRUST_STORE_PIN_FILE,
            FIELD_TRUST_STORE_TYPE,
+           FIELD_USE_JVM_DEFAULT_TRUST_STORE,
            FIELD_VERIFY_ADDRESS);
 
       final String type = StaticUtils.toLowerCase(
@@ -326,7 +362,8 @@ final class SecurityOptions
              FIELD_TRUST_STORE_FILE,
              FIELD_TRUST_STORE_PIN,
              FIELD_TRUST_STORE_PIN_FILE,
-             FIELD_TRUST_STORE_TYPE);
+             FIELD_TRUST_STORE_TYPE,
+             FIELD_USE_JVM_DEFAULT_TRUST_STORE);
       }
       else
       {
@@ -373,6 +410,10 @@ final class SecurityOptions
                  FIELD_TRUST_STORE_PIN_FILE);
           }
         }
+
+        useJVMDefaultTrustStore =
+             LDAPConnectionDetailsJSONSpecification.getBoolean(o,
+                  FIELD_USE_JVM_DEFAULT_TRUST_STORE, false);
       }
 
       verifyAddress = LDAPConnectionDetailsJSONSpecification.getBoolean(o,
@@ -463,24 +504,45 @@ final class SecurityOptions
         {
           trustManager = new TrustAllTrustManager(! trustExpired);
         }
-        else if (trustStoreFile != null)
+        else
         {
-          final char[] trustStorePINArray;
-          if (trustStorePIN == null)
+          if (trustStoreFile == null)
           {
-            trustStorePINArray = null;
+            if (useJVMDefaultTrustStore)
+            {
+              trustManager = JVMDefaultTrustManager.getInstance();
+            }
+            else
+            {
+              trustManager = null;
+            }
           }
           else
           {
-            trustStorePINArray = trustStorePIN.toCharArray();
-          }
+            final char[] trustStorePINArray;
+            if (trustStorePIN == null)
+            {
+              trustStorePINArray = null;
+            }
+            else
+            {
+              trustStorePINArray = trustStorePIN.toCharArray();
+            }
 
-          trustManager = new TrustStoreTrustManager(trustStoreFile,
-               trustStorePINArray, trustStoreType, ! trustExpired);
-        }
-        else
-        {
-          trustManager = null;
+            final TrustStoreTrustManager trustStoreTrustManager =
+                 new TrustStoreTrustManager(trustStoreFile, trustStorePINArray,
+                      trustStoreType, ! trustExpired);
+            if (useJVMDefaultTrustStore)
+            {
+              trustManager = new AggregateTrustManager(false,
+                   trustStoreTrustManager,
+                   JVMDefaultTrustManager.getInstance());
+            }
+            else
+            {
+              trustManager = trustStoreTrustManager;
+            }
+          }
         }
       }
       catch (final Exception e)
@@ -591,6 +653,7 @@ final class SecurityOptions
    *
    * @return  The socket factory to use when establishing connections.
    */
+  @NotNull()
   SocketFactory getSocketFactory()
   {
     return socketFactory;
@@ -604,6 +667,7 @@ final class SecurityOptions
    *
    * @return  The StartTLS post-connect processor to use with a connection pool.
    */
+  @Nullable()
   StartTLSPostConnectProcessor getPostConnectProcessor()
   {
     return postConnectProcessor;

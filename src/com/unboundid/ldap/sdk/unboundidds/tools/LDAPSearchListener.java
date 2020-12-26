@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,8 @@ import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchResultListener;
 import com.unboundid.ldap.sdk.SearchResultReference;
 import com.unboundid.ldap.sdk.transformations.EntryTransformation;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -61,10 +78,10 @@ final class LDAPSearchListener
 
 
   // The output handler to use to display the results.
-  private final LDAPSearchOutputHandler outputHandler;
+  @NotNull private final LDAPSearchOutputHandler outputHandler;
 
   // The entry transformations to apply.
-  private final List<EntryTransformation> entryTransformations;
+  @Nullable private final List<EntryTransformation> entryTransformations;
 
 
 
@@ -77,8 +94,8 @@ final class LDAPSearchListener
    *                               be {@code null} or empty if no
    *                               transformations are needed.
    */
-  LDAPSearchListener(final LDAPSearchOutputHandler outputHandler,
-                     final List<EntryTransformation> entryTransformations)
+  LDAPSearchListener(@NotNull final LDAPSearchOutputHandler outputHandler,
+       @Nullable final List<EntryTransformation> entryTransformations)
   {
     this.outputHandler        = outputHandler;
     this.entryTransformations = entryTransformations;
@@ -90,7 +107,7 @@ final class LDAPSearchListener
    * {@inheritDoc}
    */
   @Override()
-  public void searchEntryReturned(final SearchResultEntry searchEntry)
+  public void searchEntryReturned(@NotNull final SearchResultEntry searchEntry)
   {
     final SearchResultEntry sre;
     if (entryTransformations == null)
@@ -103,6 +120,10 @@ final class LDAPSearchListener
       for (final EntryTransformation t : entryTransformations)
       {
         e = t.transformEntry(e);
+        if (e == null)
+        {
+          return;
+        }
       }
 
       sre = new SearchResultEntry(searchEntry.getMessageID(), e,
@@ -119,7 +140,7 @@ final class LDAPSearchListener
    */
   @Override()
   public void searchReferenceReturned(
-                   final SearchResultReference searchReference)
+                   @NotNull final SearchResultReference searchReference)
   {
     outputHandler.formatSearchResultReference(searchReference);
   }

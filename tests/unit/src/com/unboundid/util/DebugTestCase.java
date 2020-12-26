@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,6 +37,7 @@ package com.unboundid.util;
 
 
 
+import java.io.ByteArrayInputStream;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Properties;
@@ -34,6 +50,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.unboundid.asn1.ASN1Null;
+import com.unboundid.ldap.listener.InMemoryDirectoryServer;
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.DisconnectType;
@@ -41,11 +58,15 @@ import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.ldap.sdk.DeleteRequest;
 import com.unboundid.ldap.sdk.IntermediateResponse;
 import com.unboundid.ldap.sdk.LDAPConnection;
+import com.unboundid.ldap.sdk.LDAPConnectionPool;
+import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchResultReference;
 import com.unboundid.ldif.LDIFDeleteChangeRecord;
+import com.unboundid.util.json.JSONObject;
+import com.unboundid.util.json.JSONObjectReader;
 
 
 
@@ -713,6 +734,7 @@ public class DebugTestCase
     assertFalse(Debug.debugEnabled());
     assertFalse(Debug.debugEnabled(DebugType.ASN1));
     assertFalse(Debug.debugEnabled(DebugType.CONNECT));
+    assertFalse(Debug.debugEnabled(DebugType.CONNECTION_POOL));
     assertFalse(Debug.debugEnabled(DebugType.EXCEPTION));
     assertFalse(Debug.debugEnabled(DebugType.LDAP));
     assertFalse(Debug.debugEnabled(DebugType.LDIF));
@@ -724,6 +746,7 @@ public class DebugTestCase
     assertTrue(Debug.debugEnabled());
     assertFalse(Debug.debugEnabled(DebugType.ASN1));
     assertFalse(Debug.debugEnabled(DebugType.CONNECT));
+    assertFalse(Debug.debugEnabled(DebugType.CONNECTION_POOL));
     assertTrue(Debug.debugEnabled(DebugType.EXCEPTION));
     assertFalse(Debug.debugEnabled(DebugType.LDAP));
     assertFalse(Debug.debugEnabled(DebugType.LDIF));
@@ -735,6 +758,7 @@ public class DebugTestCase
     assertFalse(Debug.debugEnabled());
     assertFalse(Debug.debugEnabled(DebugType.ASN1));
     assertFalse(Debug.debugEnabled(DebugType.CONNECT));
+    assertFalse(Debug.debugEnabled(DebugType.CONNECTION_POOL));
     assertFalse(Debug.debugEnabled(DebugType.EXCEPTION));
     assertFalse(Debug.debugEnabled(DebugType.LDAP));
     assertFalse(Debug.debugEnabled(DebugType.LDIF));
@@ -746,6 +770,7 @@ public class DebugTestCase
     Debug.setEnabled(true);
     assertTrue(Debug.debugEnabled(DebugType.ASN1));
     assertTrue(Debug.debugEnabled(DebugType.CONNECT));
+    assertTrue(Debug.debugEnabled(DebugType.CONNECTION_POOL));
     assertTrue(Debug.debugEnabled(DebugType.EXCEPTION));
     assertTrue(Debug.debugEnabled(DebugType.LDAP));
     assertTrue(Debug.debugEnabled(DebugType.LDIF));
@@ -757,6 +782,7 @@ public class DebugTestCase
     Debug.setEnabled(true, null);
     assertTrue(Debug.debugEnabled(DebugType.ASN1));
     assertTrue(Debug.debugEnabled(DebugType.CONNECT));
+    assertTrue(Debug.debugEnabled(DebugType.CONNECTION_POOL));
     assertTrue(Debug.debugEnabled(DebugType.EXCEPTION));
     assertTrue(Debug.debugEnabled(DebugType.LDAP));
     assertTrue(Debug.debugEnabled(DebugType.LDIF));
@@ -768,6 +794,7 @@ public class DebugTestCase
     Debug.setEnabled(true, EnumSet.noneOf(DebugType.class));
     assertTrue(Debug.debugEnabled(DebugType.ASN1));
     assertTrue(Debug.debugEnabled(DebugType.CONNECT));
+    assertTrue(Debug.debugEnabled(DebugType.CONNECTION_POOL));
     assertTrue(Debug.debugEnabled(DebugType.EXCEPTION));
     assertTrue(Debug.debugEnabled(DebugType.LDAP));
     assertTrue(Debug.debugEnabled(DebugType.LDIF));
@@ -795,7 +822,8 @@ public class DebugTestCase
     Debug.debug(Level.SEVERE, DebugType.OTHER, "foo");
     String s = testLogHandler.getMessagesString();
     assertTrue(s.contains("foo"));
-    assertFalse(s.contains("calledFrom="));
+    assertFalse(s.contains("caller-stack-trace"));
+    assertValidJSON(testLogHandler.getMessagesString());
 
     Debug.setIncludeStackTrace(true);
     assertTrue(Debug.includeStackTrace());
@@ -804,7 +832,8 @@ public class DebugTestCase
     Debug.debug(Level.SEVERE, DebugType.OTHER, "foo");
     s = testLogHandler.getMessagesString();
     assertTrue(s.contains("foo"));
-    assertTrue(s.contains("calledFrom="));
+    assertTrue(s.contains("caller-stack-trace"));
+    assertValidJSON(testLogHandler.getMessagesString());
 
     Debug.setIncludeStackTrace(false);
     assertFalse(Debug.includeStackTrace());
@@ -813,7 +842,36 @@ public class DebugTestCase
     Debug.debug(Level.SEVERE, DebugType.OTHER, "foo");
     s = testLogHandler.getMessagesString();
     assertTrue(s.contains("foo"));
-    assertFalse(s.contains("calledFrom="));
+    assertFalse(s.contains("caller-stack-trace"));
+    assertValidJSON(testLogHandler.getMessagesString());
+  }
+
+
+
+  /**
+   * Ensures that the provided string consists of zero or more valid JSON
+   * objects.
+   *
+   * @param  s  The string to examine.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  private static void assertValidJSON(final String s)
+          throws Exception
+  {
+    final ByteArrayInputStream inputStream =
+         new ByteArrayInputStream(StaticUtils.getBytes(s));
+    try (JSONObjectReader r = new JSONObjectReader(inputStream))
+    {
+      while (true)
+      {
+        final JSONObject o = r.readObject();
+        if (o == null)
+        {
+          break;
+        }
+      }
+    }
   }
 
 
@@ -3012,6 +3070,57 @@ public class DebugTestCase
 
 
   /**
+   * Provides coverage for the method that debugs connection pool interaction.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testDebugConnectionPool()
+         throws Exception
+  {
+    Debug.setEnabled(true);
+    testLogHandler.resetMessageCount();
+
+    assertTrue(Debug.debugEnabled(DebugType.CONNECTION_POOL));
+
+    final InMemoryDirectoryServer ds = getTestDS();
+    final LDAPConnectionPool pool = ds.getConnectionPool(1);
+
+    assertNotNull(pool.getRootDSE());
+    assertTrue(testLogHandler.getMessageCount() >= 2);
+    testLogHandler.resetMessageCount();
+
+    pool.setConnectionPoolName("Test pool");
+    final LDAPConnection conn = pool.getConnection();
+    conn.setConnectionName("Test connection");
+    pool.releaseConnection(conn);
+    assertTrue(testLogHandler.getMessageCount() >= 2);
+    testLogHandler.resetMessageCount();
+
+    pool.close();
+    assertTrue(testLogHandler.getMessageCount() >= 1);
+    testLogHandler.resetMessageCount();
+
+    try
+    {
+      pool.getRootDSE();
+      fail("Expected an exception when trying to use a closed pool");
+    }
+    catch (final LDAPException e)
+    {
+      // This was expected.
+    }
+    assertTrue(testLogHandler.getMessageCount() >= 1);
+    testLogHandler.resetMessageCount();
+
+    Debug.debugConnectionPool(Level.SEVERE, pool, null, "Test message",
+         new Exception());
+    assertTrue(testLogHandler.getMessageCount() >= 1);
+  }
+
+
+
+  /**
    * Tests the first {@code debugLDIFWrite} method with the debugger disabled
    * and a debug type set of all types.
    *
@@ -4596,6 +4705,7 @@ public class DebugTestCase
     LDAPConnection conn = getAdminConnection();
     assertTrue((testLogHandler.getMessageCount() >= 4),
                testLogHandler.getMessagesString());
+    assertValidJSON(testLogHandler.getMessagesString());
 
 
     // Add an entry to the server.  This should result in four debug events:
@@ -4606,6 +4716,7 @@ public class DebugTestCase
     conn.add(getTestBaseDN(), getBaseEntryAttributes());
     assertTrue((testLogHandler.getMessageCount() >= 3),
                testLogHandler.getMessagesString());
+    assertValidJSON(testLogHandler.getMessagesString());
 
 
     // Read the entry back.  This should result in six debug events:
@@ -4617,6 +4728,7 @@ public class DebugTestCase
     conn.getEntry(getTestBaseDN());
     assertTrue((testLogHandler.getMessageCount() >= 4),
                testLogHandler.getMessagesString());
+    assertValidJSON(testLogHandler.getMessagesString());
 
 
     // Remove entry from the server.  This should result in four debug events:
@@ -4627,6 +4739,7 @@ public class DebugTestCase
     conn.delete(getTestBaseDN());
     assertTrue((testLogHandler.getMessageCount() >= 3),
                testLogHandler.getMessagesString());
+    assertValidJSON(testLogHandler.getMessagesString());
 
 
     // Close the connection to the server.  This should result in three debug
@@ -4638,6 +4751,7 @@ public class DebugTestCase
     conn.close();
     assertTrue((testLogHandler.getMessageCount() >= 3),
                testLogHandler.getMessagesString());
+    assertValidJSON(testLogHandler.getMessagesString());
   }
 
 

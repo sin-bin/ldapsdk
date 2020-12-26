@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -48,6 +63,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.AggregateInputStream;
 import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.PassphraseEncryptedInputStream;
 import com.unboundid.util.PassphraseEncryptedOutputStream;
@@ -91,7 +108,8 @@ public final class ToolUtils
    * encryption settings definition ID if the server code is available.  We have
    * to call this via reflection because the server code may not be available.
    */
-  private static final Method GET_PASSPHRASE_FOR_ENCRYPTION_SETTINGS_ID_METHOD;
+  @Nullable private static final Method
+       GET_PASSPHRASE_FOR_ENCRYPTION_SETTINGS_ID_METHOD;
   static
   {
     Method m = null;
@@ -139,7 +157,8 @@ public final class ToolUtils
    * @throws  LDAPException  If a problem occurs while attempting to read the
    *                         encryption passphrase.
    */
-  public static String readEncryptionPassphraseFromFile(final File f)
+  @NotNull()
+  public static String readEncryptionPassphraseFromFile(@NotNull final File f)
          throws LDAPException
   {
     Validator.ensureTrue((f != null),
@@ -218,10 +237,11 @@ public final class ToolUtils
    * @throws  LDAPException  If a problem is encountered while trying to obtain
    *                         the passphrase from the user.
    */
+  @NotNull()
   public static String promptForEncryptionPassphrase(final boolean allowEmpty,
-                                                     final boolean confirm,
-                                                     final PrintStream out,
-                                                     final PrintStream err)
+              final boolean confirm,
+              @NotNull final PrintStream out,
+              @NotNull final PrintStream err)
           throws LDAPException
   {
     return promptForEncryptionPassphrase(allowEmpty, confirm,
@@ -259,11 +279,13 @@ public final class ToolUtils
    * @throws  LDAPException  If a problem is encountered while trying to obtain
    *                         the passphrase from the user.
    */
+  @NotNull()
   public static String promptForEncryptionPassphrase(final boolean allowEmpty,
                             final boolean confirm,
-                            final CharSequence initialPrompt,
-                            final CharSequence confirmPrompt,
-                            final PrintStream out, final PrintStream err)
+                            @NotNull final CharSequence initialPrompt,
+                            @Nullable final CharSequence confirmPrompt,
+                            @NotNull final PrintStream out,
+                            @NotNull final PrintStream err)
           throws LDAPException
   {
     Validator.ensureTrue(
@@ -345,7 +367,8 @@ public final class ToolUtils
    * @param  out      The {@code PrintStream} that should be used to write the
    *                  provided message.
    */
-  public static void wrap(final CharSequence message, final PrintStream out)
+  public static void wrap(@NotNull final CharSequence message,
+                          @NotNull final PrintStream out)
   {
     Validator.ensureTrue((out != null), "ToolUtils.wrap.out must not be null.");
 
@@ -376,9 +399,9 @@ public final class ToolUtils
    *                              should be written.  It must not be
    *                              {@code null}.
    */
-  public static void wrapPrompt(final CharSequence prompt,
+  public static void wrapPrompt(@NotNull final CharSequence prompt,
                                 final boolean ensureTrailingSpace,
-                                final PrintStream out)
+                                @NotNull final PrintStream out)
   {
     Validator.ensureTrue(((prompt != null) && (prompt.length() > 0)),
          "ToolUtils.wrapPrompt.prompt must not be null or empty.");
@@ -435,10 +458,12 @@ public final class ToolUtils
    * @throws  IOException  If a problem is encountered while attempting to get
    *                       the input stream for reading the data.
    */
+  @NotNull()
   public static ObjectPair<InputStream,String> getInputStreamForLDIFFiles(
-                     final List<File> ldifFiles,
-                     final String encryptionPassphrase, final PrintStream out,
-                     final PrintStream err)
+                     @NotNull final List<File> ldifFiles,
+                     @Nullable final String encryptionPassphrase,
+                     @NotNull final PrintStream out,
+                     @NotNull final PrintStream err)
          throws IOException
   {
     Validator.ensureTrue(((ldifFiles != null) && (! ldifFiles.isEmpty())),
@@ -568,8 +593,9 @@ public final class ToolUtils
    *                       determine whether the stream contains GZIP-compressed
    *                       data.
    */
+  @NotNull()
   public static InputStream getPossiblyGZIPCompressedInputStream(
-                                 final InputStream inputStream)
+                                 @NotNull final InputStream inputStream)
          throws IOException
   {
     Validator.ensureTrue((inputStream != null),
@@ -701,15 +727,16 @@ public final class ToolUtils
    *                                    attempting to prepare to decrypt data
    *                                    read from the input stream.
    */
+  @NotNull()
   public static ObjectPair<InputStream,String>
                      getPossiblyPassphraseEncryptedInputStream(
-                          final InputStream inputStream,
-                          final String potentialPassphrase,
+                          @NotNull final InputStream inputStream,
+                          @Nullable final String potentialPassphrase,
                           final boolean promptOnIncorrectPassphrase,
-                          final CharSequence passphrasePrompt,
-                          final CharSequence incorrectPassphraseError,
-                          final PrintStream standardOutput,
-                          final PrintStream standardError)
+                          @NotNull final CharSequence passphrasePrompt,
+                          @NotNull final CharSequence incorrectPassphraseError,
+                          @NotNull final PrintStream standardOutput,
+                          @NotNull final PrintStream standardError)
          throws IOException, InvalidKeyException, GeneralSecurityException
   {
     final Collection<char[]> potentialPassphrases;
@@ -822,15 +849,16 @@ public final class ToolUtils
    *                                    attempting to prepare to decrypt data
    *                                    read from the input stream.
    */
+  @NotNull()
   public static ObjectPair<InputStream,char[]>
                      getPossiblyPassphraseEncryptedInputStream(
-                          final InputStream inputStream,
-                          final char[] potentialPassphrase,
+                          @NotNull final InputStream inputStream,
+                          @Nullable final char[] potentialPassphrase,
                           final boolean promptOnIncorrectPassphrase,
-                          final CharSequence passphrasePrompt,
-                          final CharSequence incorrectPassphraseError,
-                          final PrintStream standardOutput,
-                          final PrintStream standardError)
+                          @NotNull final CharSequence passphrasePrompt,
+                          @NotNull final CharSequence incorrectPassphraseError,
+                          @NotNull final PrintStream standardOutput,
+                          @NotNull final PrintStream standardError)
          throws IOException, InvalidKeyException, GeneralSecurityException
   {
     final Collection<char[]> potentialPassphrases;
@@ -943,15 +971,16 @@ public final class ToolUtils
    *                                    attempting to prepare to decrypt data
    *                                    read from the input stream.
    */
+  @NotNull()
   public static ObjectPair<InputStream,char[]>
-                     getPossiblyPassphraseEncryptedInputStream(
-                          final InputStream inputStream,
-                          final Collection<char[]> potentialPassphrases,
-                          final boolean promptOnIncorrectPassphrase,
-                          final CharSequence passphrasePrompt,
-                          final CharSequence incorrectPassphraseError,
-                          final PrintStream standardOutput,
-                          final PrintStream standardError)
+              getPossiblyPassphraseEncryptedInputStream(
+                   @NotNull final InputStream inputStream,
+                   @Nullable final Collection<char[]> potentialPassphrases,
+                   final boolean promptOnIncorrectPassphrase,
+                   @NotNull final CharSequence passphrasePrompt,
+                   @NotNull final CharSequence incorrectPassphraseError,
+                   @NotNull final PrintStream standardOutput,
+                   @NotNull final PrintStream standardError)
          throws IOException, InvalidKeyException, GeneralSecurityException
   {
     Validator.ensureTrue((inputStream != null),

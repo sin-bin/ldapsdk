@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,8 @@ import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.ldap.sdk.ReadOnlySearchRequest;
 import com.unboundid.ldap.sdk.SearchResultReference;
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -51,6 +68,7 @@ public interface InMemoryInterceptedSearchResult
    *
    * @return  The search request that was processed.
    */
+  @NotNull()
   ReadOnlySearchRequest getRequest();
 
 
@@ -60,6 +78,7 @@ public interface InMemoryInterceptedSearchResult
    *
    * @return  The search result to be returned to the client.
    */
+  @Nullable()
   LDAPResult getResult();
 
 
@@ -72,7 +91,7 @@ public interface InMemoryInterceptedSearchResult
    *                       the in-memory directory server.  It must not be
    *                       {@code null}.
    */
-  void setResult(LDAPResult searchResult);
+  void setResult(@NotNull LDAPResult searchResult);
 
 
 
@@ -91,7 +110,7 @@ public interface InMemoryInterceptedSearchResult
    * @throws  LDAPException  If a problem is encountered while trying to send
    *                         the search result entry.
    */
-  void sendSearchEntry(Entry entry)
+  void sendSearchEntry(@NotNull Entry entry)
        throws LDAPException;
 
 
@@ -108,7 +127,7 @@ public interface InMemoryInterceptedSearchResult
    * @throws  LDAPException  If a problem is encountered while trying to send
    *                         the search result reference.
    */
-  void sendSearchReference(SearchResultReference reference)
+  void sendSearchReference(@NotNull SearchResultReference reference)
        throws LDAPException;
 
 
@@ -125,6 +144,7 @@ public interface InMemoryInterceptedSearchResult
    * @throws  LDAPException  If a problem is encountered while trying to send
    *                         the intermediate response.
    */
-  void sendIntermediateResponse(IntermediateResponse intermediateResponse)
-         throws LDAPException;
+  void sendIntermediateResponse(
+            @NotNull IntermediateResponse intermediateResponse)
+       throws LDAPException;
 }

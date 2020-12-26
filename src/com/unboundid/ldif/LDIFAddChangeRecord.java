@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,7 @@ package com.unboundid.ldif;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +56,8 @@ import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -66,7 +84,7 @@ public final class LDIFAddChangeRecord
 
 
   // The set of attributes for this add change record.
-  private final Attribute[] attributes;
+  @NotNull private final Attribute[] attributes;
 
 
 
@@ -78,7 +96,8 @@ public final class LDIFAddChangeRecord
    * @param  attributes  The set of attributes for this LDIF add change record.
    *                     It must not be {@code null} or empty.
    */
-  public LDIFAddChangeRecord(final String dn, final Attribute... attributes)
+  public LDIFAddChangeRecord(@NotNull final String dn,
+                             @NotNull final Attribute... attributes)
   {
     this(dn, attributes, null);
   }
@@ -96,8 +115,9 @@ public final class LDIFAddChangeRecord
    *                     It may be {@code null} or empty if there are no
    *                     controls.
    */
-  public LDIFAddChangeRecord(final String dn, final Attribute[] attributes,
-                             final List<Control> controls)
+  public LDIFAddChangeRecord(@NotNull final String dn,
+                             @NotNull final Attribute[] attributes,
+                             @Nullable final List<Control> controls)
   {
     super(dn, controls);
 
@@ -118,7 +138,8 @@ public final class LDIFAddChangeRecord
    * @param  attributes  The set of attributes for this LDIF add change record.
    *                     It must not be {@code null} or empty.
    */
-  public LDIFAddChangeRecord(final String dn, final List<Attribute> attributes)
+  public LDIFAddChangeRecord(@NotNull final String dn,
+                             @NotNull final List<Attribute> attributes)
   {
     this(dn, attributes, null);
   }
@@ -136,8 +157,9 @@ public final class LDIFAddChangeRecord
    *                     It may be {@code null} or empty if there are no
    *                     controls.
    */
-  public LDIFAddChangeRecord(final String dn, final List<Attribute> attributes,
-                             final List<Control> controls)
+  public LDIFAddChangeRecord(@NotNull final String dn,
+                             @NotNull final List<Attribute> attributes,
+                             @Nullable final List<Control> controls)
   {
     super(dn, controls);
 
@@ -157,9 +179,9 @@ public final class LDIFAddChangeRecord
    * @param  entry  The entry to use to create this LDIF add change record.  It
    *                must not be {@code null}.
    */
-  public LDIFAddChangeRecord(final Entry entry)
+  public LDIFAddChangeRecord(@NotNull final Entry entry)
   {
-    this(entry, null);
+    this(entry, Collections.<Control>emptyList());
   }
 
 
@@ -172,7 +194,8 @@ public final class LDIFAddChangeRecord
    * @param  controls  The set of controls for this LDIF add change record.  It
    *                   may be {@code null} or empty if there are no controls.
    */
-  public LDIFAddChangeRecord(final Entry entry, final List<Control> controls)
+  public LDIFAddChangeRecord(@NotNull final Entry entry,
+                             @Nullable final List<Control> controls)
   {
     super(entry.getDN(), controls);
 
@@ -194,7 +217,7 @@ public final class LDIFAddChangeRecord
    * @param  addRequest  The add request to use to create this LDIF add change
    *                     record.  It must not be {@code null}.
    */
-  public LDIFAddChangeRecord(final AddRequest addRequest)
+  public LDIFAddChangeRecord(@NotNull final AddRequest addRequest)
   {
     super(addRequest.getDN(), addRequest.getControlList());
 
@@ -215,6 +238,7 @@ public final class LDIFAddChangeRecord
    *
    * @return  The set of attributes for this add change record.
    */
+  @NotNull()
   public Attribute[] getAttributes()
   {
     return attributes;
@@ -227,6 +251,7 @@ public final class LDIFAddChangeRecord
    *
    * @return  The entry that would be created by this add change record.
    */
+  @NotNull()
   public Entry getEntryToAdd()
   {
     return new Entry(getDN(), attributes);
@@ -240,6 +265,7 @@ public final class LDIFAddChangeRecord
    *
    * @return  The add request created from this LDIF add change record.
    */
+  @NotNull()
   public AddRequest toAddRequest()
   {
     return toAddRequest(true);
@@ -256,6 +282,7 @@ public final class LDIFAddChangeRecord
    *
    * @return  The add request created from this LDIF add change record.
    */
+  @NotNull()
   public AddRequest toAddRequest(final boolean includeControls)
   {
     final AddRequest addRequest = new AddRequest(getDN(), attributes);
@@ -273,6 +300,7 @@ public final class LDIFAddChangeRecord
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ChangeType getChangeType()
   {
     return ChangeType.ADD;
@@ -284,7 +312,8 @@ public final class LDIFAddChangeRecord
    * {@inheritDoc}
    */
   @Override()
-  public LDIFAddChangeRecord duplicate(final Control... controls)
+  @NotNull()
+  public LDIFAddChangeRecord duplicate(@Nullable final Control... controls)
   {
     return new LDIFAddChangeRecord(getDN(), attributes,
          StaticUtils.toList(controls));
@@ -296,7 +325,8 @@ public final class LDIFAddChangeRecord
    * {@inheritDoc}
    */
   @Override()
-  public LDAPResult processChange(final LDAPInterface connection,
+  @NotNull()
+  public LDAPResult processChange(@NotNull final LDAPInterface connection,
                                   final boolean includeControls)
          throws LDAPException
   {
@@ -309,6 +339,7 @@ public final class LDIFAddChangeRecord
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String[] toLDIF(final int wrapColumn)
   {
     List<String> ldifLines = new ArrayList<>(2*attributes.length);
@@ -346,7 +377,8 @@ public final class LDIFAddChangeRecord
    * {@inheritDoc}
    */
   @Override()
-  public void toLDIF(final ByteStringBuffer buffer, final int wrapColumn)
+  public void toLDIF(@NotNull final ByteStringBuffer buffer,
+                     final int wrapColumn)
   {
     LDIFWriter.encodeNameAndValue("dn", new ASN1OctetString(getDN()), buffer,
          wrapColumn);
@@ -380,7 +412,8 @@ public final class LDIFAddChangeRecord
    * {@inheritDoc}
    */
   @Override()
-  public void toLDIFString(final StringBuilder buffer, final int wrapColumn)
+  public void toLDIFString(@NotNull final StringBuilder buffer,
+                           final int wrapColumn)
   {
     LDIFWriter.encodeNameAndValue("dn", new ASN1OctetString(getDN()), buffer,
          wrapColumn);
@@ -439,7 +472,7 @@ public final class LDIFAddChangeRecord
    * {@inheritDoc}
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == null)
     {
@@ -476,7 +509,7 @@ public final class LDIFAddChangeRecord
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("LDIFAddChangeRecord(dn='");
     buffer.append(getDN());

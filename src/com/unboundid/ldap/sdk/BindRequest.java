@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,8 @@ package com.unboundid.ldap.sdk;
 
 import com.unboundid.asn1.ASN1Integer;
 import com.unboundid.util.Extensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -57,7 +74,8 @@ public abstract class BindRequest
   /**
    * The pre-encoded ASN.1 element used to represent the protocol version.
    */
-  protected static final ASN1Integer VERSION_ELEMENT = new ASN1Integer(3);
+  @NotNull protected static final ASN1Integer VERSION_ELEMENT =
+       new ASN1Integer(3);
 
 
 
@@ -73,7 +91,7 @@ public abstract class BindRequest
    *
    * @param  controls  The set of controls to include in this bind request.
    */
-  protected BindRequest(final Control[] controls)
+  protected BindRequest(@Nullable final Control[] controls)
   {
     super(controls);
   }
@@ -96,7 +114,9 @@ public abstract class BindRequest
    *                         reading the response.
    */
   @Override()
-  protected abstract BindResult process(LDAPConnection connection, int depth)
+  @NotNull()
+  protected abstract BindResult process(@NotNull LDAPConnection connection,
+                                        int depth)
             throws LDAPException;
 
 
@@ -105,6 +125,7 @@ public abstract class BindRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public final OperationType getOperationType()
   {
     return OperationType.BIND;
@@ -117,6 +138,7 @@ public abstract class BindRequest
    *
    * @return  A human-readable string that describes the type of bind request.
    */
+  @NotNull()
   public abstract String getBindType();
 
 
@@ -125,6 +147,7 @@ public abstract class BindRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public abstract BindRequest duplicate();
 
 
@@ -133,7 +156,8 @@ public abstract class BindRequest
    * {@inheritDoc}
    */
   @Override()
-  public abstract BindRequest duplicate(Control[] controls);
+  @NotNull()
+  public abstract BindRequest duplicate(@Nullable Control[] controls);
 
 
 
@@ -162,7 +186,9 @@ public abstract class BindRequest
    *          the initial bind, or {@code null} to indicate that automatic
    *          re-binding is not supported for this type of bind request.
    */
-  public BindRequest getRebindRequest(final String host, final int port)
+  @Nullable()
+  public BindRequest getRebindRequest(@NotNull final String host,
+                                      final int port)
   {
     return null;
   }

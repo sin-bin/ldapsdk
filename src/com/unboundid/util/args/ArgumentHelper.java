@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,7 @@ import java.util.List;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.InternalUseOnly;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -50,6 +66,20 @@ public final class ArgumentHelper
 
 
   /**
+   * Resets the provided argument parser so that it behaves as if it had not
+   * been used to parse a set of command-line arguments.
+   *
+   * @param  parser  The argument parser to be reset.
+   */
+  @InternalUseOnly()
+  public static void reset(@NotNull final ArgumentParser parser)
+  {
+    parser.reset();
+  }
+
+
+
+  /**
    * Increments the number of occurrences for the argument in the provided set
    * of command line arguments.
    *
@@ -60,7 +90,7 @@ public final class ArgumentHelper
    *                             exceed the maximum allowed number.
    */
   @InternalUseOnly()
-  public static void incrementOccurrences(final Argument argument)
+  public static void incrementOccurrences(@NotNull final Argument argument)
          throws ArgumentException
   {
     argument.incrementOccurrences();
@@ -78,7 +108,7 @@ public final class ArgumentHelper
    */
   @InternalUseOnly()
   public static void incrementOccurrencesSuppressException(
-                          final Argument argument)
+                          @NotNull final Argument argument)
   {
     try
     {
@@ -100,8 +130,8 @@ public final class ArgumentHelper
    * @param  subcommand  The subcommand that has been selected.
    */
   @InternalUseOnly()
-  public static void setSelectedSubCommand(final ArgumentParser parser,
-                                           final SubCommand subcommand)
+  public static void setSelectedSubCommand(@NotNull final ArgumentParser parser,
+                                           @NotNull final SubCommand subcommand)
   {
     parser.setSelectedSubCommand(subcommand);
   }
@@ -121,7 +151,8 @@ public final class ArgumentHelper
    *                             number of values.
    */
   @InternalUseOnly()
-  public static void addValue(final Argument argument, final String valueString)
+  public static void addValue(@NotNull final Argument argument,
+                              @NotNull final String valueString)
             throws ArgumentException
   {
     argument.addValue(valueString);
@@ -139,8 +170,8 @@ public final class ArgumentHelper
    * @param  valueString  The string representation of the value.
    */
   @InternalUseOnly()
-  public static void addValueSuppressException(final Argument argument,
-                                               final String valueString)
+  public static void addValueSuppressException(@NotNull final Argument argument,
+                          @NotNull final String valueString)
   {
     try
     {
@@ -165,7 +196,7 @@ public final class ArgumentHelper
    *          {@code false} if not.
    */
   @InternalUseOnly()
-  public static boolean hasDefaultValue(final Argument argument)
+  public static boolean hasDefaultValue(@NotNull final Argument argument)
   {
     return argument.hasDefaultValue();
   }
@@ -181,7 +212,7 @@ public final class ArgumentHelper
    * @param  argument  The argument to reset.
    */
   @InternalUseOnly()
-  public static void reset(final Argument argument)
+  public static void reset(@NotNull final Argument argument)
   {
     argument.reset();
   }
@@ -197,8 +228,8 @@ public final class ArgumentHelper
    *                     the command-line arguments.
    */
   @InternalUseOnly()
-  public static void addToCommandLine(final Argument argument,
-                                      final List<String> argStrings)
+  public static void addToCommandLine(@NotNull final Argument argument,
+                                      @NotNull final List<String> argStrings)
   {
     argument.addToCommandLine(argStrings);
   }
@@ -212,7 +243,8 @@ public final class ArgumentHelper
    *                 cleared.
    */
   @InternalUseOnly()
-  public static void resetTrailingArguments(final ArgumentParser parser)
+  public static void resetTrailingArguments(
+                          @NotNull final ArgumentParser parser)
   {
     parser.resetTrailingArguments();
   }
@@ -231,8 +263,8 @@ public final class ArgumentHelper
    *                             number of trailing arguments.
    */
   @InternalUseOnly()
-  public static void addTrailingArgument(final ArgumentParser parser,
-                                         final String value)
+  public static void addTrailingArgument(@NotNull final ArgumentParser parser,
+                                         @NotNull final String value)
          throws ArgumentException
   {
     parser.addTrailingArgument(value);

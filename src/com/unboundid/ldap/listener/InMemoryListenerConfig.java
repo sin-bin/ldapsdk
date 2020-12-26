@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -56,24 +73,32 @@ import static com.unboundid.ldap.listener.ListenerMessages.*;
 @ThreadSafety(level=ThreadSafetyLevel.COMPLETELY_THREADSAFE)
 public final class InMemoryListenerConfig
 {
+  // Indicates whether the listener should request that the client provide a
+  // certificate.
+  private final boolean requestClientCertificate;
+
+  // Indicates whether the listener should require that the client provide a
+  // certificate.
+  private final boolean requireClientCertificate;
+
   // The address on which this listener should accept client connections.
-  private final InetAddress listenAddress;
+  @Nullable private final InetAddress listenAddress;
 
   // The port on which this listener should accept client connections.
   private final int listenPort;
 
   // The socket factory that should be used for accepting new connections.
-  private final ServerSocketFactory serverSocketFactory;
+  @Nullable private final ServerSocketFactory serverSocketFactory;
 
   // The socket factory that should be used for creating client connections.
-  private final SocketFactory clientSocketFactory;
+  @Nullable private final SocketFactory clientSocketFactory;
 
   // The socket factory that will be used to add StartTLS encryption to an
   // existing connection.
-  private final SSLSocketFactory startTLSSocketFactory;
+  @Nullable private final SSLSocketFactory startTLSSocketFactory;
 
   // The used to refer to this listener.
-  private final String listenerName;
+  @NotNull private final String listenerName;
 
 
 
@@ -114,12 +139,77 @@ public final class InMemoryListenerConfig
    * @throws  LDAPException  If the provided listener name is {@code null} or
    *                         the configured listen port is out of range.
    */
-  public InMemoryListenerConfig(final String listenerName,
-                                final InetAddress listenAddress,
-                                final int listenPort,
-                                final ServerSocketFactory serverSocketFactory,
-                                final SocketFactory clientSocketFactory,
-                                final SSLSocketFactory startTLSSocketFactory)
+  public InMemoryListenerConfig(@NotNull final String listenerName,
+              @Nullable final InetAddress listenAddress, final int listenPort,
+              @Nullable final ServerSocketFactory serverSocketFactory,
+              @Nullable final SocketFactory clientSocketFactory,
+              @Nullable final SSLSocketFactory startTLSSocketFactory)
+         throws LDAPException
+  {
+    this(listenerName, listenAddress, listenPort, serverSocketFactory,
+         clientSocketFactory, startTLSSocketFactory, false, false);
+  }
+
+
+
+  /**
+   * Creates a new in-memory directory server listener configuration with the
+   * provided settings.
+   *
+   * @param  listenerName              The name to assign to this listener.  It
+   *                                   must not be {@code null} and must not be
+   *                                   the same as the name for any other
+   *                                   listener configured in the server.
+   * @param  listenAddress             The address on which the listener should
+   *                                   accept connections from clients.  It may
+   *                                   be {@code null} to indicate that it
+   *                                   should accept connections on all
+   *                                   addresses on all interfaces.
+   * @param  listenPort                The port on which the listener should
+   *                                   accept connections from clients.  It may
+   *                                   be 0 to indicate that the server should
+   *                                   automatically choose an available port.
+   * @param  serverSocketFactory       The socket factory that should be used to
+   *                                   create sockets when accepting client
+   *                                   connections.  It may be {@code null} if
+   *                                   the JVM-default server socket factory
+   *                                   should be used.
+   * @param  clientSocketFactory       The socket factory that should be used to
+   *                                   create client connections to the server.
+   *                                   It may be {@code null} if the JVM-default
+   *                                   socket factory should be used.
+   * @param  startTLSSocketFactory     The socket factory that should be used to
+   *                                   add StartTLS encryption to existing
+   *                                   connections.  It may be {@code null} if
+   *                                   StartTLS is not to be supported on this
+   *                                   listener, and should be {@code null} if
+   *                                   the server socket factory already
+   *                                   provides some other form of communication
+   *                                   security.
+   * @param  requestClientCertificate  Indicates whether the listener should
+   *                                   request that the client present its own
+   *                                   certificate chain during TLS negotiation.
+   *                                   This will be ignored for non-TLS-based
+   *                                   connections.
+   * @param  requireClientCertificate  Indicates whether the listener should
+   *                                   require that the client present its own
+   *                                   certificate chain during TLS negotiation,
+   *                                   and should fail negotiation if the client
+   *                                   does not present one.  This will be
+   *                                   ignored for non-TLS-based connections or
+   *                                   if {@code requestClientCertificate} is
+   *                                   {@code false}.
+   *
+   * @throws  LDAPException  If the provided listener name is {@code null} or
+   *                         the configured listen port is out of range.
+   */
+  public InMemoryListenerConfig(@NotNull final String listenerName,
+              @Nullable final InetAddress listenAddress, final int listenPort,
+              @Nullable final ServerSocketFactory serverSocketFactory,
+              @Nullable final SocketFactory clientSocketFactory,
+              @Nullable final SSLSocketFactory startTLSSocketFactory,
+              final boolean requestClientCertificate,
+              final boolean requireClientCertificate)
          throws LDAPException
   {
     if ((listenerName == null) || listenerName.isEmpty())
@@ -134,12 +224,14 @@ public final class InMemoryListenerConfig
            ERR_LISTENER_CFG_INVALID_PORT.get(listenPort));
     }
 
-    this.listenerName          = listenerName;
-    this.listenAddress         = listenAddress;
-    this.listenPort            = listenPort;
-    this.serverSocketFactory   = serverSocketFactory;
-    this.clientSocketFactory   = clientSocketFactory;
-    this.startTLSSocketFactory = startTLSSocketFactory;
+    this.listenerName             = listenerName;
+    this.listenAddress            = listenAddress;
+    this.listenPort               = listenPort;
+    this.serverSocketFactory      = serverSocketFactory;
+    this.clientSocketFactory      = clientSocketFactory;
+    this.startTLSSocketFactory    = startTLSSocketFactory;
+    this.requestClientCertificate = requestClientCertificate;
+    this.requireClientCertificate = requireClientCertificate;
   }
 
 
@@ -156,8 +248,9 @@ public final class InMemoryListenerConfig
    *
    * @throws  LDAPException  If the provided name is {@code null}.
    */
+  @NotNull()
   public static InMemoryListenerConfig createLDAPConfig(
-                                            final String listenerName)
+                                            @NotNull final String listenerName)
          throws LDAPException
   {
     return new InMemoryListenerConfig(listenerName, null, 0, null, null, null);
@@ -182,8 +275,9 @@ public final class InMemoryListenerConfig
    * @throws  LDAPException  If the provided listener name is {@code null} or
    *                         the configured listen port is out of range.
    */
+  @NotNull()
   public static InMemoryListenerConfig createLDAPConfig(
-                                            final String listenerName,
+                                            @NotNull final String listenerName,
                                             final int listenPort)
          throws LDAPException
   {
@@ -223,14 +317,77 @@ public final class InMemoryListenerConfig
    * @throws  LDAPException  If the provided listener name is {@code null} or
    *                         the configured listen port is out of range.
    */
+  @NotNull()
   public static InMemoryListenerConfig createLDAPConfig(
-                     final String listenerName, final InetAddress listenAddress,
+                     @NotNull final String listenerName,
+                     @Nullable final InetAddress listenAddress,
                      final int listenPort,
-                     final SSLSocketFactory startTLSSocketFactory)
+                     @Nullable final SSLSocketFactory startTLSSocketFactory)
+         throws LDAPException
+  {
+    return createLDAPConfig(listenerName, listenAddress, listenPort,
+         startTLSSocketFactory, false, false);
+  }
+
+
+
+  /**
+   * Creates a new listener configuration that will listen for unencrypted LDAP
+   * communication, and may optionally support StartTLS.
+   *
+   * @param  listenerName              The name to assign to this listener.  It
+   *                                   must not be {@code null} and must not be
+   *                                   the same as the name for any other
+   *                                   listener configured in the server.
+   * @param  listenAddress             The address on which the listener should
+   *                                   accept connections from clients.  It may
+   *                                   be {@code null} to indicate that it
+   *                                   should accept connections on all
+   *                                   addresses on all interfaces.
+   * @param  listenPort                The port on which the listener should
+   *                                   accept connections from clients.  It may
+   *                                   be 0 to indicate that the server should
+   *                                   automatically choose an available port.
+   * @param  startTLSSocketFactory     The socket factory that should be used to
+   *                                   add StartTLS encryption to an existing
+   *                                   connection.  It may be {@code null} if
+   *                                   StartTLS is not to be supported on this
+   *                                   listener, and should be {@code null} if
+   *                                   the server socket factory already
+   *                                   provides some other form of communication
+   *                                   security.
+   * @param  requestClientCertificate  Indicates whether the listener should
+   *                                   request that the client present its own
+   *                                   certificate chain during TLS negotiation.
+   *                                   This will be ignored for non-TLS-based
+   *                                   connections.
+   * @param  requireClientCertificate  Indicates whether the listener should
+   *                                   require that the client present its own
+   *                                   certificate chain during TLS negotiation,
+   *                                   and should fail negotiation if the client
+   *                                   does not present one.  This will be
+   *                                   ignored for non-TLS-based connections or
+   *                                   if {@code requestClientCertificate} is
+   *                                   {@code false}.
+   *
+   * @return  The newly-created listener configuration.
+   *
+   * @throws  LDAPException  If the provided listener name is {@code null} or
+   *                         the configured listen port is out of range.
+   */
+  @NotNull()
+  public static InMemoryListenerConfig createLDAPConfig(
+                     @NotNull final String listenerName,
+                     @Nullable final InetAddress listenAddress,
+                     final int listenPort,
+                     @Nullable final SSLSocketFactory startTLSSocketFactory,
+                     final boolean requestClientCertificate,
+                     final boolean requireClientCertificate)
          throws LDAPException
   {
     return new InMemoryListenerConfig(listenerName, listenAddress, listenPort,
-         null, null, startTLSSocketFactory);
+         null, null, startTLSSocketFactory, requestClientCertificate,
+         requireClientCertificate);
   }
 
 
@@ -250,9 +407,10 @@ public final class InMemoryListenerConfig
    *
    * @throws  LDAPException  If the provided name is {@code null}.
    */
+  @NotNull()
   public static InMemoryListenerConfig createLDAPSConfig(
-                     final String listenerName,
-                     final SSLServerSocketFactory serverSocketFactory)
+                     @NotNull final String listenerName,
+                     @NotNull final SSLServerSocketFactory serverSocketFactory)
          throws LDAPException
   {
     return createLDAPSConfig(listenerName, null, 0, serverSocketFactory, null);
@@ -278,9 +436,10 @@ public final class InMemoryListenerConfig
    *
    * @throws  LDAPException  If the provided name is {@code null}.
    */
+  @NotNull()
   public static InMemoryListenerConfig createLDAPSConfig(
-                     final String listenerName, final int listenPort,
-                     final SSLServerSocketFactory serverSocketFactory)
+                     @NotNull final String listenerName, final int listenPort,
+                     @NotNull final SSLServerSocketFactory serverSocketFactory)
          throws LDAPException
   {
     return createLDAPSConfig(listenerName, null, listenPort,
@@ -319,11 +478,75 @@ public final class InMemoryListenerConfig
    *          {@code null}, or an error occurs while attempting to create a
    *          client socket factory.
    */
+  @NotNull()
   public static InMemoryListenerConfig createLDAPSConfig(
-                     final String listenerName, final InetAddress listenAddress,
+                     @NotNull final String listenerName,
+                     @Nullable final InetAddress listenAddress,
                      final int listenPort,
-                     final SSLServerSocketFactory serverSocketFactory,
-                     final SSLSocketFactory clientSocketFactory)
+                     @NotNull final SSLServerSocketFactory serverSocketFactory,
+                     @Nullable final SSLSocketFactory clientSocketFactory)
+         throws LDAPException
+  {
+    return createLDAPSConfig(listenerName, listenAddress, listenPort,
+         serverSocketFactory, clientSocketFactory, false, false);
+  }
+
+
+
+  /**
+   * Creates a new listener configuration that will listen for SSL-encrypted
+   * LDAP communication on an automatically-selected port on all available
+   * addresses.
+   *
+   * @param  listenerName              The name to use for the listener.  It
+   *                                   must not be {@code null}.
+   * @param  listenAddress             The address on which the listener should
+   *                                   accept connections from clients.  It may
+   *                                   be  {@code null} to indicate that it
+   *                                   should accept connections on all
+   *                                   addresses on all interfaces.
+   * @param  listenPort                The port on which the listener should
+   *                                   accept connections from clients.  It may
+   *                                   be 0 to indicate that the server should
+   *                                   automatically choose an available port.
+   * @param  serverSocketFactory       The SSL server socket factory that will
+   *                                   be used for accepting SSL-based
+   *                                   connections from clients.  It must not be
+   *                                   {@code null}.
+   * @param  clientSocketFactory       The SSL socket factory that will be used
+   *                                   to create secure connections to the
+   *                                   server.  It may be {@code null} if a
+   *                                   default "trust all" socket factory should
+   *                                   be used.
+   * @param  requestClientCertificate  Indicates whether the listener should
+   *                                   request that the client present its own
+   *                                   certificate chain during TLS negotiation.
+   *                                   This will be ignored for non-TLS-based
+   *                                   connections.
+   * @param  requireClientCertificate  Indicates whether the listener should
+   *                                   require that the client present its own
+   *                                   certificate chain during TLS negotiation,
+   *                                   and should fail negotiation if the client
+   *                                   does not present one.  This will be
+   *                                   ignored for non-TLS-based connections or
+   *                                   if {@code requestClientCertificate} is
+   *                                   {@code false}.
+   *
+   * @return  The newly-created listener configuration.
+   *
+   * @throws  LDAPException  If the provided name or server socket factory is
+   *          {@code null}, or an error occurs while attempting to create a
+   *          client socket factory.
+   */
+  @NotNull()
+  public static InMemoryListenerConfig createLDAPSConfig(
+                     @NotNull final String listenerName,
+                     @Nullable final InetAddress listenAddress,
+                     final int listenPort,
+                     @NotNull final SSLServerSocketFactory serverSocketFactory,
+                     @Nullable final SSLSocketFactory clientSocketFactory,
+                     final boolean requestClientCertificate,
+                     final boolean requireClientCertificate)
          throws LDAPException
   {
     if (serverSocketFactory == null)
@@ -355,7 +578,8 @@ public final class InMemoryListenerConfig
     }
 
     return new InMemoryListenerConfig(listenerName, listenAddress, listenPort,
-         serverSocketFactory, clientFactory, null);
+         serverSocketFactory, clientFactory, null, requestClientCertificate,
+         requireClientCertificate);
   }
 
 
@@ -365,6 +589,7 @@ public final class InMemoryListenerConfig
    *
    * @return  The name for this listener configuration.
    */
+  @NotNull()
   public String getListenerName()
   {
     return listenerName;
@@ -380,6 +605,7 @@ public final class InMemoryListenerConfig
    *          clients, or {@code null} if it should accept connections on all
    *          addresses on all interfaces.
    */
+  @Nullable()
   public InetAddress getListenAddress()
   {
     return listenAddress;
@@ -410,6 +636,7 @@ public final class InMemoryListenerConfig
    *          accepting client connections, or {@code null} if the JVM-default
    *          server socket factory should be used.
    */
+  @Nullable()
   public ServerSocketFactory getServerSocketFactory()
   {
     return serverSocketFactory;
@@ -425,6 +652,7 @@ public final class InMemoryListenerConfig
    *          connections to the server, or {@code null} if the JVM-default
    *          socket factory should be used.
    */
+  @Nullable()
   public SocketFactory getClientSocketFactory()
   {
     return clientSocketFactory;
@@ -440,9 +668,45 @@ public final class InMemoryListenerConfig
    *          to existing connections, or {@code null} if StartTLS should not be
    *          supported.
    */
+  @Nullable()
   public SSLSocketFactory getStartTLSSocketFactory()
   {
     return startTLSSocketFactory;
+  }
+
+
+
+  /**
+   * Indicates whether the listener should request that the client present its
+   * own certificate chain during TLS negotiation.  This will be ignored for
+   * non-TLS-based connections.
+   *
+   * @return  {@code true} if the listener should request that the client
+   *          present its own certificate chain during TLS negotiation, or
+   *          {@code false} if not.
+   */
+  public boolean requestClientCertificate()
+  {
+    return requestClientCertificate;
+  }
+
+
+
+  /**
+   * Indicates whether the listener should require that the client present its
+   * own certificate chain during TLS negotiation and should fail negotiation
+   * if no certificate chain was provided.  This will be ignored for
+   * non-TLS-based connections, and it will also be ignored if
+   * {@link #requestClientCertificate} returns false.
+   *
+   * @return  {@code true} if the listener should require that the client
+   *          present its own certificate chain during TLS negotiation, or
+   *          {@code false} if TLS negotiation should continue even if the
+   *          client did not present a certificate chain when requested.
+   */
+  public boolean requireClientCertificate()
+  {
+    return requireClientCertificate;
   }
 
 
@@ -453,6 +717,7 @@ public final class InMemoryListenerConfig
    * @return  A string representation of this listener configuration.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -468,7 +733,7 @@ public final class InMemoryListenerConfig
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("InMemoryListenerConfig(name='");
     buffer.append(listenerName);
@@ -504,6 +769,11 @@ public final class InMemoryListenerConfig
       buffer.append(startTLSSocketFactory.getClass().getName());
       buffer.append('\'');
     }
+
+    buffer.append(", requestClientCertificate=");
+    buffer.append(requestClientCertificate);
+    buffer.append(", requireClientCertificate=");
+    buffer.append(requireClientCertificate);
 
     buffer.append(')');
   }

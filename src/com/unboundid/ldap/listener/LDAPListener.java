@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -40,6 +55,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.extensions.NoticeOfDisconnectionExtendedResult;
 import com.unboundid.util.Debug;
 import com.unboundid.util.InternalUseOnly;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -97,27 +114,27 @@ public final class LDAPListener
        extends Thread
 {
   // Indicates whether a request has been received to stop running.
-  private final AtomicBoolean stopRequested;
+  @NotNull private final AtomicBoolean stopRequested;
 
   // The connection ID value that should be assigned to the next connection that
   // is established.
-  private final AtomicLong nextConnectionID;
+  @NotNull private final AtomicLong nextConnectionID;
 
   // The server socket that is being used to accept connections.
-  private final AtomicReference<ServerSocket> serverSocket;
+  @NotNull private final AtomicReference<ServerSocket> serverSocket;
 
   // The thread that is currently listening for new client connections.
-  private final AtomicReference<Thread> thread;
+  @NotNull private final AtomicReference<Thread> thread;
 
   // A map of all established connections.
-  private final ConcurrentHashMap<Long,LDAPListenerClientConnection>
+  @NotNull private final ConcurrentHashMap<Long,LDAPListenerClientConnection>
        establishedConnections;
 
   // The latch used to wait for the listener to have started.
-  private final CountDownLatch startLatch;
+  @NotNull private final CountDownLatch startLatch;
 
   // The configuration to use for this listener.
-  private final LDAPListenerConfig config;
+  @NotNull private final LDAPListenerConfig config;
 
 
 
@@ -128,7 +145,7 @@ public final class LDAPListener
    *
    * @param  config  The configuration to use for this listener.
    */
-  public LDAPListener(final LDAPListenerConfig config)
+  public LDAPListener(@NotNull final LDAPListenerConfig config)
   {
     this.config = config.duplicate();
 
@@ -405,6 +422,7 @@ public final class LDAPListener
    *          connections, or {@code null} if it is not currently listening for
    *          client connections.
    */
+  @Nullable()
   public InetAddress getListenAddress()
   {
     final ServerSocket s = serverSocket.get();
@@ -447,6 +465,7 @@ public final class LDAPListener
    *
    * @return  The configuration in use for this listener.
    */
+  @NotNull()
   LDAPListenerConfig getConfig()
   {
     return config;
@@ -474,7 +493,7 @@ public final class LDAPListener
    *
    * @param  connection  The connection that has been closed.
    */
-  void connectionClosed(final LDAPListenerClientConnection connection)
+  void connectionClosed(@NotNull final LDAPListenerClientConnection connection)
   {
     establishedConnections.remove(connection.getConnectionID());
   }

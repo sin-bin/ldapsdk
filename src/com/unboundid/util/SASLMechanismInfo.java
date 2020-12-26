@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -44,13 +59,13 @@ public final class SASLMechanismInfo
   private final boolean requiresPassword;
 
   // The list of options available for use with this mechanism.
-  private final List<SASLOption> options;
+  @NotNull private final List<SASLOption> options;
 
   // A description for this SASL mechanism.
-  private final String description;
+  @NotNull private final String description;
 
   // The name for this SASL mechanism.
-  private final String name;
+  @NotNull private final String name;
 
 
 
@@ -66,10 +81,11 @@ public final class SASLMechanismInfo
    * @param  options           The set of options that are associated with the
    *                           SASL mechanism.
    */
-  public SASLMechanismInfo(final String name, final String description,
+  public SASLMechanismInfo(@NotNull final String name,
+                           @NotNull final String description,
                            final boolean acceptsPassword,
                            final boolean requiresPassword,
-                           final SASLOption... options)
+                           @Nullable final SASLOption... options)
   {
     this.name             = name;
     this.description      = description;
@@ -93,6 +109,7 @@ public final class SASLMechanismInfo
    *
    * @return  The name of the SASL mechanism.
    */
+  @NotNull()
   public String getName()
   {
     return name;
@@ -105,6 +122,7 @@ public final class SASLMechanismInfo
    *
    * @return  A description for the SASL mechanism.
    */
+  @NotNull()
   public String getDescription()
   {
     return description;
@@ -147,6 +165,7 @@ public final class SASLMechanismInfo
    *          an empty list if there are no supported SASL options for the
    *          associated mechanism.
    */
+  @NotNull()
   public List<SASLOption> getOptions()
   {
     return options;
@@ -160,6 +179,7 @@ public final class SASLMechanismInfo
    * @return  A string representation of this SASL mechanism info object.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -175,7 +195,7 @@ public final class SASLMechanismInfo
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("SASLMechanismInfo(name='");
     buffer.append(name);

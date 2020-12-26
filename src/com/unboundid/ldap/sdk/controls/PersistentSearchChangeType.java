@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,8 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Set;
 
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -74,7 +91,7 @@ public enum PersistentSearchChangeType
   private final int value;
 
   // The human-readable name for this change type.
-  private final String name;
+  @NotNull private final String name;
 
 
 
@@ -84,7 +101,7 @@ public enum PersistentSearchChangeType
    * @param  name   The human-readable name for this change type.
    * @param  value  The numeric value associated with this change type.
    */
-  PersistentSearchChangeType(final String name, final int value)
+  PersistentSearchChangeType(@NotNull final String name, final int value)
   {
     this.name  = name;
     this.value = value;
@@ -97,6 +114,7 @@ public enum PersistentSearchChangeType
    *
    * @return  The human-readable name for this change type.
    */
+  @NotNull()
   public String getName()
   {
     return name;
@@ -124,6 +142,7 @@ public enum PersistentSearchChangeType
    * @return  The associated change type, or {@code null} if there is no
    *          persistent search change type with the specified set of values.
    */
+  @Nullable()
   public static PersistentSearchChangeType valueOf(final int intValue)
   {
     switch (intValue)
@@ -156,7 +175,8 @@ public enum PersistentSearchChangeType
    * @return  The requested persistent search change type, or {@code null} if
    *          there is no change type with the given name.
    */
-  public static PersistentSearchChangeType forName(final String name)
+  @Nullable()
+  public static PersistentSearchChangeType forName(@NotNull final String name)
   {
     switch (StaticUtils.toLowerCase(name))
     {
@@ -193,6 +213,7 @@ public enum PersistentSearchChangeType
    *
    * @return  A set containing all defined change types.
    */
+  @NotNull()
   public static Set<PersistentSearchChangeType> allChangeTypes()
   {
     return EnumSet.allOf(PersistentSearchChangeType.class);
@@ -210,7 +231,7 @@ public enum PersistentSearchChangeType
    *          change types.
    */
   public static int encodeChangeTypes(
-                         final PersistentSearchChangeType... changeTypes)
+              @NotNull final PersistentSearchChangeType... changeTypes)
   {
     int changeTypesValue = 0;
 
@@ -234,7 +255,7 @@ public enum PersistentSearchChangeType
    *          change types.
    */
   public static int encodeChangeTypes(
-       final Collection<PersistentSearchChangeType> changeTypes)
+              @NotNull final Collection<PersistentSearchChangeType> changeTypes)
   {
     int changeTypesValue = 0;
 
@@ -256,6 +277,7 @@ public enum PersistentSearchChangeType
    *
    * @return  A list of the change types encoded in the provided value.
    */
+  @NotNull()
   public static Set<PersistentSearchChangeType> decodeChangeTypes(
                                                       final int changeTypes)
   {
@@ -293,6 +315,7 @@ public enum PersistentSearchChangeType
    * @return  A string representation for this persistent search change type.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return name;

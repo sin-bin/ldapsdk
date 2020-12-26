@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -40,10 +55,10 @@ public final class RateLimitedOutputStream
   private final boolean autoFlush;
 
   // The fixed-rate barrier that will serve as a rate limiter for this class.
-  private final FixedRateBarrier rateLimiter;
+  @NotNull private final FixedRateBarrier rateLimiter;
 
   // The output stream to which the data will actually be written.
-  private final OutputStream wrappedStream;
+  @NotNull private final OutputStream wrappedStream;
 
   // The maximum number of bytes that can be written in any single call to the
   // rate limiter.
@@ -64,7 +79,7 @@ public final class RateLimitedOutputStream
    * @param  autoFlush          Indicates whether to automatically flush the
    *                            wrapped output stream after each write.
    */
-  public RateLimitedOutputStream(final OutputStream wrappedStream,
+  public RateLimitedOutputStream(@NotNull final OutputStream wrappedStream,
                                  final int maxBytesPerSecond,
                                  final boolean autoFlush)
   {
@@ -132,7 +147,7 @@ public final class RateLimitedOutputStream
    *                       wrapped stream.
    */
   @Override()
-  public void write(final byte[] b)
+  public void write(@NotNull final byte[] b)
          throws IOException
   {
     write(b, 0, b.length);
@@ -157,7 +172,7 @@ public final class RateLimitedOutputStream
    *                       wrapped stream.
    */
   @Override()
-  public void write(final byte[] b, final int offset, final int length)
+  public void write(@NotNull final byte[] b, final int offset, final int length)
          throws IOException
   {
     if (length <= 0)

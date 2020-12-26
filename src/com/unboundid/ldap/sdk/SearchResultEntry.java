@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,8 @@ import com.unboundid.ldap.protocol.LDAPResponse;
 import com.unboundid.ldap.sdk.schema.Schema;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -60,7 +77,7 @@ public final class SearchResultEntry
 
 
   // The set of controls returned with this search result entry.
-  private final Control[] controls;
+  @NotNull private final Control[] controls;
 
   // The message ID for the LDAP message containing this response.
   private final int messageID;
@@ -77,8 +94,9 @@ public final class SearchResultEntry
    * @param  controls    The set of controls for this search result entry.  It
    *                     must not be {@code null}.
    */
-  public SearchResultEntry(final String dn, final Attribute[] attributes,
-                           final Control... controls)
+  public SearchResultEntry(@NotNull final String dn,
+                           @NotNull final Attribute[] attributes,
+                           @NotNull final Control... controls)
   {
     this(-1, dn, null, attributes, controls);
   }
@@ -97,9 +115,9 @@ public final class SearchResultEntry
    * @param  controls    The set of controls for this search result entry.  It
    *                     must not be {@code null}.
    */
-  public SearchResultEntry(final int messageID, final String dn,
-                           final Attribute[] attributes,
-                           final Control... controls)
+  public SearchResultEntry(final int messageID, @NotNull final String dn,
+                           @NotNull final Attribute[] attributes,
+                           @NotNull final Control... controls)
   {
     this(messageID, dn, null, attributes, controls);
   }
@@ -120,9 +138,10 @@ public final class SearchResultEntry
    * @param  controls    The set of controls for this search result entry.  It
    *                     must not be {@code null}.
    */
-  public SearchResultEntry(final int messageID, final String dn,
-                           final Schema schema, final Attribute[] attributes,
-                           final Control... controls)
+  public SearchResultEntry(final int messageID, @NotNull final String dn,
+                           @Nullable final Schema schema,
+                           @NotNull final Attribute[] attributes,
+                           @NotNull final Control... controls)
   {
     super(dn, schema, attributes);
 
@@ -144,9 +163,9 @@ public final class SearchResultEntry
    * @param  controls    The set of controls for this search result entry.  It
    *                     must not be {@code null}.
    */
-  public SearchResultEntry(final String dn,
-                           final Collection<Attribute> attributes,
-                           final Control... controls)
+  public SearchResultEntry(@NotNull final String dn,
+                           @NotNull final Collection<Attribute> attributes,
+                           @NotNull final Control... controls)
   {
     this(-1, dn, null, attributes, controls);
   }
@@ -165,9 +184,9 @@ public final class SearchResultEntry
    * @param  controls    The set of controls for this search result entry.  It
    *                     must not be {@code null}.
    */
-  public SearchResultEntry(final int messageID, final String dn,
-                           final Collection<Attribute> attributes,
-                           final Control... controls)
+  public SearchResultEntry(final int messageID, @NotNull final String dn,
+                           @NotNull final Collection<Attribute> attributes,
+                           @NotNull final Control... controls)
   {
     this(messageID, dn, null, attributes, controls);
   }
@@ -188,10 +207,10 @@ public final class SearchResultEntry
    * @param  controls    The set of controls for this search result entry.  It
    *                     must not be {@code null}.
    */
-  public SearchResultEntry(final int messageID, final String dn,
-                           final Schema schema,
-                           final Collection<Attribute> attributes,
-                           final Control... controls)
+  public SearchResultEntry(final int messageID, @NotNull final String dn,
+                           @Nullable final Schema schema,
+                           @NotNull final Collection<Attribute> attributes,
+                           @NotNull final Control... controls)
   {
     super(dn, schema, attributes);
 
@@ -211,7 +230,8 @@ public final class SearchResultEntry
    * @param  controls  The set of controls for this search result entry.  It
    *                   must not be {@code null}.
    */
-  public SearchResultEntry(final Entry entry, final Control... controls)
+  public SearchResultEntry(@NotNull final Entry entry,
+                           @NotNull final Control... controls)
   {
     this(-1, entry, controls);
   }
@@ -228,8 +248,8 @@ public final class SearchResultEntry
    * @param  controls   The set of controls for this search result entry.  It
    *                    must not be {@code null}.
    */
-  public SearchResultEntry(final int messageID, final Entry entry,
-                           final Control... controls)
+  public SearchResultEntry(final int messageID, @NotNull final Entry entry,
+                           @NotNull final Control... controls)
   {
     super(entry);
 
@@ -261,9 +281,11 @@ public final class SearchResultEntry
    * @throws  LDAPException  If a problem occurs while reading or decoding data
    *                         from the ASN.1 stream reader.
    */
+  @NotNull()
   static SearchResultEntry readSearchEntryFrom(final int messageID,
-              final ASN1StreamReaderSequence messageSequence,
-              final ASN1StreamReader reader, final Schema schema)
+              @NotNull final ASN1StreamReaderSequence messageSequence,
+              @NotNull final ASN1StreamReader reader,
+              @Nullable final Schema schema)
          throws LDAPException
   {
     try
@@ -329,6 +351,7 @@ public final class SearchResultEntry
    *
    * @return  The set of controls returned with this search result entry.
    */
+  @NotNull()
   public Control[] getControls()
   {
     return controls;
@@ -345,7 +368,8 @@ public final class SearchResultEntry
    * @return  The control with the requested OID, or {@code null} if there is no
    *          such control for this search result entry.
    */
-  public Control getControl(final String oid)
+  @Nullable()
+  public Control getControl(@NotNull final String oid)
   {
     for (final Control c : controls)
     {
@@ -391,7 +415,7 @@ public final class SearchResultEntry
    *          entry, or {@code false} if not.
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (! super.equals(o))
     {
@@ -430,7 +454,7 @@ public final class SearchResultEntry
    *                 this entry.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("SearchResultEntry(dn='");
     buffer.append(getDN());

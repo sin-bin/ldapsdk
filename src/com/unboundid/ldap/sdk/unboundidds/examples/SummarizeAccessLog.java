@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -42,8 +57,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPInputStream;
 import javax.crypto.BadPaddingException;
 
+import com.unboundid.ldap.sdk.DN;
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.RDN;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldap.sdk.Version;
@@ -64,11 +81,15 @@ import com.unboundid.ldap.sdk.unboundidds.logs.ModifyResultAccessLogMessage;
 import com.unboundid.ldap.sdk.unboundidds.logs.OperationAccessLogMessage;
 import com.unboundid.ldap.sdk.unboundidds.logs.SearchRequestAccessLogMessage;
 import com.unboundid.ldap.sdk.unboundidds.logs.SearchResultAccessLogMessage;
+import com.unboundid.ldap.sdk.unboundidds.logs.
+            SecurityNegotiationAccessLogMessage;
 import com.unboundid.ldap.sdk.unboundidds.logs.UnbindRequestAccessLogMessage;
 import com.unboundid.ldap.sdk.unboundidds.tools.ToolUtils;
 import com.unboundid.util.CommandLineTool;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.ReverseComparator;
 import com.unboundid.util.StaticUtils;
@@ -77,7 +98,9 @@ import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.args.ArgumentException;
 import com.unboundid.util.args.ArgumentParser;
 import com.unboundid.util.args.BooleanArgument;
+import com.unboundid.util.args.DurationArgument;
 import com.unboundid.util.args.FileArgument;
+import com.unboundid.util.args.IntegerArgument;
 
 
 
@@ -106,15 +129,14 @@ import com.unboundid.util.args.FileArgument;
  *   <LI>The average duration for operations processed, overall and by operation
  *       type.</LI>
  *   <LI>A breakdown of operation processing times into a number of predefined
- *       categories (less than 1ms, between 1ms and 2ms, between 2ms and 3ms,
- *       between 3ms and 5ms, between 5ms and 10ms, between 10ms and 20ms,
- *       between 20ms and 30ms, between 30ms and 50ms, between 50ms and 100ms,
- *       between 100ms and 1000ms, and over 1000ms).</LI>
+ *       categories, ranging from less than one millisecond to over one
+ *       minute.</LI>
  *   <LI>A breakdown of the most common result codes for each type of operation
  *       and their relative frequencies.</LI>
  *   <LI>The most common types of extended requests processed and their
  *       relative frequencies.</LI>
- *   <LI>The number of unindexed search operations processed.</LI>
+ *   <LI>The number of unindexed search operations processed and the most common
+ *       types of filters used in unindexed searches.</LI>
  *   <LI>A breakdown of the relative frequencies for each type of search
  *       scope.</LI>
  *   <LI>The most common types of search filters used for search
@@ -148,17 +170,24 @@ public final class SummarizeAccessLog
 
 
   // Variables used for accessing argument information.
-  private ArgumentParser  argumentParser;
+  @Nullable private ArgumentParser argumentParser;
 
-  // An argument which may be used to indicate that the log files are
-  // compressed.
-  private BooleanArgument isCompressed;
+  // An argument that may be used to indicate that the summarized output should
+  // not be anonymized, and should include attribute values.
+  @Nullable private BooleanArgument doNotAnonymize;
+
+  // An argument that may be used to indicate that the log files are compressed.
+  @Nullable private BooleanArgument isCompressed;
 
   // An argument used to specify the encryption passphrase.
-  private FileArgument    encryptionPassphraseFile;
+  @Nullable private FileArgument encryptionPassphraseFile;
+
+  // An argument used to specify the maximum number of values to report for each
+  // item.
+  @Nullable private IntegerArgument reportCount;
 
   // The decimal format that will be used for this class.
-  private final DecimalFormat decimalFormat;
+  @NotNull private final DecimalFormat decimalFormat;
 
   // The total duration for log content, in milliseconds.
   private long logDurationMillis;
@@ -184,7 +213,6 @@ public final class SummarizeAccessLog
   private long numExtended;
   private long numModifies;
   private long numModifyDNs;
-  private long numNonBaseSearches;
   private long numSearches;
   private long numUnbinds;
 
@@ -204,30 +232,43 @@ public final class SummarizeAccessLog
   private long numUnindexedSuccessful;
 
   // Variables used for maintaining counts for common types of information.
-  private final HashMap<Long,AtomicLong> searchEntryCounts;
-  private final HashMap<ResultCode,AtomicLong> addResultCodes;
-  private final HashMap<ResultCode,AtomicLong> bindResultCodes;
-  private final HashMap<ResultCode,AtomicLong> compareResultCodes;
-  private final HashMap<ResultCode,AtomicLong> deleteResultCodes;
-  private final HashMap<ResultCode,AtomicLong> extendedResultCodes;
-  private final HashMap<ResultCode,AtomicLong> modifyResultCodes;
-  private final HashMap<ResultCode,AtomicLong> modifyDNResultCodes;
-  private final HashMap<ResultCode,AtomicLong> searchResultCodes;
-  private final HashMap<SearchScope,AtomicLong> searchScopes;
-  private final HashMap<String,AtomicLong> clientAddresses;
-  private final HashMap<String,AtomicLong> clientConnectionPolicies;
-  private final HashMap<String,AtomicLong> disconnectReasons;
-  private final HashMap<String,AtomicLong> extendedOperations;
-  private final HashMap<String,AtomicLong> filterTypes;
-  private final HashSet<String> processedRequests;
-  private final LinkedHashMap<Long,AtomicLong> addProcessingTimes;
-  private final LinkedHashMap<Long,AtomicLong> bindProcessingTimes;
-  private final LinkedHashMap<Long,AtomicLong> compareProcessingTimes;
-  private final LinkedHashMap<Long,AtomicLong> deleteProcessingTimes;
-  private final LinkedHashMap<Long,AtomicLong> extendedProcessingTimes;
-  private final LinkedHashMap<Long,AtomicLong> modifyProcessingTimes;
-  private final LinkedHashMap<Long,AtomicLong> modifyDNProcessingTimes;
-  private final LinkedHashMap<Long,AtomicLong> searchProcessingTimes;
+  @NotNull private final HashMap<Long,AtomicLong> searchEntryCounts;
+  @NotNull private final HashMap<ResultCode,AtomicLong> addResultCodes;
+  @NotNull private final HashMap<ResultCode,AtomicLong> bindResultCodes;
+  @NotNull private final HashMap<ResultCode,AtomicLong> compareResultCodes;
+  @NotNull private final HashMap<ResultCode,AtomicLong> deleteResultCodes;
+  @NotNull private final HashMap<ResultCode,AtomicLong> extendedResultCodes;
+  @NotNull private final HashMap<ResultCode,AtomicLong> modifyResultCodes;
+  @NotNull private final HashMap<ResultCode,AtomicLong> modifyDNResultCodes;
+  @NotNull private final HashMap<ResultCode,AtomicLong> searchResultCodes;
+  @NotNull private final HashMap<SearchScope,AtomicLong> searchScopes;
+  @NotNull private final HashMap<String,AtomicLong> authenticationTypes;
+  @NotNull private final HashMap<String,AtomicLong> authzDNs;
+  @NotNull private final HashMap<String,AtomicLong> failedBindDNs;
+  @NotNull private final HashMap<String,AtomicLong> successfulBindDNs;
+  @NotNull private final HashMap<String,AtomicLong> clientAddresses;
+  @NotNull private final HashMap<String,AtomicLong> clientConnectionPolicies;
+  @NotNull private final HashMap<String,AtomicLong> disconnectReasons;
+  @NotNull private final HashMap<String,AtomicLong> extendedOperations;
+  @NotNull private final HashMap<String,AtomicLong> filterTypes;
+  @NotNull private final HashMap<String,AtomicLong> mostExpensiveFilters;
+  @NotNull private final HashMap<String,AtomicLong> multiEntryFilters;
+  @NotNull private final HashMap<String,AtomicLong> noEntryFilters;
+  @NotNull private final HashMap<String,AtomicLong> oneEntryFilters;
+  @NotNull private final HashMap<String,AtomicLong> searchBaseDNs;
+  @NotNull private final HashMap<String,AtomicLong> tlsCipherSuites;
+  @NotNull private final HashMap<String,AtomicLong> tlsProtocols;
+  @NotNull private final HashMap<String,AtomicLong> unindexedFilters;
+  @NotNull private final HashMap<String,String> extendedOperationOIDsToNames;
+  @NotNull private final HashSet<String> processedRequests;
+  @NotNull private final LinkedHashMap<Long,AtomicLong> addProcessingTimes;
+  @NotNull private final LinkedHashMap<Long,AtomicLong> bindProcessingTimes;
+  @NotNull private final LinkedHashMap<Long,AtomicLong> compareProcessingTimes;
+  @NotNull private final LinkedHashMap<Long,AtomicLong> deleteProcessingTimes;
+  @NotNull private final LinkedHashMap<Long,AtomicLong> extendedProcessingTimes;
+  @NotNull private final LinkedHashMap<Long,AtomicLong> modifyProcessingTimes;
+  @NotNull private final LinkedHashMap<Long,AtomicLong> modifyDNProcessingTimes;
+  @NotNull private final LinkedHashMap<Long,AtomicLong> searchProcessingTimes;
 
 
 
@@ -237,7 +278,7 @@ public final class SummarizeAccessLog
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String[] args)
+  public static void main(@NotNull final String[] args)
   {
     final ResultCode resultCode = main(args, System.out, System.err);
     if (resultCode != ResultCode.SUCCESS)
@@ -262,9 +303,10 @@ public final class SummarizeAccessLog
    *
    * @return  A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args,
-                                final OutputStream outStream,
-                                final OutputStream errStream)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream)
   {
     final SummarizeAccessLog summarizer =
          new SummarizeAccessLog(outStream, errStream);
@@ -283,46 +325,55 @@ public final class SummarizeAccessLog
    *                    written.  It may be {@code null} if error messages
    *                    should be suppressed.
    */
-  public SummarizeAccessLog(final OutputStream outStream,
-                            final OutputStream errStream)
+  public SummarizeAccessLog(@Nullable final OutputStream outStream,
+                            @Nullable final OutputStream errStream)
   {
     super(outStream, errStream);
+
+    argumentParser = null;
+    doNotAnonymize = null;
+    isCompressed = null;
+    encryptionPassphraseFile = null;
+    reportCount = null;
 
     decimalFormat = new DecimalFormat("0.000");
 
     logDurationMillis = 0L;
 
-    addProcessingDuration      = 0.0;
-    bindProcessingDuration     = 0.0;
-    compareProcessingDuration  = 0.0;
-    deleteProcessingDuration   = 0.0;
+    addProcessingDuration = 0.0;
+    bindProcessingDuration = 0.0;
+    compareProcessingDuration = 0.0;
+    deleteProcessingDuration = 0.0;
     extendedProcessingDuration = 0.0;
-    modifyProcessingDuration   = 0.0;
+    modifyProcessingDuration = 0.0;
     modifyDNProcessingDuration = 0.0;
-    searchProcessingDuration   = 0.0;
+    searchProcessingDuration = 0.0;
 
-    numAbandons        = 0L;
-    numAdds            = 0L;
-    numBinds           = 0L;
-    numCompares        = 0L;
-    numConnects        = 0L;
-    numDeletes         = 0L;
-    numDisconnects     = 0L;
-    numExtended        = 0L;
-    numModifies        = 0L;
-    numModifyDNs       = 0L;
-    numNonBaseSearches = 0L;
-    numSearches        = 0L;
-    numUnbinds         = 0L;
+    numAbandons = 0L;
+    numAdds = 0L;
+    numBinds = 0L;
+    numCompares = 0L;
+    numConnects = 0L;
+    numDeletes = 0L;
+    numDisconnects = 0L;
+    numExtended = 0L;
+    numModifies = 0L;
+    numModifyDNs = 0L;
+    numSearches = 0L;
+    numUnbinds = 0L;
 
-    numUncachedAdds      = 0L;
-    numUncachedBinds     = 0L;
-    numUncachedCompares  = 0L;
-    numUncachedDeletes   = 0L;
-    numUncachedExtended  = 0L;
-    numUncachedModifies  = 0L;
+    numUncachedAdds = 0L;
+    numUncachedBinds = 0L;
+    numUncachedCompares = 0L;
+    numUncachedDeletes = 0L;
+    numUncachedExtended = 0L;
+    numUncachedModifies = 0L;
     numUncachedModifyDNs = 0L;
-    numUncachedSearches  = 0L;
+    numUncachedSearches = 0L;
+
+    numUnindexedAttempts = 0L;
+    numUnindexedFailed = 0L;
+    numUnindexedSuccessful = 0L;
 
     searchEntryCounts = new HashMap<>(StaticUtils.computeMapCapacity(10));
     addResultCodes = new HashMap<>(StaticUtils.computeMapCapacity(10));
@@ -334,12 +385,26 @@ public final class SummarizeAccessLog
     modifyDNResultCodes = new HashMap<>(StaticUtils.computeMapCapacity(10));
     searchResultCodes = new HashMap<>(StaticUtils.computeMapCapacity(10));
     searchScopes = new HashMap<>(StaticUtils.computeMapCapacity(4));
+    authenticationTypes = new HashMap<>(StaticUtils.computeMapCapacity(100));
+    authzDNs = new HashMap<>(StaticUtils.computeMapCapacity(100));
+    failedBindDNs = new HashMap<>(StaticUtils.computeMapCapacity(100));
+    successfulBindDNs = new HashMap<>(StaticUtils.computeMapCapacity(100));
     clientAddresses = new HashMap<>(StaticUtils.computeMapCapacity(100));
     clientConnectionPolicies =
          new HashMap<>(StaticUtils.computeMapCapacity(100));
     disconnectReasons = new HashMap<>(StaticUtils.computeMapCapacity(100));
     extendedOperations = new HashMap<>(StaticUtils.computeMapCapacity(10));
     filterTypes = new HashMap<>(StaticUtils.computeMapCapacity(100));
+    mostExpensiveFilters = new HashMap<>(StaticUtils.computeMapCapacity(100));
+    multiEntryFilters = new HashMap<>(StaticUtils.computeMapCapacity(100));
+    noEntryFilters = new HashMap<>(StaticUtils.computeMapCapacity(100));
+    oneEntryFilters = new HashMap<>(StaticUtils.computeMapCapacity(100));
+    searchBaseDNs = new HashMap<>(StaticUtils.computeMapCapacity(100));
+    tlsCipherSuites = new HashMap<>(StaticUtils.computeMapCapacity(100));
+    tlsProtocols = new HashMap<>(StaticUtils.computeMapCapacity(100));
+    unindexedFilters = new HashMap<>(StaticUtils.computeMapCapacity(100));
+    extendedOperationOIDsToNames =
+         new HashMap<>(StaticUtils.computeMapCapacity(100));
     processedRequests = new HashSet<>(StaticUtils.computeMapCapacity(100));
     addProcessingTimes =
          new LinkedHashMap<>(StaticUtils.computeMapCapacity(11));
@@ -376,6 +441,7 @@ public final class SummarizeAccessLog
    * @return  The name for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "summarize-access-log";
@@ -389,6 +455,7 @@ public final class SummarizeAccessLog
    * @return  The description for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return "Examine one or more access log files from Ping Identity, " +
@@ -404,6 +471,7 @@ public final class SummarizeAccessLog
    * @return  The version string for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -449,6 +517,7 @@ public final class SummarizeAccessLog
    *          the usage information for this tool.
    */
   @Override()
+  @NotNull()
   public String getTrailingArgumentsPlaceholder()
   {
     return "{path}";
@@ -544,7 +613,7 @@ public final class SummarizeAccessLog
    *                             argument parser.
    */
   @Override()
-  public void addToolArguments(final ArgumentParser parser)
+  public void addToolArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     // We need to save a reference to the argument parser so that we can get
@@ -579,6 +648,37 @@ public final class SummarizeAccessLog
     encryptionPassphraseFile.addLongIdentifier("encryption-password-file",
          true);
     parser.addArgument(encryptionPassphraseFile);
+
+
+    // Add an argument that indicates the number of values to display for each
+    // item being summarized.
+    description = "The number of values to display for each item being " +
+         "summarized.  A value of zero indicates that all items should be " +
+         "displayed.  If this is not provided, a default value of 20 will " +
+         "be used.";
+    reportCount = new IntegerArgument(null, "reportCount", false, 0, null,
+         description, 0, Integer.MAX_VALUE, 20);
+    reportCount.addLongIdentifier("report-count", true);
+    reportCount.addLongIdentifier("maximumCount", true);
+    reportCount.addLongIdentifier("maximum-count", true);
+    reportCount.addLongIdentifier("maxCount", true);
+    reportCount.addLongIdentifier("max-count", true);
+    reportCount.addLongIdentifier("count", true);
+    parser.addArgument(reportCount);
+
+
+    // Add an argument that indicates that the output should not be anonymized.
+    description = "Do not anonymize the output, but include actual attribute " +
+         "values in filters and DNs.  This will also have the effect of " +
+         "de-generifying those values, so output including the most common " +
+         "filters and DNs in some category will be specific instances of " +
+         "those filters and DNs instead of generic patterns.";
+    doNotAnonymize = new BooleanArgument(null, "doNotAnonymize", 1,
+         description);
+    doNotAnonymize.addLongIdentifier("do-not-anonymize", true);
+    doNotAnonymize.addLongIdentifier("deAnonymize", true);
+    doNotAnonymize.addLongIdentifier("de-anonymize", true);
+    parser.addArgument(doNotAnonymize);
   }
 
 
@@ -587,7 +687,7 @@ public final class SummarizeAccessLog
    * Performs any necessary processing that should be done to ensure that the
    * provided set of command-line arguments were valid.  This method will be
    * called after the basic argument parsing has been performed and immediately
-   * before the {@link CommandLineTool#doToolProcessing} method is invoked.
+   * before the {@link #doToolProcessing} method is invoked.
    *
    * @throws  ArgumentException  If there was a problem with the command-line
    *                             arguments provided to this program.
@@ -614,8 +714,15 @@ public final class SummarizeAccessLog
    *          successfully.
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
+    int displayCount = reportCount.getValue();
+    if (displayCount <= 0)
+    {
+      displayCount = Integer.MAX_VALUE;
+    }
+
     String encryptionPassphrase = null;
     if (encryptionPassphraseFile.isPresent())
     {
@@ -750,6 +857,10 @@ public final class SummarizeAccessLog
           case CONNECT:
             processConnect((ConnectAccessLogMessage) msg);
             break;
+          case SECURITY_NEGOTIATION:
+            processSecurityNegotiation(
+                 (SecurityNegotiationAccessLogMessage) msg);
+            break;
           case DISCONNECT:
             processDisconnect((DisconnectAccessLogMessage) msg);
             break;
@@ -838,7 +949,7 @@ public final class SummarizeAccessLog
 
     out();
 
-    final double logDurationSeconds   = logDurationMillis / 1000.0;
+    final double logDurationSeconds   = logDurationMillis / 1_000.0;
     final double connectsPerSecond    = numConnects / logDurationSeconds;
     final double disconnectsPerSecond = numDisconnects / logDurationSeconds;
 
@@ -847,59 +958,20 @@ public final class SummarizeAccessLog
     out("Total disconnects:  ", numDisconnects, " (",
         decimalFormat.format(disconnectsPerSecond), "/second)");
 
-    if (! clientAddresses.isEmpty())
-    {
-      out();
-      final List<ObjectPair<String,Long>> connectCounts =
-           getMostCommonElements(clientAddresses, 20);
-      out("Most common client addresses:");
-      for (final ObjectPair<String,Long> p : connectCounts)
-      {
-        final long count = p.getSecond();
-        final double percent = 100.0 * count / numConnects;
+    printCounts(clientAddresses, "Most common client addresses:", "address",
+         "addresses");
 
-        out(p.getFirst(), ":  ", count, " (", decimalFormat.format(percent),
-            ")");
-      }
-    }
+    printCounts(clientConnectionPolicies,
+         "Most common client connection policies:", "policy", "policies");
 
-    if (! clientConnectionPolicies.isEmpty())
-    {
-      long totalCCPs = 0;
-      for (final AtomicLong l : clientConnectionPolicies.values())
-      {
-        totalCCPs += l.get();
-      }
+    printCounts(tlsProtocols, "Most common TLS protocol versions:", "version",
+         "versions");
 
-      final List<ObjectPair<String,Long>> reasonCounts =
-           getMostCommonElements(clientConnectionPolicies, 20);
+    printCounts(tlsCipherSuites, "Most common TLS cipher suites:",
+         "cipher suite", "cipher suites");
 
-      out();
-      out("Most common client connection policies:");
-      for (final ObjectPair<String,Long> p : reasonCounts)
-      {
-        final long count = p.getSecond();
-        final double percent = 100.0 * count / totalCCPs;
-        out(p.getFirst(), ":  ", p.getSecond(), " (",
-             decimalFormat.format(percent), "%)");
-      }
-    }
-
-    if (! disconnectReasons.isEmpty())
-    {
-      final List<ObjectPair<String,Long>> reasonCounts =
-           getMostCommonElements(disconnectReasons, 20);
-
-      out();
-      out("Most common disconnect reasons:");
-      for (final ObjectPair<String,Long> p : reasonCounts)
-      {
-        final long count = p.getSecond();
-        final double percent = 100.0 * count / numDisconnects;
-        out(p.getFirst(), ":  ", p.getSecond(), " (",
-             decimalFormat.format(percent), "%)");
-      }
-    }
+    printCounts(disconnectReasons, "Most common disconnect reasons:", "reason",
+         "reasons");
 
     final long totalOps = numAbandons + numAdds + numBinds + numCompares +
          numDeletes + numExtended + numModifies + numModifyDNs + numSearches +
@@ -1036,147 +1108,87 @@ public final class SummarizeAccessLog
       printProcessingTimeHistogram("search", numSearches,
                                    searchProcessingTimes);
 
-      if (! addResultCodes.isEmpty())
-      {
-        final List<ObjectPair<ResultCode,Long>> rcCounts =
-             getMostCommonElements(addResultCodes, 20);
+      printResultCodeCounts(addResultCodes, "add");
+      printResultCodeCounts(bindResultCodes, "bind");
+      printResultCodeCounts(compareResultCodes, "compare");
+      printResultCodeCounts(deleteResultCodes, "delete");
+      printResultCodeCounts(extendedResultCodes, "extended");
+      printResultCodeCounts(modifyResultCodes, "modify");
+      printResultCodeCounts(modifyDNResultCodes, "modify DN");
+      printResultCodeCounts(searchResultCodes, "search");
 
-        out();
-        out("Most common add operation result codes:");
-        for (final ObjectPair<ResultCode,Long> p : rcCounts)
-        {
-          final long count = p.getSecond();
-          final double percent = 100.0 * count / numAdds;
-          out(p.getFirst().getName(), ":  ", p.getSecond(), " (",
-              decimalFormat.format(percent), "%)");
-        }
+      printCounts(successfulBindDNs,
+           "Most common bind DNs used in successful authentication attempts:",
+           "DN", "DNs");
+      printCounts(failedBindDNs,
+           "Most common bind DNs used in failed authentication attempts:",
+           "DN", "DNs");
+      printCounts(authenticationTypes, "Most common authentication types:",
+           "authentication type", "authentication types");
+
+      long numResultsWithAuthzID = 0L;
+      for (final AtomicLong l : authzDNs.values())
+      {
+        numResultsWithAuthzID += l.get();
       }
 
-      if (! bindResultCodes.isEmpty())
-      {
-        final List<ObjectPair<ResultCode,Long>> rcCounts =
-             getMostCommonElements(bindResultCodes, 20);
+      out();
+      final double percentWithAuthzID =
+           100.0 * numResultsWithAuthzID / totalOps;
+      out("Number of operations with an alternate authorization identity:  ",
+           numResultsWithAuthzID, " (",
+           decimalFormat.format(percentWithAuthzID), "%)");
 
-        out();
-        out("Most common bind operation result codes:");
-        for (final ObjectPair<ResultCode,Long> p : rcCounts)
-        {
-          final long count = p.getSecond();
-          final double percent = 100.0 * count / numBinds;
-          out(p.getFirst().getName(), ":  ", p.getSecond(), " (",
-              decimalFormat.format(percent), "%)");
-        }
-      }
-
-      if (! compareResultCodes.isEmpty())
-      {
-        final List<ObjectPair<ResultCode,Long>> rcCounts =
-             getMostCommonElements(compareResultCodes, 20);
-
-        out();
-        out("Most common compare operation result codes:");
-        for (final ObjectPair<ResultCode,Long> p : rcCounts)
-        {
-          final long count = p.getSecond();
-          final double percent = 100.0 * count / numCompares;
-          out(p.getFirst().getName(), ":  ", p.getSecond(), " (",
-              decimalFormat.format(percent), "%)");
-        }
-      }
-
-      if (! deleteResultCodes.isEmpty())
-      {
-        final List<ObjectPair<ResultCode,Long>> rcCounts =
-             getMostCommonElements(deleteResultCodes, 20);
-
-        out();
-        out("Most common delete operation result codes:");
-        for (final ObjectPair<ResultCode,Long> p : rcCounts)
-        {
-          final long count = p.getSecond();
-          final double percent = 100.0 * count / numDeletes;
-          out(p.getFirst().getName(), ":  ", p.getSecond(), " (",
-              decimalFormat.format(percent), "%)");
-        }
-      }
-
-      if (! extendedResultCodes.isEmpty())
-      {
-        final List<ObjectPair<ResultCode,Long>> rcCounts =
-             getMostCommonElements(extendedResultCodes, 20);
-
-        out();
-        out("Most common extended operation result codes:");
-        for (final ObjectPair<ResultCode,Long> p : rcCounts)
-        {
-          final long count = p.getSecond();
-          final double percent = 100.0 * count / numExtended;
-          out(p.getFirst().getName(), ":  ", p.getSecond(), " (",
-              decimalFormat.format(percent), "%)");
-        }
-      }
-
-      if (! modifyResultCodes.isEmpty())
-      {
-        final List<ObjectPair<ResultCode,Long>> rcCounts =
-             getMostCommonElements(modifyResultCodes, 20);
-
-        out();
-        out("Most common modify operation result codes:");
-        for (final ObjectPair<ResultCode,Long> p : rcCounts)
-        {
-          final long count = p.getSecond();
-          final double percent = 100.0 * count / numModifies;
-          out(p.getFirst().getName(), ":  ", p.getSecond(), " (",
-              decimalFormat.format(percent), "%)");
-        }
-      }
-
-      if (! modifyDNResultCodes.isEmpty())
-      {
-        final List<ObjectPair<ResultCode,Long>> rcCounts =
-             getMostCommonElements(modifyDNResultCodes, 20);
-
-        out();
-        out("Most common modify DN operation result codes:");
-        for (final ObjectPair<ResultCode,Long> p : rcCounts)
-        {
-          final long count = p.getSecond();
-          final double percent = 100.0 * count / numModifyDNs;
-          out(p.getFirst().getName(), ":  ", p.getSecond(), " (",
-              decimalFormat.format(percent), "%)");
-        }
-      }
-
-      if (! searchResultCodes.isEmpty())
-      {
-        final List<ObjectPair<ResultCode,Long>> rcCounts =
-             getMostCommonElements(searchResultCodes, 20);
-
-        out();
-        out("Most common search operation result codes:");
-        for (final ObjectPair<ResultCode,Long> p : rcCounts)
-        {
-          final long count = p.getSecond();
-          final double percent = 100.0 * count / numSearches;
-          out(p.getFirst().getName(), ":  ", p.getSecond(), " (",
-              decimalFormat.format(percent), "%)");
-        }
-      }
+      printCounts(authzDNs, "Most common alternate authorization identity DNs:",
+           "DN", "DNs");
 
       if (! extendedOperations.isEmpty())
       {
-        final List<ObjectPair<String,Long>> extOpCounts =
-             getMostCommonElements(extendedOperations, 20);
+        final List<ObjectPair<String,Long>> extOpCounts = new ArrayList<>();
+        final AtomicLong skippedWithSameCount = new AtomicLong(0L);
+        final AtomicLong skippedWithLowerCount = new AtomicLong(0L);
+        getMostCommonElements(extendedOperations, extOpCounts, displayCount,
+             skippedWithSameCount, skippedWithLowerCount);
 
         out();
         out("Most common extended operation types:");
+
+        long count = -1L;
         for (final ObjectPair<String,Long> p : extOpCounts)
         {
-          final long count = p.getSecond();
+          count = p.getSecond();
           final double percent = 100.0 * count / numExtended;
-          out(p.getFirst(), ":  ", p.getSecond(), " (",
-              decimalFormat.format(percent), "%)");
+
+          final String oid = p.getFirst();
+          final String name = extendedOperationOIDsToNames.get(oid);
+          if (name == null)
+          {
+            out(p.getFirst(), ":  ", p.getSecond(), " (",
+                 decimalFormat.format(percent), "%)");
+          }
+          else
+          {
+            out(p.getFirst(), " (", name, "):  ", p.getSecond(), " (",
+                 decimalFormat.format(percent), "%)");
+          }
+        }
+
+        if (skippedWithSameCount.get() > 0L)
+        {
+          out("{ Skipped " + skippedWithSameCount.get() +
+               " additional extended " +
+               getSingularOrPlural(skippedWithSameCount.get(), "operation",
+                    "operations") +
+               " with a count of " + count + " }");
+        }
+
+        if (skippedWithLowerCount.get() > 0L)
+        {
+          out("{ Skipped " + skippedWithLowerCount.get() +
+               " additional extended " +
+               getSingularOrPlural(skippedWithLowerCount.get(), "operation",
+                    "operations") +
+               " with a count that is less than " + count + " }");
         }
       }
 
@@ -1186,53 +1198,187 @@ public final class SummarizeAccessLog
            numUnindexedSuccessful);
       out("Number of failed unindexed searches:  ", numUnindexedFailed);
 
+      printCounts(unindexedFilters, "Most common unindexed search filters:",
+           "filter", "filters");
+
       if (! searchScopes.isEmpty())
       {
         final List<ObjectPair<SearchScope,Long>> scopeCounts =
-             getMostCommonElements(searchScopes, 20);
+             new ArrayList<>();
+        final AtomicLong skippedWithSameCount = new AtomicLong(0L);
+        final AtomicLong skippedWithLowerCount = new AtomicLong(0L);
+        getMostCommonElements(searchScopes, scopeCounts, displayCount,
+             skippedWithSameCount, skippedWithLowerCount);
 
         out();
         out("Most common search scopes:");
+
+        long count = -1L;
         for (final ObjectPair<SearchScope,Long> p : scopeCounts)
         {
-          final long count = p.getSecond();
+          count = p.getSecond();
           final double percent = 100.0 * count / numSearches;
-          out(p.getFirst().getName(), ":  ", p.getSecond(), " (",
-              decimalFormat.format(percent), "%)");
+          out(p.getFirst().getName().toLowerCase(), " (",
+               p.getFirst().intValue(), "):  ", p.getSecond(), " (",
+               decimalFormat.format(percent), "%)");
+        }
+
+        if (skippedWithSameCount.get() > 0L)
+        {
+          out("{ Skipped " + skippedWithSameCount.get() + " additional " +
+               getSingularOrPlural(skippedWithSameCount.get(), "scope",
+                    "scopes") +
+               " with a count of " + count + " }");
+        }
+
+        if (skippedWithLowerCount.get() > 0L)
+        {
+          out("{ Skipped " + skippedWithLowerCount.get() + " additional " +
+               getSingularOrPlural(skippedWithLowerCount.get(), "scope",
+                    "scopes") +
+               " with a count that is less than " + count + " }");
         }
       }
 
       if (! searchEntryCounts.isEmpty())
       {
-        final List<ObjectPair<Long,Long>> entryCounts =
-             getMostCommonElements(searchEntryCounts, 20);
+        final List<ObjectPair<Long,Long>> entryCounts = new ArrayList<>();
+        final AtomicLong skippedWithSameCount = new AtomicLong(0L);
+        final AtomicLong skippedWithLowerCount = new AtomicLong(0L);
+        getMostCommonElements(searchEntryCounts, entryCounts, displayCount,
+             skippedWithSameCount, skippedWithLowerCount);
 
         out();
         out("Most common search entry counts:");
+
+        long count = -1L;
         for (final ObjectPair<Long,Long> p : entryCounts)
         {
-          final long count = p.getSecond();
+          count = p.getSecond();
           final double percent = 100.0 * count / numSearches;
-          out(p.getFirst(), ":  ", p.getSecond(), " (",
-              decimalFormat.format(percent), "%)");
+          out(p.getFirst(), " matching ",
+               getSingularOrPlural(p.getFirst(), "entry", "entries"),
+               ":  ", p.getSecond(), " (", decimalFormat.format(percent), "%)");
+        }
+
+        if (skippedWithSameCount.get() > 0L)
+        {
+          out("{ Skipped " + skippedWithSameCount.get() + " additional entry " +
+               getSingularOrPlural(skippedWithSameCount.get(), "count",
+                    "counts") +
+               " with a count of " + count + " }");
+        }
+
+        if (skippedWithLowerCount.get() > 0L)
+        {
+          out("{ Skipped " + skippedWithLowerCount.get() +
+               " additional entry " +
+               getSingularOrPlural(skippedWithLowerCount.get(), "count",
+                    "counts") +
+               " with a count that is less than " + count + " }");
         }
       }
 
-      if (! filterTypes.isEmpty())
+      printCounts(searchBaseDNs,
+           "Most common base DNs for searches with a non-base scope:",
+           "base DN", "base DNs");
+
+      printCounts(filterTypes,
+           "Most common filters for searches with a non-base scope:",
+           "filter", "filters");
+
+      if (numSearches > 0L)
       {
-        final List<ObjectPair<String,Long>> filterCounts =
-             getMostCommonElements(filterTypes, 20);
+        long numSearchesMatchingNoEntries = 0L;
+        for (final AtomicLong l : noEntryFilters.values())
+        {
+          numSearchesMatchingNoEntries += l.get();
+        }
 
         out();
-        out("Most common generic filters for searches with a non-base scope:");
-        for (final ObjectPair<String,Long> p : filterCounts)
+        final double noEntryPercent =
+             100.0 * numSearchesMatchingNoEntries / numSearches;
+        out("Number of searches matching no entries:  ",
+             numSearchesMatchingNoEntries, " (",
+             decimalFormat.format(noEntryPercent), "%)");
+
+        printCounts(noEntryFilters,
+             "Most common filters for searches matching no entries:",
+             "filter", "filters");
+
+
+        long numSearchesMatchingOneEntry = 0L;
+        for (final AtomicLong l : oneEntryFilters.values())
         {
-          final long count = p.getSecond();
-          final double percent = 100.0 * count / numNonBaseSearches;
-          out(p.getFirst(), ":  ", p.getSecond(), " (",
-              decimalFormat.format(percent), "%)");
+          numSearchesMatchingOneEntry += l.get();
         }
+
+        out();
+        final double oneEntryPercent =
+             100.0 * numSearchesMatchingOneEntry / numSearches;
+        out("Number of searches matching one entry:  ",
+             numSearchesMatchingOneEntry, " (",
+             decimalFormat.format(oneEntryPercent), "%)");
+
+        printCounts(oneEntryFilters,
+             "Most common filters for searches matching one entry:",
+             "filter", "filters");
+
+
+        long numSearchesMatchingMultipleEntries = 0L;
+        for (final AtomicLong l : multiEntryFilters.values())
+        {
+          numSearchesMatchingMultipleEntries += l.get();
+        }
+
+        out();
+        final double multiEntryPercent =
+             100.0 * numSearchesMatchingMultipleEntries / numSearches;
+        out("Number of searches matching multiple entries:  ",
+             numSearchesMatchingMultipleEntries, " (",
+             decimalFormat.format(multiEntryPercent), "%)");
+
+        printCounts(multiEntryFilters,
+             "Most common filters for searches matching multiple entries:",
+             "filter", "filters");
       }
+    }
+
+    if (! mostExpensiveFilters.isEmpty())
+    {
+        final List<ObjectPair<String,Long>> filterDurations = new ArrayList<>();
+        final AtomicLong skippedWithSameCount = new AtomicLong(0L);
+        final AtomicLong skippedWithLowerCount = new AtomicLong(0L);
+        getMostCommonElements(mostExpensiveFilters, filterDurations,
+             displayCount, skippedWithSameCount, skippedWithLowerCount);
+
+        out();
+        out("Filters for searches with the longest processing times:");
+
+        String durationStr = "";
+        for (final ObjectPair<String,Long> p : filterDurations)
+        {
+          final long durationMicros = p.getSecond();
+          final double durationMillis = durationMicros / 1_000.0;
+          durationStr = decimalFormat.format(durationMillis) + " ms";
+          out(p.getFirst(), ":  ", durationStr);
+        }
+
+        if (skippedWithSameCount.get() > 0L)
+        {
+          out("{ Skipped " + skippedWithSameCount.get() + " additional " +
+               getSingularOrPlural(skippedWithSameCount.get(), "filter",
+                    "filters") +
+               " with a duration of " + durationStr + " }");
+        }
+
+        if (skippedWithLowerCount.get() > 0L)
+        {
+          out("{ Skipped " + skippedWithLowerCount.get() + " additional " +
+               getSingularOrPlural(skippedWithLowerCount.get(), "filter",
+                    "filters") +
+               " with a duration that is less than " + durationStr + " }");
+        }
     }
 
     final long totalUncached = numUncachedAdds + numUncachedBinds +
@@ -1269,6 +1415,7 @@ public final class SummarizeAccessLog
    *          information is available.
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> examples =
@@ -1293,7 +1440,7 @@ public final class SummarizeAccessLog
    * @param  m  The processing time map to be populated.
    */
   private static void populateProcessingTimeMap(
-                           final HashMap<Long,AtomicLong> m)
+                           @NotNull final HashMap<Long,AtomicLong> m)
   {
     m.put(1L, new AtomicLong(0L));
     m.put(2L, new AtomicLong(0L));
@@ -1304,7 +1451,14 @@ public final class SummarizeAccessLog
     m.put(30L, new AtomicLong(0L));
     m.put(50L, new AtomicLong(0L));
     m.put(100L, new AtomicLong(0L));
-    m.put(1000L, new AtomicLong(0L));
+    m.put(1_000L, new AtomicLong(0L));
+    m.put(2_000L, new AtomicLong(0L));
+    m.put(3_000L, new AtomicLong(0L));
+    m.put(5_000L, new AtomicLong(0L));
+    m.put(10_000L, new AtomicLong(0L));
+    m.put(20_000L, new AtomicLong(0L));
+    m.put(30_000L, new AtomicLong(0L));
+    m.put(60_000L, new AtomicLong(0L));
     m.put(Long.MAX_VALUE, new AtomicLong(0L));
   }
 
@@ -1315,7 +1469,7 @@ public final class SummarizeAccessLog
    *
    * @param  m  The log message to be processed.
    */
-  private void processConnect(final ConnectAccessLogMessage m)
+  private void processConnect(@NotNull final ConnectAccessLogMessage m)
   {
     numConnects++;
 
@@ -1347,11 +1501,46 @@ public final class SummarizeAccessLog
 
 
   /**
+   * Performs any necessary processing for a security negotiation message.
+   *
+   * @param  m  The log message to be processed.
+   */
+  private void processSecurityNegotiation(
+                    @NotNull final SecurityNegotiationAccessLogMessage m)
+  {
+    final String protocol = m.getProtocol();
+    if (protocol != null)
+    {
+      AtomicLong l = tlsProtocols.get(protocol);
+      if (l == null)
+      {
+        l = new AtomicLong(0L);
+        tlsProtocols.put(protocol, l);
+      }
+      l.incrementAndGet();
+    }
+
+    final String cipherSuite = m.getCipher();
+    if (cipherSuite != null)
+    {
+      AtomicLong l = tlsCipherSuites.get(cipherSuite);
+      if (l == null)
+      {
+        l = new AtomicLong(0L);
+        tlsCipherSuites.put(cipherSuite, l);
+      }
+      l.incrementAndGet();
+    }
+  }
+
+
+
+  /**
    * Performs any necessary processing for a disconnect message.
    *
    * @param  m  The log message to be processed.
    */
-  private void processDisconnect(final DisconnectAccessLogMessage m)
+  private void processDisconnect(@NotNull final DisconnectAccessLogMessage m)
   {
     numDisconnects++;
 
@@ -1375,7 +1564,8 @@ public final class SummarizeAccessLog
    *
    * @param  m  The log message to be processed.
    */
-  private void processAbandonRequest(final AbandonRequestAccessLogMessage m)
+  private void processAbandonRequest(
+                    @NotNull final AbandonRequestAccessLogMessage m)
   {
     numAbandons++;
   }
@@ -1387,7 +1577,8 @@ public final class SummarizeAccessLog
    *
    * @param  m  The log message to be processed.
    */
-  private void processExtendedRequest(final ExtendedRequestAccessLogMessage m)
+  private void processExtendedRequest(
+                    @NotNull final ExtendedRequestAccessLogMessage m)
   {
     processedRequests.add(m.getConnectionID() + "-" + m.getOperationID());
     processExtendedRequestInternal(m);
@@ -1401,7 +1592,7 @@ public final class SummarizeAccessLog
    * @param  m  The log message to be processed.
    */
   private void processExtendedRequestInternal(
-                    final ExtendedRequestAccessLogMessage m)
+                    @NotNull final ExtendedRequestAccessLogMessage m)
   {
     final String oid = m.getRequestOID();
     if (oid != null)
@@ -1413,6 +1604,13 @@ public final class SummarizeAccessLog
         extendedOperations.put(oid, l);
       }
       l.incrementAndGet();
+
+      final String requestType = m.getRequestType();
+      if ((requestType != null) &&
+           (! extendedOperationOIDsToNames.containsKey(oid)))
+      {
+        extendedOperationOIDsToNames.put(oid, requestType);
+      }
     }
   }
 
@@ -1423,7 +1621,8 @@ public final class SummarizeAccessLog
    *
    * @param  m  The log message to be processed.
    */
-  private void processSearchRequest(final SearchRequestAccessLogMessage m)
+  private void processSearchRequest(
+                    @NotNull final SearchRequestAccessLogMessage m)
   {
     processedRequests.add(m.getConnectionID() + "-" + m.getOperationID());
     processSearchRequestInternal(m);
@@ -1437,16 +1636,11 @@ public final class SummarizeAccessLog
    * @param  m  The log message to be processed.
    */
   private void processSearchRequestInternal(
-                    final SearchRequestAccessLogMessage m)
+                    @NotNull final SearchRequestAccessLogMessage m)
   {
     final SearchScope scope = m.getScope();
     if (scope != null)
     {
-      if (scope != SearchScope.BASE)
-      {
-        numNonBaseSearches++;
-      }
-
       AtomicLong scopeCount = searchScopes.get(scope);
       if (scopeCount == null)
       {
@@ -1457,17 +1651,29 @@ public final class SummarizeAccessLog
 
       if (! scope.equals(SearchScope.BASE))
       {
-        final Filter filter = m.getParsedFilter();
-        if (filter != null)
+        final String filterString = getFilterString(m.getParsedFilter());
+        if (filterString != null)
         {
-          final String genericString = new GenericFilter(filter).toString();
-          AtomicLong filterCount = filterTypes.get(genericString);
+          AtomicLong filterCount = filterTypes.get(filterString);
           if (filterCount == null)
           {
             filterCount = new AtomicLong(0L);
-            filterTypes.put(genericString, filterCount);
+            filterTypes.put(filterString, filterCount);
           }
           filterCount.incrementAndGet();
+
+
+          final String baseDN = getDNString(m.getBaseDN());
+          if (baseDN != null)
+          {
+            AtomicLong baseDNCount = searchBaseDNs.get(baseDN);
+            if (baseDNCount == null)
+            {
+              baseDNCount = new AtomicLong(0L);
+              searchBaseDNs.put(baseDN, baseDNCount);
+            }
+            baseDNCount.incrementAndGet();
+          }
         }
       }
     }
@@ -1480,7 +1686,8 @@ public final class SummarizeAccessLog
    *
    * @param  m  The log message to be processed.
    */
-  private void processUnbindRequest(final UnbindRequestAccessLogMessage m)
+  private void processUnbindRequest(
+                    @NotNull final UnbindRequestAccessLogMessage m)
   {
     numUnbinds++;
   }
@@ -1492,7 +1699,7 @@ public final class SummarizeAccessLog
    *
    * @param  m  The log message to be processed.
    */
-  private void processAddResult(final AddResultAccessLogMessage m)
+  private void processAddResult(@NotNull final AddResultAccessLogMessage m)
   {
     numAdds++;
 
@@ -1505,6 +1712,8 @@ public final class SummarizeAccessLog
     {
       numUncachedAdds++;
     }
+
+    updateAuthzCount(m.getAlternateAuthorizationDN());
   }
 
 
@@ -1514,24 +1723,97 @@ public final class SummarizeAccessLog
    *
    * @param  m  The log message to be processed.
    */
-  private void processBindResult(final BindResultAccessLogMessage m)
+  private void processBindResult(@NotNull final BindResultAccessLogMessage m)
   {
     numBinds++;
+
+    if (m.getAuthenticationType() != null)
+    {
+      final String authType;
+      switch (m.getAuthenticationType())
+      {
+        case SIMPLE:
+          authType = "Simple";
+          break;
+
+        case SASL:
+          final String saslMechanism = m.getSASLMechanismName();
+          if (saslMechanism == null)
+          {
+            authType = "SASL {unknown mechanism}";
+          }
+          else
+          {
+            authType = "SASL " + saslMechanism;
+          }
+          break;
+
+        case INTERNAL:
+          authType = "Internal";
+          break;
+
+        default:
+          authType = m.getAuthenticationType().name();
+          break;
+      }
+
+      AtomicLong l = authenticationTypes.get(authType);
+      if (l == null)
+      {
+        l = new AtomicLong(0L);
+        authenticationTypes.put(authType, l);
+      }
+      l.incrementAndGet();
+    }
 
     updateResultCodeCount(m.getResultCode(), bindResultCodes);
     bindProcessingDuration +=
          doubleValue(m.getProcessingTimeMillis(), bindProcessingTimes);
 
-    final String ccp = m.getClientConnectionPolicy();
-    if (ccp != null)
+    String authenticationDN = getDNString(m.getAuthenticationDN());
+    if (m.getResultCode() == ResultCode.SUCCESS)
     {
-      AtomicLong l = clientConnectionPolicies.get(ccp);
-      if (l == null)
+      if (authenticationDN != null)
       {
-        l = new AtomicLong(0L);
-        clientConnectionPolicies.put(ccp, l);
+        AtomicLong l = successfulBindDNs.get(authenticationDN);
+        if (l == null)
+        {
+          l = new AtomicLong(0L);
+          successfulBindDNs.put(authenticationDN, l);
+        }
+        l.incrementAndGet();
       }
-      l.incrementAndGet();
+
+      final String ccp = m.getClientConnectionPolicy();
+      if (ccp != null)
+      {
+        AtomicLong l = clientConnectionPolicies.get(ccp);
+        if (l == null)
+        {
+          l = new AtomicLong(0L);
+          clientConnectionPolicies.put(ccp, l);
+        }
+        l.incrementAndGet();
+      }
+    }
+    else if ((m.getResultCode() != ResultCode.SASL_BIND_IN_PROGRESS) &&
+         (m.getResultCode() != ResultCode.REFERRAL))
+    {
+      if (authenticationDN == null)
+      {
+        authenticationDN = getDNString(m.getDN());
+      }
+
+      if (authenticationDN != null)
+      {
+        AtomicLong l = failedBindDNs.get(authenticationDN);
+        if (l == null)
+        {
+          l = new AtomicLong(0L);
+          failedBindDNs.put(authenticationDN, l);
+        }
+        l.incrementAndGet();
+      }
     }
 
     final Boolean uncachedDataAccessed = m.getUncachedDataAccessed();
@@ -1539,6 +1821,8 @@ public final class SummarizeAccessLog
     {
       numUncachedBinds++;
     }
+
+    updateAuthzCount(m.getAuthorizationDN());
   }
 
 
@@ -1548,7 +1832,8 @@ public final class SummarizeAccessLog
    *
    * @param  m  The log message to be processed.
    */
-  private void processCompareResult(final CompareResultAccessLogMessage m)
+  private void processCompareResult(
+                    @NotNull final CompareResultAccessLogMessage m)
   {
     numCompares++;
 
@@ -1561,6 +1846,8 @@ public final class SummarizeAccessLog
     {
       numUncachedCompares++;
     }
+
+    updateAuthzCount(m.getAlternateAuthorizationDN());
   }
 
 
@@ -1570,7 +1857,8 @@ public final class SummarizeAccessLog
    *
    * @param  m  The log message to be processed.
    */
-  private void processDeleteResult(final DeleteResultAccessLogMessage m)
+  private void processDeleteResult(
+                    @NotNull final DeleteResultAccessLogMessage m)
   {
     numDeletes++;
 
@@ -1583,6 +1871,8 @@ public final class SummarizeAccessLog
     {
       numUncachedDeletes++;
     }
+
+    updateAuthzCount(m.getAlternateAuthorizationDN());
   }
 
 
@@ -1592,7 +1882,8 @@ public final class SummarizeAccessLog
    *
    * @param  m  The log message to be processed.
    */
-  private void processExtendedResult(final ExtendedResultAccessLogMessage m)
+  private void processExtendedResult(
+                    @NotNull final ExtendedResultAccessLogMessage m)
   {
     numExtended++;
 
@@ -1632,7 +1923,8 @@ public final class SummarizeAccessLog
    *
    * @param  m  The log message to be processed.
    */
-  private void processModifyResult(final ModifyResultAccessLogMessage m)
+  private void processModifyResult(
+                    @NotNull final ModifyResultAccessLogMessage m)
   {
     numModifies++;
 
@@ -1645,6 +1937,8 @@ public final class SummarizeAccessLog
     {
       numUncachedModifies++;
     }
+
+    updateAuthzCount(m.getAlternateAuthorizationDN());
   }
 
 
@@ -1654,7 +1948,8 @@ public final class SummarizeAccessLog
    *
    * @param  m  The log message to be processed.
    */
-  private void processModifyDNResult(final ModifyDNResultAccessLogMessage m)
+  private void processModifyDNResult(
+                    @NotNull final ModifyDNResultAccessLogMessage m)
   {
     numModifyDNs++;
 
@@ -1667,6 +1962,8 @@ public final class SummarizeAccessLog
     {
       numUncachedModifyDNs++;
     }
+
+    updateAuthzCount(m.getAlternateAuthorizationDN());
   }
 
 
@@ -1676,12 +1973,13 @@ public final class SummarizeAccessLog
    *
    * @param  m  The log message to be processed.
    */
-  private void processSearchResult(final SearchResultAccessLogMessage m)
+  private void processSearchResult(
+                    @NotNull final SearchResultAccessLogMessage m)
   {
     numSearches++;
 
     final String id = m.getConnectionID() + "-" + m.getOperationID();
-    if (!processedRequests.remove(id))
+    if (! processedRequests.remove(id))
     {
       processSearchRequestInternal(m);
     }
@@ -1690,6 +1988,8 @@ public final class SummarizeAccessLog
     updateResultCodeCount(resultCode, searchResultCodes);
     searchProcessingDuration +=
          doubleValue(m.getProcessingTimeMillis(), searchProcessingTimes);
+
+    final String filterString = getFilterString(m.getParsedFilter());
 
     final Long entryCount = m.getEntriesReturned();
     if (entryCount != null)
@@ -1701,6 +2001,31 @@ public final class SummarizeAccessLog
         searchEntryCounts.put(entryCount, l);
       }
       l.incrementAndGet();
+
+      final Map<String,AtomicLong> filterCountMap;
+      switch (entryCount.intValue())
+      {
+        case 0:
+          filterCountMap = noEntryFilters;
+          break;
+        case 1:
+          filterCountMap = oneEntryFilters;
+          break;
+        default:
+          filterCountMap = multiEntryFilters;
+          break;
+      }
+
+      if (filterString != null)
+      {
+        AtomicLong filterCount = filterCountMap.get(filterString);
+        if (filterCount == null)
+        {
+          filterCount = new AtomicLong(0L);
+          filterCountMap.put(filterString, filterCount);
+        }
+        filterCount.incrementAndGet();
+      }
     }
 
     final Boolean isUnindexed = m.isUnindexed();
@@ -1715,12 +2040,47 @@ public final class SummarizeAccessLog
       {
         numUnindexedFailed++;
       }
+
+      if (filterString != null)
+      {
+        AtomicLong l = unindexedFilters.get(filterString);
+        if (l == null)
+        {
+          l = new AtomicLong(0L);
+          unindexedFilters.put(filterString, l);
+        }
+        l.incrementAndGet();
+      }
     }
 
     final Boolean uncachedDataAccessed = m.getUncachedDataAccessed();
     if ((uncachedDataAccessed != null) && uncachedDataAccessed)
     {
       numUncachedSearches++;
+    }
+
+    updateAuthzCount(m.getAlternateAuthorizationDN());
+
+    final Double processingTimeMillis = m.getProcessingTimeMillis();
+    if ((processingTimeMillis != null) && (filterString != null))
+    {
+      final long processingTimeMicros =
+           Math.round(processingTimeMillis * 1_000.0);
+
+      AtomicLong l = mostExpensiveFilters.get(filterString);
+      if (l == null)
+      {
+        l = new AtomicLong(processingTimeMicros);
+        mostExpensiveFilters.put(filterString, l);
+      }
+      else
+      {
+        final long previousProcessingTimeMicros = l.get();
+        if (processingTimeMicros > previousProcessingTimeMicros)
+        {
+          l.set(processingTimeMicros);
+        }
+      }
     }
   }
 
@@ -1732,8 +2092,8 @@ public final class SummarizeAccessLog
    * @param  rc  The result code for which to update the count.
    * @param  m   The map used to hold counts by result code.
    */
-  private static void updateResultCodeCount(final ResultCode rc,
-                           final HashMap<ResultCode,AtomicLong> m)
+  private static void updateResultCodeCount(@Nullable final ResultCode rc,
+                           @NotNull final HashMap<ResultCode,AtomicLong> m)
   {
     if (rc == null)
     {
@@ -1760,8 +2120,8 @@ public final class SummarizeAccessLog
    * @return  The double value of the provided {@code Double} object if it was
    *          non-{@code null}, or 0.0 if it was {@code null}.
    */
-  private static double doubleValue(final Double d,
-                                    final HashMap<Long,AtomicLong> m)
+  private static double doubleValue(@Nullable final Double d,
+                                    @NotNull final HashMap<Long,AtomicLong> m)
   {
     if (d == null)
     {
@@ -1785,51 +2145,203 @@ public final class SummarizeAccessLog
 
 
   /**
-   * Retrieves a list of the most frequently-occurring elements in the
-   * provided map, paired with the number of times each value occurred.
+   * Updates the provided list with the most frequently-occurring elements in
+   * the provided map, paired with the number of times each value occurred.
    *
-   * @param  <K>  The type of object used as the key for the provided map.
-   * @param  m    The map to be examined.  It is expected that the values of the
-   *              map will be the count of occurrences for the keys.
-   * @param  n    The number of elements to return.
+   * @param  <K>                    The type of object used as the key for the
+   *                                provided map.
+   * @param  countMap               The map to be examined.  It is expected that
+   *                                the values of the map will be the count of
+   *                                occurrences for the keys.
+   * @param  mostCommonElementList  The list to which the values will be
+   *                                updated.  It must not be {@code null}, must
+   *                                be empty, and must be updatable.
+   * @param  maxListSize            The maximum number of items to add to the
+   *                                provided list.  It must be greater than
+   *                                zero.
+   * @param  skippedWithSameCount   A counter that will be incremented for each
+   *                                map entry that is skipped with the same
+   *                                count as a value that was not skipped.  It
+   *                                must not be {@code null} and must initially
+   *                                be zero.
+   * @param  skippedWithLowerCount  A counter that will be incremented for each
+   *                                map entry that is skipped with a lower count
+   *                                as the last value that was not skipped.  It
+   *                                must not be {@code null} and must initially
+   *                                be zero.
    *
    * @return  A list of the most frequently-occurring elements in the provided
    *          map.
    */
+  @NotNull()
   private static <K> List<ObjectPair<K,Long>> getMostCommonElements(
-                                                   final Map<K,AtomicLong> m,
-                                                   final int n)
+               @NotNull final Map<K,AtomicLong> countMap,
+               @NotNull final List<ObjectPair<K,Long>> mostCommonElementList,
+               final int maxListSize,
+               @NotNull final AtomicLong skippedWithSameCount,
+               @NotNull final AtomicLong skippedWithLowerCount)
   {
     final TreeMap<Long,List<K>> reverseMap =
          new TreeMap<>(new ReverseComparator<Long>());
-    for (final Map.Entry<K,AtomicLong> e : m.entrySet())
+    for (final Map.Entry<K,AtomicLong> e : countMap.entrySet())
     {
       final Long count = e.getValue().get();
       List<K> list = reverseMap.get(count);
       if (list == null)
       {
-        list = new ArrayList<>(n);
+        list = new ArrayList<>();
         reverseMap.put(count, list);
       }
       list.add(e.getKey());
     }
 
-    final ArrayList<ObjectPair<K,Long>> returnList = new ArrayList<>(n);
     for (final Map.Entry<Long,List<K>> e : reverseMap.entrySet())
     {
       final Long l = e.getKey();
+      int numNotSkipped = 0;
       for (final K k : e.getValue())
       {
-        returnList.add(new ObjectPair<>(k, l));
-      }
-
-      if (returnList.size() >= n)
-      {
-        break;
+        if (mostCommonElementList.size() >= maxListSize)
+        {
+          if (numNotSkipped > 0)
+          {
+            skippedWithSameCount.incrementAndGet();
+          }
+          else
+          {
+            skippedWithLowerCount.incrementAndGet();
+          }
+        }
+        else
+        {
+          numNotSkipped++;
+          mostCommonElementList.add(new ObjectPair<>(k, l));
+        }
       }
     }
 
-    return returnList;
+    return mostCommonElementList;
+  }
+
+
+
+  /**
+   * Updates the count of alternate authorization identities for the provided
+   * DN.
+   *
+   * @param  authzDN  The DN of the alternate authorization identity that was
+   *                  used.  It may be {@code null} if no alternate
+   *                  authorization identity was used.
+   */
+  private void updateAuthzCount(@Nullable final String authzDN)
+  {
+    if (authzDN == null)
+    {
+      return;
+    }
+
+    final String dnString = getDNString(authzDN);
+
+    AtomicLong l = authzDNs.get(dnString);
+    if (l == null)
+    {
+      l = new AtomicLong(0L);
+      authzDNs.put(dnString, l);
+    }
+  }
+
+
+
+  /**
+   * Retrieves a string representation of the provided DN.  It may either be
+   * anonymized, using question marks in place of specific attribute values, or
+   * it may be the actual string representation of the given DN.
+   *
+   * @param  dn  The DN for which to retrieve the string representation.
+   *
+   * @return  A string representation of the provided DN, or {@code null} if the
+   *          given DN was {@code null}.
+   */
+  @Nullable()
+  private String getDNString(@Nullable final String dn)
+  {
+    if (dn == null)
+    {
+      return null;
+    }
+
+    final DN parsedDN;
+    try
+    {
+      parsedDN = new DN(dn);
+    }
+    catch (final Exception e)
+    {
+      Debug.debugException(e);
+      return dn.toLowerCase();
+    }
+
+    if (parsedDN.isNullDN())
+    {
+      return "{Null DN}";
+    }
+
+    if (doNotAnonymize.isPresent())
+    {
+      return parsedDN.toNormalizedString();
+    }
+
+    final StringBuilder buffer = new StringBuilder();
+    final RDN[] rdns = parsedDN.getRDNs();
+    for (int i=0; i < rdns.length; i++)
+    {
+      if (i > 0)
+      {
+        buffer.append(',');
+      }
+
+      final RDN rdn = rdns[i];
+      final String[] attributeNames = rdn.getAttributeNames();
+      for (int j=0; j < attributeNames.length; j++)
+      {
+        if (j > 0)
+        {
+          buffer.append('+');
+        }
+        buffer.append(attributeNames[j].toLowerCase());
+        buffer.append("=?");
+      }
+    }
+
+    return buffer.toString();
+  }
+
+
+
+  /**
+   * Retrieves a string representation of the provided filter.  It may
+   * potentially be de-anonymized to include specific values.
+   *
+   * @param  filter  The filter for which to obtain the string representation.
+   *
+   * @return  A string representation of the provided filter (which may or may
+   *          not be anonymized), or {@code null} if the provided filter is
+   *          {@code null}.
+   */
+  @Nullable()
+  private String getFilterString(@Nullable final Filter filter)
+  {
+    if (filter == null)
+    {
+      return null;
+    }
+
+    if (doNotAnonymize.isPresent())
+    {
+      return filter.toString().toLowerCase();
+    }
+
+    return new GenericFilter(filter).toString().toLowerCase();
   }
 
 
@@ -1843,8 +2355,9 @@ public final class SummarizeAccessLog
    *            processed by the server.
    * @param  m  The map of operation counts by processing time bucket.
    */
-  private void printProcessingTimeHistogram(final String t, final long n,
-                    final LinkedHashMap<Long,AtomicLong> m)
+  private void printProcessingTimeHistogram(@NotNull final String t,
+                    final long n,
+                    @NotNull final LinkedHashMap<Long,AtomicLong> m)
   {
     if (n <= 0)
     {
@@ -1869,14 +2382,34 @@ public final class SummarizeAccessLog
 
       if (i.hasNext())
       {
-        out("Between ", lowerBound, "ms and ", upperBound, "ms:  ",
+        final String lowerBoundString;
+        if (lowerBound == 0L)
+        {
+          lowerBoundString = "0 milliseconds";
+        }
+        else
+        {
+          final long lowerBoundNanos = lowerBound * 1_000_000L;
+          lowerBoundString = DurationArgument.nanosToDuration(lowerBoundNanos);
+        }
+
+        final long upperBoundNanos = upperBound * 1_000_000L;
+        final String upperBoundString =
+             DurationArgument.nanosToDuration(upperBoundNanos);
+
+
+        out("Between ", lowerBoundString, " and ", upperBoundString, ":  ",
             count, " (", decimalFormat.format(categoryPercent), "%, ",
             decimalFormat.format(accumulatedPercent), "% accumulated)");
         lowerBound = upperBound;
       }
       else
       {
-        out("Greater than ", lowerBound, "ms:  ", count, " (",
+        final long lowerBoundNanos = lowerBound * 1_000_000L;
+        final String lowerBoundString =
+             DurationArgument.nanosToDuration(lowerBoundNanos);
+
+        out("Greater than ", lowerBoundString, ":  ", count, " (",
             decimalFormat.format(categoryPercent), "%, ",
             decimalFormat.format(accumulatedPercent), "% accumulated)");
       }
@@ -1895,7 +2428,8 @@ public final class SummarizeAccessLog
    * @param  numTotal       The total number of operations of the specified
    *                        type.
    */
-  private void printUncached(final String operationType, final long numUncached,
+  private void printUncached(@NotNull final String operationType,
+                             final long numUncached,
                              final long numTotal)
   {
     if (numUncached == 0)
@@ -1905,5 +2439,183 @@ public final class SummarizeAccessLog
 
     out(operationType, ":  ", numUncached, " (",
          decimalFormat.format(100.0 * numUncached / numTotal), "%)");
+  }
+
+
+
+  /**
+   * Prints data from the provided map of counts.
+   *
+   * @param  countMap      The map containing the data to print.
+   * @param  heading       The heading to display before printing the contents
+   *                       of the map.
+   * @param  singularItem  The name to use for a single item represented by the
+   *                       key of the given map.
+   * @param  pluralItem    The name to use for zero or multiple items
+   *                       represented by the key of the given map.
+   */
+  private void printCounts(@Nullable final Map<String,AtomicLong> countMap,
+                           @NotNull final String heading,
+                           @NotNull final String singularItem,
+                           @NotNull final String pluralItem)
+  {
+    if ((countMap == null) || countMap.isEmpty())
+    {
+      return;
+    }
+
+    long totalCount = 0L;
+    for (final AtomicLong l : countMap.values())
+    {
+      totalCount += l.get();
+    }
+
+    out();
+    out(heading);
+
+    int displayCount = reportCount.getValue();
+    if (displayCount <= 0L)
+    {
+      displayCount = Integer.MAX_VALUE;
+    }
+
+    final List<ObjectPair<String,Long>> countList = new ArrayList<>();
+    final AtomicLong skippedWithSameCount = new AtomicLong(0L);
+    final AtomicLong skippedWithLowerCount = new AtomicLong(0L);
+    getMostCommonElements(countMap, countList, displayCount,
+         skippedWithSameCount, skippedWithLowerCount);
+
+    long count = -1L;
+    for (final ObjectPair<String,Long> p : countList)
+    {
+      count = p.getSecond();
+
+      if (totalCount > 0L)
+      {
+        final double percent = 100.0 * count / totalCount;
+        out(p.getFirst(), ":  ", count, " (", decimalFormat.format(percent),
+             ")");
+      }
+      else
+      {
+        out(p.getFirst(), ":  ", count);
+      }
+    }
+
+    if (skippedWithSameCount.get() > 0L)
+    {
+      out("{ Skipped " + skippedWithSameCount.get() + " additional " +
+           getSingularOrPlural(skippedWithSameCount.get(), singularItem,
+                pluralItem) +
+           " with a count of " + count + " }");
+    }
+
+    if (skippedWithLowerCount.get() > 0L)
+    {
+      out("{ Skipped " + skippedWithLowerCount.get() + " additional " +
+           getSingularOrPlural(skippedWithLowerCount.get(), singularItem,
+                pluralItem) +
+           " with a count that is less than " + count + " }");
+    }
+  }
+
+
+
+  /**
+   * Prints data from the provided map of counts.
+   *
+   * @param  countMap       The map containing the data to print.
+   * @param  operationType  The type of operation represented by the keys of
+   *                        the map.
+   */
+  private void printResultCodeCounts(
+                    @Nullable final Map<ResultCode,AtomicLong> countMap,
+                    @NotNull final String operationType)
+  {
+    if ((countMap == null) || countMap.isEmpty())
+    {
+      return;
+    }
+
+    long totalCount = 0L;
+    for (final AtomicLong l : countMap.values())
+    {
+      totalCount += l.get();
+    }
+
+    out();
+    out("Most common " + operationType + " operation result codes:");
+
+    int displayCount = reportCount.getValue();
+    if (displayCount <= 0L)
+    {
+      displayCount = Integer.MAX_VALUE;
+    }
+
+    final List<ObjectPair<ResultCode,Long>> resultCodeList = new ArrayList<>();
+    final AtomicLong skippedWithSameCount = new AtomicLong(0L);
+    final AtomicLong skippedWithLowerCount = new AtomicLong(0L);
+    getMostCommonElements(countMap, resultCodeList, displayCount,
+         skippedWithSameCount, skippedWithLowerCount);
+
+    long count = -1L;
+    for (final ObjectPair<ResultCode,Long> p : resultCodeList)
+    {
+      count = p.getSecond();
+
+      if (totalCount > 0L)
+      {
+        final double percent = 100.0 * count / totalCount;
+        out(p.getFirst().getName(), " (", p.getFirst().intValue(), "):  ",
+             count, " (", decimalFormat.format(percent), ")");
+      }
+      else
+      {
+        out(p.getFirst(), ":  ", count);
+      }
+    }
+
+    if (skippedWithSameCount.get() > 0L)
+    {
+      out("{ Skipped " + skippedWithSameCount.get() + " additional result " +
+           getSingularOrPlural(skippedWithSameCount.get(), "code", "codes") +
+           " with a count of " + count + " }");
+    }
+
+    if (skippedWithLowerCount.get() > 0L)
+    {
+      out("{ Skipped " + skippedWithLowerCount.get() + " additional result " +
+           getSingularOrPlural(skippedWithLowerCount.get(), "code", "codes") +
+           " with a count that is less than " + count + " }");
+    }
+  }
+
+
+
+  /**
+   * Retrieves the appropriate singular or plural form based on the given
+   * value.
+   *
+   * @param  count     The count that will be used to determine whether to
+   *                   retrieve the singular or plural form.
+   * @param  singular  The singular form for the value to return.
+   * @param  plural    The plural form for the value to return.
+   *
+   * @return  The singular form if the count is 1, or the plural form if the
+   *          count is any other value.
+   */
+  @NotNull()
+  private String getSingularOrPlural(final long count,
+                                     @NotNull final String singular,
+                                     @NotNull final String plural)
+  {
+    if (count == 1L)
+    {
+      return singular;
+    }
+    else
+    {
+      return plural;
+    }
   }
 }

@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import java.util.Map;
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -107,7 +124,7 @@ public final class JEEnvironmentMonitorEntry
   /**
    * The structural object class used in JE environment monitor entries.
    */
-  static final String JE_ENVIRONMENT_MONITOR_OC =
+  @NotNull static final String JE_ENVIRONMENT_MONITOR_OC =
        "ds-je-environment-monitor-entry";
 
 
@@ -115,7 +132,8 @@ public final class JEEnvironmentMonitorEntry
   /**
    * The name of the attribute that contains the number of active transactions.
    */
-  private static final String ATTR_ACTIVE_TXNS = "active-transaction-count";
+  @NotNull private static final String ATTR_ACTIVE_TXNS =
+       "active-transaction-count";
 
 
 
@@ -123,7 +141,7 @@ public final class JEEnvironmentMonitorEntry
    * The name of the attribute that contains the average duration of the all
    * checkpoints in milliseconds.
    */
-  private static final String ATTR_AVERAGE_CHECKPOINT_DURATION_MILLIS =
+  @NotNull private static final String ATTR_AVERAGE_CHECKPOINT_DURATION_MILLIS =
        "average-checkpoint-duration-millis";
 
 
@@ -132,14 +150,15 @@ public final class JEEnvironmentMonitorEntry
    * The name of the attribute that contains the backend ID for the associated
    * backend.
    */
-  private static final String ATTR_BACKEND_ID = "backend-id";
+  @NotNull private static final String ATTR_BACKEND_ID = "backend-id";
 
 
 
   /**
    * The name of the attribute that contains the DB cache percent full.
    */
-  private static final String ATTR_CACHE_PCT_FULL = "db-cache-percent-full";
+  @NotNull private static final String ATTR_CACHE_PCT_FULL =
+       "db-cache-percent-full";
 
 
 
@@ -147,7 +166,7 @@ public final class JEEnvironmentMonitorEntry
    * The name of the attribute that indicates whether a checkpoint is currently
    * in progress.
    */
-  private static final String ATTR_CHECKPOINT_IN_PROGRESS =
+  @NotNull private static final String ATTR_CHECKPOINT_IN_PROGRESS =
        "checkpoint-in-progress";
 
 
@@ -155,35 +174,36 @@ public final class JEEnvironmentMonitorEntry
   /**
    * The name of the attribute that contains the cleaner backlog.
    */
-  private static final String ATTR_CLEANER_BACKLOG = "cleaner-backlog";
+  @NotNull private static final String ATTR_CLEANER_BACKLOG = "cleaner-backlog";
 
 
 
   /**
    * The name of the attribute that contains the current DB cache size.
    */
-  private static final String ATTR_CURRENT_CACHE_SIZE = "current-db-cache-size";
+  @NotNull private static final String ATTR_CURRENT_CACHE_SIZE =
+       "current-db-cache-size";
 
 
 
   /**
    * The name of the attribute that contains the path to the DB directory.
    */
-  private static final String ATTR_DB_DIRECTORY = "db-directory";
+  @NotNull private static final String ATTR_DB_DIRECTORY = "db-directory";
 
 
 
   /**
    * The name of the attribute that contains the DB on-disk size.
    */
-  private static final String ATTR_DB_ON_DISK_SIZE = "db-on-disk-size";
+  @NotNull private static final String ATTR_DB_ON_DISK_SIZE = "db-on-disk-size";
 
 
 
   /**
    * The name of the attribute that contains the Berkeley DB JE version string.
    */
-  private static final String ATTR_JE_VERSION = "je-version";
+  @NotNull private static final String ATTR_JE_VERSION = "je-version";
 
 
 
@@ -191,7 +211,7 @@ public final class JEEnvironmentMonitorEntry
    * The name of the attribute that contains the duration of the last checkpoint
    * in milliseconds.
    */
-  private static final String ATTR_LAST_CHECKPOINT_DURATION_MILLIS =
+  @NotNull private static final String ATTR_LAST_CHECKPOINT_DURATION_MILLIS =
        "last-checkpoint-duration-millis";
 
 
@@ -199,7 +219,7 @@ public final class JEEnvironmentMonitorEntry
   /**
    * The name of the attribute that contains the time the last checkpoint began.
    */
-  private static final String ATTR_LAST_CHECKPOINT_START_TIME =
+  @NotNull private static final String ATTR_LAST_CHECKPOINT_START_TIME =
        "last-checkpoint-start-time";
 
 
@@ -207,7 +227,7 @@ public final class JEEnvironmentMonitorEntry
   /**
    * The name of the attribute that contains the time the last checkpoint ended.
    */
-  private static final String ATTR_LAST_CHECKPOINT_STOP_TIME =
+  @NotNull private static final String ATTR_LAST_CHECKPOINT_STOP_TIME =
        "last-checkpoint-stop-time";
 
 
@@ -218,7 +238,7 @@ public final class JEEnvironmentMonitorEntry
    * @deprecated  Use {@link #ATTR_LAST_CHECKPOINT_STOP_TIME} instead.
    */
   @Deprecated()
-  private static final String ATTR_LAST_CHECKPOINT_TIME =
+  @NotNull private static final String ATTR_LAST_CHECKPOINT_TIME =
        "last-checkpoint-time";
 
 
@@ -226,7 +246,8 @@ public final class JEEnvironmentMonitorEntry
   /**
    * The name of the attribute that contains the maximum cache size.
    */
-  private static final String ATTR_MAX_CACHE_SIZE = "max-db-cache-size";
+  @NotNull private static final String ATTR_MAX_CACHE_SIZE =
+       "max-db-cache-size";
 
 
 
@@ -234,7 +255,7 @@ public final class JEEnvironmentMonitorEntry
    * The name of the attribute that contains the length of time in milliseconds
    * since the last checkpoint.
    */
-  private static final String ATTR_MILLIS_SINCE_LAST_CHECKPOINT =
+  @NotNull private static final String ATTR_MILLIS_SINCE_LAST_CHECKPOINT =
        "millis-since-last-checkpoint";
 
 
@@ -243,7 +264,7 @@ public final class JEEnvironmentMonitorEntry
    * The name of the attribute that contains the number of nodes evicted from
    * the cache.
    */
-  private static final String ATTR_NODES_EVICTED = "nodes-evicted";
+  @NotNull private static final String ATTR_NODES_EVICTED = "nodes-evicted";
 
 
 
@@ -251,14 +272,14 @@ public final class JEEnvironmentMonitorEntry
    * The name of the attribute that contains the number of checkpoints
    * processed.
    */
-  private static final String ATTR_NUM_CHECKPOINTS = "num-checkpoints";
+  @NotNull private static final String ATTR_NUM_CHECKPOINTS = "num-checkpoints";
 
 
 
   /**
    * The name of the attribute that contains the number of read locks held.
    */
-  private static final String ATTR_NUM_READ_LOCKS = "read-locks-held";
+  @NotNull private static final String ATTR_NUM_READ_LOCKS = "read-locks-held";
 
 
 
@@ -266,7 +287,7 @@ public final class JEEnvironmentMonitorEntry
    * The name of the attribute that contains the total duration of the all
    * checkpoints in milliseconds.
    */
-  private static final String ATTR_TOTAL_CHECKPOINT_DURATION_MILLIS =
+  @NotNull private static final String ATTR_TOTAL_CHECKPOINT_DURATION_MILLIS =
        "total-checkpoint-duration-millis";
 
 
@@ -275,7 +296,7 @@ public final class JEEnvironmentMonitorEntry
    * The name of the attribute that contains the number of transactions waiting
    * on locks.
    */
-  private static final String ATTR_NUM_WAITING_TXNS =
+  @NotNull private static final String ATTR_NUM_WAITING_TXNS =
        "transactions-waiting-on-locks";
 
 
@@ -283,35 +304,39 @@ public final class JEEnvironmentMonitorEntry
   /**
    * The name of the attribute that contains the number of write locks held.
    */
-  private static final String ATTR_NUM_WRITE_LOCKS = "write-locks-held";
+  @NotNull private static final String ATTR_NUM_WRITE_LOCKS =
+       "write-locks-held";
 
 
 
   /**
    * The name of the attribute that contains the number of random reads.
    */
-  private static final String ATTR_RANDOM_READS = "random-read-count";
+  @NotNull private static final String ATTR_RANDOM_READS = "random-read-count";
 
 
 
   /**
    * The name of the attribute that contains the number of random writes.
    */
-  private static final String ATTR_RANDOM_WRITES = "random-write-count";
+  @NotNull private static final String ATTR_RANDOM_WRITES =
+       "random-write-count";
 
 
 
   /**
    * The name of the attribute that contains the number of sequential reads.
    */
-  private static final String ATTR_SEQUENTIAL_READS = "sequential-read-count";
+  @NotNull private static final String ATTR_SEQUENTIAL_READS =
+       "sequential-read-count";
 
 
 
   /**
    * The name of the attribute that contains the number of sequential writes.
    */
-  private static final String ATTR_SEQUENTIAL_WRITES = "sequential-write-count";
+  @NotNull private static final String ATTR_SEQUENTIAL_WRITES =
+       "sequential-write-count";
 
 
 
@@ -319,7 +344,7 @@ public final class JEEnvironmentMonitorEntry
    * The prefix that will be used for attribute names that contain generic
    * environment statistics.
    */
-  private static final String ATTR_PREFIX_ENV_STAT = "je-env-stat-";
+  @NotNull private static final String ATTR_PREFIX_ENV_STAT = "je-env-stat-";
 
 
 
@@ -327,7 +352,7 @@ public final class JEEnvironmentMonitorEntry
    * The prefix that will be used for attribute names that contain generic lock
    * statistics.
    */
-  private static final String ATTR_PREFIX_LOCK_STAT = "je-lock-stat-";
+  @NotNull private static final String ATTR_PREFIX_LOCK_STAT = "je-lock-stat-";
 
 
 
@@ -335,7 +360,7 @@ public final class JEEnvironmentMonitorEntry
    * The prefix that will be used for attribute names that contain generic
    * transaction statistics.
    */
-  private static final String ATTR_PREFIX_TXN_STAT = "je-txn-stat-";
+  @NotNull private static final String ATTR_PREFIX_TXN_STAT = "je-txn-stat-";
 
 
 
@@ -343,7 +368,7 @@ public final class JEEnvironmentMonitorEntry
    * The name that will be used for the property that contains generic
    * environment statistics.
    */
-  private static final String PROPERTY_ENV_STATS = "je-env-stats";
+  @NotNull private static final String PROPERTY_ENV_STATS = "je-env-stats";
 
 
 
@@ -351,7 +376,7 @@ public final class JEEnvironmentMonitorEntry
    * The name that will be used for the property that contains generic lock
    * statistics.
    */
-  private static final String PROPERTY_LOCK_STATS = "je-lock-stats";
+  @NotNull private static final String PROPERTY_LOCK_STATS = "je-lock-stats";
 
 
 
@@ -359,7 +384,7 @@ public final class JEEnvironmentMonitorEntry
    * The name that will be used for the property that contains generic
    * transaction statistics.
    */
-  private static final String PROPERTY_TXN_STATS = "je-txn-stats";
+  @NotNull private static final String PROPERTY_TXN_STATS = "je-txn-stats";
 
 
 
@@ -371,13 +396,13 @@ public final class JEEnvironmentMonitorEntry
 
 
   // Indicates whether a checkpoint is currently in progress.
-  private final Boolean checkpointInProgress;
+  @Nullable private final Boolean checkpointInProgress;
 
   // The time the last checkpoint began.
-  private final Date lastCheckpointStartTime;
+  @Nullable private final Date lastCheckpointStartTime;
 
   // The time the last checkpoint ended.
-  private final Date lastCheckpointStopTime;
+  @Nullable private final Date lastCheckpointStopTime;
 
   /**
    * The time the last checkpoint ended.
@@ -385,82 +410,82 @@ public final class JEEnvironmentMonitorEntry
    * @deprecated  Use lastCheckpointStopTime instead.
    */
   @Deprecated
-  private final Date lastCheckpointTime;
+  @Nullable private final Date lastCheckpointTime;
 
   // The number of active transactions.
-  private final Long activeTransactionCount;
+  @Nullable private final Long activeTransactionCount;
 
   // The average duration for all checkpoints.
-  private final Long averageCheckpointDurationMillis;
+  @Nullable private final Long averageCheckpointDurationMillis;
 
   // The current cleaner backlog.
-  private final Long cleanerBacklog;
+  @Nullable private final Long cleanerBacklog;
 
   // The current DB cache size.
-  private final Long currentDBCacheSize;
+  @Nullable private final Long currentDBCacheSize;
 
   // The current DB cache percent full.
-  private final Long dbCachePercentFull;
+  @Nullable private final Long dbCachePercentFull;
 
   // The current DB on-disk size.
-  private final Long dbOnDiskSize;
+  @Nullable private final Long dbOnDiskSize;
 
   // The duration for the last checkpoint.
-  private final Long lastCheckpointDurationMillis;
+  @Nullable private final Long lastCheckpointDurationMillis;
 
   // The maximum allowed DB cache size.
-  private final Long maxDBCacheSize;
+  @Nullable private final Long maxDBCacheSize;
 
   // The length of time since the last checkpoint.
-  private final Long millisSinceLastCheckpoint;
+  @Nullable private final Long millisSinceLastCheckpoint;
 
   // The number of nodes evicted from the DB cache.
-  private final Long nodesEvicted;
+  @Nullable private final Long nodesEvicted;
 
   // The number of checkpoints completed.
-  private final Long numCheckpoints;
+  @Nullable private final Long numCheckpoints;
 
   // The number of random reads performed.
-  private final Long randomReads;
+  @Nullable private final Long randomReads;
 
   // The number of random writes performed.
-  private final Long randomWrites;
+  @Nullable private final Long randomWrites;
 
   // The number of read locks held.
-  private final Long readLocksHeld;
+  @Nullable private final Long readLocksHeld;
 
   // The number of sequential reads performed.
-  private final Long sequentialReads;
+  @Nullable private final Long sequentialReads;
 
   // The number of sequential writes performed.
-  private final Long sequentialWrites;
+  @Nullable private final Long sequentialWrites;
 
   // The total duration for all checkpoints.
-  private final Long totalCheckpointDurationMillis;
+  @Nullable private final Long totalCheckpointDurationMillis;
 
   // The number of transactions waiting on locks.
-  private final Long transactionsWaitingOnLocks;
+  @Nullable private final Long transactionsWaitingOnLocks;
 
   // The number of write locks held.
-  private final Long writeLocksHeld;
+  @Nullable private final Long writeLocksHeld;
 
   // The set of generic environment statistics.
-  private final Map<String,String> envStats;
+  @NotNull private final Map<String,String> envStats;
 
   // The set of generic lock statistics.
-  private final Map<String,String> lockStats;
+  @NotNull private final Map<String,String> lockStats;
 
   // The set of generic transaction statistics.
-  private final Map<String,String> txnStats;
+  @NotNull private final Map<String,String> txnStats;
 
   // The backend ID for the associated backend.
-  private final String backendID;
+  @Nullable private final String backendID;
 
   // The path to the directory containing the database files.
-  private final String dbDirectory;
+  @Nullable private final String dbDirectory;
 
   // The Berkeley DB JE version string.
-  private final String jeVersion;
+  @Nullable private final String jeVersion;
 
 
 
@@ -471,7 +496,7 @@ public final class JEEnvironmentMonitorEntry
    *                It must not be {@code null}.
    */
   @SuppressWarnings("deprecation")
-  public JEEnvironmentMonitorEntry(final Entry entry)
+  public JEEnvironmentMonitorEntry(@NotNull final Entry entry)
   {
     super(entry);
 
@@ -552,6 +577,7 @@ public final class JEEnvironmentMonitorEntry
    * @return  The backend ID for the backend with which the Berkeley DB JE
    *          database is associated.
    */
+  @Nullable()
   public String getBackendID()
   {
     return backendID;
@@ -567,6 +593,7 @@ public final class JEEnvironmentMonitorEntry
    *          the associated backend, or {@code null} if it was not included in
    *          the monitor entry.
    */
+  @Nullable()
   public String getJEVersion()
   {
     return jeVersion;
@@ -580,6 +607,7 @@ public final class JEEnvironmentMonitorEntry
    * @return  The path to the directory containing the database files, or
    *          {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public String getDBDirectory()
   {
     return dbDirectory;
@@ -593,6 +621,7 @@ public final class JEEnvironmentMonitorEntry
    * @return  The amount of disk space in bytes consumed by the database files,
    *          or {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public Long getDBOnDiskSize()
   {
     return dbOnDiskSize;
@@ -608,6 +637,7 @@ public final class JEEnvironmentMonitorEntry
    *          cache, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getCurrentDBCacheSize()
   {
     return currentDBCacheSize;
@@ -623,6 +653,7 @@ public final class JEEnvironmentMonitorEntry
    *          database cache, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getMaxDBCacheSize()
   {
     return maxDBCacheSize;
@@ -638,6 +669,7 @@ public final class JEEnvironmentMonitorEntry
    *          currently in use, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getDBCachePercentFull()
   {
     return dbCachePercentFull;
@@ -653,6 +685,7 @@ public final class JEEnvironmentMonitorEntry
    *          currently in progress in the associated backend, or {@code null}
    *          if it was not included in the monitor entry.
    */
+  @Nullable()
   public Boolean checkpointInProgress()
   {
     return checkpointInProgress;
@@ -666,6 +699,7 @@ public final class JEEnvironmentMonitorEntry
    * @return  The number of checkpoints completed in the associated backend, or
    *          {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public Long getNumCheckpoints()
   {
     return numCheckpoints;
@@ -681,6 +715,7 @@ public final class JEEnvironmentMonitorEntry
    *          the associated backend, or {@code null} if it was not included in
    *          the monitor entry.
    */
+  @Nullable()
   public Long getTotalCheckpointDurationMillis()
   {
     return totalCheckpointDurationMillis;
@@ -696,6 +731,7 @@ public final class JEEnvironmentMonitorEntry
    *          in the associated backend, or {@code null} if it was not included
    *          in the monitor entry.
    */
+  @Nullable()
   public Long getAverageCheckpointDurationMillis()
   {
     return averageCheckpointDurationMillis;
@@ -711,6 +747,7 @@ public final class JEEnvironmentMonitorEntry
    *          the associated backend, or {@code null} if it was not included
    *          in the monitor entry.
    */
+  @Nullable()
   public Long getLastCheckpointDurationMillis()
   {
     return lastCheckpointDurationMillis;
@@ -724,6 +761,7 @@ public final class JEEnvironmentMonitorEntry
    * @return  The time that the last completed checkpoint began, or {@code null}
    *          if it was not included in the monitor entry.
    */
+  @Nullable()
   public Date getLastCheckpointStartTime()
   {
     return lastCheckpointStartTime;
@@ -737,6 +775,7 @@ public final class JEEnvironmentMonitorEntry
    * @return  The time that the last completed checkpoint ended, or {@code null}
    *          if it was not included in the monitor entry.
    */
+  @Nullable()
   public Date getLastCheckpointStopTime()
   {
     return lastCheckpointStopTime;
@@ -754,6 +793,7 @@ public final class JEEnvironmentMonitorEntry
    */
   @Deprecated()
   @SuppressWarnings("deprecation")
+  @Nullable()
   public Date getLastCheckpointTime()
   {
     return lastCheckpointTime;
@@ -769,6 +809,7 @@ public final class JEEnvironmentMonitorEntry
    *          checkpoint, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getMillisSinceLastCheckpoint()
   {
     return millisSinceLastCheckpoint;
@@ -782,6 +823,7 @@ public final class JEEnvironmentMonitorEntry
    * @return  The number of log files that the cleaner needs to examine, or
    *          {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public Long getCleanerBacklog()
   {
     return cleanerBacklog;
@@ -797,6 +839,7 @@ public final class JEEnvironmentMonitorEntry
    *          since the backend was started, or {@code null} if it was not
    *          included in the monitor entry.
    */
+  @Nullable()
   public Long getNodesEvicted()
   {
     return nodesEvicted;
@@ -812,6 +855,7 @@ public final class JEEnvironmentMonitorEntry
    *          was started, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getRandomReads()
   {
     return randomReads;
@@ -827,6 +871,7 @@ public final class JEEnvironmentMonitorEntry
    *          backend was started, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getRandomWrites()
   {
     return randomWrites;
@@ -842,6 +887,7 @@ public final class JEEnvironmentMonitorEntry
    *          was started, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getSequentialReads()
   {
     return sequentialReads;
@@ -857,6 +903,7 @@ public final class JEEnvironmentMonitorEntry
    *          was started, or {@code null} if it was not included in the monitor
    *          entry.
    */
+  @Nullable()
   public Long getSequentialWrites()
   {
     return sequentialWrites;
@@ -870,6 +917,7 @@ public final class JEEnvironmentMonitorEntry
    * @return  The number of active transactions in the JE database environment,
    *          or {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public Long getActiveTransactionCount()
   {
     return activeTransactionCount;
@@ -883,6 +931,7 @@ public final class JEEnvironmentMonitorEntry
    * @return  The number of read locks held in the JE database environment, or
    *          {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public Long getReadLocksHeld()
   {
     return readLocksHeld;
@@ -896,6 +945,7 @@ public final class JEEnvironmentMonitorEntry
    * @return  The number of write locks held in the JE database environment, or
    *          {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public Long getWriteLocksHeld()
   {
     return writeLocksHeld;
@@ -911,6 +961,7 @@ public final class JEEnvironmentMonitorEntry
    *          database environment, or {@code null} if it was not included in
    *          the monitor entry.
    */
+  @Nullable()
   public Long getTransactionsWaitingOnLocks()
   {
     return transactionsWaitingOnLocks;
@@ -928,6 +979,7 @@ public final class JEEnvironmentMonitorEntry
    *          environment, mapped from the statistic name to the string
    *          representation of its value.
    */
+  @NotNull()
   public Map<String,String> getEnvironmentStats()
   {
     return envStats;
@@ -945,7 +997,8 @@ public final class JEEnvironmentMonitorEntry
    * @return  The value of the requested database environment statistic, or
    *          {@code null} if no such statistic was provided.
    */
-  public String getEnvironmentStat(final String statName)
+  @Nullable()
+  public String getEnvironmentStat(@NotNull final String statName)
   {
     return envStats.get(StaticUtils.toLowerCase(statName));
   }
@@ -960,6 +1013,7 @@ public final class JEEnvironmentMonitorEntry
    * @return  A set of lock statistics for the database environment, mapped from
    *          the statistic name to the string representation of its value.
    */
+  @NotNull()
   public Map<String,String> getLockStats()
   {
     return lockStats;
@@ -977,7 +1031,8 @@ public final class JEEnvironmentMonitorEntry
    * @return  The value of the requested database environment lock statistic, or
    *          {@code null} if no such statistic was provided.
    */
-  public String getLockStat(final String statName)
+  @Nullable()
+  public String getLockStat(@NotNull final String statName)
   {
     return lockStats.get(StaticUtils.toLowerCase(statName));
   }
@@ -993,6 +1048,7 @@ public final class JEEnvironmentMonitorEntry
    *          mapped from the statistic name to the string representation of its
    *          value.
    */
+  @NotNull()
   public Map<String,String> getTransactionStats()
   {
     return txnStats;
@@ -1010,7 +1066,8 @@ public final class JEEnvironmentMonitorEntry
    * @return  The value of the requested database environment transaction
    *          statistic, or {@code null} if no such statistic was provided.
    */
-  public String getTransactionStat(final String statName)
+  @Nullable()
+  public String getTransactionStat(@NotNull final String statName)
   {
     return txnStats.get(StaticUtils.toLowerCase(statName));
   }
@@ -1021,6 +1078,7 @@ public final class JEEnvironmentMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDisplayName()
   {
     return INFO_JE_ENVIRONMENT_MONITOR_DISPNAME.get();
@@ -1032,6 +1090,7 @@ public final class JEEnvironmentMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDescription()
   {
     return INFO_JE_ENVIRONMENT_MONITOR_DESC.get();
@@ -1043,6 +1102,7 @@ public final class JEEnvironmentMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<String,MonitorAttribute> getMonitorAttributes()
   {
     final LinkedHashMap<String,MonitorAttribute> attrs =

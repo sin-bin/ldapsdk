@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,8 @@ package com.unboundid.ldap.sdk.migrate.ldapjdk;
 import com.unboundid.ldap.sdk.SearchResultReference;
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -54,7 +71,7 @@ public class LDAPReferralException
 
 
   // The referral URLs for this exception.
-  private final String[] referralURLs;
+  @NotNull private final String[] referralURLs;
 
 
 
@@ -78,8 +95,9 @@ public class LDAPReferralException
    *                             exception.
    * @param  serverErrorMessage  The error message returned from the server.
    */
-  public LDAPReferralException(final String message, final int resultCode,
-                               final String serverErrorMessage)
+  public LDAPReferralException(@Nullable final String message,
+                               final int resultCode,
+                               @Nullable final String serverErrorMessage)
   {
     super(message, resultCode, serverErrorMessage, null);
 
@@ -95,8 +113,9 @@ public class LDAPReferralException
    * @param  resultCode  The result code for this LDAP referral exception.
    * @param  referrals   The set of referrals for this exception.
    */
-  public LDAPReferralException(final String message, final int resultCode,
-                               final String[] referrals)
+  public LDAPReferralException(@Nullable final String message,
+                               final int resultCode,
+                               @NotNull final String[] referrals)
   {
     super(message, resultCode, null, null);
 
@@ -113,7 +132,7 @@ public class LDAPReferralException
    *                        LDAP interrupted exception.
    */
   public LDAPReferralException(
-              final com.unboundid.ldap.sdk.LDAPException ldapException)
+              @NotNull final com.unboundid.ldap.sdk.LDAPException ldapException)
   {
     super(ldapException);
 
@@ -129,7 +148,7 @@ public class LDAPReferralException
    * @param  reference  The {@code SearchResultReference} object to use to
    *                    create this exception.
    */
-  public LDAPReferralException(final SearchResultReference reference)
+  public LDAPReferralException(@NotNull final SearchResultReference reference)
   {
     super(null, REFERRAL);
 
@@ -143,6 +162,7 @@ public class LDAPReferralException
    *
    * @return  The set of referral URLs for this exception.
    */
+  @NotNull()
   public String[] getURLs()
   {
     return referralURLs;

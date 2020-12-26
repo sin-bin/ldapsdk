@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,7 @@ package com.unboundid.asn1;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -97,7 +113,7 @@ public final class ASN1Enumerated
    * @param  value     The pre-encoded value to use for this element.
    */
   private ASN1Enumerated(final byte type, final int intValue,
-                         final byte[] value)
+                         @NotNull final byte[] value)
   {
     super(type, value);
 
@@ -129,7 +145,9 @@ public final class ASN1Enumerated
    * @throws  ASN1Exception  If the provided array cannot be decoded as an
    *                         enumerated element.
    */
-  public static ASN1Enumerated decodeAsEnumerated(final byte[] elementBytes)
+  @NotNull()
+  public static ASN1Enumerated decodeAsEnumerated(
+                                    @NotNull final byte[] elementBytes)
          throws ASN1Exception
   {
     try
@@ -221,7 +239,9 @@ public final class ASN1Enumerated
    * @throws  ASN1Exception  If the provided element cannot be decoded as an
    *                         enumerated element.
    */
-  public static ASN1Enumerated decodeAsEnumerated(final ASN1Element element)
+  @NotNull()
+  public static ASN1Enumerated decodeAsEnumerated(
+                                    @NotNull final ASN1Element element)
          throws ASN1Exception
   {
     int intValue;
@@ -272,7 +292,7 @@ public final class ASN1Enumerated
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append(intValue);
   }

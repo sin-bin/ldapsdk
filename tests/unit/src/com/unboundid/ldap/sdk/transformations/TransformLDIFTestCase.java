@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -43,9 +58,13 @@ import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.ldap.sdk.LDAPSDKTestCase;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.schema.Schema;
+import com.unboundid.ldif.LDIFAddChangeRecord;
 import com.unboundid.ldif.LDIFChangeRecord;
+import com.unboundid.ldif.LDIFDeleteChangeRecord;
 import com.unboundid.ldif.LDIFModifyChangeRecord;
+import com.unboundid.ldif.LDIFModifyDNChangeRecord;
 import com.unboundid.ldif.LDIFReader;
+import com.unboundid.ldif.LDIFRecord;
 import com.unboundid.util.PassphraseEncryptedInputStream;
 import com.unboundid.util.PassphraseEncryptedOutputStream;
 import com.unboundid.util.PasswordReader;
@@ -973,7 +992,7 @@ public final class TransformLDIFTestCase
 
   /**
    * Tests the behavior when trying to rename attributes without an equal number
-   * of from and to attributes..
+   * of from and to attributes.
    *
    * @throws  Exception  If an unexpected problem occurs.
    */
@@ -1672,6 +1691,132 @@ public final class TransformLDIFTestCase
     e = reader.readEntry();
     assertNotNull(e);
     assertDNsEqual(e.getDN(), "uid=user.5,ou=People,dc=example,dc=com");
+
+    assertNull(reader.readEntry());
+    reader.close();
+  }
+
+
+
+  /**
+   * Tests the ability to exclude LDIF records without change types.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testExcludeRecordsWithoutChangeType()
+         throws Exception
+  {
+    // Create the LDIF file to process.
+    final File sourceLDIFFile = createTempFile(
+         "dn: dc=example,dc=com",
+         "objectClass: top",
+         "objectClass: domain",
+         "dc: example",
+         "",
+         "dn: ou=People,dc=example,dc=com",
+         "changetype: add",
+         "objectClass: top",
+         "objectClass: organizationalUnit",
+         "ou: People",
+         "",
+         "dn: ou=People,dc=example,dc=com",
+         "changetype: modify",
+         "add: description",
+         "description: foo",
+         "",
+         "dn: ou=People,dc=example,dc=com",
+         "changetype: moddn",
+         "newrdn: ou=Users",
+         "deleteoldrdn: 1",
+         "",
+         "dn: ou=Users,dc=example,dc=com",
+         "changetype: delete");
+
+
+    final File outputFile = runTool(
+         "--sourceLDIF", sourceLDIFFile.getAbsolutePath(),
+         "--excludeRecordsWithoutChangeType");
+
+    final LDIFReader reader = new LDIFReader(outputFile);
+
+    LDIFRecord r = reader.readLDIFRecord();
+    assertNotNull(r);
+    assertTrue(r instanceof LDIFAddChangeRecord);
+
+    r = reader.readLDIFRecord();
+    assertNotNull(r);
+    assertTrue(r instanceof LDIFModifyChangeRecord);
+
+    r = reader.readLDIFRecord();
+    assertNotNull(r);
+    assertTrue(r instanceof LDIFModifyDNChangeRecord);
+
+    r = reader.readLDIFRecord();
+    assertNotNull(r);
+    assertTrue(r instanceof LDIFDeleteChangeRecord);
+
+    assertNull(reader.readEntry());
+    reader.close();
+  }
+
+
+
+  /**
+   * Tests the ability to exclude LDIF records with a specified set of change
+   * types.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testExcludeChangeType()
+         throws Exception
+  {
+    // Create the LDIF file to process.
+    final File sourceLDIFFile = createTempFile(
+         "dn: dc=example,dc=com",
+         "objectClass: top",
+         "objectClass: domain",
+         "dc: example",
+         "",
+         "dn: ou=People,dc=example,dc=com",
+         "changetype: add",
+         "objectClass: top",
+         "objectClass: organizationalUnit",
+         "ou: People",
+         "",
+         "dn: ou=People,dc=example,dc=com",
+         "changetype: modify",
+         "add: description",
+         "description: foo",
+         "",
+         "dn: ou=People,dc=example,dc=com",
+         "changetype: moddn",
+         "newrdn: ou=Users",
+         "deleteoldrdn: 1",
+         "",
+         "dn: ou=Users,dc=example,dc=com",
+         "changetype: delete");
+
+
+    final File outputFile = runTool(
+         "--sourceLDIF", sourceLDIFFile.getAbsolutePath(),
+         "--excludeChangeType", "add",
+         "--excludeChangeType", "delete");
+
+    final LDIFReader reader = new LDIFReader(outputFile);
+
+    LDIFRecord r = reader.readLDIFRecord();
+    assertNotNull(r);
+    assertTrue(r instanceof Entry);
+
+    r = reader.readLDIFRecord();
+    assertNotNull(r);
+    assertTrue(r instanceof LDIFModifyChangeRecord);
+
+    r = reader.readLDIFRecord();
+    assertNotNull(r);
+    assertTrue(r instanceof LDIFModifyDNChangeRecord);
 
     assertNull(reader.readEntry());
     reader.close();

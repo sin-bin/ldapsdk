@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,8 @@ package com.unboundid.util.json;
 import java.io.Serializable;
 
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -86,7 +103,7 @@ public abstract class JSONValue
    * @return  {@code true} if the provided object is considered equal to this
    *          JSON value, or {@code false} if not.
    */
-  public abstract boolean equals(Object o);
+  public abstract boolean equals(@Nullable Object o);
 
 
 
@@ -109,7 +126,8 @@ public abstract class JSONValue
    *          provided JSON value (subject to the specified constraints), or
    *          {@code false} if not.
    */
-  public abstract boolean equals(JSONValue v, boolean ignoreFieldNameCase,
+  public abstract boolean equals(@NotNull JSONValue v,
+                                 boolean ignoreFieldNameCase,
                                  boolean ignoreValueCase,
                                  boolean ignoreArrayOrder);
 
@@ -125,6 +143,7 @@ public abstract class JSONValue
    * @return  A string representation of this value as it should appear in a
    *          JSON object.
    */
+  @NotNull()
   public abstract String toString();
 
 
@@ -138,7 +157,7 @@ public abstract class JSONValue
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public abstract void toString(StringBuilder buffer);
+  public abstract void toString(@NotNull StringBuilder buffer);
 
 
 
@@ -149,6 +168,7 @@ public abstract class JSONValue
    * @return  A string representation of this value as it should appear in a
    *          JSON object.
    */
+  @NotNull()
   public abstract String toSingleLineString();
 
 
@@ -160,7 +180,7 @@ public abstract class JSONValue
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public abstract void toSingleLineString(StringBuilder buffer);
+  public abstract void toSingleLineString(@NotNull StringBuilder buffer);
 
 
 
@@ -171,6 +191,7 @@ public abstract class JSONValue
    *
    * @return  A normalized string representation of this value.
    */
+  @NotNull()
   public abstract String toNormalizedString();
 
 
@@ -183,7 +204,7 @@ public abstract class JSONValue
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public abstract void toNormalizedString(StringBuilder buffer);
+  public abstract void toNormalizedString(@NotNull StringBuilder buffer);
 
 
 
@@ -205,6 +226,7 @@ public abstract class JSONValue
    *
    * @return  A normalized string representation of this value.
    */
+  @NotNull()
   public abstract String toNormalizedString(boolean ignoreFieldNameCase,
                                             boolean ignoreValueCase,
                                             boolean ignoreArrayOrder);
@@ -229,7 +251,7 @@ public abstract class JSONValue
    *                              {@code false}) or insignificant (if
    *                              {@code true}).
    */
-  public abstract void toNormalizedString(StringBuilder buffer,
+  public abstract void toNormalizedString(@NotNull StringBuilder buffer,
                                           boolean ignoreFieldNameCase,
                                           boolean ignoreValueCase,
                                           boolean ignoreArrayOrder);
@@ -243,7 +265,7 @@ public abstract class JSONValue
    *
    * @param  buffer  The JSON buffer to which this value should be appended.
    */
-  public abstract void appendToJSONBuffer(JSONBuffer buffer);
+  public abstract void appendToJSONBuffer(@NotNull JSONBuffer buffer);
 
 
 
@@ -254,5 +276,6 @@ public abstract class JSONValue
    * @param  fieldName  The name to use for the field.
    * @param  buffer     The JSON buffer to which this value should be appended.
    */
-  public abstract void appendToJSONBuffer(String fieldName, JSONBuffer buffer);
+  public abstract void appendToJSONBuffer(@NotNull String fieldName,
+                                          @NotNull JSONBuffer buffer);
 }

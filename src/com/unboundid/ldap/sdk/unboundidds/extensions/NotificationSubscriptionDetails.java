@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,7 @@ import java.util.List;
 
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -64,10 +80,10 @@ public final class NotificationSubscriptionDetails
 
 
   // The encoded details for this notification subscription.
-  private final List<ASN1OctetString> details;
+  @NotNull private final List<ASN1OctetString> details;
 
   // The unique ID for this notification subscription.
-  private final String id;
+  @NotNull private final String id;
 
 
 
@@ -80,8 +96,8 @@ public final class NotificationSubscriptionDetails
    * @param  details  The encoded details for this notification subscription.
    *                  It must not be {@code null} or empty.
    */
-  public NotificationSubscriptionDetails(final String id,
-              final Collection<ASN1OctetString> details)
+  public NotificationSubscriptionDetails(@NotNull final String id,
+              @NotNull final Collection<ASN1OctetString> details)
   {
     Validator.ensureNotNull(id);
     Validator.ensureNotNull(details);
@@ -99,6 +115,7 @@ public final class NotificationSubscriptionDetails
    *
    * @return The unique ID for this subscription details object.
    */
+  @NotNull()
   public String getID()
   {
     return id;
@@ -111,6 +128,7 @@ public final class NotificationSubscriptionDetails
    *
    * @return  The encoded details for this subscription details object.
    */
+  @NotNull()
   public List<ASN1OctetString> getDetails()
   {
     return details;
@@ -126,6 +144,7 @@ public final class NotificationSubscriptionDetails
    *          object.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -141,7 +160,7 @@ public final class NotificationSubscriptionDetails
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("NotificationSubscription(id='");
     buffer.append(id);

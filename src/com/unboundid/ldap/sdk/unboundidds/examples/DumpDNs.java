@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -47,6 +62,8 @@ import com.unboundid.ldap.sdk.unboundidds.extensions.
 import com.unboundid.ldap.sdk.unboundidds.extensions.
             StreamDirectoryValuesIntermediateResponse;
 import com.unboundid.util.LDAPCommandLineTool;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -93,16 +110,16 @@ public final class DumpDNs
 
 
   // The argument used to obtain the base DN.
-  private DNArgument baseDN;
+  @Nullable private DNArgument baseDN;
 
   // The argument used to obtain the output file.
-  private FileArgument outputFile;
+  @Nullable private FileArgument outputFile;
 
   // The number of DNs dumped.
-  private final AtomicLong dnsWritten;
+  @NotNull private final AtomicLong dnsWritten;
 
   // The print stream that will be used to output the DNs.
-  private PrintStream outputStream;
+  @Nullable private PrintStream outputStream;
 
 
 
@@ -112,7 +129,7 @@ public final class DumpDNs
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String[] args)
+  public static void main(@NotNull final String[] args)
   {
     final ResultCode resultCode = main(args, System.out, System.err);
     if (resultCode != ResultCode.SUCCESS)
@@ -137,9 +154,10 @@ public final class DumpDNs
    *
    * @return  A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args,
-                                final OutputStream outStream,
-                                final OutputStream errStream)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream)
   {
     final DumpDNs tool = new DumpDNs(outStream, errStream);
     return tool.runTool(args);
@@ -157,7 +175,8 @@ public final class DumpDNs
    *                    written.  It may be {@code null} if error messages
    *                    should be suppressed.
    */
-  public DumpDNs(final OutputStream outStream, final OutputStream errStream)
+  public DumpDNs(@Nullable final OutputStream outStream,
+                 @Nullable final OutputStream errStream)
   {
     super(outStream, errStream);
 
@@ -176,6 +195,7 @@ public final class DumpDNs
    * @return  The name for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "dump-dns";
@@ -189,6 +209,7 @@ public final class DumpDNs
    * @return  A human-readable description for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return "Obtain a listing of all of the DNs for all entries below a " +
@@ -203,6 +224,7 @@ public final class DumpDNs
    * @return  The version string for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -299,6 +321,24 @@ public final class DumpDNs
 
 
   /**
+   * Indicates whether this tool should provide a command-line argument that
+   * allows for low-level SSL debugging.  If this returns {@code true}, then an
+   * "--enableSSLDebugging}" argument will be added that sets the
+   * "javax.net.debug" system property to "all" before attempting any
+   * communication.
+   *
+   * @return  {@code true} if this tool should offer an "--enableSSLDebugging"
+   *          argument, or {@code false} if not.
+   */
+  @Override()
+  protected boolean supportsSSLDebugging()
+  {
+    return true;
+  }
+
+
+
+  /**
    * Adds the arguments needed by this command-line tool to the provided
    * argument parser which are not related to connecting or authenticating to
    * the directory server.
@@ -308,7 +348,7 @@ public final class DumpDNs
    * @throws  ArgumentException  If a problem occurs while adding the arguments.
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     baseDN = new DNArgument('b', "baseDN", true, 1, "{dn}",
@@ -336,6 +376,7 @@ public final class DumpDNs
    *          are created with this command line tool.
    */
   @Override()
+  @NotNull()
   public LDAPConnectionOptions getConnectionOptions()
   {
     final LDAPConnectionOptions options = new LDAPConnectionOptions();
@@ -355,6 +396,7 @@ public final class DumpDNs
    *          successfully.
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     // Create the writer that will be used to write the DNs.
@@ -441,6 +483,7 @@ public final class DumpDNs
    *          information is available.
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> exampleMap =
@@ -474,7 +517,7 @@ public final class DumpDNs
    */
   @Override()
   public void intermediateResponseReturned(
-                   final IntermediateResponse intermediateResponse)
+                   @NotNull final IntermediateResponse intermediateResponse)
   {
     // Try to parse the intermediate response as a stream directory values
     // intermediate response.

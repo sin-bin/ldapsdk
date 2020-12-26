@@ -1,9 +1,24 @@
 /*
- * Copyright 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2012-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,8 @@ import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -67,7 +84,7 @@ public final class GetSubtreeAccessibilityExtendedRequest
    * The OID (1.3.6.1.4.1.30221.1.6.20) for the get subtree accessibility
    * extended request.
    */
-  public static final String GET_SUBTREE_ACCESSIBILITY_REQUEST_OID =
+  @NotNull public static final String GET_SUBTREE_ACCESSIBILITY_REQUEST_OID =
        "1.3.6.1.4.1.30221.1.6.20";
 
 
@@ -85,7 +102,8 @@ public final class GetSubtreeAccessibilityExtendedRequest
    * @param  controls  The set of controls to include in the request.  It may be
    *                   {@code null} or empty if no controls are needed.
    */
-  public GetSubtreeAccessibilityExtendedRequest(final Control... controls)
+  public GetSubtreeAccessibilityExtendedRequest(
+              @Nullable final Control... controls)
   {
     super(GET_SUBTREE_ACCESSIBILITY_REQUEST_OID, null, controls);
   }
@@ -102,7 +120,7 @@ public final class GetSubtreeAccessibilityExtendedRequest
    * @throws  LDAPException  If a problem occurs while decoding the request.
    */
   public GetSubtreeAccessibilityExtendedRequest(
-              final ExtendedRequest extendedRequest)
+              @NotNull final ExtendedRequest extendedRequest)
          throws LDAPException
   {
     super(extendedRequest);
@@ -120,8 +138,9 @@ public final class GetSubtreeAccessibilityExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public GetSubtreeAccessibilityExtendedResult process(
-              final LDAPConnection connection, final int depth)
+              @NotNull final LDAPConnection connection, final int depth)
          throws LDAPException
   {
     final ExtendedResult extendedResponse = super.process(connection, depth);
@@ -134,6 +153,7 @@ public final class GetSubtreeAccessibilityExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public GetSubtreeAccessibilityExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -145,8 +165,9 @@ public final class GetSubtreeAccessibilityExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public GetSubtreeAccessibilityExtendedRequest duplicate(
-                                                     final Control[] controls)
+              @Nullable final Control[] controls)
   {
     final GetSubtreeAccessibilityExtendedRequest r =
          new GetSubtreeAccessibilityExtendedRequest(controls);
@@ -160,6 +181,7 @@ public final class GetSubtreeAccessibilityExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_EXTENDED_REQUEST_NAME_GET_SUBTREE_ACCESSIBILITY.get();
@@ -171,7 +193,7 @@ public final class GetSubtreeAccessibilityExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("GetSubtreeAccessibilityExtendedRequest(");
 

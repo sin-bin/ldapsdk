@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -1012,6 +1027,29 @@ public class LDAPURLTestCase
         "ldap://server.example.com:389/a=b+c=d,dc=example,dc=com??sub?" +
              "(cn=foo%20bar)"
       },
+
+      new Object[]
+      {
+        "ldap://child.root.example.com/OU=%25%5E%25%5E%25%5E*,DC=child," +
+             "DC=root,DC=example,DC=com",
+        "ldap",
+        "child.root.example.com",
+        true,
+        389,
+        false,
+        new DN(new RDN("OU", "%^%^%^*"), new RDN("DC", "child"),
+             new RDN("DC", "root"), new RDN("DC", "example"),
+             new RDN("dc", "com")),
+        true,
+        new String[0],
+        false,
+        SearchScope.BASE,
+        false,
+        Filter.create("(objectClass=*)"),
+        false,
+        "ldap://child.root.example.com:389/ou=%25%5e%25%5e%25%5e*,dc=child," +
+             "dc=root,dc=example,dc=com??base?(objectclass=*)"
+      }
     };
   }
 

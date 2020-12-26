@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,7 @@ import java.util.TimerTask;
 
 import com.unboundid.ldap.protocol.LDAPResponse;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 
 import static com.unboundid.ldap.sdk.LDAPMessages.*;
@@ -40,7 +56,7 @@ final class AsyncTimeoutTimerTask
       extends TimerTask
 {
   // The async helper with which this task is associated.
-  private final CommonAsyncHelper helper;
+  @NotNull private final CommonAsyncHelper helper;
 
 
 
@@ -50,7 +66,7 @@ final class AsyncTimeoutTimerTask
    *
    * @param  helper  The async helper with which this task is associated.
    */
-  AsyncTimeoutTimerTask(final CommonAsyncHelper helper)
+  AsyncTimeoutTimerTask(@NotNull final CommonAsyncHelper helper)
   {
     this.helper = helper;
   }

@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -40,6 +55,8 @@ import com.unboundid.util.LDAPSDKUsageException;
 import com.unboundid.util.Debug;
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -80,10 +97,10 @@ public final class BindRequestProtocolOp
 
 
   // The credentials to use for SASL authentication.
-  private final ASN1OctetString saslCredentials;
+  @Nullable private final ASN1OctetString saslCredentials;
 
   // The password to use for simple authentication.
-  private final ASN1OctetString simplePassword;
+  @Nullable private final ASN1OctetString simplePassword;
 
   // The credentials type for this bind request.
   private final byte credentialsType;
@@ -92,10 +109,10 @@ public final class BindRequestProtocolOp
   private final int version;
 
   // The bind DN to use for this bind request.
-  private final String bindDN;
+  @NotNull private final String bindDN;
 
   // The name of the SASL mechanism.
-  private final String saslMechanism;
+  @Nullable private final String saslMechanism;
 
 
 
@@ -105,7 +122,8 @@ public final class BindRequestProtocolOp
    * @param  bindDN    The DN for this bind request.
    * @param  password  The password for this bind request.
    */
-  public BindRequestProtocolOp(final String bindDN, final String password)
+  public BindRequestProtocolOp(@Nullable final String bindDN,
+                               @Nullable final String password)
   {
     if (bindDN == null)
     {
@@ -139,7 +157,8 @@ public final class BindRequestProtocolOp
    * @param  bindDN    The DN for this bind request.
    * @param  password  The password for this bind request.
    */
-  public BindRequestProtocolOp(final String bindDN, final byte[] password)
+  public BindRequestProtocolOp(@Nullable final String bindDN,
+                               @Nullable final byte[] password)
   {
     if (bindDN == null)
     {
@@ -176,8 +195,9 @@ public final class BindRequestProtocolOp
    * @param  saslCredentials  The SASL credentials for this bind request, if
    *                          any.
    */
-  public BindRequestProtocolOp(final String bindDN, final String saslMechanism,
-                               final ASN1OctetString saslCredentials)
+  public BindRequestProtocolOp(@Nullable final String bindDN,
+                               @NotNull final String saslMechanism,
+                               @Nullable final ASN1OctetString saslCredentials)
   {
     this.saslMechanism   = saslMechanism;
     this.saslCredentials = saslCredentials;
@@ -210,7 +230,7 @@ public final class BindRequestProtocolOp
    *                                 configured to use a password provider
    *                                 rather than a static password.
    */
-  public BindRequestProtocolOp(final SimpleBindRequest request)
+  public BindRequestProtocolOp(@NotNull final SimpleBindRequest request)
          throws LDAPSDKUsageException
   {
     version         = 3;
@@ -236,7 +256,7 @@ public final class BindRequestProtocolOp
    * @param  request  The generic SASL bind request to use to create this
    *                  protocol op.
    */
-  public BindRequestProtocolOp(final GenericSASLBindRequest request)
+  public BindRequestProtocolOp(@NotNull final GenericSASLBindRequest request)
   {
     version         = 3;
     credentialsType = CRED_TYPE_SASL;
@@ -258,7 +278,7 @@ public final class BindRequestProtocolOp
    * @throws  LDAPException  If a problem occurs while reading or parsing the
    *                         bind request.
    */
-  BindRequestProtocolOp(final ASN1StreamReader reader)
+  BindRequestProtocolOp(@NotNull final ASN1StreamReader reader)
        throws LDAPException
   {
     try
@@ -331,11 +351,11 @@ public final class BindRequestProtocolOp
    * @param  saslMechanism    The name of the SASL mechanism, if appropriate.
    * @param  saslCredentials  The SASL credentials, if appropriate.
    */
-  private BindRequestProtocolOp(final int version, final String bindDN,
+  private BindRequestProtocolOp(final int version, @NotNull final String bindDN,
                                 final byte credentialsType,
-                                final ASN1OctetString simplePassword,
-                                final String saslMechanism,
-                                final ASN1OctetString saslCredentials)
+                                @Nullable final ASN1OctetString simplePassword,
+                                @Nullable final String saslMechanism,
+                                @Nullable final ASN1OctetString saslCredentials)
   {
     this.version         = version;
     this.bindDN          = bindDN;
@@ -365,6 +385,7 @@ public final class BindRequestProtocolOp
    * @return  The bind DN for this bind request, or an empty string if none was
    *          provided.
    */
+  @NotNull()
   public String getBindDN()
   {
     return bindDN;
@@ -391,6 +412,7 @@ public final class BindRequestProtocolOp
    * @return  The password to use for simple authentication, or {@code null} if
    *          SASL authentication will be used.
    */
+  @Nullable()
   public ASN1OctetString getSimplePassword()
   {
     return simplePassword;
@@ -404,6 +426,7 @@ public final class BindRequestProtocolOp
    * @return  The name of the SASL mechanism for this bind request, or
    *          {@code null} if simple authentication will be used.
    */
+  @Nullable()
   public String getSASLMechanism()
   {
     return saslMechanism;
@@ -418,6 +441,7 @@ public final class BindRequestProtocolOp
    *          there are no SASL credentials or if simple authentication will be
    *          used.
    */
+  @Nullable()
   public ASN1OctetString getSASLCredentials()
   {
     return saslCredentials;
@@ -440,6 +464,7 @@ public final class BindRequestProtocolOp
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ASN1Element encodeProtocolOp()
   {
     final ASN1Element credentials;
@@ -480,8 +505,9 @@ public final class BindRequestProtocolOp
    * @throws  LDAPException  If the provided ASN.1 element cannot be decoded as
    *                         a bind request protocol op.
    */
+  @NotNull()
   public static BindRequestProtocolOp decodeProtocolOp(
-                                           final ASN1Element element)
+                                           @NotNull final ASN1Element element)
          throws LDAPException
   {
     try
@@ -551,7 +577,7 @@ public final class BindRequestProtocolOp
    * {@inheritDoc}
    */
   @Override()
-  public void writeTo(final ASN1Buffer buffer)
+  public void writeTo(@NotNull final ASN1Buffer buffer)
   {
     final ASN1BufferSequence opSequence =
          buffer.beginSequence(LDAPMessage.PROTOCOL_OP_TYPE_BIND_REQUEST);
@@ -588,7 +614,8 @@ public final class BindRequestProtocolOp
    *
    * @return  The bind request that was created.
    */
-  public BindRequest toBindRequest(final Control... controls)
+  @NotNull()
+  public BindRequest toBindRequest(@Nullable final Control... controls)
   {
     if (credentialsType == CRED_TYPE_SIMPLE)
     {
@@ -610,6 +637,7 @@ public final class BindRequestProtocolOp
    * @return  A string representation of this protocol op.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -623,7 +651,7 @@ public final class BindRequestProtocolOp
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("BindRequestProtocolOp(version=");
     buffer.append(version);

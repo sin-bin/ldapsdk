@@ -1,9 +1,24 @@
 /*
- * Copyright 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2013-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -49,6 +64,8 @@ import com.unboundid.ldap.sdk.Version;
 import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
 import com.unboundid.util.Debug;
 import com.unboundid.util.LDAPCommandLineTool;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -95,26 +112,26 @@ public final class IdentifyReferencesToMissingEntries
 
 
   // The number of entries examined so far.
-  private final AtomicLong entriesExamined;
+  @NotNull private final AtomicLong entriesExamined;
 
   // The argument used to specify the base DNs to use for searches.
-  private DNArgument baseDNArgument;
+  @Nullable private DNArgument baseDNArgument;
 
   // The argument used to specify the search page size.
-  private IntegerArgument pageSizeArgument;
+  @Nullable private IntegerArgument pageSizeArgument;
 
   // The connection to use for retrieving referenced entries.
-  private LDAPConnectionPool getReferencedEntriesPool;
+  @Nullable private LDAPConnectionPool getReferencedEntriesPool;
 
   // A map with counts of missing references by attribute type.
-  private final Map<String,AtomicLong> missingReferenceCounts;
+  @NotNull private final Map<String,AtomicLong> missingReferenceCounts;
 
   // The names of the attributes for which to find missing references.
-  private String[] attributes;
+  @Nullable private String[] attributes;
 
   // The argument used to specify the attributes for which to find missing
   // references.
-  private StringArgument attributeArgument;
+  @Nullable private StringArgument attributeArgument;
 
 
 
@@ -124,7 +141,7 @@ public final class IdentifyReferencesToMissingEntries
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String... args)
+  public static void main(@NotNull final String... args)
   {
     final ResultCode resultCode = main(args, System.out, System.err);
     if (resultCode != ResultCode.SUCCESS)
@@ -149,9 +166,10 @@ public final class IdentifyReferencesToMissingEntries
    *
    * @return A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args,
-                                final OutputStream outStream,
-                                final OutputStream errStream)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream)
   {
     final IdentifyReferencesToMissingEntries tool =
          new IdentifyReferencesToMissingEntries(outStream, errStream);
@@ -170,8 +188,9 @@ public final class IdentifyReferencesToMissingEntries
    *                    written.  It may be {@code null} if error messages
    *                    should be suppressed.
    */
-  public IdentifyReferencesToMissingEntries(final OutputStream outStream,
-                                            final OutputStream errStream)
+  public IdentifyReferencesToMissingEntries(
+              @Nullable final OutputStream outStream,
+              @Nullable final OutputStream errStream)
   {
     super(outStream, errStream);
 
@@ -193,6 +212,7 @@ public final class IdentifyReferencesToMissingEntries
    * @return  The name for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "identify-references-to-missing-entries";
@@ -206,6 +226,7 @@ public final class IdentifyReferencesToMissingEntries
    * @return  A human-readable description for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return "This tool may be used to identify entries containing one or more " +
@@ -223,6 +244,7 @@ public final class IdentifyReferencesToMissingEntries
    *          available.
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -339,6 +361,24 @@ public final class IdentifyReferencesToMissingEntries
 
 
   /**
+   * Indicates whether this tool should provide a command-line argument that
+   * allows for low-level SSL debugging.  If this returns {@code true}, then an
+   * "--enableSSLDebugging}" argument will be added that sets the
+   * "javax.net.debug" system property to "all" before attempting any
+   * communication.
+   *
+   * @return  {@code true} if this tool should offer an "--enableSSLDebugging"
+   *          argument, or {@code false} if not.
+   */
+  @Override()
+  protected boolean supportsSSLDebugging()
+  {
+    return true;
+  }
+
+
+
+  /**
    * Adds the arguments needed by this command-line tool to the provided
    * argument parser which are not related to connecting or authenticating to
    * the directory server.
@@ -348,7 +388,7 @@ public final class IdentifyReferencesToMissingEntries
    * @throws  ArgumentException  If a problem occurs while adding the arguments.
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     String description = "The search base DN(s) to use to find entries with " +
@@ -390,6 +430,7 @@ public final class IdentifyReferencesToMissingEntries
    *          are created with this command line tool.
    */
   @Override()
+  @NotNull()
   public LDAPConnectionOptions getConnectionOptions()
   {
     final LDAPConnectionOptions options = new LDAPConnectionOptions();
@@ -409,6 +450,7 @@ public final class IdentifyReferencesToMissingEntries
    *          successfully.
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     // Establish a connection to the target directory server to use for
@@ -593,6 +635,7 @@ public final class IdentifyReferencesToMissingEntries
    * @return  A map that correlates the number of missing references found by
    *          attribute type.
    */
+  @NotNull()
   public Map<String,AtomicLong> getMissingReferenceCounts()
   {
     return Collections.unmodifiableMap(missingReferenceCounts);
@@ -611,6 +654,7 @@ public final class IdentifyReferencesToMissingEntries
    *          information is available.
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> exampleMap =
@@ -645,7 +689,7 @@ public final class IdentifyReferencesToMissingEntries
    *                      server.
    */
   @Override()
-  public void searchEntryReturned(final SearchResultEntry searchEntry)
+  public void searchEntryReturned(@NotNull final SearchResultEntry searchEntry)
   {
     try
     {
@@ -704,7 +748,7 @@ public final class IdentifyReferencesToMissingEntries
    */
   @Override()
   public void searchReferenceReturned(
-                   final SearchResultReference searchReference)
+                   @NotNull final SearchResultReference searchReference)
   {
     // No implementation is required.  This tool will not follow referrals.
   }

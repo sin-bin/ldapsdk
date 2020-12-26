@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,6 +49,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.unboundidds.extensions.PasswordQualityRequirement;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -92,12 +109,12 @@ public final class PasswordQualityRequirementValidationResult
   private final boolean requirementSatisfied;
 
   // The password quality requirement to which this validation result applies.
-  private final PasswordQualityRequirement passwordRequirement;
+  @NotNull private final PasswordQualityRequirement passwordRequirement;
 
   // An optional message with additional information about the result of the
   // validation for the proposed password with respect to the associated
   // password quality requirement.
-  private final String additionalInfo;
+  @Nullable private final String additionalInfo;
 
 
 
@@ -118,8 +135,9 @@ public final class PasswordQualityRequirementValidationResult
    *                               requirement.
    */
   public PasswordQualityRequirementValidationResult(
-              final PasswordQualityRequirement passwordRequirement,
-              final boolean requirementSatisfied, final String additionalInfo)
+              @NotNull final PasswordQualityRequirement passwordRequirement,
+              final boolean requirementSatisfied,
+              @Nullable final String additionalInfo)
   {
     Validator.ensureNotNull(passwordRequirement);
 
@@ -137,6 +155,7 @@ public final class PasswordQualityRequirementValidationResult
    * @return  The password quality requirement to which this validation result
    * applies.
    */
+  @NotNull()
   public PasswordQualityRequirement getPasswordRequirement()
   {
     return passwordRequirement;
@@ -168,6 +187,7 @@ public final class PasswordQualityRequirementValidationResult
    *          validation, or {@code null} if no additional information is
    *          available.
    */
+  @Nullable()
   public String getAdditionalInfo()
   {
     return additionalInfo;
@@ -182,6 +202,7 @@ public final class PasswordQualityRequirementValidationResult
    * @return  The ASN.1 element that provides an encoded representation of this
    *          object.
    */
+  @NotNull()
   public ASN1Element encode()
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(3);
@@ -211,8 +232,9 @@ public final class PasswordQualityRequirementValidationResult
    * @throws  LDAPException  If a problem is encountered while attempting to
    *                         decode the provided ASN.1 element.
    */
+  @NotNull()
   public static PasswordQualityRequirementValidationResult decode(
-                     final ASN1Element element)
+                     @NotNull final ASN1Element element)
          throws LDAPException
   {
     try
@@ -269,6 +291,7 @@ public final class PasswordQualityRequirementValidationResult
    *          validation result.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -284,7 +307,7 @@ public final class PasswordQualityRequirementValidationResult
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("PasswordQualityRequirementValidationResult(requirement=");
     passwordRequirement.toString(buffer);

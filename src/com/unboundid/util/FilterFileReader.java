@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -48,13 +63,13 @@ public final class FilterFileReader
 {
   // A counter used to keep track of the line number for information read from
   // the file.
-  private final AtomicLong lineNumberCounter;
+  @NotNull private final AtomicLong lineNumberCounter;
 
   // The reader to use to read the filters.
-  private final BufferedReader reader;
+  @NotNull private final BufferedReader reader;
 
   // The file from which the filters are being read.
-  private final File filterFile;
+  @NotNull private final File filterFile;
 
 
 
@@ -68,7 +83,7 @@ public final class FilterFileReader
    * @throws  IOException  If a problem is encountered while opening the file
    *                       for reading.
    */
-  public FilterFileReader(final String path)
+  public FilterFileReader(@NotNull final String path)
          throws IOException
   {
     this(new File(path));
@@ -85,7 +100,7 @@ public final class FilterFileReader
    * @throws  IOException  If a problem is encountered while opening the file
    *                       for reading.
    */
-  public FilterFileReader(final File filterFile)
+  public FilterFileReader(@NotNull final File filterFile)
          throws IOException
   {
     this.filterFile = filterFile;
@@ -108,6 +123,7 @@ public final class FilterFileReader
    * @throws  LDAPException  If data read from the file can't be parsed as an
    *                         LDAP search filter.
    */
+  @Nullable()
   public Filter readFilter()
          throws IOException, LDAPException
   {

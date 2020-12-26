@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,8 @@ import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.ldap.matchingrules.MatchingRule;
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -55,16 +72,16 @@ class LDIFAttribute
 
 
   // The set of normalized values for this attribute.
-  private LinkedHashSet<ASN1OctetString> normalizedValues;
+  @Nullable private LinkedHashSet<ASN1OctetString> normalizedValues;
 
   // The list of values for this attribute.
-  private final ArrayList<ASN1OctetString> values;
+  @NotNull private final ArrayList<ASN1OctetString> values;
 
   // The matching rule to use when comparing values.
-  private final MatchingRule matchingRule;
+  @NotNull private final MatchingRule matchingRule;
 
   // The name for this attribute.
-  private final String name;
+  @NotNull private final String name;
 
 
 
@@ -75,8 +92,9 @@ class LDIFAttribute
    * @param  matchingRule  The matching rule for this attribute.
    * @param  value         The first value for this attribute.
    */
-  LDIFAttribute(final String name, final MatchingRule matchingRule,
-                final ASN1OctetString value)
+  LDIFAttribute(@NotNull final String name,
+                @NotNull final MatchingRule matchingRule,
+                @NotNull final ASN1OctetString value)
   {
     this.name         = name;
     this.matchingRule = matchingRule;
@@ -103,8 +121,8 @@ class LDIFAttribute
    * @throws  LDAPException  If the provided value is invalid according to the
    *                         associated syntax.
    */
-  boolean addValue(final ASN1OctetString value,
-                   final DuplicateValueBehavior duplicateValueBehavior)
+  boolean addValue(@NotNull final ASN1OctetString value,
+                   @NotNull final DuplicateValueBehavior duplicateValueBehavior)
           throws LDAPException
   {
     if (normalizedValues == null)
@@ -145,6 +163,7 @@ class LDIFAttribute
    *
    * @return  An SDK attribute with the name and values of this LDIF attribute.
    */
+  @NotNull()
   Attribute toAttribute()
   {
     final ASN1OctetString[] valueArray = new ASN1OctetString[values.size()];

@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,6 +52,7 @@ import java.util.Set;
 import java.util.logging.Handler;
 
 import com.unboundid.ldap.listener.interceptor.InMemoryOperationInterceptor;
+import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.DN;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.ldap.sdk.LDAPException;
@@ -47,6 +63,8 @@ import com.unboundid.ldap.sdk.Version;
 import com.unboundid.ldap.sdk.schema.Schema;
 import com.unboundid.util.Mutable;
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -120,18 +138,22 @@ public class InMemoryDirectoryServerConfig
   private boolean includeRequestProcessingInCodeLog;
 
   // The base DNs to use for the LDAP listener.
-  private DN[] baseDNs;
+  @NotNull private DN[] baseDNs;
 
   // The log handler that should be used to record access log messages about
   // operations processed by the server.
-  private Handler accessLogHandler;
+  @Nullable private Handler accessLogHandler;
+
+  // The log handler that should be used to record JSON-formatted access log
+  // messages about operations processed by the server.
+  @Nullable private Handler jsonAccessLogHandler;
 
   // The log handler that should be used to record detailed protocol-level
   // messages about LDAP operations processed by the server.
-  private Handler ldapDebugLogHandler;
+  @Nullable private Handler ldapDebugLogHandler;
 
   // The password encoder that will be used to encode new clear-text passwords.
-  private InMemoryPasswordEncoder primaryPasswordEncoder;
+  @Nullable private InMemoryPasswordEncoder primaryPasswordEncoder;
 
   // The maximum number of entries to retain in a generated changelog.
   private int maxChangeLogEntries;
@@ -139,69 +161,78 @@ public class InMemoryDirectoryServerConfig
   // The maximum number of concurrent connections that will be allowed.
   private int maxConnections;
 
+  // The maximum size in bytes for encoded messages that the server will accept.
+  private int maxMessageSizeBytes;
+
   // The maximum number of entries that may be returned in any single search
   // operation.
   private int maxSizeLimit;
 
   // The exception handler that should be used for the listener.
-  private LDAPListenerExceptionHandler exceptionHandler;
+  @Nullable private LDAPListenerExceptionHandler exceptionHandler;
+
+  // A set of custom attributes that should be included in the root DSE.
+  @NotNull private List<Attribute> customRootDSEAttributes;
 
   // The extended operation handlers that may be used to process extended
   // operations in the server.
-  private final List<InMemoryExtendedOperationHandler>
+  @NotNull private final List<InMemoryExtendedOperationHandler>
        extendedOperationHandlers;
 
   // The listener configurations that should be used for accepting connections
   // to the server.
-  private final List<InMemoryListenerConfig> listenerConfigs;
+  @NotNull private final List<InMemoryListenerConfig> listenerConfigs;
 
   // The operation interceptors that should be used with the in-memory directory
   // server.
-  private final List<InMemoryOperationInterceptor> operationInterceptors;
+  @NotNull private final List<InMemoryOperationInterceptor>
+       operationInterceptors;
 
   // A list of secondary password encoders that will be used to interact with
   // existing pre-encoded passwords, but will not be used to encode new
   // passwords.
-  private final List<InMemoryPasswordEncoder> secondaryPasswordEncoders;
+  @NotNull private final List<InMemoryPasswordEncoder>
+       secondaryPasswordEncoders;
 
   // The SASL bind handlers that may be used to process SASL bind requests in
   // the server.
-  private final List<InMemorySASLBindHandler> saslBindHandlers;
+  @NotNull private final List<InMemorySASLBindHandler> saslBindHandlers;
 
   // The names or OIDs of the attributes for which to maintain equality indexes.
-  private final List<String> equalityIndexAttributes;
+  @NotNull private final List<String> equalityIndexAttributes;
 
   // A set of additional credentials that can be used for binding without
   // requiring a corresponding entry in the data set.
-  private final Map<DN,byte[]> additionalBindCredentials;
+  @NotNull private final Map<DN,byte[]> additionalBindCredentials;
 
   // The entry to use for the server root DSE.
-  private ReadOnlyEntry rootDSEEntry;
+  @Nullable private ReadOnlyEntry rootDSEEntry;
 
   // The schema to use for the server.
-  private Schema schema;
+  @Nullable private Schema schema;
 
   // The set of operation types that will be supported by the server.
-  private final Set<OperationType> allowedOperationTypes;
+  @NotNull private final Set<OperationType> allowedOperationTypes;
 
   // The set of operation types for which authentication will be required.
-  private final Set<OperationType> authenticationRequiredOperationTypes;
+  @NotNull private final Set<OperationType>
+       authenticationRequiredOperationTypes;
 
   // The set of attributes for which referential integrity should be maintained.
-  private final Set<String> referentialIntegrityAttributes;
+  @NotNull private final Set<String> referentialIntegrityAttributes;
 
   // The set of attributes that will hold user passwords.
-  private final Set<String> passwordAttributes;
+  @NotNull private final Set<String> passwordAttributes;
 
   // The path to a file that should be written with code that may be used to
   // issue the requests received by the server.
-  private String codeLogPath;
+  @Nullable private String codeLogPath;
 
   // The vendor name to report in the server root DSE.
-  private String vendorName;
+  @Nullable private String vendorName;
 
   // The vendor version to report in the server root DSE.
-  private String vendorVersion;
+  @Nullable private String vendorVersion;
 
 
 
@@ -216,7 +247,7 @@ public class InMemoryDirectoryServerConfig
    *                         empty, or if any of the provided base DN strings
    *                         cannot be parsed as a valid DN.
    */
-  public InMemoryDirectoryServerConfig(final String... baseDNs)
+  public InMemoryDirectoryServerConfig(@NotNull final String... baseDNs)
          throws LDAPException
   {
     this(parseDNs(Schema.getDefaultStandardSchema(), baseDNs));
@@ -233,7 +264,7 @@ public class InMemoryDirectoryServerConfig
    *
    * @throws  LDAPException  If the provided set of base DNs is null or empty.
    */
-  public InMemoryDirectoryServerConfig(final DN... baseDNs)
+  public InMemoryDirectoryServerConfig(@NotNull final DN... baseDNs)
          throws LDAPException
   {
     if ((baseDNs == null) || (baseDNs.length == 0))
@@ -250,14 +281,17 @@ public class InMemoryDirectoryServerConfig
     additionalBindCredentials            =
          new LinkedHashMap<>(StaticUtils.computeMapCapacity(1));
     accessLogHandler                     = null;
+    jsonAccessLogHandler                 = null;
     ldapDebugLogHandler                  = null;
     enforceAttributeSyntaxCompliance     = true;
     enforceSingleStructuralObjectClass   = true;
     generateOperationalAttributes        = true;
     maxChangeLogEntries                  = 0;
     maxConnections                       = 0;
+    maxMessageSizeBytes = LDAPListenerConfig.DEFAULT_MAX_MESSAGE_SIZE_BYTES;
     maxSizeLimit                         = 0;
     exceptionHandler                     = null;
+    customRootDSEAttributes              = Collections.emptyList();
     equalityIndexAttributes              = new ArrayList<>(10);
     rootDSEEntry                         = null;
     schema                               = Schema.getDefaultStandardSchema();
@@ -297,7 +331,8 @@ public class InMemoryDirectoryServerConfig
    * @param  cfg  The in-memory directory server config object for to be
    *              duplicated.
    */
-  public InMemoryDirectoryServerConfig(final InMemoryDirectoryServerConfig cfg)
+  public InMemoryDirectoryServerConfig(
+              @NotNull final InMemoryDirectoryServerConfig cfg)
   {
     baseDNs = new DN[cfg.baseDNs.length];
     System.arraycopy(cfg.baseDNs, 0, baseDNs, 0, baseDNs.length);
@@ -329,11 +364,14 @@ public class InMemoryDirectoryServerConfig
     enforceSingleStructuralObjectClass = cfg.enforceSingleStructuralObjectClass;
     generateOperationalAttributes      = cfg.generateOperationalAttributes;
     accessLogHandler                   = cfg.accessLogHandler;
+    jsonAccessLogHandler               = cfg.jsonAccessLogHandler;
     ldapDebugLogHandler                = cfg.ldapDebugLogHandler;
     maxChangeLogEntries                = cfg.maxChangeLogEntries;
     maxConnections                     = cfg.maxConnections;
+    maxMessageSizeBytes                = cfg.maxMessageSizeBytes;
     maxSizeLimit                       = cfg.maxSizeLimit;
     exceptionHandler                   = cfg.exceptionHandler;
+    customRootDSEAttributes            = cfg.customRootDSEAttributes;
     rootDSEEntry                       = cfg.rootDSEEntry;
     schema                             = cfg.schema;
     vendorName                         = cfg.vendorName;
@@ -354,6 +392,7 @@ public class InMemoryDirectoryServerConfig
    *
    * @return  The set of base DNs that should be used for the directory server.
    */
+  @NotNull()
   public DN[] getBaseDNs()
   {
     return baseDNs;
@@ -371,7 +410,7 @@ public class InMemoryDirectoryServerConfig
    *                         empty, or if any of the provided base DN strings
    *                         cannot be parsed as a valid DN.
    */
-  public void setBaseDNs(final String... baseDNs)
+  public void setBaseDNs(@NotNull final String... baseDNs)
          throws LDAPException
   {
     setBaseDNs(parseDNs(schema, baseDNs));
@@ -387,7 +426,7 @@ public class InMemoryDirectoryServerConfig
    *
    * @throws  LDAPException  If the provided set of base DNs is null or empty.
    */
-  public void setBaseDNs(final DN... baseDNs)
+  public void setBaseDNs(@NotNull final DN... baseDNs)
          throws LDAPException
   {
     if ((baseDNs == null) || (baseDNs.length == 0))
@@ -408,6 +447,7 @@ public class InMemoryDirectoryServerConfig
    * @return  The list of listener configurations that should be used for the
    *          directory server.
    */
+  @NotNull()
   public List<InMemoryListenerConfig> getListenerConfigs()
   {
     return listenerConfigs;
@@ -428,7 +468,7 @@ public class InMemoryDirectoryServerConfig
    *                         listener configurations.
    */
   public void setListenerConfigs(
-                   final InMemoryListenerConfig... listenerConfigs)
+                   @NotNull final InMemoryListenerConfig... listenerConfigs)
          throws LDAPException
   {
     setListenerConfigs(StaticUtils.toList(listenerConfigs));
@@ -449,7 +489,7 @@ public class InMemoryDirectoryServerConfig
    *                         listener configurations.
    */
   public void setListenerConfigs(
-                   final Collection<InMemoryListenerConfig> listenerConfigs)
+              @NotNull final Collection<InMemoryListenerConfig> listenerConfigs)
          throws LDAPException
   {
     if ((listenerConfigs == null) || listenerConfigs.isEmpty())
@@ -487,6 +527,7 @@ public class InMemoryDirectoryServerConfig
    *
    * @return  The set of operation types that will be allowed by the server.
    */
+  @NotNull()
   public Set<OperationType> getAllowedOperationTypes()
   {
     return allowedOperationTypes;
@@ -502,7 +543,8 @@ public class InMemoryDirectoryServerConfig
    * @param  operationTypes  The set of operation types that will be allowed by
    *                         the server.
    */
-  public void setAllowedOperationTypes(final OperationType... operationTypes)
+  public void setAllowedOperationTypes(
+                   @Nullable final OperationType... operationTypes)
   {
     allowedOperationTypes.clear();
     if (operationTypes != null)
@@ -522,7 +564,7 @@ public class InMemoryDirectoryServerConfig
    *                         the server.
    */
   public void setAllowedOperationTypes(
-                   final Collection<OperationType> operationTypes)
+                   @Nullable final Collection<OperationType> operationTypes)
   {
     allowedOperationTypes.clear();
     if (operationTypes != null)
@@ -543,6 +585,7 @@ public class InMemoryDirectoryServerConfig
    * @return  The set of operation types that will only be allowed for
    *          authenticated clients.
    */
+  @NotNull()
   public Set<OperationType> getAuthenticationRequiredOperationTypes()
   {
     return authenticationRequiredOperationTypes;
@@ -561,7 +604,7 @@ public class InMemoryDirectoryServerConfig
    *                         authenticated clients.
    */
   public void setAuthenticationRequiredOperationTypes(
-                   final OperationType... operationTypes)
+                   @Nullable final OperationType... operationTypes)
   {
     authenticationRequiredOperationTypes.clear();
     if (operationTypes != null)
@@ -584,7 +627,7 @@ public class InMemoryDirectoryServerConfig
    *                         authenticated clients.
    */
   public void setAuthenticationRequiredOperationTypes(
-                   final Collection<OperationType> operationTypes)
+                   @Nullable final Collection<OperationType> operationTypes)
   {
     authenticationRequiredOperationTypes.clear();
     if (operationTypes != null)
@@ -606,6 +649,7 @@ public class InMemoryDirectoryServerConfig
    *          be allowed to bind to the server, even if their entries do not
    *          exist in the data set.
    */
+  @NotNull()
   public Map<DN,byte[]> getAdditionalBindCredentials()
   {
     return additionalBindCredentials;
@@ -629,8 +673,8 @@ public class InMemoryDirectoryServerConfig
    * @throws  LDAPException  If there is a problem with the provided bind DN or
    *                         password.
    */
-  public void addAdditionalBindCredentials(final String dn,
-                                           final String password)
+  public void addAdditionalBindCredentials(@NotNull final String dn,
+                                           @NotNull final String password)
          throws LDAPException
   {
     addAdditionalBindCredentials(dn, StaticUtils.getBytes(password));
@@ -654,8 +698,8 @@ public class InMemoryDirectoryServerConfig
    * @throws  LDAPException  If there is a problem with the provided bind DN or
    *                         password.
    */
-  public void addAdditionalBindCredentials(final String dn,
-                                           final byte[] password)
+  public void addAdditionalBindCredentials(@NotNull final String dn,
+                                           @NotNull final byte[] password)
          throws LDAPException
   {
     if (dn == null)
@@ -690,6 +734,7 @@ public class InMemoryDirectoryServerConfig
    *          while attempting to interact with a client, or {@code null} if no
    *          exception handler should be used.
    */
+  @Nullable()
   public LDAPListenerExceptionHandler getListenerExceptionHandler()
   {
     return exceptionHandler;
@@ -708,7 +753,7 @@ public class InMemoryDirectoryServerConfig
    *                           handler should be used.
    */
   public void setListenerExceptionHandler(
-                   final LDAPListenerExceptionHandler exceptionHandler)
+              @Nullable final LDAPListenerExceptionHandler exceptionHandler)
   {
     this.exceptionHandler = exceptionHandler;
   }
@@ -724,6 +769,7 @@ public class InMemoryDirectoryServerConfig
    * @return  The schema that should be used by the server, or {@code null} if
    *          no schema should be used.
    */
+  @Nullable()
   public Schema getSchema()
   {
     return schema;
@@ -739,7 +785,7 @@ public class InMemoryDirectoryServerConfig
    * @param  schema  The schema that should be used by the server.  It may be
    *                 {@code null} if no schema should be used.
    */
-  public void setSchema(final Schema schema)
+  public void setSchema(@Nullable final Schema schema)
   {
     this.schema = schema;
   }
@@ -824,6 +870,7 @@ public class InMemoryDirectoryServerConfig
    *          about operations processed by the server, or {@code null} if no
    *          access logging should be performed.
    */
+  @Nullable()
   public Handler getAccessLogHandler()
   {
     return accessLogHandler;
@@ -840,9 +887,43 @@ public class InMemoryDirectoryServerConfig
    *                           the server.  It may be {@code null} if no access
    *                           logging should be performed.
    */
-  public void setAccessLogHandler(final Handler accessLogHandler)
+  public void setAccessLogHandler(@Nullable final Handler accessLogHandler)
   {
     this.accessLogHandler = accessLogHandler;
+  }
+
+
+
+  /**
+   * Retrieves the log handler that should be used to record JSON-formatted
+   * access log messages about operations processed by the server, if any.
+   *
+   * @return  The log handler that should be used to record JSON-formatted
+   *          access log messages about operations processed by the server, or
+   *          {@code null} if no access logging should be performed.
+   */
+  @Nullable()
+  public Handler getJSONAccessLogHandler()
+  {
+    return jsonAccessLogHandler;
+  }
+
+
+
+  /**
+   * Specifies the log handler that should be used to record JSON-formatted
+   * access log messages about operations processed by the server.
+   *
+   * @param  jsonAccessLogHandler  The log handler that should be used to record
+   *                               JSON-formatted access log messages about
+   *                               operations processed by the server.  It may
+   *                               be {@code null} if no access logging should
+   *                               be performed.
+   */
+  public void setJSONAccessLogHandler(
+                   @Nullable final Handler jsonAccessLogHandler)
+  {
+    this.jsonAccessLogHandler = jsonAccessLogHandler;
   }
 
 
@@ -857,6 +938,7 @@ public class InMemoryDirectoryServerConfig
    *          the server, or {@code null} if no debug logging should be
    *          performed.
    */
+  @Nullable()
   public Handler getLDAPDebugLogHandler()
   {
     return ldapDebugLogHandler;
@@ -874,7 +956,8 @@ public class InMemoryDirectoryServerConfig
    *                              and from the server.  It may be {@code null}
    *                              if no LDAP debug logging should be performed.
    */
-  public void setLDAPDebugLogHandler(final Handler ldapDebugLogHandler)
+  public void setLDAPDebugLogHandler(
+                   @Nullable final Handler ldapDebugLogHandler)
   {
     this.ldapDebugLogHandler = ldapDebugLogHandler;
   }
@@ -889,6 +972,7 @@ public class InMemoryDirectoryServerConfig
    *          used to construct the requests processed by the server, or
    *          {@code null} if no code log should be written.
    */
+  @Nullable()
   public String getCodeLogPath()
   {
     return codeLogPath;
@@ -926,7 +1010,7 @@ public class InMemoryDirectoryServerConfig
    *                            used if the {@code codeLogPath} argument is
    *                            non-{@code null}.
    */
-  public void setCodeLogDetails(final String codeLogPath,
+  public void setCodeLogDetails(@Nullable final String codeLogPath,
                                 final boolean includeProcessing)
   {
     this.codeLogPath = codeLogPath;
@@ -945,6 +1029,7 @@ public class InMemoryDirectoryServerConfig
    * @return  An updatable list of the operation interceptors that may be used
    *          to intercept and transform requests and/or responses.
    */
+  @NotNull()
   public List<InMemoryOperationInterceptor> getOperationInterceptors()
   {
     return operationInterceptors;
@@ -962,7 +1047,7 @@ public class InMemoryDirectoryServerConfig
    *                      the course of processing requests and responses.
    */
   public void addInMemoryOperationInterceptor(
-                   final InMemoryOperationInterceptor interceptor)
+                   @NotNull final InMemoryOperationInterceptor interceptor)
   {
     operationInterceptors.add(interceptor);
   }
@@ -977,6 +1062,7 @@ public class InMemoryDirectoryServerConfig
    * @return  An updatable list of the extended operation handlers that may be
    *          used to process extended operations in the server.
    */
+  @NotNull()
   public List<InMemoryExtendedOperationHandler> getExtendedOperationHandlers()
   {
     return extendedOperationHandlers;
@@ -993,7 +1079,7 @@ public class InMemoryDirectoryServerConfig
    *                  operations.
    */
   public void addExtendedOperationHandler(
-                   final InMemoryExtendedOperationHandler handler)
+                   @NotNull final InMemoryExtendedOperationHandler handler)
   {
     extendedOperationHandlers.add(handler);
   }
@@ -1008,6 +1094,7 @@ public class InMemoryDirectoryServerConfig
    * @return  An updatable list of the SASL bind handlers that may be used to
    *          process SASL bind requests in the server.
    */
+  @NotNull()
   public List<InMemorySASLBindHandler> getSASLBindHandlers()
   {
     return saslBindHandlers;
@@ -1022,7 +1109,7 @@ public class InMemoryDirectoryServerConfig
    * @param  handler  The SASL bind handler that should be used by the server
    *                  for processing certain types of SASL bind requests.
    */
-  public void addSASLBindHandler(final InMemorySASLBindHandler handler)
+  public void addSASLBindHandler(@NotNull final InMemorySASLBindHandler handler)
   {
     saslBindHandlers.add(handler);
   }
@@ -1146,6 +1233,43 @@ public class InMemoryDirectoryServerConfig
 
 
   /**
+   * Retrieves the maximum size in bytes for LDAP messages that will be accepted
+   * by the server.
+   *
+   * @return  The maximum size in bytes for LDAP messages that will be accepted
+   *          by the server.
+   */
+  public int getMaxMessageSizeBytes()
+  {
+    return maxMessageSizeBytes;
+  }
+
+
+
+  /**
+   * Specifies the maximum size in bytes for LDAP messages that will be accepted
+   * by the server.
+   *
+   * @param  maxMessageSizeBytes  The maximum size in bytes for LDAP messages
+   *                              that will be accepted by the server.  A
+   *                              value that is less than or equal to zero will
+   *                              use the maximum allowed message size.
+   */
+  public void setMaxMessageSizeBytes(final int maxMessageSizeBytes)
+  {
+    if (maxMessageSizeBytes > 0)
+    {
+      this.maxMessageSizeBytes = maxMessageSizeBytes;
+    }
+    else
+    {
+      this.maxMessageSizeBytes = Integer.MAX_VALUE;
+    }
+  }
+
+
+
+  /**
    * Retrieves the maximum number of entries that the server should return in
    * any search operation.
    *
@@ -1191,6 +1315,7 @@ public class InMemoryDirectoryServerConfig
    *          certain kinds of searches, or an empty list if no equality indexes
    *          should be created.
    */
+  @NotNull()
   public List<String> getEqualityIndexAttributes()
   {
     return equalityIndexAttributes;
@@ -1210,7 +1335,7 @@ public class InMemoryDirectoryServerConfig
    *                                  should be maintained.
    */
   public void setEqualityIndexAttributes(
-                   final String... equalityIndexAttributes)
+                   @Nullable final String... equalityIndexAttributes)
   {
     setEqualityIndexAttributes(StaticUtils.toList(equalityIndexAttributes));
   }
@@ -1229,7 +1354,7 @@ public class InMemoryDirectoryServerConfig
    *                                  should be maintained.
    */
   public void setEqualityIndexAttributes(
-                   final Collection<String> equalityIndexAttributes)
+                   @Nullable final Collection<String> equalityIndexAttributes)
   {
     this.equalityIndexAttributes.clear();
     if (equalityIndexAttributes != null)
@@ -1253,6 +1378,7 @@ public class InMemoryDirectoryServerConfig
    *          be maintained, or an empty set if referential integrity should not
    *          be maintained for any attributes.
    */
+  @NotNull()
   public Set<String> getReferentialIntegrityAttributes()
   {
     return referentialIntegrityAttributes;
@@ -1278,7 +1404,7 @@ public class InMemoryDirectoryServerConfig
    *                                          be maintained.
    */
   public void setReferentialIntegrityAttributes(
-                   final String... referentialIntegrityAttributes)
+                   @Nullable final String... referentialIntegrityAttributes)
   {
     setReferentialIntegrityAttributes(
          StaticUtils.toList(referentialIntegrityAttributes));
@@ -1304,7 +1430,7 @@ public class InMemoryDirectoryServerConfig
    *                                          be maintained.
    */
   public void setReferentialIntegrityAttributes(
-                   final Collection<String> referentialIntegrityAttributes)
+              @Nullable final Collection<String> referentialIntegrityAttributes)
   {
     this.referentialIntegrityAttributes.clear();
     if (referentialIntegrityAttributes != null)
@@ -1322,6 +1448,7 @@ public class InMemoryDirectoryServerConfig
    * @return  The vendor name value to report in the server root DSE, or
    *          {@code null} if no vendor name should appear.
    */
+  @Nullable()
   public String getVendorName()
   {
     return vendorName;
@@ -1335,7 +1462,7 @@ public class InMemoryDirectoryServerConfig
    * @param  vendorName  The vendor name value to report in the server root DSE.
    *                     It may be {@code null} if no vendor name should appear.
    */
-  public void setVendorName(final String vendorName)
+  public void setVendorName(@Nullable final String vendorName)
   {
     this.vendorName = vendorName;
   }
@@ -1348,6 +1475,7 @@ public class InMemoryDirectoryServerConfig
    * @return  The vendor version value to report in the server root DSE, or
    *          {@code null} if no vendor version should appear.
    */
+  @Nullable()
   public String getVendorVersion()
   {
     return vendorVersion;
@@ -1362,7 +1490,7 @@ public class InMemoryDirectoryServerConfig
    *                        root DSE.  It may be {@code null} if no vendor
    *                        version should appear.
    */
-  public void setVendorVersion(final String vendorVersion)
+  public void setVendorVersion(@Nullable final String vendorVersion)
   {
     this.vendorVersion = vendorVersion;
   }
@@ -1377,6 +1505,7 @@ public class InMemoryDirectoryServerConfig
    *          directory server's root DSE, or {@code null} if the root DSE
    *          should be dynamically generated.
    */
+  @Nullable()
   public ReadOnlyEntry getRootDSEEntry()
   {
     return rootDSEEntry;
@@ -1387,14 +1516,21 @@ public class InMemoryDirectoryServerConfig
   /**
    * Specifies an entry that should always be returned as the in-memory
    * directory server's root DSE.  Note that if a specific root DSE entry is
-   * provided, then
+   * provided, then the generated root DSE will not necessarily accurately
+   * reflect the capabilities of the server, nor will it be dynamically updated
+   * as operations are processed.  As an alternative, the
+   * {@link #setCustomRootDSEAttributes} method may be used to specify custom
+   * attributes that should be included in the root DSE entry while still having
+   * the server generate dynamic values for other attributes.  If both a root
+   * DSE entry and a custom set of root DSE attributes are specified, then the
+   * root DSE entry will take precedence.
    *
    * @param  rootDSEEntry  An entry that should always be returned as the
    *                       in-memory directory server's root DSE, or
    *                       {@code null} to indicate that the root DSE should be
    *                       dynamically generated.
    */
-  public void setRootDSEEntry(final Entry rootDSEEntry)
+  public void setRootDSEEntry(@Nullable final Entry rootDSEEntry)
   {
     if (rootDSEEntry == null)
     {
@@ -1410,6 +1546,53 @@ public class InMemoryDirectoryServerConfig
 
 
   /**
+   * Retrieves a list of custom attributes that should be included in the root
+   * DSE that is dynamically generated by the in-memory directory server.
+   *
+   * @return  A list of custom attributes that will be included in the root DSE
+   *          that is generated by the in-memory directory server, or an empty
+   *          list if none should be included.
+   */
+  @NotNull()
+  public List<Attribute> getCustomRootDSEAttributes()
+  {
+    return customRootDSEAttributes;
+  }
+
+
+
+  /**
+   * Specifies a list of custom attributes that should be included in the root
+   * DSE that is dynamically generated by the in-memory directory server.  Note
+   * that this list of attributes will not be used if the
+   * {@link #setRootDSEEntry} method is used to override the entire entry.  Also
+   * note that any attributes provided in this list will override those that
+   * would be dynamically generated by the in-memory directory server.
+   *
+   * @param  customRootDSEAttributes  A list of custom attributes that should
+   *                                  be included in the root DSE that is
+   *                                  dynamically generated by the in-memory
+   *                                  directory server.  It may be {@code null}
+   *                                  or empty if no custom attributes should be
+   *                                  included in the root DSE.
+   */
+  public void setCustomRootDSEAttributes(
+                   @Nullable final List<Attribute> customRootDSEAttributes)
+  {
+    if (customRootDSEAttributes == null)
+    {
+      this.customRootDSEAttributes = Collections.emptyList();
+    }
+    else
+    {
+      this.customRootDSEAttributes = Collections.unmodifiableList(
+           new ArrayList<>(customRootDSEAttributes));
+    }
+  }
+
+
+
+  /**
    * Retrieves an unmodifiable set containing the names or OIDs of the
    * attributes that may hold passwords.  These are the attributes whose values
    * will be used in bind processing, and clear-text values stored in these
@@ -1419,6 +1602,7 @@ public class InMemoryDirectoryServerConfig
    *          that may hold passwords, or an empty set if no password attributes
    *          have been defined.
    */
+  @NotNull()
   public Set<String> getPasswordAttributes()
   {
     return Collections.unmodifiableSet(passwordAttributes);
@@ -1438,7 +1622,8 @@ public class InMemoryDirectoryServerConfig
    *                             attributes, but that will prevent user
    *                             authentication from succeeding.
    */
-  public void setPasswordAttributes(final String... passwordAttributes)
+  public void setPasswordAttributes(
+                   @Nullable final String... passwordAttributes)
   {
     setPasswordAttributes(StaticUtils.toList(passwordAttributes));
   }
@@ -1457,7 +1642,8 @@ public class InMemoryDirectoryServerConfig
    *                             attributes, but that will prevent user
    *                             authentication from succeeding.
    */
-  public void setPasswordAttributes(final Collection<String> passwordAttributes)
+  public void setPasswordAttributes(
+                   @Nullable final Collection<String> passwordAttributes)
   {
     this.passwordAttributes.clear();
 
@@ -1480,6 +1666,7 @@ public class InMemoryDirectoryServerConfig
    *          or {@code null} if clear-text passwords should be left in the
    *          clear without any encoding.
    */
+  @Nullable()
   public InMemoryPasswordEncoder getPrimaryPasswordEncoder()
   {
     return primaryPasswordEncoder;
@@ -1497,6 +1684,7 @@ public class InMemoryDirectoryServerConfig
    *          in-memory directory server, or an empty map if no secondary
    *          encoders are defined.
    */
+  @NotNull()
   public List<InMemoryPasswordEncoder> getSecondaryPasswordEncoders()
   {
     return Collections.unmodifiableList(secondaryPasswordEncoders);
@@ -1540,8 +1728,9 @@ public class InMemoryDirectoryServerConfig
    * @throws  LDAPException  If there is a conflict between the prefixes used by
    *                         two or more of the provided encoders.
    */
-  public void setPasswordEncoders(final InMemoryPasswordEncoder primaryEncoder,
-                   final InMemoryPasswordEncoder... secondaryEncoders)
+  public void setPasswordEncoders(
+                   @Nullable final InMemoryPasswordEncoder primaryEncoder,
+                   @Nullable final InMemoryPasswordEncoder... secondaryEncoders)
          throws LDAPException
   {
     setPasswordEncoders(primaryEncoder, StaticUtils.toList(secondaryEncoders));
@@ -1585,8 +1774,9 @@ public class InMemoryDirectoryServerConfig
    * @throws  LDAPException  If there is a conflict between the prefixes used by
    *                         two or more of the provided encoders.
    */
-  public void setPasswordEncoders(final InMemoryPasswordEncoder primaryEncoder,
-                   final Collection<InMemoryPasswordEncoder> secondaryEncoders)
+  public void setPasswordEncoders(
+       @Nullable final InMemoryPasswordEncoder primaryEncoder,
+       @Nullable final Collection<InMemoryPasswordEncoder> secondaryEncoders)
          throws LDAPException
   {
     // Before applying the change, make sure that there aren't any conflicts in
@@ -1630,16 +1820,19 @@ public class InMemoryDirectoryServerConfig
   /**
    * Parses the provided set of strings as DNs.
    *
-   * @param  dnStrings  The array of strings to be parsed as DNs.
    * @param  schema     The schema to use to generate the normalized
    *                    representations of the DNs, if available.
+   * @param  dnStrings  The array of strings to be parsed as DNs.
    *
-   * @return  The array of parsed DNs.
+   * @return  The array of parsed DNs, or {@code null} if the provided array of
+   *          DNs was {@code null}.
    *
    * @throws  LDAPException  If any of the provided strings cannot be parsed as
    *                         DNs.
    */
-  private static DN[] parseDNs(final Schema schema, final String... dnStrings)
+  @Nullable()
+  private static DN[] parseDNs(@Nullable final Schema schema,
+                               @Nullable final String... dnStrings)
           throws LDAPException
   {
     if (dnStrings == null)
@@ -1665,6 +1858,7 @@ public class InMemoryDirectoryServerConfig
    *          configuration.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -1681,7 +1875,7 @@ public class InMemoryDirectoryServerConfig
    * @param  buffer  The buffer to which the string representation should be
    *                 appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("InMemoryDirectoryServerConfig(baseDNs={");
 
@@ -1786,6 +1980,8 @@ public class InMemoryDirectoryServerConfig
 
     buffer.append(", maxConnections=");
     buffer.append(maxConnections);
+    buffer.append(", maxMessageSizeBytes=");
+    buffer.append(maxMessageSizeBytes);
     buffer.append(", maxSizeLimit=");
     buffer.append(maxSizeLimit);
 
@@ -1869,6 +2065,13 @@ public class InMemoryDirectoryServerConfig
     {
       buffer.append(", accessLogHandlerClass='");
       buffer.append(accessLogHandler.getClass().getName());
+      buffer.append('\'');
+    }
+
+    if (jsonAccessLogHandler != null)
+    {
+      buffer.append(", jsonAccessLogHandlerClass='");
+      buffer.append(jsonAccessLogHandler.getClass().getName());
       buffer.append('\'');
     }
 

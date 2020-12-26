@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -36,6 +51,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicLong;
@@ -62,6 +78,7 @@ import com.unboundid.ldap.sdk.UnsolicitedNotificationHandler;
 import com.unboundid.ldap.sdk.Version;
 import com.unboundid.ldap.sdk.controls.AssertionRequestControl;
 import com.unboundid.ldap.sdk.controls.AuthorizationIdentityRequestControl;
+import com.unboundid.ldap.sdk.controls.DraftLDUPSubentriesRequestControl;
 import com.unboundid.ldap.sdk.controls.ManageDsaITRequestControl;
 import com.unboundid.ldap.sdk.controls.MatchedValuesFilter;
 import com.unboundid.ldap.sdk.controls.MatchedValuesRequestControl;
@@ -69,10 +86,10 @@ import com.unboundid.ldap.sdk.controls.PersistentSearchChangeType;
 import com.unboundid.ldap.sdk.controls.PersistentSearchRequestControl;
 import com.unboundid.ldap.sdk.controls.ProxiedAuthorizationV1RequestControl;
 import com.unboundid.ldap.sdk.controls.ProxiedAuthorizationV2RequestControl;
+import com.unboundid.ldap.sdk.controls.RFC3672SubentriesRequestControl;
 import com.unboundid.ldap.sdk.controls.ServerSideSortRequestControl;
 import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
 import com.unboundid.ldap.sdk.controls.SortKey;
-import com.unboundid.ldap.sdk.controls.SubentriesRequestControl;
 import com.unboundid.ldap.sdk.controls.VirtualListViewRequestControl;
 import com.unboundid.ldap.sdk.persist.PersistUtils;
 import com.unboundid.ldap.sdk.transformations.EntryTransformation;
@@ -86,7 +103,12 @@ import com.unboundid.ldap.sdk.unboundidds.controls.ExcludeBranchRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             GetAuthorizationEntryRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
+            GetBackendSetIDRequestControl;
+import com.unboundid.ldap.sdk.unboundidds.controls.
             GetEffectiveRightsRequestControl;
+import com.unboundid.ldap.sdk.unboundidds.controls.
+            GetRecentLoginHistoryRequestControl;
+import com.unboundid.ldap.sdk.unboundidds.controls.GetServerIDRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             GetUserResourceLimitsRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.JoinBaseDN;
@@ -97,7 +119,8 @@ import com.unboundid.ldap.sdk.unboundidds.controls.
             MatchingEntryCountRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             OperationPurposeRequestControl;
-import com.unboundid.ldap.sdk.unboundidds.controls.OverrideSearchLimitsRequestControl;
+import com.unboundid.ldap.sdk.unboundidds.controls.
+            OverrideSearchLimitsRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.PasswordPolicyRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             PermitUnindexedSearchRequestControl;
@@ -107,6 +130,9 @@ import com.unboundid.ldap.sdk.unboundidds.controls.
             RejectUnindexedSearchRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             ReturnConflictEntriesRequestControl;
+import com.unboundid.ldap.sdk.unboundidds.controls.
+            RouteToBackendSetRequestControl;
+import com.unboundid.ldap.sdk.unboundidds.controls.RouteToServerRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             SoftDeletedEntryAccessRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
@@ -123,6 +149,8 @@ import com.unboundid.util.Debug;
 import com.unboundid.util.FilterFileReader;
 import com.unboundid.util.FixedRateBarrier;
 import com.unboundid.util.LDAPCommandLineTool;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.OutputFormat;
 import com.unboundid.util.PassphraseEncryptedOutputStream;
 import com.unboundid.util.StaticUtils;
@@ -132,6 +160,7 @@ import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.args.ArgumentException;
 import com.unboundid.util.args.ArgumentParser;
 import com.unboundid.util.args.BooleanArgument;
+import com.unboundid.util.args.BooleanValueArgument;
 import com.unboundid.util.args.ControlArgument;
 import com.unboundid.util.args.DNArgument;
 import com.unboundid.util.args.FileArgument;
@@ -176,116 +205,128 @@ public final class LDAPSearch
 
 
   // The set of arguments supported by this program.
-  private BooleanArgument accountUsable = null;
-  private BooleanArgument authorizationIdentity = null;
-  private BooleanArgument compressOutput = null;
-  private BooleanArgument continueOnError = null;
-  private BooleanArgument countEntries = null;
-  private BooleanArgument dontWrap = null;
-  private BooleanArgument dryRun = null;
-  private BooleanArgument encryptOutput = null;
-  private BooleanArgument followReferrals = null;
-  private BooleanArgument hideRedactedValueCount = null;
-  private BooleanArgument getUserResourceLimits = null;
-  private BooleanArgument includeReplicationConflictEntries = null;
-  private BooleanArgument includeSubentries = null;
-  private BooleanArgument joinRequireMatch = null;
-  private BooleanArgument manageDsaIT = null;
-  private BooleanArgument permitUnindexedSearch = null;
-  private BooleanArgument realAttributesOnly = null;
-  private BooleanArgument rejectUnindexedSearch = null;
-  private BooleanArgument retryFailedOperations = null;
-  private BooleanArgument separateOutputFilePerSearch = null;
-  private BooleanArgument suppressBase64EncodedValueComments = null;
-  private BooleanArgument teeResultsToStandardOut = null;
-  private BooleanArgument useAdministrativeSession = null;
-  private BooleanArgument usePasswordPolicyControl = null;
-  private BooleanArgument terse = null;
-  private BooleanArgument typesOnly = null;
-  private BooleanArgument verbose = null;
-  private BooleanArgument virtualAttributesOnly = null;
-  private ControlArgument bindControl = null;
-  private ControlArgument searchControl = null;
-  private DNArgument baseDN = null;
-  private DNArgument excludeBranch = null;
-  private DNArgument moveSubtreeFrom = null;
-  private DNArgument moveSubtreeTo = null;
-  private DNArgument proxyV1As = null;
-  private FileArgument encryptionPassphraseFile = null;
-  private FileArgument filterFile = null;
-  private FileArgument ldapURLFile = null;
-  private FileArgument outputFile = null;
-  private FilterArgument assertionFilter = null;
-  private FilterArgument filter = null;
-  private FilterArgument joinFilter = null;
-  private FilterArgument matchedValuesFilter = null;
-  private IntegerArgument joinSizeLimit = null;
-  private IntegerArgument ratePerSecond = null;
-  private IntegerArgument scrambleRandomSeed = null;
-  private IntegerArgument simplePageSize = null;
-  private IntegerArgument sizeLimit = null;
-  private IntegerArgument timeLimitSeconds = null;
-  private IntegerArgument wrapColumn = null;
-  private ScopeArgument joinScope = null;
-  private ScopeArgument scope = null;
-  private StringArgument dereferencePolicy = null;
-  private StringArgument excludeAttribute = null;
-  private StringArgument getAuthorizationEntryAttribute = null;
-  private StringArgument getEffectiveRightsAttribute = null;
-  private StringArgument getEffectiveRightsAuthzID = null;
-  private StringArgument includeSoftDeletedEntries = null;
-  private StringArgument joinBaseDN = null;
-  private StringArgument joinRequestedAttribute = null;
-  private StringArgument joinRule = null;
-  private StringArgument matchingEntryCountControl = null;
-  private StringArgument operationPurpose = null;
-  private StringArgument outputFormat = null;
-  private StringArgument overrideSearchLimit = null;
-  private StringArgument persistentSearch = null;
-  private StringArgument proxyAs = null;
-  private StringArgument redactAttribute = null;
-  private StringArgument renameAttributeFrom = null;
-  private StringArgument renameAttributeTo = null;
-  private StringArgument requestedAttribute = null;
-  private StringArgument scrambleAttribute = null;
-  private StringArgument scrambleJSONField = null;
-  private StringArgument sortOrder = null;
-  private StringArgument suppressOperationalAttributeUpdates = null;
-  private StringArgument virtualListView = null;
+  @Nullable private BooleanArgument accountUsable = null;
+  @Nullable private BooleanArgument authorizationIdentity = null;
+  @Nullable private BooleanArgument compressOutput = null;
+  @Nullable private BooleanArgument continueOnError = null;
+  @Nullable private BooleanArgument countEntries = null;
+  @Nullable private BooleanArgument dontWrap = null;
+  @Nullable private BooleanArgument draftLDUPSubentries = null;
+  @Nullable private BooleanArgument dryRun = null;
+  @Nullable private BooleanArgument encryptOutput = null;
+  @Nullable private BooleanArgument followReferrals = null;
+  @Nullable private BooleanArgument getBackendSetID = null;
+  @Nullable private BooleanArgument getServerID = null;
+  @Nullable private BooleanArgument getRecentLoginHistory = null;
+  @Nullable private BooleanArgument hideRedactedValueCount = null;
+  @Nullable private BooleanArgument getUserResourceLimits = null;
+  @Nullable private BooleanArgument includeReplicationConflictEntries = null;
+  @Nullable private BooleanArgument joinRequireMatch = null;
+  @Nullable private BooleanArgument manageDsaIT = null;
+  @Nullable private BooleanArgument permitUnindexedSearch = null;
+  @Nullable private BooleanArgument realAttributesOnly = null;
+  @Nullable private BooleanArgument rejectUnindexedSearch = null;
+  @Nullable private BooleanArgument requireMatch = null;
+  @Nullable private BooleanArgument retryFailedOperations = null;
+  @Nullable private BooleanArgument separateOutputFilePerSearch = null;
+  @Nullable private BooleanArgument suppressBase64EncodedValueComments = null;
+  @Nullable private BooleanArgument teeResultsToStandardOut = null;
+  @Nullable private BooleanArgument useAdministrativeSession = null;
+  @Nullable private BooleanArgument usePasswordPolicyControl = null;
+  @Nullable private BooleanArgument terse = null;
+  @Nullable private BooleanArgument typesOnly = null;
+  @Nullable private BooleanArgument verbose = null;
+  @Nullable private BooleanArgument virtualAttributesOnly = null;
+  @Nullable private BooleanValueArgument rfc3672Subentries = null;
+  @Nullable private ControlArgument bindControl = null;
+  @Nullable private ControlArgument searchControl = null;
+  @Nullable private DNArgument baseDN = null;
+  @Nullable private DNArgument excludeBranch = null;
+  @Nullable private DNArgument moveSubtreeFrom = null;
+  @Nullable private DNArgument moveSubtreeTo = null;
+  @Nullable private DNArgument proxyV1As = null;
+  @Nullable private FileArgument encryptionPassphraseFile = null;
+  @Nullable private FileArgument filterFile = null;
+  @Nullable private FileArgument ldapURLFile = null;
+  @Nullable private FileArgument outputFile = null;
+  @Nullable private FilterArgument assertionFilter = null;
+  @Nullable private FilterArgument filter = null;
+  @Nullable private FilterArgument joinFilter = null;
+  @Nullable private FilterArgument matchedValuesFilter = null;
+  @Nullable private IntegerArgument joinSizeLimit = null;
+  @Nullable private IntegerArgument ratePerSecond = null;
+  @Nullable private IntegerArgument scrambleRandomSeed = null;
+  @Nullable private IntegerArgument simplePageSize = null;
+  @Nullable private IntegerArgument sizeLimit = null;
+  @Nullable private IntegerArgument timeLimitSeconds = null;
+  @Nullable private IntegerArgument wrapColumn = null;
+  @Nullable private ScopeArgument joinScope = null;
+  @Nullable private ScopeArgument scope = null;
+  @Nullable private StringArgument dereferencePolicy = null;
+  @Nullable private StringArgument excludeAttribute = null;
+  @Nullable private StringArgument getAuthorizationEntryAttribute = null;
+  @Nullable private StringArgument getEffectiveRightsAttribute = null;
+  @Nullable private StringArgument getEffectiveRightsAuthzID = null;
+  @Nullable private StringArgument includeSoftDeletedEntries = null;
+  @Nullable private StringArgument joinBaseDN = null;
+  @Nullable private StringArgument joinRequestedAttribute = null;
+  @Nullable private StringArgument joinRule = null;
+  @Nullable private StringArgument matchingEntryCountControl = null;
+  @Nullable private StringArgument operationPurpose = null;
+  @Nullable private StringArgument outputFormat = null;
+  @Nullable private StringArgument overrideSearchLimit = null;
+  @Nullable private StringArgument persistentSearch = null;
+  @Nullable private StringArgument proxyAs = null;
+  @Nullable private StringArgument redactAttribute = null;
+  @Nullable private StringArgument renameAttributeFrom = null;
+  @Nullable private StringArgument renameAttributeTo = null;
+  @Nullable private StringArgument requestedAttribute = null;
+  @Nullable private StringArgument routeToBackendSet = null;
+  @Nullable private StringArgument routeToServer = null;
+  @Nullable private StringArgument scrambleAttribute = null;
+  @Nullable private StringArgument scrambleJSONField = null;
+  @Nullable private StringArgument sortOrder = null;
+  @Nullable private StringArgument suppressOperationalAttributeUpdates = null;
+  @Nullable private StringArgument virtualListView = null;
 
   // The argument parser used by this tool.
-  private volatile ArgumentParser parser = null;
+  @Nullable private volatile ArgumentParser parser = null;
 
   // Controls that should be sent to the server but need special validation.
-  private volatile JoinRequestControl joinRequestControl = null;
-  private volatile MatchedValuesRequestControl
+  @Nullable private volatile JoinRequestControl joinRequestControl = null;
+  @NotNull private final List<RouteToBackendSetRequestControl>
+       routeToBackendSetRequestControls = new ArrayList<>(10);
+  @Nullable private volatile MatchedValuesRequestControl
        matchedValuesRequestControl = null;
-  private volatile MatchingEntryCountRequestControl
+  @Nullable private volatile MatchingEntryCountRequestControl
        matchingEntryCountRequestControl = null;
-  private volatile OverrideSearchLimitsRequestControl
+  @Nullable private volatile OverrideSearchLimitsRequestControl
        overrideSearchLimitsRequestControl = null;
-  private volatile PersistentSearchRequestControl
+  @Nullable private volatile PersistentSearchRequestControl
        persistentSearchRequestControl = null;
-  private volatile ServerSideSortRequestControl sortRequestControl = null;
-  private volatile VirtualListViewRequestControl vlvRequestControl = null;
+  @Nullable private volatile ServerSideSortRequestControl sortRequestControl =
+       null;
+  @Nullable private volatile VirtualListViewRequestControl vlvRequestControl =
+       null;
 
   // Other values decoded from arguments.
-  private volatile DereferencePolicy derefPolicy = null;
+  @Nullable private volatile DereferencePolicy derefPolicy = null;
 
   // The print streams used for standard output and error.
-  private final AtomicLong outputFileCounter = new AtomicLong(1);
-  private volatile PrintStream errStream = null;
-  private volatile PrintStream outStream = null;
+  @NotNull private final AtomicLong outputFileCounter = new AtomicLong(1);
+  @Nullable private volatile PrintStream errStream = null;
+  @Nullable private volatile PrintStream outStream = null;
 
   // The output handler for this tool.
-  private volatile LDAPSearchOutputHandler outputHandler =
+  @NotNull private volatile LDAPSearchOutputHandler outputHandler =
        new LDIFLDAPSearchOutputHandler(this, WRAP_COLUMN);
 
   // The list of entry transformations to apply.
-  private volatile List<EntryTransformation> entryTransformations = null;
+  @Nullable private volatile List<EntryTransformation> entryTransformations =
+       null;
 
   // The encryption passphrase to use if the output is to be encrypted.
-  private String encryptionPassphrase = null;
+  @Nullable private String encryptionPassphrase = null;
 
 
 
@@ -295,7 +336,7 @@ public final class LDAPSearch
    *
    * @param  args  The command-line arguments to provide to this program.
    */
-  public static void main(final String... args)
+  public static void main(@NotNull final String... args)
   {
     final ResultCode resultCode = main(System.out, System.err, args);
     if (resultCode != ResultCode.SUCCESS)
@@ -318,8 +359,10 @@ public final class LDAPSearch
    * @return  The result code obtained when running the tool.  Any result code
    *          other than {@link ResultCode#SUCCESS} indicates an error.
    */
-  public static ResultCode main(final OutputStream out, final OutputStream err,
-                                final String... args)
+  @NotNull()
+  public static ResultCode main(@Nullable final OutputStream out,
+                                @Nullable final OutputStream err,
+                                @NotNull final String... args)
   {
     final LDAPSearch tool = new LDAPSearch(out, err);
     return tool.runTool(args);
@@ -335,7 +378,8 @@ public final class LDAPSearch
    * @param  err  The output stream to use for standard error.  If this is
    *              {@code null}, then standard error will be suppressed.
    */
-  public LDAPSearch(final OutputStream out, final OutputStream err)
+  public LDAPSearch(@Nullable final OutputStream out,
+                    @Nullable final OutputStream err)
   {
     super(out, err);
   }
@@ -346,6 +390,7 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "ldapsearch";
@@ -357,6 +402,7 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return INFO_LDAPSEARCH_TOOL_DESCRIPTION.get();
@@ -368,6 +414,7 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<String> getAdditionalDescriptionParagraphs()
   {
     return Arrays.asList(
@@ -381,6 +428,7 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -414,6 +462,7 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTrailingArgumentsPlaceholder()
   {
     return INFO_LDAPSEARCH_TRAILING_ARGS_PLACEHOLDER.get();
@@ -480,6 +529,18 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
+  protected boolean supportsSSLDebugging()
+  {
+    return true;
+  }
+
+
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override()
+  @NotNull()
   protected Set<Character> getSuppressedShortIdentifiers()
   {
     return Collections.singleton('T');
@@ -491,7 +552,7 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     this.parser = parser;
@@ -696,10 +757,12 @@ public final class LDAPSearch
          INFO_LDAPSEARCH_ARG_GROUP_DATA.get());
     parser.addArgument(teeResultsToStandardOut);
 
-    final Set<String> outputFormatAllowedValues =
-         StaticUtils.setOf("ldif", "json", "csv", "tab-delimited");
+    final Set<String> outputFormatAllowedValues = StaticUtils.setOf("ldif",
+         "json", "csv", "multi-valued-csv", "tab-delimited",
+         "multi-valued-tab-delimited", "dns-only", "values-only");
     outputFormat = new StringArgument(null, "outputFormat", false, 1,
-         "{ldif|json|csv|tab-delimited}",
+         "{ldif|json|csv|multi-valued-csv|tab-delimited|" +
+              "multi-valued-tab-delimited|dns-only|values-only}",
          INFO_LDAPSEARCH_ARG_DESCRIPTION_OUTPUT_FORMAT.get(
               requestedAttribute.getIdentifierString(),
               ldapURLFile.getIdentifierString()),
@@ -707,6 +770,22 @@ public final class LDAPSearch
     outputFormat.addLongIdentifier("output-format", true);
     outputFormat.setArgumentGroupName(INFO_LDAPSEARCH_ARG_GROUP_DATA.get());
     parser.addArgument(outputFormat);
+
+    requireMatch = new BooleanArgument(null, "requireMatch", 1,
+         INFO_LDAPSEARCH_ARG_DESCRIPTION_REQUIRE_MATCH.get(
+              getToolName(),
+              String.valueOf(ResultCode.NO_RESULTS_RETURNED)));
+    requireMatch.addLongIdentifier("require-match", true);
+    requireMatch.addLongIdentifier("requireMatchingEntry", true);
+    requireMatch.addLongIdentifier("require-matching-entry", true);
+    requireMatch.addLongIdentifier("requireMatchingEntries", true);
+    requireMatch.addLongIdentifier("require-matching-entries", true);
+    requireMatch.addLongIdentifier("requireEntry", true);
+    requireMatch.addLongIdentifier("require-entry", true);
+    requireMatch.addLongIdentifier("requireEntries", true);
+    requireMatch.addLongIdentifier("require-entries", true);
+    requireMatch.setArgumentGroupName(INFO_LDAPSEARCH_ARG_GROUP_DATA.get());
+    parser.addArgument(requireMatch);
 
     terse = new BooleanArgument(null, "terse", 1,
          INFO_LDAPSEARCH_ARG_DESCRIPTION_TERSE.get());
@@ -750,23 +829,6 @@ public final class LDAPSearch
          INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
     parser.addArgument(assertionFilter);
 
-    getAuthorizationEntryAttribute = new StringArgument(null,
-         "getAuthorizationEntryAttribute", false, 0,
-         INFO_PLACEHOLDER_ATTR.get(),
-         INFO_LDAPSEARCH_ARG_DESCRIPTION_GET_AUTHZ_ENTRY_ATTR.get());
-    getAuthorizationEntryAttribute.addLongIdentifier(
-         "get-authorization-entry-attribute", true);
-    getAuthorizationEntryAttribute.setArgumentGroupName(
-         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
-    parser.addArgument(getAuthorizationEntryAttribute);
-
-    getUserResourceLimits = new BooleanArgument(null, "getUserResourceLimits",
-         1, INFO_LDAPSEARCH_ARG_DESCRIPTION_GET_USER_RESOURCE_LIMITS.get());
-    getUserResourceLimits.addLongIdentifier("get-user-resource-limits", true);
-    getUserResourceLimits.setArgumentGroupName(
-         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
-    parser.addArgument(getUserResourceLimits);
-
     accountUsable = new BooleanArgument(null, "accountUsable", 1,
          INFO_LDAPSEARCH_ARG_DESCRIPTION_ACCOUNT_USABLE.get());
     accountUsable.addLongIdentifier("account-usable", true);
@@ -780,6 +842,23 @@ public final class LDAPSearch
     excludeBranch.setArgumentGroupName(
          INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
     parser.addArgument(excludeBranch);
+
+    getAuthorizationEntryAttribute = new StringArgument(null,
+         "getAuthorizationEntryAttribute", false, 0,
+         INFO_PLACEHOLDER_ATTR.get(),
+         INFO_LDAPSEARCH_ARG_DESCRIPTION_GET_AUTHZ_ENTRY_ATTR.get());
+    getAuthorizationEntryAttribute.addLongIdentifier(
+         "get-authorization-entry-attribute", true);
+    getAuthorizationEntryAttribute.setArgumentGroupName(
+         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
+    parser.addArgument(getAuthorizationEntryAttribute);
+
+    getBackendSetID = new BooleanArgument(null, "getBackendSetID",
+         1, INFO_LDAPSEARCH_ARG_DESCRIPTION_GET_BACKEND_SET_ID.get());
+    getBackendSetID.addLongIdentifier("get-backend-set-id", true);
+    getBackendSetID.setArgumentGroupName(
+         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
+    parser.addArgument(getBackendSetID);
 
     getEffectiveRightsAuthzID = new StringArgument('g',
          "getEffectiveRightsAuthzID", false, 1,
@@ -801,6 +880,27 @@ public final class LDAPSearch
     getEffectiveRightsAttribute.setArgumentGroupName(
          INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
     parser.addArgument(getEffectiveRightsAttribute);
+
+    getRecentLoginHistory = new BooleanArgument(null, "getRecentLoginHistory",
+         1, INFO_LDAPSEARCH_ARG_DESCRIPTION_GET_RECENT_LOGIN_HISTORY.get());
+    getRecentLoginHistory.addLongIdentifier("get-recent-login-history", true);
+    getRecentLoginHistory.setArgumentGroupName(
+         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
+    parser.addArgument(getRecentLoginHistory);
+
+    getServerID = new BooleanArgument(null, "getServerID",
+         1, INFO_LDAPSEARCH_ARG_DESCRIPTION_GET_SERVER_ID.get());
+    getServerID.addLongIdentifier("get-server-id", true);
+    getServerID.setArgumentGroupName(
+         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
+    parser.addArgument(getServerID);
+
+    getUserResourceLimits = new BooleanArgument(null, "getUserResourceLimits",
+         1, INFO_LDAPSEARCH_ARG_DESCRIPTION_GET_USER_RESOURCE_LIMITS.get());
+    getUserResourceLimits.addLongIdentifier("get-user-resource-limits", true);
+    getUserResourceLimits.setArgumentGroupName(
+         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
+    parser.addArgument(getUserResourceLimits);
 
     includeReplicationConflictEntries = new BooleanArgument(null,
          "includeReplicationConflictEntries", 1,
@@ -826,14 +926,28 @@ public final class LDAPSearch
          INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
     parser.addArgument(includeSoftDeletedEntries);
 
-    includeSubentries = new BooleanArgument(null, "includeSubentries", 1,
-         INFO_LDAPSEARCH_ARG_DESCRIPTION_INCLUDE_SUBENTRIES.get());
-    includeSubentries.addLongIdentifier("includeLDAPSubentries", true);
-    includeSubentries.addLongIdentifier("include-subentries", true);
-    includeSubentries.addLongIdentifier("include-ldap-subentries", true);
-    includeSubentries.setArgumentGroupName(
+    draftLDUPSubentries = new BooleanArgument(null, "draftLDUPSubentries", 1,
+         INFO_LDAPSEARCH_ARG_DESCRIPTION_INCLUDE_DRAFT_LDUP_SUBENTRIES.get());
+    draftLDUPSubentries.addLongIdentifier("draftIETFLDUPSubentries", true);
+    draftLDUPSubentries.addLongIdentifier("includeSubentries", true);
+    draftLDUPSubentries.addLongIdentifier("includeLDAPSubentries", true);
+    draftLDUPSubentries.addLongIdentifier("draft-ldup-subentries", true);
+    draftLDUPSubentries.addLongIdentifier("draft-ietf-ldup-subentries", true);
+    draftLDUPSubentries.addLongIdentifier("include-subentries", true);
+    draftLDUPSubentries.addLongIdentifier("include-ldap-subentries", true);
+    draftLDUPSubentries.setArgumentGroupName(
          INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
-    parser.addArgument(includeSubentries);
+    parser.addArgument(draftLDUPSubentries);
+
+    rfc3672Subentries = new BooleanValueArgument(null, "rfc3672Subentries",
+         false,
+         INFO_LDAPSEARCH_ARG_PLACEHOLDER_INCLUDE_RFC_3672_SUBENTRIES.get(),
+         INFO_LDAPSEARCH_ARG_DESCRIPTION_INCLUDE_RFC_3672_SUBENTRIES.get());
+    rfc3672Subentries.addLongIdentifier("rfc-3672-subentries", true);
+    rfc3672Subentries.addLongIdentifier("rfc3672-subentries", true);
+    rfc3672Subentries.setArgumentGroupName(
+         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
+    parser.addArgument(rfc3672Subentries);
 
     joinRule = new StringArgument(null, "joinRule", false, 1,
          "{dn:sourceAttr|reverse-dn:targetAttr|equals:sourceAttr:targetAttr|" +
@@ -942,6 +1056,19 @@ public final class LDAPSearch
          INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
     parser.addArgument(persistentSearch);
 
+    permitUnindexedSearch = new BooleanArgument(null, "permitUnindexedSearch",
+         1, INFO_LDAPSEARCH_ARG_DESCRIPTION_PERMIT_UNINDEXED_SEARCH.get());
+    permitUnindexedSearch.addLongIdentifier("permitUnindexedSearches", true);
+    permitUnindexedSearch.addLongIdentifier("permitUnindexed", true);
+    permitUnindexedSearch.addLongIdentifier("permitIfUnindexed", true);
+    permitUnindexedSearch.addLongIdentifier("permit-unindexed-search", true);
+    permitUnindexedSearch.addLongIdentifier("permit-unindexed-searches", true);
+    permitUnindexedSearch.addLongIdentifier("permit-unindexed", true);
+    permitUnindexedSearch.addLongIdentifier("permit-if-unindexed", true);
+    permitUnindexedSearch.setArgumentGroupName(
+         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
+    parser.addArgument(permitUnindexedSearch);
+
     proxyAs = new StringArgument('Y', "proxyAs", false, 1,
          INFO_PLACEHOLDER_AUTHZID.get(),
          INFO_LDAPSEARCH_ARG_DESCRIPTION_PROXY_AS.get());
@@ -955,6 +1082,36 @@ public final class LDAPSearch
     proxyV1As.setArgumentGroupName(INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
     parser.addArgument(proxyV1As);
 
+    rejectUnindexedSearch = new BooleanArgument(null, "rejectUnindexedSearch",
+         1, INFO_LDAPSEARCH_ARG_DESCRIPTION_REJECT_UNINDEXED_SEARCH.get());
+    rejectUnindexedSearch.addLongIdentifier("rejectUnindexedSearches", true);
+    rejectUnindexedSearch.addLongIdentifier("rejectUnindexed", true);
+    rejectUnindexedSearch.addLongIdentifier("rejectIfUnindexed", true);
+    rejectUnindexedSearch.addLongIdentifier("reject-unindexed-search", true);
+    rejectUnindexedSearch.addLongIdentifier("reject-unindexed-searches", true);
+    rejectUnindexedSearch.addLongIdentifier("reject-unindexed", true);
+    rejectUnindexedSearch.addLongIdentifier("reject-if-unindexed", true);
+    rejectUnindexedSearch.setArgumentGroupName(
+         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
+    parser.addArgument(rejectUnindexedSearch);
+
+    routeToBackendSet = new StringArgument(null, "routeToBackendSet",
+         false, 0,
+         INFO_LDAPSEARCH_ARG_PLACEHOLDER_ROUTE_TO_BACKEND_SET.get(),
+         INFO_LDAPSEARCH_ARG_DESCRIPTION_ROUTE_TO_BACKEND_SET.get());
+    routeToBackendSet.addLongIdentifier("route-to-backend-set", true);
+    routeToBackendSet.setArgumentGroupName(
+         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
+    parser.addArgument(routeToBackendSet);
+
+    routeToServer = new StringArgument(null, "routeToServer", false, 1,
+         INFO_LDAPSEARCH_ARG_PLACEHOLDER_ROUTE_TO_SERVER.get(),
+         INFO_LDAPSEARCH_ARG_DESCRIPTION_ROUTE_TO_SERVER.get());
+    routeToServer.addLongIdentifier("route-to-server", true);
+    routeToServer.setArgumentGroupName(
+         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
+    parser.addArgument(routeToServer);
+
     final Set<String> suppressOperationalAttributeUpdatesAllowedValues =
          StaticUtils.setOf("last-access-time", "last-login-time",
               "last-login-ip", "lastmod");
@@ -966,7 +1123,7 @@ public final class LDAPSearch
     suppressOperationalAttributeUpdates.addLongIdentifier(
          "suppress-operational-attribute-updates", true);
     suppressOperationalAttributeUpdates.setArgumentGroupName(
-         INFO_LDAPMODIFY_ARG_GROUP_CONTROLS.get());
+         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
     parser.addArgument(suppressOperationalAttributeUpdates);
 
     usePasswordPolicyControl = new BooleanArgument(null,
@@ -1015,32 +1172,6 @@ public final class LDAPSearch
     virtualListView.setArgumentGroupName(
          INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
     parser.addArgument(virtualListView);
-
-    rejectUnindexedSearch = new BooleanArgument(null, "rejectUnindexedSearch",
-         1, INFO_LDAPSEARCH_ARG_DESCRIPTION_REJECT_UNINDEXED_SEARCH.get());
-    rejectUnindexedSearch.addLongIdentifier("rejectUnindexedSearches", true);
-    rejectUnindexedSearch.addLongIdentifier("rejectUnindexed", true);
-    rejectUnindexedSearch.addLongIdentifier("rejectIfUnindexed", true);
-    rejectUnindexedSearch.addLongIdentifier("reject-unindexed-search", true);
-    rejectUnindexedSearch.addLongIdentifier("reject-unindexed-searches", true);
-    rejectUnindexedSearch.addLongIdentifier("reject-unindexed", true);
-    rejectUnindexedSearch.addLongIdentifier("reject-if-unindexed", true);
-    rejectUnindexedSearch.setArgumentGroupName(
-         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
-    parser.addArgument(rejectUnindexedSearch);
-
-    permitUnindexedSearch = new BooleanArgument(null, "permitUnindexedSearch",
-         1, INFO_LDAPSEARCH_ARG_DESCRIPTION_PERMIT_UNINDEXED_SEARCH.get());
-    permitUnindexedSearch.addLongIdentifier("permitUnindexedSearches", true);
-    permitUnindexedSearch.addLongIdentifier("permitUnindexed", true);
-    permitUnindexedSearch.addLongIdentifier("permitIfUnindexed", true);
-    permitUnindexedSearch.addLongIdentifier("permit-unindexed-search", true);
-    permitUnindexedSearch.addLongIdentifier("permit-unindexed-searches", true);
-    permitUnindexedSearch.addLongIdentifier("permit-unindexed", true);
-    permitUnindexedSearch.addLongIdentifier("permit-if-unindexed", true);
-    permitUnindexedSearch.setArgumentGroupName(
-         INFO_LDAPSEARCH_ARG_GROUP_CONTROLS.get());
-    parser.addArgument(permitUnindexedSearch);
 
     excludeAttribute = new StringArgument(null, "excludeAttribute", false, 0,
          INFO_PLACEHOLDER_ATTR.get(),
@@ -1163,6 +1294,10 @@ public final class LDAPSearch
     parser.addExclusiveArgumentSet(persistentSearch, filterFile);
     parser.addExclusiveArgumentSet(persistentSearch, ldapURLFile);
 
+    // The draft-ietf-ldup-subentry and RFC 3672 subentries controls cannot be
+    // used together.
+    parser.addExclusiveArgumentSet(draftLDUPSubentries, rfc3672Subentries);
+
     // The realAttributesOnly and virtualAttributesOnly arguments can't be used
     // together.
     parser.addExclusiveArgumentSet(realAttributesOnly, virtualAttributesOnly);
@@ -1259,6 +1394,7 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<Control> getBindControls()
   {
     final ArrayList<Control> bindControls = new ArrayList<>(10);
@@ -1277,6 +1413,11 @@ public final class LDAPSearch
     {
       bindControls.add(new GetAuthorizationEntryRequestControl(true, true,
            getAuthorizationEntryAttribute.getValues()));
+    }
+
+    if (getRecentLoginHistory.isPresent())
+    {
+      bindControls.add(new GetRecentLoginHistoryRequestControl());
     }
 
     if (getUserResourceLimits.isPresent())
@@ -1831,6 +1972,8 @@ public final class LDAPSearch
     }
 
 
+    // If we should use the LDAP join request control, then validate and
+    // pre-create that control.
     if (joinRule.isPresent())
     {
       final JoinRule rule;
@@ -1925,6 +2068,46 @@ public final class LDAPSearch
            joinBase, joinScope.getValue(), DereferencePolicy.NEVER,
            joinSizeLimit.getValue(), joinFilter.getValue(), joinAttrs,
            joinRequireMatch.isPresent(), null));
+    }
+
+
+    // If we should use the route to backend set request control, then validate
+    // and pre-create those controls.
+    if (routeToBackendSet.isPresent())
+    {
+      final List<String> values = routeToBackendSet.getValues();
+      final Map<String,List<String>> idsByRP = new LinkedHashMap<>(
+           StaticUtils.computeMapCapacity(values.size()));
+      for (final String value : values)
+      {
+        final int colonPos = value.indexOf(':');
+        if (colonPos <= 0)
+        {
+          throw new ArgumentException(
+               ERR_LDAPSEARCH_ROUTE_TO_BACKEND_SET_INVALID_FORMAT.get(value,
+                    routeToBackendSet.getIdentifierString()));
+        }
+
+        final String rpID = value.substring(0, colonPos);
+        final String bsID = value.substring(colonPos+1);
+
+        List<String> idsForRP = idsByRP.get(rpID);
+        if (idsForRP == null)
+        {
+          idsForRP = new ArrayList<>(values.size());
+          idsByRP.put(rpID, idsForRP);
+        }
+        idsForRP.add(bsID);
+      }
+
+      for (final Map.Entry<String,List<String>> e : idsByRP.entrySet())
+      {
+        final String rpID = e.getKey();
+        final List<String> bsIDs = e.getValue();
+        routeToBackendSetRequestControls.add(
+             RouteToBackendSetRequestControl.createAbsoluteRoutingRequest(true,
+                  rpID, bsIDs));
+      }
     }
 
 
@@ -2032,7 +2215,9 @@ public final class LDAPSearch
       outputHandler = new JSONLDAPSearchOutputHandler(this);
     }
     else if (outputFormatStr.equals("csv") ||
-             outputFormatStr.equals("tab-delimited"))
+             outputFormatStr.equals("multi-valued-csv") ||
+             outputFormatStr.equals("tab-delimited") ||
+             outputFormatStr.equals("multi-valued-tab-delimited"))
     {
       // These output formats cannot be used with the --ldapURLFile argument.
       if (ldapURLFile.isPresent())
@@ -2080,11 +2265,40 @@ public final class LDAPSearch
                     requestedAttribute.getIdentifierString()));
       }
 
+      final OutputFormat format;
+      final boolean includeAllValues;
+      switch (outputFormatStr)
+      {
+        case "multi-valued-csv":
+          format = OutputFormat.CSV;
+          includeAllValues = true;
+          break;
+        case "tab-delimited":
+          format = OutputFormat.TAB_DELIMITED_TEXT;
+          includeAllValues = false;
+          break;
+        case "multi-valued-tab-delimited":
+          format = OutputFormat.TAB_DELIMITED_TEXT;
+          includeAllValues = true;
+          break;
+        case "csv":
+        default:
+          format = OutputFormat.CSV;
+          includeAllValues = false;
+          break;
+      }
+
+
       outputHandler = new ColumnFormatterLDAPSearchOutputHandler(this,
-           (outputFormatStr.equals("csv")
-                ? OutputFormat.CSV
-                : OutputFormat.TAB_DELIMITED_TEXT),
-           requestedAttributes, WRAP_COLUMN);
+           format, requestedAttributes, WRAP_COLUMN, includeAllValues);
+    }
+    else if (outputFormatStr.equals("dns-only"))
+    {
+      outputHandler = new DNsOnlyLDAPSearchOutputHandler(this);
+    }
+    else if (outputFormatStr.equals("values-only"))
+    {
+      outputHandler = new ValuesOnlyLDAPSearchOutputHandler(this);
     }
     else
     {
@@ -2098,6 +2312,7 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPConnectionOptions getConnectionOptions()
   {
     final LDAPConnectionOptions options = new LDAPConnectionOptions();
@@ -2105,6 +2320,7 @@ public final class LDAPSearch
     options.setUseSynchronousMode(true);
     options.setFollowReferrals(followReferrals.isPresent());
     options.setUnsolicitedNotificationHandler(this);
+    options.setResponseTimeoutMillis(0L);
 
     return options;
   }
@@ -2115,6 +2331,7 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     // If we should encrypt the output, then get the encryption passphrase.
@@ -2428,9 +2645,10 @@ public final class LDAPSearch
    *
    * @return  A result code indicating the result of the processing.
    */
-  private ResultCode searchWithLDAPURLs(final LDAPConnectionPool pool,
-                                        final FixedRateBarrier rateLimiter,
-                                        final List<Control> searchControls)
+  @NotNull()
+  private ResultCode searchWithLDAPURLs(@NotNull final LDAPConnectionPool pool,
+               @Nullable final FixedRateBarrier rateLimiter,
+               @NotNull final List<Control> searchControls)
   {
     ResultCode resultCode = ResultCode.SUCCESS;
     for (final File f : ldapURLFile.getValues())
@@ -2540,10 +2758,12 @@ public final class LDAPSearch
    *
    * @return  A result code indicating the result of the processing.
    */
-  private ResultCode searchWithFilterFile(final LDAPConnectionPool pool,
-                                          final String[] attributes,
-                                          final FixedRateBarrier rateLimiter,
-                                          final List<Control> searchControls)
+  @NotNull()
+  private ResultCode searchWithFilterFile(
+               @NotNull final LDAPConnectionPool pool,
+               @NotNull final String[] attributes,
+               @Nullable final FixedRateBarrier rateLimiter,
+               @NotNull final List<Control> searchControls)
   {
     ResultCode resultCode = ResultCode.SUCCESS;
     for (final File f : filterFile.getValues())
@@ -2643,11 +2863,12 @@ public final class LDAPSearch
    *
    * @return  A result code indicating the result of the processing.
    */
-  private ResultCode searchWithFilter(final LDAPConnectionPool pool,
-                                      final Filter filter,
-                                      final String[] attributes,
-                                      final FixedRateBarrier rateLimiter,
-                                      final List<Control> searchControls)
+  @NotNull()
+  private ResultCode searchWithFilter(@NotNull final LDAPConnectionPool pool,
+               @NotNull final Filter filter,
+               @NotNull final String[] attributes,
+               @Nullable final FixedRateBarrier rateLimiter,
+               @NotNull final List<Control> searchControls)
   {
     final String baseDNString;
     if (baseDN.isPresent())
@@ -2681,10 +2902,11 @@ public final class LDAPSearch
    *
    * @return  A result code indicating the result of the processing.
    */
-  private ResultCode doSearch(final LDAPConnectionPool pool,
-                              final SearchRequest searchRequest,
-                              final FixedRateBarrier rateLimiter,
-                              final List<Control> searchControls)
+  @NotNull()
+  private ResultCode doSearch(@NotNull final LDAPConnectionPool pool,
+                              @NotNull final SearchRequest searchRequest,
+                              @Nullable final FixedRateBarrier rateLimiter,
+                              @NotNull final List<Control> searchControls)
   {
     if (separateOutputFilePerSearch.isPresent())
     {
@@ -2883,6 +3105,10 @@ public final class LDAPSearch
       {
         return ResultCode.valueOf((int) Math.min(totalEntries, 255));
       }
+      else if (requireMatch.isPresent() && (totalEntries == 0))
+      {
+        return ResultCode.NO_RESULTS_RETURNED;
+      }
       else
       {
         return searchResult.getResultCode();
@@ -2915,7 +3141,11 @@ public final class LDAPSearch
    *
    * @return  A list of the controls that should be used when processing search
    *          operations.
+   *
+   * @throws  LDAPException  If a problem is encountered while generating the
+   *                         controls for a search request.
    */
+  @NotNull()
   private List<Control> getSearchControls()
   {
     final ArrayList<Control> controls = new ArrayList<>(10);
@@ -2960,9 +3190,21 @@ public final class LDAPSearch
       controls.add(vlvRequestControl);
     }
 
+    controls.addAll(routeToBackendSetRequestControls);
+
     if (accountUsable.isPresent())
     {
       controls.add(new AccountUsableRequestControl(true));
+    }
+
+    if (getBackendSetID.isPresent())
+    {
+      controls.add(new GetBackendSetIDRequestControl(false));
+    }
+
+    if (getServerID.isPresent())
+    {
+      controls.add(new GetServerIDRequestControl(false));
     }
 
     if (includeReplicationConflictEntries.isPresent())
@@ -2991,9 +3233,15 @@ public final class LDAPSearch
       }
     }
 
-    if (includeSubentries.isPresent())
+    if (draftLDUPSubentries.isPresent())
     {
-      controls.add(new SubentriesRequestControl(true));
+      controls.add(new DraftLDUPSubentriesRequestControl(true));
+    }
+
+    if (rfc3672Subentries.isPresent())
+    {
+      controls.add(new RFC3672SubentriesRequestControl(
+           rfc3672Subentries.getValue()));
     }
 
     if (manageDsaIT.isPresent())
@@ -3004,6 +3252,12 @@ public final class LDAPSearch
     if (realAttributesOnly.isPresent())
     {
       controls.add(new RealAttributesOnlyRequestControl(true));
+    }
+
+    if (routeToServer.isPresent())
+    {
+      controls.add(new RouteToServerRequestControl(false,
+           routeToServer.getValue(), false, false, false));
     }
 
     if (virtualAttributesOnly.isPresent())
@@ -3112,7 +3366,7 @@ public final class LDAPSearch
    *
    * @param  result  The result to examine.
    */
-  private void displayResult(final LDAPResult result)
+  private void displayResult(@NotNull final LDAPResult result)
   {
     outputHandler.formatResult(result);
   }
@@ -3124,7 +3378,7 @@ public final class LDAPSearch
    *
    * @param  message  The message to be written.
    */
-  void writeOut(final String message)
+  void writeOut(@NotNull final String message)
   {
     if (outStream == null)
     {
@@ -3143,7 +3397,7 @@ public final class LDAPSearch
    *
    * @param  message  The message to be written.
    */
-  private void writeErr(final String message)
+  private void writeErr(@NotNull final String message)
   {
     if (errStream == null)
     {
@@ -3163,7 +3417,7 @@ public final class LDAPSearch
    *
    * @param  message  The message to be written.
    */
-  private void commentToOut(final String message)
+  private void commentToOut(@NotNull final String message)
   {
     if (terse.isPresent())
     {
@@ -3184,11 +3438,51 @@ public final class LDAPSearch
    *
    * @param  message  The message to be written.
    */
-  private void commentToErr(final String message)
+  private void commentToErr(@NotNull final String message)
   {
     for (final String line : StaticUtils.wrapLine(message, (WRAP_COLUMN - 2)))
     {
       writeErr("# " + line);
+    }
+  }
+
+
+
+  /**
+   * Retrieves the tool's output stream.
+   *
+   * @return  The tool's output stream.
+   */
+  @NotNull()
+  PrintStream getOutStream()
+  {
+    if (outStream == null)
+    {
+      return getOut();
+    }
+    else
+    {
+      return outStream;
+    }
+  }
+
+
+
+  /**
+   * Retrieves the tool's error stream.
+   *
+   * @return  The tool's error stream.
+   */
+  @NotNull()
+  PrintStream getErrStream()
+  {
+    if (errStream == null)
+    {
+      return getErr();
+    }
+    else
+    {
+      return errStream;
     }
   }
 
@@ -3200,7 +3494,7 @@ public final class LDAPSearch
    *
    * @param  outputHandler  The output handler that should be used by this tool.
    */
-  void setOutputHandler(final LDAPSearchOutputHandler outputHandler)
+  void setOutputHandler(@NotNull final LDAPSearchOutputHandler outputHandler)
   {
     this.outputHandler = outputHandler;
   }
@@ -3211,8 +3505,9 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
-  public void handleUnsolicitedNotification(final LDAPConnection connection,
-                                            final ExtendedResult notification)
+  public void handleUnsolicitedNotification(
+                   @NotNull final LDAPConnection connection,
+                   @NotNull final ExtendedResult notification)
   {
     outputHandler.formatUnsolicitedNotification(connection, notification);
   }
@@ -3223,6 +3518,7 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> examples =
@@ -3235,7 +3531,7 @@ public final class LDAPSearch
       "--bindDN", "uid=jdoe,ou=People,dc=example,dc=com",
       "--bindPassword", "password",
       "--baseDN", "ou=People,dc=example,dc=com",
-      "--searchScope", "sub",
+      "--scope", "sub",
       "(uid=jqpublic)",
       "givenName",
       "sn",
@@ -3253,7 +3549,7 @@ public final class LDAPSearch
       "--saslOption", "authID=u:jdoe",
       "--bindPasswordFile", "/path/to/password/file",
       "--baseDN", "ou=People,dc=example,dc=com",
-      "--searchScope", "sub",
+      "--scope", "sub",
       "--filterFile", "/path/to/filter/file",
       "--outputFile", "/path/to/base/output/file",
       "--separateOutputFilePerSearch",
@@ -3270,7 +3566,7 @@ public final class LDAPSearch
       "--useStartTLS",
       "--trustStorePath", "/path/to/truststore/file",
       "--baseDN", "",
-      "--searchScope", "base",
+      "--scope", "base",
       "--outputFile", "/path/to/output/file",
       "--teeResultsToStandardOut",
       "(objectClass=*)",
@@ -3286,7 +3582,7 @@ public final class LDAPSearch
       "--port", "389",
       "--bindDN", "uid=admin,dc=example,dc=com",
       "--baseDN", "dc=example,dc=com",
-      "--searchScope", "sub",
+      "--scope", "sub",
       "--outputFile", "/path/to/output/file",
       "--simplePageSize", "100",
       "(objectClass=*)",
@@ -3302,7 +3598,7 @@ public final class LDAPSearch
       "--port", "389",
       "--bindDN", "uid=admin,dc=example,dc=com",
       "--baseDN", "dc=example,dc=com",
-      "--searchScope", "sub",
+      "--scope", "sub",
       "(&(givenName=John)(sn=Doe))",
       "debugsearchindex"
     };

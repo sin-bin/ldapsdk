@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,10 +46,10 @@ import com.unboundid.ldap.sdk.ExtendedResult;
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
-import com.unboundid.ldap.sdk.unboundidds.controls.
-            InteractiveTransactionSpecificationRequestControl;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -45,14 +60,15 @@ import static com.unboundid.ldap.sdk.unboundidds.extensions.ExtOpMessages.*;
 
 /**
  * <BLOCKQUOTE>
- *   <B>NOTE:</B>  The use of interactive transactions is discouraged because it
- *   can create conditions which are prone to deadlocks between operations that
- *   may result in the cancellation of one or both operations.  It is strongly
- *   recommended that standard LDAP transactions (which may be started using a
+ *   <B>NOTE:</B>  The use of interactive transactions is strongly discouraged
+ *   because it can create conditions which are prone to deadlocks between
+ *   operations that may significantly affect performance and will result in the
+ *   cancellation of one or both operations.  It is strongly recommended that
+ *   standard LDAP transactions (which may be started using a
  *   {@link com.unboundid.ldap.sdk.extensions.StartTransactionExtendedRequest})
- *   or a multi-update extended operation be used instead.  Although they cannot
- *   include arbitrary read operations, LDAP transactions and multi-update
- *   operations may be used in conjunction with the
+ *   or a {@link MultiUpdateExtendedRequest} be used instead.  Although they
+ *   cannot include arbitrary read operations, LDAP transactions and
+ *   multi-update operations may be used in conjunction with the
  *   {@link com.unboundid.ldap.sdk.controls.AssertionRequestControl},
  *   {@link com.unboundid.ldap.sdk.controls.PreReadRequestControl}, and
  *   {@link com.unboundid.ldap.sdk.controls.PostReadRequestControl} to
@@ -71,7 +87,7 @@ import static com.unboundid.ldap.sdk.unboundidds.extensions.ExtOpMessages.*;
  * {@link StartInteractiveTransactionExtendedResult} that is returned will
  * include a a transaction ID, which should be included in each operation that
  * is part of the transaction using the
- * {@link InteractiveTransactionSpecificationRequestControl}.  After all
+ * {@code InteractiveTransactionSpecificationRequestControl}.  After all
  * requests for the transaction have been submitted to the server, the
  * {@link EndInteractiveTransactionExtendedRequest} should be used to
  * commit that transaction, or it may also be used to abort the transaction if
@@ -97,7 +113,7 @@ import static com.unboundid.ldap.sdk.unboundidds.extensions.ExtOpMessages.*;
  * returned will include a transaction ID that may be used to identify the
  * transaction for all operations which are to be performed as part of the
  * transaction.  This transaction ID should be included in a
- * {@link InteractiveTransactionSpecificationRequestControl} attached to each
+ * {@code InteractiveTransactionSpecificationRequestControl} attached to each
  * request that is to be processed as part of the transaction.  When the
  * transaction has completed, the
  * {@link EndInteractiveTransactionExtendedRequest} may be used to commit it,
@@ -170,7 +186,14 @@ import static com.unboundid.ldap.sdk.unboundidds.extensions.ExtOpMessages.*;
  *   }
  * }
  * </PRE>
+ *
+ * @deprecated  The use of interactive transactions is strongly discouraged
+ *              because it can create conditions which are prone to deadlocks
+ *              between operations that may significantly affect performance and
+ *              will result in the cancellation of one or both operations.
  */
+@Deprecated()
+@SuppressWarnings("deprecation")
 @NotMutable()
 @ThreadSafety(level=ThreadSafetyLevel.NOT_THREADSAFE)
 public final class StartInteractiveTransactionExtendedRequest
@@ -180,8 +203,9 @@ public final class StartInteractiveTransactionExtendedRequest
    * The OID (1.3.6.1.4.1.30221.2.6.3) for the start interactive transaction
    * extended request.
    */
-  public static final String START_INTERACTIVE_TRANSACTION_REQUEST_OID =
-       "1.3.6.1.4.1.30221.2.6.3";
+  @NotNull public static final String
+       START_INTERACTIVE_TRANSACTION_REQUEST_OID =
+            "1.3.6.1.4.1.30221.2.6.3";
 
 
 
@@ -200,7 +224,7 @@ public final class StartInteractiveTransactionExtendedRequest
 
 
   // The base DN for this request, if specified.
-  private final String baseDN;
+  @Nullable private final String baseDN;
 
 
 
@@ -223,7 +247,8 @@ public final class StartInteractiveTransactionExtendedRequest
    * @param  baseDN  The base DN to use for the request.  It may be {@code null}
    *                 if no base DN should be provided.
    */
-  public StartInteractiveTransactionExtendedRequest(final String baseDN)
+  public StartInteractiveTransactionExtendedRequest(
+              @Nullable final String baseDN)
   {
     super(START_INTERACTIVE_TRANSACTION_REQUEST_OID, encodeValue(baseDN));
 
@@ -239,8 +264,9 @@ public final class StartInteractiveTransactionExtendedRequest
    *                   {@code null} if no base DN should be provided.
    * @param  controls  The set of controls to include in the request.
    */
-  public StartInteractiveTransactionExtendedRequest(final String baseDN,
-                                                    final Control[] controls)
+  public StartInteractiveTransactionExtendedRequest(
+              @Nullable final String baseDN,
+              @Nullable final Control[] controls)
   {
     super(START_INTERACTIVE_TRANSACTION_REQUEST_OID, encodeValue(baseDN),
           controls);
@@ -260,7 +286,7 @@ public final class StartInteractiveTransactionExtendedRequest
    * @throws  LDAPException  If a problem occurs while decoding the request.
    */
   public StartInteractiveTransactionExtendedRequest(
-              final ExtendedRequest extendedRequest)
+              @NotNull final ExtendedRequest extendedRequest)
          throws LDAPException
   {
     super(extendedRequest);
@@ -319,7 +345,8 @@ public final class StartInteractiveTransactionExtendedRequest
    * @return  The ASN.1 octet string containing the encoded value, or
    *          {@code null} if no value should be used.
    */
-  private static ASN1OctetString encodeValue(final String baseDN)
+  @Nullable()
+  private static ASN1OctetString encodeValue(@Nullable final String baseDN)
   {
     if (baseDN == null)
     {
@@ -343,6 +370,7 @@ public final class StartInteractiveTransactionExtendedRequest
    * @return  The base DN for this start interactive transaction extended
    *          request, or {@code null} if none was provided.
    */
+  @Nullable()
   public String getBaseDN()
   {
     return baseDN;
@@ -354,8 +382,9 @@ public final class StartInteractiveTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public StartInteractiveTransactionExtendedResult process(
-              final LDAPConnection connection, final int depth)
+              @NotNull final LDAPConnection connection, final int depth)
          throws LDAPException
   {
     final ExtendedResult extendedResponse = super.process(connection, depth);
@@ -368,6 +397,7 @@ public final class StartInteractiveTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public StartInteractiveTransactionExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -379,8 +409,9 @@ public final class StartInteractiveTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public StartInteractiveTransactionExtendedRequest duplicate(
-              final Control[] controls)
+              @Nullable final Control[] controls)
   {
     final StartInteractiveTransactionExtendedRequest r =
          new StartInteractiveTransactionExtendedRequest(baseDN, controls);
@@ -394,6 +425,7 @@ public final class StartInteractiveTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_EXTENDED_REQUEST_NAME_START_INTERACTIVE_TXN.get();
@@ -405,7 +437,7 @@ public final class StartInteractiveTransactionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("StartInteractiveTransactionExtendedRequest(");
 

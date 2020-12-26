@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,8 @@ package com.unboundid.ldap.sdk;
 
 import com.unboundid.ldif.LDIFModifyDNChangeRecord;
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -52,6 +69,7 @@ public interface ReadOnlyModifyDNRequest
    *
    * @return  The current DN of the entry to move/rename.
    */
+  @NotNull()
   String getDN();
 
 
@@ -61,6 +79,7 @@ public interface ReadOnlyModifyDNRequest
    *
    * @return  The new RDN for the entry.
    */
+  @NotNull()
   String getNewRDN();
 
 
@@ -81,6 +100,7 @@ public interface ReadOnlyModifyDNRequest
    * @return  The new superior DN for the entry, or {@code null} if the entry is
    *          not to be moved below a new parent.
    */
+  @Nullable()
   String getNewSuperiorDN();
 
 
@@ -89,6 +109,7 @@ public interface ReadOnlyModifyDNRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   ModifyDNRequest duplicate();
 
 
@@ -97,7 +118,8 @@ public interface ReadOnlyModifyDNRequest
    * {@inheritDoc}
    */
   @Override()
-  ModifyDNRequest duplicate(Control[] controls);
+  @NotNull()
+  ModifyDNRequest duplicate(@Nullable Control[] controls);
 
 
 
@@ -108,6 +130,7 @@ public interface ReadOnlyModifyDNRequest
    * @return  An LDIF modify DN change record with the contents of this modify
    *          DN request.
    */
+  @NotNull()
   LDIFModifyDNChangeRecord toLDIFChangeRecord();
 
 
@@ -119,6 +142,7 @@ public interface ReadOnlyModifyDNRequest
    * @return  A string array whose lines contain an LDIF representation of the
    *          corresponding modify DN change record.
    */
+  @NotNull()
   String[] toLDIF();
 
 
@@ -128,5 +152,6 @@ public interface ReadOnlyModifyDNRequest
    *
    * @return  An LDIF string representation of this modify DN request.
    */
+  @NotNull()
   String toLDIFString();
 }

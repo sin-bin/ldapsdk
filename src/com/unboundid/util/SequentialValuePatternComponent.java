@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -43,7 +58,7 @@ final class SequentialValuePatternComponent
 
 
   // The next value to return.
-  private final AtomicLong nextValue;
+  @NotNull private final AtomicLong nextValue;
 
   // The increment for this component.
   private final long increment;
@@ -55,10 +70,10 @@ final class SequentialValuePatternComponent
   private final long upperBound;
 
   // The format string that will be used by the decimal formatter.
-  private final String formatString;
+  @Nullable private final String formatString;
 
   // The decimal format that will be used by this component, if applicable.
-  private final ThreadLocal<DecimalFormat> decimalFormat;
+  @NotNull private final ThreadLocal<DecimalFormat> decimalFormat;
 
 
 
@@ -74,7 +89,7 @@ final class SequentialValuePatternComponent
    */
   SequentialValuePatternComponent(final long lowerBound, final long upperBound,
                                   final long increment,
-                                  final String formatString)
+                                  @Nullable final String formatString)
   {
     if (lowerBound == upperBound)
     {
@@ -122,7 +137,7 @@ final class SequentialValuePatternComponent
    * {@inheritDoc}
    */
   @Override()
-  void append(final StringBuilder buffer)
+  void append(@NotNull final StringBuilder buffer)
   {
     long value = nextValue.getAndAdd(increment);
     if (value > upperBound)

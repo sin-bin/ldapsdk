@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,8 @@ import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.ExtendedResult;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -56,7 +73,7 @@ public final class WhoAmIExtendedResult
 
 
   // The authorization identity string returned by the server.
-  private final String authorizationID;
+  @Nullable private final String authorizationID;
 
 
 
@@ -67,7 +84,7 @@ public final class WhoAmIExtendedResult
    * @param  extendedResult  The extended result to be decoded as a "Who Am I?"
    *                         extended result.
    */
-  public WhoAmIExtendedResult(final ExtendedResult extendedResult)
+  public WhoAmIExtendedResult(@NotNull final ExtendedResult extendedResult)
   {
     super(extendedResult);
 
@@ -100,12 +117,13 @@ public final class WhoAmIExtendedResult
    * @param  responseControls   The set of controls from the response, if
    *                            available.
    */
-  public WhoAmIExtendedResult(final int messageID, final ResultCode resultCode,
-                              final String diagnosticMessage,
-                              final String matchedDN,
-                              final String[] referralURLs,
-                              final String authorizationID,
-                              final Control[] responseControls)
+  public WhoAmIExtendedResult(final int messageID,
+                              @NotNull final ResultCode resultCode,
+                              @Nullable final String diagnosticMessage,
+                              @Nullable final String matchedDN,
+                              @Nullable final String[] referralURLs,
+                              @Nullable final String authorizationID,
+                              @Nullable final Control[] responseControls)
   {
     super(messageID, resultCode, diagnosticMessage, matchedDN, referralURLs,
           null, encodeValue(authorizationID), responseControls);
@@ -123,7 +141,9 @@ public final class WhoAmIExtendedResult
    * @return  An ASN.1 octet string containing the encoded value, or
    *          {@code null} if there should not be an encoded value.
    */
-  private static ASN1OctetString encodeValue(final String authorizationID)
+  @Nullable()
+  private static ASN1OctetString encodeValue(
+                                      @Nullable final String authorizationID)
   {
     if (authorizationID == null)
     {
@@ -144,6 +164,7 @@ public final class WhoAmIExtendedResult
    * @return  The authorization ID for this "Who Am I?" extended result, or
    *          {@code null} if none was provided.
    */
+  @Nullable()
   public String getAuthorizationID()
   {
     return authorizationID;
@@ -155,6 +176,7 @@ public final class WhoAmIExtendedResult
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedResultName()
   {
     return INFO_EXTENDED_RESULT_NAME_WHO_AM_I.get();
@@ -170,7 +192,7 @@ public final class WhoAmIExtendedResult
    *                 extended result will be appended.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("WhoAmIExtendedResult(resultCode=");
     buffer.append(getResultCode());

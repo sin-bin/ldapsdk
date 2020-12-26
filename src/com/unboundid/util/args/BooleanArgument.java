@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,8 @@ import java.util.Collections;
 import java.util.List;
 
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -75,8 +92,9 @@ public final class BooleanArgument
    * @throws  ArgumentException  If there is a problem with the definition of
    *                             this argument.
    */
-  public BooleanArgument(final Character shortIdentifier,
-                         final String longIdentifier, final String description)
+  public BooleanArgument(@Nullable final Character shortIdentifier,
+                         @Nullable final String longIdentifier,
+                         @NotNull final String description)
          throws ArgumentException
   {
     super(shortIdentifier, longIdentifier, false, 1, null, description);
@@ -103,9 +121,10 @@ public final class BooleanArgument
    * @throws  ArgumentException  If there is a problem with the definition of
    *                             this argument.
    */
-  public BooleanArgument(final Character shortIdentifier,
-                         final String longIdentifier, final int maxOccurrences,
-                         final String description)
+  public BooleanArgument(@Nullable final Character shortIdentifier,
+                         @Nullable final String longIdentifier,
+                         final int maxOccurrences,
+                         @NotNull final String description)
          throws ArgumentException
   {
     super(shortIdentifier, longIdentifier, false, maxOccurrences, null,
@@ -120,7 +139,7 @@ public final class BooleanArgument
    *
    * @param  source  The source argument to use for this argument.
    */
-  private BooleanArgument(final BooleanArgument source)
+  private BooleanArgument(@NotNull final BooleanArgument source)
   {
     super(source);
   }
@@ -131,7 +150,7 @@ public final class BooleanArgument
    * {@inheritDoc}
    */
   @Override()
-  protected void addValue(final String valueString)
+  protected void addValue(@NotNull final String valueString)
             throws ArgumentException
   {
     throw new ArgumentException(ERR_BOOLEAN_VALUES_NOT_ALLOWED.get(
@@ -144,6 +163,7 @@ public final class BooleanArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<String> getValueStringRepresentations(final boolean useDefault)
   {
     return Collections.singletonList(String.valueOf(isPresent()));
@@ -166,6 +186,7 @@ public final class BooleanArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getDataTypeName()
   {
     return INFO_BOOLEAN_TYPE_NAME.get();
@@ -177,6 +198,7 @@ public final class BooleanArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getValueConstraints()
   {
     return INFO_BOOLEAN_CONSTRAINTS.get();
@@ -188,6 +210,7 @@ public final class BooleanArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public BooleanArgument getCleanCopy()
   {
     return new BooleanArgument(this);
@@ -199,7 +222,7 @@ public final class BooleanArgument
    * {@inheritDoc}
    */
   @Override()
-  protected void addToCommandLine(final List<String> argStrings)
+  protected void addToCommandLine(@NotNull final List<String> argStrings)
   {
     for (int i=0; i < getNumOccurrences(); i++)
     {
@@ -213,7 +236,7 @@ public final class BooleanArgument
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("BooleanArgument(");
     appendBasicToStringInfo(buffer);

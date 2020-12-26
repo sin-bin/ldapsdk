@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,7 @@ import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchResultReference;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -65,7 +81,7 @@ abstract class LDAPSearchOutputHandler
    *
    * @param  entry  The search result entry to be processed.
    */
-  abstract void formatSearchResultEntry(SearchResultEntry entry);
+  abstract void formatSearchResultEntry(@NotNull SearchResultEntry entry);
 
 
 
@@ -75,7 +91,7 @@ abstract class LDAPSearchOutputHandler
    *
    * @param  ref  The search result reference to be processed.
    */
-  abstract void formatSearchResultReference(SearchResultReference ref);
+  abstract void formatSearchResultReference(@NotNull SearchResultReference ref);
 
 
 
@@ -86,7 +102,7 @@ abstract class LDAPSearchOutputHandler
    * @param  result  The LDAP result to be processed.  It may or may not be a
    *                 search result.
    */
-  abstract void formatResult(LDAPResult result);
+  abstract void formatResult(@NotNull LDAPResult result);
 
 
 
@@ -98,6 +114,7 @@ abstract class LDAPSearchOutputHandler
    *                       was received.
    * @param  notification  The unsolicited notification that was received.
    */
-  abstract void formatUnsolicitedNotification(LDAPConnection connection,
-                                              ExtendedResult notification);
+  abstract void formatUnsolicitedNotification(
+                     @NotNull LDAPConnection connection,
+                     @NotNull ExtendedResult notification);
 }

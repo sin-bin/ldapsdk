@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,6 +53,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -83,8 +100,9 @@ public final class GetSupportedOTPDeliveryMechanismsExtendedResult
    * The OID (1.3.6.1.4.1.30221.2.6.48) for the get supported one-time password
    * delivery mechanisms extended result.
    */
-  public static final String GET_SUPPORTED_OTP_DELIVERY_MECHANISMS_RESULT_OID =
-       "1.3.6.1.4.1.30221.2.6.48";
+  @NotNull public static final String
+       GET_SUPPORTED_OTP_DELIVERY_MECHANISMS_RESULT_OID =
+            "1.3.6.1.4.1.30221.2.6.48";
 
 
 
@@ -117,7 +135,8 @@ public final class GetSupportedOTPDeliveryMechanismsExtendedResult
 
 
   // The list of supported delivery mechanism information for this result.
-  private final List<SupportedOTPDeliveryMechanismInfo> deliveryMechanismInfo;
+  @NotNull private final List<SupportedOTPDeliveryMechanismInfo>
+       deliveryMechanismInfo;
 
 
 
@@ -132,7 +151,7 @@ public final class GetSupportedOTPDeliveryMechanismsExtendedResult
    *                         as a get supported OTP delivery mechanisms result.
    */
   public GetSupportedOTPDeliveryMechanismsExtendedResult(
-              final ExtendedResult result)
+              @NotNull final ExtendedResult result)
          throws LDAPException
   {
     super(result);
@@ -227,11 +246,13 @@ public final class GetSupportedOTPDeliveryMechanismsExtendedResult
    *                                are needed.
    */
   public GetSupportedOTPDeliveryMechanismsExtendedResult(final int messageID,
-              final ResultCode resultCode, final String diagnosticMessage,
-              final String matchedDN, final String[] referralURLs,
-              final Collection<SupportedOTPDeliveryMechanismInfo>
-                   deliveryMechanismInfo,
-              final Control... controls)
+       @NotNull final ResultCode resultCode,
+       @Nullable final String diagnosticMessage,
+       @Nullable final String matchedDN,
+       @Nullable final String[] referralURLs,
+       @Nullable final Collection<SupportedOTPDeliveryMechanismInfo>
+            deliveryMechanismInfo,
+       @Nullable final Control... controls)
   {
     super(messageID, resultCode, diagnosticMessage, matchedDN, referralURLs,
          (resultCode == ResultCode.SUCCESS ?
@@ -264,9 +285,11 @@ public final class GetSupportedOTPDeliveryMechanismsExtendedResult
    *
    * @return  The ASN.1 octet string containing the encoded value.
    */
-  private static ASN1OctetString encodeValue(final ResultCode resultCode,
-                      final Collection<SupportedOTPDeliveryMechanismInfo>
-                           deliveryMechanismInfo)
+  @Nullable()
+  private static ASN1OctetString encodeValue(
+               @NotNull final ResultCode resultCode,
+               @Nullable final Collection<SupportedOTPDeliveryMechanismInfo>
+                    deliveryMechanismInfo)
 
   {
     if (resultCode != ResultCode.SUCCESS)
@@ -318,10 +341,11 @@ public final class GetSupportedOTPDeliveryMechanismsExtendedResult
    *
    * @return  A list containing information about the OTP delivery mechanisms
    *          supported by the server and which are available for the target
-   *          user, or an empty list if the server doesn't support  any OTP
+   *          user, or an empty list if the server doesn't support any OTP
    *          delivery mechanisms or if the request was not processed
    *          successfully.
    */
+  @NotNull()
   public List<SupportedOTPDeliveryMechanismInfo> getDeliveryMechanismInfo()
   {
     return deliveryMechanismInfo;
@@ -333,6 +357,7 @@ public final class GetSupportedOTPDeliveryMechanismsExtendedResult
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedResultName()
   {
     return INFO_GET_SUPPORTED_OTP_MECH_RES_NAME.get();
@@ -348,7 +373,7 @@ public final class GetSupportedOTPDeliveryMechanismsExtendedResult
    *                 extended result will be appended.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("GetSupportedOTPDeliveryMechanismsExtendedResult(" +
          "resultCode=");

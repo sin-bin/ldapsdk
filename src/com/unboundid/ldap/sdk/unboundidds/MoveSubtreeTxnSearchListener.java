@@ -1,9 +1,24 @@
 /*
- * Copyright 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2012-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -41,12 +56,10 @@ import com.unboundid.ldap.sdk.SearchResultReference;
 import com.unboundid.ldap.sdk.unboundidds.controls.
             IgnoreNoUserModificationRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.controls.
-            InteractiveTransactionSpecificationRequestControl;
-import com.unboundid.ldap.sdk.unboundidds.controls.
-            InteractiveTransactionSpecificationResponseControl;
-import com.unboundid.ldap.sdk.unboundidds.controls.
             OperationPurposeRequestControl;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -71,6 +84,7 @@ import static com.unboundid.ldap.sdk.unboundidds.UnboundIDDSMessages.*;
  *   interoperable way with other types of LDAP servers.
  * </BLOCKQUOTE>
  */
+@SuppressWarnings("deprecation")
 @ThreadSafety(level=ThreadSafetyLevel.NOT_THREADSAFE)
 final class MoveSubtreeTxnSearchListener
       implements SearchResultListener
@@ -83,32 +97,32 @@ final class MoveSubtreeTxnSearchListener
 
 
   // Indicates whether the target transaction should be considered valid.
-  private final AtomicBoolean targetTxnValid;
+  @NotNull private final AtomicBoolean targetTxnValid;
 
   // The counter for the number of entries added to the target server.
-  private final AtomicInteger entriesAddedToTarget;
+  @NotNull private final AtomicInteger entriesAddedToTarget;
 
   // The counter for the number of entries read from the source server.
-  private final AtomicInteger entriesReadFromSource;
+  @NotNull private final AtomicInteger entriesReadFromSource;
 
   // A reference to the result code for move subtree processing.
-  private final AtomicReference<ResultCode> resultCode;
+  @NotNull private final AtomicReference<ResultCode> resultCode;
 
   // The set of controls to include in add requests to the target server.
-  private final Control[] addControls;
+  @NotNull private final Control[] addControls;
 
   // An LDAP connection that may be used to communicate with the target server.
-  private final LDAPConnection targetConnection;
+  @NotNull private final LDAPConnection targetConnection;
 
   // A listener that should be used to perform any processing before and after
   // add operations in the target server.
-  private final MoveSubtreeListener moveListener;
+  @Nullable private final MoveSubtreeListener moveListener;
 
   // A buffer to which any error messages encountered should be appended.
-  private final StringBuilder errorMessage;
+  @NotNull private final StringBuilder errorMessage;
 
   // The DNs of the entries read from the source server.
-  private final TreeSet<DN> sourceEntryDNs;
+  @NotNull private final TreeSet<DN> sourceEntryDNs;
 
 
 
@@ -139,15 +153,16 @@ final class MoveSubtreeTxnSearchListener
    *                                It may be {@code null} if no move listener
    *                                is required.
    */
-  MoveSubtreeTxnSearchListener(final LDAPConnection targetConnection,
-       final AtomicReference<ResultCode> resultCode,
-       final StringBuilder errorMessage,
-       final AtomicInteger entriesReadFromSource,
-       final AtomicInteger entriesAddedToTarget,
-       final TreeSet<DN> sourceEntryDNs,
-       final InteractiveTransactionSpecificationRequestControl targetTxnControl,
-       final OperationPurposeRequestControl opPurposeControl,
-       final MoveSubtreeListener moveListener)
+  MoveSubtreeTxnSearchListener(@NotNull final LDAPConnection targetConnection,
+       @NotNull final AtomicReference<ResultCode> resultCode,
+       @NotNull final StringBuilder errorMessage,
+       @NotNull final AtomicInteger entriesReadFromSource,
+       @NotNull final AtomicInteger entriesAddedToTarget,
+       @NotNull final TreeSet<DN> sourceEntryDNs,
+       @NotNull final com.unboundid.ldap.sdk.unboundidds.controls.
+            InteractiveTransactionSpecificationRequestControl targetTxnControl,
+       @Nullable final OperationPurposeRequestControl opPurposeControl,
+       @Nullable final MoveSubtreeListener moveListener)
   {
     this.targetConnection      = targetConnection;
     this.resultCode            = resultCode;
@@ -184,7 +199,7 @@ final class MoveSubtreeTxnSearchListener
    * {@inheritDoc}
    */
   @Override()
-  public void searchEntryReturned(final SearchResultEntry searchEntry)
+  public void searchEntryReturned(@NotNull final SearchResultEntry searchEntry)
   {
     // Increment the number of entries read from the source server and add its
     // DN to the source DN set.
@@ -280,8 +295,11 @@ final class MoveSubtreeTxnSearchListener
 
       try
       {
-        final InteractiveTransactionSpecificationResponseControl txnResult =
-             InteractiveTransactionSpecificationResponseControl.get(addResult);
+        final com.unboundid.ldap.sdk.unboundidds.controls.
+             InteractiveTransactionSpecificationResponseControl txnResult =
+             com.unboundid.ldap.sdk.unboundidds.controls.
+                  InteractiveTransactionSpecificationResponseControl.get(
+                       addResult);
         if ((txnResult != null) && (! txnResult.transactionValid()))
         {
           targetTxnValid.set(false);
@@ -297,8 +315,11 @@ final class MoveSubtreeTxnSearchListener
 
     try
     {
-      final InteractiveTransactionSpecificationResponseControl txnResult =
-           InteractiveTransactionSpecificationResponseControl.get(addResult);
+      final com.unboundid.ldap.sdk.unboundidds.controls.
+           InteractiveTransactionSpecificationResponseControl txnResult =
+           com.unboundid.ldap.sdk.unboundidds.controls.
+                InteractiveTransactionSpecificationResponseControl.get(
+                     addResult);
       if ((txnResult != null) && (! txnResult.transactionValid()))
       {
         targetTxnValid.set(false);
@@ -349,7 +370,7 @@ final class MoveSubtreeTxnSearchListener
    */
   @Override()
   public void searchReferenceReturned(
-                   final SearchResultReference searchReference)
+                   @NotNull final SearchResultReference searchReference)
   {
     // Don't do anything if we've already encountered one or more errors.
     if (errorMessage.length() > 0)

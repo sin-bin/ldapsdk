@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,8 @@ package com.unboundid.asn1;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -50,7 +67,7 @@ public final class ASN1IA5String
 
 
   // The string value for this element.
-  private final String stringValue;
+  @NotNull private final String stringValue;
 
 
 
@@ -66,7 +83,7 @@ public final class ASN1IA5String
    * @throws  ASN1Exception  If the provided string does not represent a valid
    *                         IA5 string.
    */
-  public ASN1IA5String(final String stringValue)
+  public ASN1IA5String(@Nullable final String stringValue)
          throws ASN1Exception
   {
     this(ASN1Constants.UNIVERSAL_IA5_STRING_TYPE, stringValue);
@@ -87,7 +104,7 @@ public final class ASN1IA5String
    * @throws  ASN1Exception  If the provided string does not represent a valid
    *                         IA5 string.
    */
-  public ASN1IA5String(final byte type, final String stringValue)
+  public ASN1IA5String(final byte type, @Nullable final String stringValue)
          throws ASN1Exception
   {
     this(type, stringValue, StaticUtils.getBytes(stringValue));
@@ -109,8 +126,8 @@ public final class ASN1IA5String
    * @throws  ASN1Exception  If the provided string does not represent a valid
    *                         IA5 string.
    */
-  private ASN1IA5String(final byte type, final String stringValue,
-                        final byte[] encodedValue)
+  private ASN1IA5String(final byte type, @Nullable final String stringValue,
+                        @NotNull final byte[] encodedValue)
           throws ASN1Exception
   {
     super(type, encodedValue);
@@ -140,6 +157,7 @@ public final class ASN1IA5String
    *
    * @return  The string value for this element.
    */
+  @NotNull()
   public String stringValue()
   {
     return stringValue;
@@ -158,7 +176,9 @@ public final class ASN1IA5String
    * @throws  ASN1Exception  If the provided array cannot be decoded as an
    *                         IA5 string element.
    */
-  public static ASN1IA5String decodeAsIA5String(final byte[] elementBytes)
+  @NotNull()
+  public static ASN1IA5String decodeAsIA5String(
+                                   @NotNull final byte[] elementBytes)
          throws ASN1Exception
   {
     try
@@ -213,7 +233,9 @@ public final class ASN1IA5String
    * @throws  ASN1Exception  If the provided element cannot be decoded as an
    *                         IA5 string element.
    */
-  public static ASN1IA5String decodeAsIA5String(final ASN1Element element)
+  @NotNull()
+  public static ASN1IA5String decodeAsIA5String(
+                                   @NotNull final ASN1Element element)
          throws ASN1Exception
   {
     final byte[] elementValue = element.getValue();
@@ -227,7 +249,7 @@ public final class ASN1IA5String
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append(stringValue);
   }

@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,8 @@ import javax.net.SocketFactory;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -145,14 +162,14 @@ public final class FailoverServerSet
        extends ServerSet
 {
   // Indicates whether to re-order the server set list if failover occurs.
-  private final AtomicBoolean reOrderOnFailover;
+  @NotNull private final AtomicBoolean reOrderOnFailover;
 
   // The maximum connection age that should be set for connections established
   // using anything but the first server set.
-  private volatile Long maxFailoverConnectionAge;
+  @Nullable private volatile Long maxFailoverConnectionAge;
 
   // The server sets for which we will allow failover.
-  private final ServerSet[] serverSets;
+  @NotNull private final ServerSet[] serverSets;
 
 
 
@@ -171,7 +188,8 @@ public final class FailoverServerSet
    *                    elements in the {@code addresses} array must correspond
    *                    to the order of elements in the {@code ports} array.
    */
-  public FailoverServerSet(final String[] addresses, final int[] ports)
+  public FailoverServerSet(@NotNull final String[] addresses,
+                           @NotNull final int[] ports)
   {
     this(addresses, ports, null, null);
   }
@@ -196,8 +214,9 @@ public final class FailoverServerSet
    * @param  connectionOptions  The set of connection options to use for the
    *                            underlying connections.
    */
-  public FailoverServerSet(final String[] addresses, final int[] ports,
-                           final LDAPConnectionOptions connectionOptions)
+  public FailoverServerSet(@NotNull final String[] addresses,
+              @NotNull final int[] ports,
+              @Nullable final LDAPConnectionOptions connectionOptions)
   {
     this(addresses, ports, null, connectionOptions);
   }
@@ -222,8 +241,9 @@ public final class FailoverServerSet
    * @param  socketFactory  The socket factory to use to create the underlying
    *                        connections.
    */
-  public FailoverServerSet(final String[] addresses, final int[] ports,
-                           final SocketFactory socketFactory)
+  public FailoverServerSet(@NotNull final String[] addresses,
+                           @NotNull final int[] ports,
+                           @Nullable final SocketFactory socketFactory)
   {
     this(addresses, ports, socketFactory, null);
   }
@@ -250,9 +270,10 @@ public final class FailoverServerSet
    * @param  connectionOptions  The set of connection options to use for the
    *                            underlying connections.
    */
-  public FailoverServerSet(final String[] addresses, final int[] ports,
-                           final SocketFactory socketFactory,
-                           final LDAPConnectionOptions connectionOptions)
+  public FailoverServerSet(@NotNull final String[] addresses,
+              @NotNull final int[] ports,
+              @Nullable final SocketFactory socketFactory,
+              @Nullable final LDAPConnectionOptions connectionOptions)
   {
     this(addresses, ports, socketFactory, connectionOptions, null, null);
   }
@@ -288,11 +309,12 @@ public final class FailoverServerSet
    *                               may be {@code null} if this server set should
    *                               not perform any post-connect processing.
    */
-  public FailoverServerSet(final String[] addresses, final int[] ports,
-                           final SocketFactory socketFactory,
-                           final LDAPConnectionOptions connectionOptions,
-                           final BindRequest bindRequest,
-                           final PostConnectProcessor postConnectProcessor)
+  public FailoverServerSet(@NotNull final String[] addresses,
+              @NotNull final int[] ports,
+              @Nullable final SocketFactory socketFactory,
+              @Nullable final LDAPConnectionOptions connectionOptions,
+              @Nullable final BindRequest bindRequest,
+              @Nullable final PostConnectProcessor postConnectProcessor)
   {
     Validator.ensureNotNull(addresses, ports);
     Validator.ensureTrue(addresses.length > 0,
@@ -345,7 +367,7 @@ public final class FailoverServerSet
    *                     their {@link #includesPostConnectProcessing()}
    *                     method.
    */
-  public FailoverServerSet(final ServerSet... serverSets)
+  public FailoverServerSet(@NotNull final ServerSet... serverSets)
   {
     this(StaticUtils.toList(serverSets));
   }
@@ -364,7 +386,7 @@ public final class FailoverServerSet
    *                     their {@link #includesPostConnectProcessing()}
    *                     method.
    */
-  public FailoverServerSet(final List<ServerSet> serverSets)
+  public FailoverServerSet(@NotNull final List<ServerSet> serverSets)
   {
     Validator.ensureNotNull(serverSets);
     Validator.ensureFalse(serverSets.isEmpty(),
@@ -429,6 +451,7 @@ public final class FailoverServerSet
    *
    * @return  The server sets over which failover will occur.
    */
+  @NotNull()
   public ServerSet[] getServerSets()
   {
     return serverSets;
@@ -492,6 +515,7 @@ public final class FailoverServerSet
    *          connection age should be determined by the associated connection
    *          pool.
    */
+  @Nullable()
   public Long getMaxFailoverConnectionAgeMillis()
   {
     return maxFailoverConnectionAge;
@@ -517,7 +541,7 @@ public final class FailoverServerSet
    *                                   pool.
    */
   public void setMaxFailoverConnectionAgeMillis(
-                   final Long maxFailoverConnectionAge)
+                   @Nullable final Long maxFailoverConnectionAge)
   {
     if (maxFailoverConnectionAge == null)
     {
@@ -561,6 +585,7 @@ public final class FailoverServerSet
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPConnection getConnection()
          throws LDAPException
   {
@@ -573,10 +598,20 @@ public final class FailoverServerSet
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPConnection getConnection(
-                             final LDAPConnectionPoolHealthCheck healthCheck)
+             @Nullable final LDAPConnectionPoolHealthCheck healthCheck)
          throws LDAPException
   {
+    // NOTE:  This method does not associate the connection that is created with
+    // this server set.  This is because another server set is actually used to
+    // create the connection, and we want that server set to be able to
+    // associate itself with the connection.  The failover server set does not
+    // override the handleConnectionClosed method, but other server sets might,
+    // and associating a connection with the failover server set instead of the
+    // downstream set that actually created it could prevent that downstream
+    // set from being properly notified about the connection closure.
+
     if (reOrderOnFailover.get() && (serverSets.length > 1))
     {
       synchronized (this)
@@ -677,7 +712,7 @@ public final class FailoverServerSet
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("FailoverServerSet(serverSets={");
 

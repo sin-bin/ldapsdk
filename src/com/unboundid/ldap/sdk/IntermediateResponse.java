@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,8 @@ import com.unboundid.ldap.protocol.LDAPResponse;
 import com.unboundid.util.Debug;
 import com.unboundid.util.Extensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -86,7 +103,7 @@ public class IntermediateResponse
   /**
    * An empty set of controls that will be used if no controls are provided.
    */
-  private static final Control[] NO_CONTROLS = new Control[0];
+  @NotNull private static final Control[] NO_CONTROLS = new Control[0];
 
 
 
@@ -98,16 +115,16 @@ public class IntermediateResponse
 
 
   // The encoded value for this intermediate response, if available.
-  private final ASN1OctetString value;
+  @Nullable private final ASN1OctetString value;
 
   // The set of controls for this intermediate response.
-  private final Control[] controls;
+  @NotNull private final Control[] controls;
 
   // The message ID for this intermediate response.
   private final int messageID;
 
-  // The OID for this extended request.
-  private final String oid;
+  // The OID for this intermeddiate response.
+  @Nullable private final String oid;
 
 
 
@@ -119,7 +136,8 @@ public class IntermediateResponse
    * @param  value  The value for this intermediate response.  It may be
    *                {@code null} if there is no value.
    */
-  public IntermediateResponse(final String oid, final ASN1OctetString value)
+  public IntermediateResponse(@Nullable final String oid,
+                              @Nullable final ASN1OctetString value)
   {
     this(-1, oid, value, NO_CONTROLS);
   }
@@ -136,8 +154,8 @@ public class IntermediateResponse
    * @param  value      The value for this intermediate response.  It may be
    *                    {@code null} if there is no value.
    */
-  public IntermediateResponse(final int messageID, final String oid,
-                              final ASN1OctetString value)
+  public IntermediateResponse(final int messageID, @Nullable final String oid,
+                              @Nullable final ASN1OctetString value)
   {
     this(messageID, oid, value, NO_CONTROLS);
   }
@@ -153,8 +171,9 @@ public class IntermediateResponse
    *                   {@code null} if there is no value.
    * @param  controls  The set of controls for this intermediate response.
    */
-  public IntermediateResponse(final String oid, final ASN1OctetString value,
-                              final Control[] controls)
+  public IntermediateResponse(@Nullable final String oid,
+                              @Nullable final ASN1OctetString value,
+                              @Nullable final Control[] controls)
   {
     this(-1, oid, value, controls);
   }
@@ -172,9 +191,9 @@ public class IntermediateResponse
    *                    {@code null} if there is no value.
    * @param  controls   The set of controls for this intermediate response.
    */
-  public IntermediateResponse(final int messageID, final String oid,
-                              final ASN1OctetString value,
-                              final Control[] controls)
+  public IntermediateResponse(final int messageID, @Nullable final String oid,
+                              @Nullable final ASN1OctetString value,
+                              @Nullable final Control[] controls)
   {
     this.messageID = messageID;
     this.oid       = oid;
@@ -200,7 +219,7 @@ public class IntermediateResponse
    *                               to create this new intermediate response.
    */
   protected IntermediateResponse(
-                 final IntermediateResponse intermediateResponse)
+                 @NotNull final IntermediateResponse intermediateResponse)
   {
     messageID = intermediateResponse.messageID;
     oid       = intermediateResponse.oid;
@@ -226,9 +245,10 @@ public class IntermediateResponse
    * @throws  LDAPException  If a problem occurs while reading or decoding data
    *                         from the ASN.1 stream reader.
    */
+  @NotNull()
   static IntermediateResponse readFrom(final int messageID,
-              final ASN1StreamReaderSequence messageSequence,
-              final ASN1StreamReader reader)
+              @NotNull final ASN1StreamReaderSequence messageSequence,
+              @NotNull final ASN1StreamReader reader)
          throws LDAPException
   {
     try
@@ -309,6 +329,7 @@ public class IntermediateResponse
    * @return  The OID for this intermediate response, or {@code null} if there
    *          is no OID for this response.
    */
+  @Nullable()
   public final String getOID()
   {
     return oid;
@@ -322,6 +343,7 @@ public class IntermediateResponse
    * @return  The encoded value for this intermediate response, or {@code null}
    *          if there is no value for this response.
    */
+  @Nullable()
   public final ASN1OctetString getValue()
   {
     return value;
@@ -336,6 +358,7 @@ public class IntermediateResponse
    *
    * @return  The set of controls returned with this intermediate response.
    */
+  @NotNull()
   public final Control[] getControls()
   {
     return controls;
@@ -352,7 +375,8 @@ public class IntermediateResponse
    * @return  The control with the requested OID, or {@code null} if there is no
    *          such control for this intermediate response.
    */
-  public final Control getControl(final String oid)
+  @Nullable()
+  public final Control getControl(@NotNull final String oid)
   {
     for (final Control c : controls)
     {
@@ -378,6 +402,7 @@ public class IntermediateResponse
    *          response OID is, or {@code null} if neither a user-friendly name
    *          nor a response OID are available.
    */
+  @Nullable()
   public String getIntermediateResponseName()
   {
     // By default, we will return the OID (which may be null).  Subclasses
@@ -397,6 +422,7 @@ public class IntermediateResponse
    *          value for this intermediate response, or {@code null} if there is
    *          no value or no string representation is available.
    */
+  @Nullable()
   public String valueToString()
   {
     return null;
@@ -410,6 +436,7 @@ public class IntermediateResponse
    * @return  A string representation of this intermediate response.
    */
   @Override()
+  @NotNull()
   public final String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -427,7 +454,7 @@ public class IntermediateResponse
    *                 appended.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("IntermediateResponse(");
 

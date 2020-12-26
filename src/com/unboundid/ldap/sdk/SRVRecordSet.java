@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -41,6 +56,7 @@ import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -61,14 +77,14 @@ final class SRVRecordSet
   /**
    * The attribute name that will be used to retrieve the SRV record.
    */
-  private static final String DNS_ATTR_SRV = "SRV";
+  @NotNull private static final String DNS_ATTR_SRV = "SRV";
 
 
 
   /**
    * The names of the DNS attributes that should be retrieved.
    */
-  private static final String[] ATTRIBUTE_IDS = { DNS_ATTR_SRV };
+  @NotNull private static final String[] ATTRIBUTE_IDS = { DNS_ATTR_SRV };
 
 
 
@@ -84,10 +100,10 @@ final class SRVRecordSet
 
   // A list of all records associated with this set.  There is no defined order
   // to the list of records.
-  private final List<SRVRecord> allRecords;
+  @NotNull private final List<SRVRecord> allRecords;
 
   // A list of record sets ordered by ascending priority.
-  private final List<SRVRecordPrioritySet> recordSets;
+  @NotNull private final List<SRVRecordPrioritySet> recordSets;
 
   // The expiration time for this set.
   private final long expirationTime;
@@ -102,7 +118,8 @@ final class SRVRecordSet
    * @param  records         The set of all records to be processed.  It must
    *                         not be {@code null} or empty.
    */
-  SRVRecordSet(final long expirationTime, final List<SRVRecord> records)
+  SRVRecordSet(final long expirationTime,
+               @NotNull final List<SRVRecord> records)
   {
     this.expirationTime = expirationTime;
 
@@ -164,6 +181,7 @@ final class SRVRecordSet
    *
    * @return  A list of all SRV records ordered by priority and weight.
    */
+  @NotNull()
   List<SRVRecord> getOrderedRecords()
   {
     final ArrayList<SRVRecord> l = new ArrayList<>(totalRecords);
@@ -193,9 +211,10 @@ final class SRVRecordSet
    * @throws  LDAPException  If an error occurs while querying DNS or while
    *                         parsing the results.
    */
-  static SRVRecordSet getRecordSet(final String name,
-                           final Hashtable<String,String> jndiProperties,
-                           final long ttlMillis)
+  @NotNull()
+  static SRVRecordSet getRecordSet(@NotNull final String name,
+              @NotNull final Hashtable<String,String> jndiProperties,
+              final long ttlMillis)
          throws LDAPException
   {
     final ArrayList<String> recordStrings = new ArrayList<>(10);
@@ -288,6 +307,7 @@ final class SRVRecordSet
    * @return  A string representation of this priority server set.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -303,7 +323,7 @@ final class SRVRecordSet
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  private void toString(final StringBuilder buffer)
+  private void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("SRVRecordSet(records={");
 

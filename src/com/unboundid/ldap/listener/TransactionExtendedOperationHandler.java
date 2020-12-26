@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -47,6 +62,7 @@ import com.unboundid.ldap.sdk.extensions.StartTransactionExtendedRequest;
 import com.unboundid.ldap.sdk.extensions.StartTransactionExtendedResult;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
@@ -69,7 +85,7 @@ public final class TransactionExtendedOperationHandler
   /**
    * The counter that will be used to generate transaction IDs.
    */
-  private static final AtomicLong TXN_ID_COUNTER = new AtomicLong(1L);
+  @NotNull private static final AtomicLong TXN_ID_COUNTER = new AtomicLong(1L);
 
 
 
@@ -77,7 +93,7 @@ public final class TransactionExtendedOperationHandler
    * The name of the connection state variable that will be used to hold the
    * transaction ID for the active transaction on the associated connection.
    */
-  static final String STATE_VARIABLE_TXN_INFO = "TXN-INFO";
+  @NotNull static final String STATE_VARIABLE_TXN_INFO = "TXN-INFO";
 
 
 
@@ -95,6 +111,7 @@ public final class TransactionExtendedOperationHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedOperationHandlerName()
   {
     return "LDAP Transactions";
@@ -106,6 +123,7 @@ public final class TransactionExtendedOperationHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<String> getSupportedExtendedRequestOIDs()
   {
     return Arrays.asList(
@@ -119,9 +137,11 @@ public final class TransactionExtendedOperationHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ExtendedResult processExtendedOperation(
-                             final InMemoryRequestHandler handler,
-                             final int messageID, final ExtendedRequest request)
+                             @NotNull final InMemoryRequestHandler handler,
+                             final int messageID,
+                             @NotNull final ExtendedRequest request)
   {
     // This extended operation handler does not support any controls.  If the
     // request has any critical controls, then reject it.
@@ -187,9 +207,11 @@ public final class TransactionExtendedOperationHandler
    *
    * @return  The result for the extended operation processing.
    */
+  @NotNull()
   private static StartTransactionExtendedResult handleStartTransaction(
-                      final InMemoryRequestHandler handler,
-                      final int messageID, final ExtendedRequest request)
+                      @NotNull final InMemoryRequestHandler handler,
+                      final int messageID,
+                      @NotNull final ExtendedRequest request)
   {
     // If there is already an active transaction on the associated connection,
     // then make sure it gets aborted.
@@ -263,9 +285,11 @@ public final class TransactionExtendedOperationHandler
    *
    * @return  The result for the extended operation processing.
    */
+  @NotNull()
   private static EndTransactionExtendedResult handleEndTransaction(
-                      final InMemoryRequestHandler handler, final int messageID,
-                      final ExtendedRequest request)
+                      @NotNull final InMemoryRequestHandler handler,
+                      final int messageID,
+                      @NotNull final ExtendedRequest request)
   {
     // Get information about any transaction currently in progress on the
     // connection.  If there isn't one, then fail.

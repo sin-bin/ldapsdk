@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -23,6 +38,8 @@ package com.unboundid.ldap.sdk.unboundidds.logs;
 
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -56,10 +73,10 @@ public final class ClientCertificateAccessLogMessage
 
 
   // The subject DN for the issuer certificate.
-  private final String issuerSubject;
+  @Nullable private final String issuerSubject;
 
   // The subject DN for the client certificate.
-  private final String peerSubject;
+  @Nullable private final String peerSubject;
 
 
 
@@ -73,7 +90,7 @@ public final class ClientCertificateAccessLogMessage
    * @throws  LogException  If the provided string cannot be parsed as a valid
    *                        log message.
    */
-  public ClientCertificateAccessLogMessage(final String s)
+  public ClientCertificateAccessLogMessage(@NotNull final String s)
          throws LogException
   {
     this(new LogMessage(s));
@@ -86,7 +103,7 @@ public final class ClientCertificateAccessLogMessage
    *
    * @param  m  The log message to be parsed as a connect access log message.
    */
-  public ClientCertificateAccessLogMessage(final LogMessage m)
+  public ClientCertificateAccessLogMessage(@NotNull final LogMessage m)
   {
     super(m);
 
@@ -102,6 +119,7 @@ public final class ClientCertificateAccessLogMessage
    * @return  The subject of the peer certificate, or {@code null} if it is not
    *          included in the log message.
    */
+  @Nullable()
   public String getPeerSubject()
   {
     return peerSubject;
@@ -115,6 +133,7 @@ public final class ClientCertificateAccessLogMessage
    * @return  The subject of the issuer certificate, or {@code null} if it is
    *          not included in the log message.
    */
+  @Nullable()
   public String getIssuerSubject()
   {
     return issuerSubject;
@@ -126,6 +145,7 @@ public final class ClientCertificateAccessLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public AccessLogMessageType getMessageType()
   {
     return AccessLogMessageType.CLIENT_CERTIFICATE;

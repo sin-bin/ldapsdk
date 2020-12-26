@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,8 @@ import java.util.List;
 
 import com.unboundid.ldap.sdk.unboundidds.extensions.
             PasswordPolicyStateOperation;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 
 import static com.unboundid.ldap.sdk.unboundidds.tools.ToolMessages.*;
@@ -858,7 +875,92 @@ public enum ManageAccountSubCommandType
    */
   GET_HAS_STATIC_PASSWORD("get-has-static-password",
        INFO_MANAGE_ACCT_SC_DESC_GET_HAS_STATIC_PW.get(),
-       PasswordPolicyStateOperation.OP_TYPE_HAS_STATIC_PASSWORD);
+       PasswordPolicyStateOperation.OP_TYPE_HAS_STATIC_PASSWORD),
+
+
+
+  /**
+   * The subcommand used to retrieve the time that the server last invoked
+   * password validators for a bind operation.
+   */
+  GET_LAST_BIND_PASSWORD_VALIDATION_TIME(
+       "get-last-bind-password-validation-time",
+       INFO_MANAGE_ACCT_SC_DESC_GET_LAST_BIND_PW_VALIDATION_TIME.get(),
+       PasswordPolicyStateOperation.
+            OP_TYPE_GET_LAST_BIND_PASSWORD_VALIDATION_TIME),
+
+
+
+  /**
+   * The subcommand used to retrieve the length of time in seconds since the
+   * server last invoked password validators for a bind operation.
+   */
+  GET_SECONDS_SINCE_LAST_BIND_PASSWORD_VALIDATION(
+       "get-seconds-since-last-bind-password-validation",
+       INFO_MANAGE_ACCT_SC_DESC_GET_SECONDS_SINCE_LAST_BIND_PW_VALIDATION.get(),
+       PasswordPolicyStateOperation.
+            OP_TYPE_GET_SECONDS_SINCE_LAST_BIND_PASSWORD_VALIDATION),
+
+
+
+  /**
+   * The subcommand used to specify the time that the server last invoked
+   * password validators for a bind operation.
+   */
+  SET_LAST_BIND_PASSWORD_VALIDATION_TIME(
+       "set-last-bind-password-validation-time",
+       INFO_MANAGE_ACCT_SC_DESC_SET_LAST_BIND_PW_VALIDATION_TIME.get(),
+       PasswordPolicyStateOperation.
+            OP_TYPE_SET_LAST_BIND_PASSWORD_VALIDATION_TIME),
+
+
+
+  /**
+   * The subcommand used to clear the time that the server last invoked password
+   * validators for a bind operation.
+   */
+  CLEAR_LAST_BIND_PASSWORD_VALIDATION_TIME(
+       "clear-last-bind-password-validation-time",
+       INFO_MANAGE_ACCT_SC_DESC_CLEAR_LAST_BIND_PW_VALIDATION_TIME.get(),
+       PasswordPolicyStateOperation.
+            OP_TYPE_CLEAR_LAST_BIND_PASSWORD_VALIDATION_TIME),
+
+
+
+  /**
+   * The subcommand used to determine whether a user account is validation
+   * locked.
+   */
+  GET_ACCOUNT_IS_VALIDATION_LOCKED("get-account-is-validation-locked",
+       INFO_MANAGE_ACCT_SC_DESC_GET_ACCT_VALIDATION_LOCKED.get(),
+       PasswordPolicyStateOperation.OP_TYPE_GET_ACCOUNT_IS_VALIDATION_LOCKED),
+
+
+
+  /**
+   * The subcommand used to specify whether a user account is validation locked.
+   */
+  SET_ACCOUNT_IS_VALIDATION_LOCKED("set-account-is-validation-locked",
+       INFO_MANAGE_ACCT_SC_DESC_SET_ACCT_VALIDATION_LOCKED.get(),
+       PasswordPolicyStateOperation.OP_TYPE_SET_ACCOUNT_IS_VALIDATION_LOCKED),
+
+
+
+  /**
+   * The subcommand used to retrieve the recent login history for a user.
+   */
+  GET_RECENT_LOGIN_HISTORY("get-recent-login-history",
+       INFO_MANAGE_ACCT_SC_DESC_GET_RECENT_LOGIN_HISTORY.get(),
+       PasswordPolicyStateOperation.OP_TYPE_GET_RECENT_LOGIN_HISTORY),
+
+
+
+  /**
+   * The subcommand used to clear the recent login history for a user.
+   */
+  CLEAR_RECENT_LOGIN_HISTORY("clear-recent-login-history",
+       INFO_MANAGE_ACCT_SC_DESC_CLEAR_RECENT_LOGIN_HISTORY.get(),
+       PasswordPolicyStateOperation.OP_TYPE_CLEAR_RECENT_LOGIN_HISTORY);
 
 
 
@@ -866,15 +968,16 @@ public enum ManageAccountSubCommandType
    * The map of subcommand types indexed by password policy state operation
    * type.
    */
-  private static HashMap<Integer,ManageAccountSubCommandType> typesByOpType =
-       null;
+  @Nullable private static HashMap<Integer,ManageAccountSubCommandType>
+       typesByOpType = null;
 
 
 
   /**
    * The map of subcommand types indexed by name.
    */
-  private static HashMap<String,ManageAccountSubCommandType> typesByName = null;
+  @Nullable private static HashMap<String,ManageAccountSubCommandType>
+       typesByName = null;
 
 
 
@@ -884,16 +987,16 @@ public enum ManageAccountSubCommandType
 
   // A list containing the primary name and all alternate names for this
   // subcommand.
-  private final List<String> allNames;
+  @NotNull private final List<String> allNames;
 
   // A list of alternate names for this subcommand.
-  private final List<String> alternateNames;
+  @NotNull private final List<String> alternateNames;
 
   // The description for this subcommand.
-  private final String description;
+  @NotNull private final String description;
 
   // The primary name for this subcommand.
-  private final String primaryName;
+  @NotNull private final String primaryName;
 
 
 
@@ -911,9 +1014,10 @@ public enum ManageAccountSubCommandType
    *                         invoke this subcommand.  It may be empty but not
    *                         {@code null}.
    */
-  ManageAccountSubCommandType(final String primaryName,
-                              final String description, final int operationType,
-                              final String... alternateNames)
+  ManageAccountSubCommandType(@NotNull final String primaryName,
+                              @NotNull final String description,
+                              final int operationType,
+                              @NotNull final String... alternateNames)
   {
     this.primaryName    = primaryName;
     this.description    = description;
@@ -937,6 +1041,7 @@ public enum ManageAccountSubCommandType
    *
    * @return  The primary name for the subcommand.
    */
+  @NotNull()
   public String getPrimaryName()
   {
     return primaryName;
@@ -950,6 +1055,7 @@ public enum ManageAccountSubCommandType
    * @return  The alternate names for this subcommand, or an empty list if
    *          there are no alternate names.
    */
+  @NotNull()
   public List<String> getAlternateNames()
   {
     return alternateNames;
@@ -963,6 +1069,7 @@ public enum ManageAccountSubCommandType
    *
    * @return  A list containing all names for ths subcommand.
    */
+  @NotNull()
   public List<String> getAllNames()
   {
     return allNames;
@@ -975,6 +1082,7 @@ public enum ManageAccountSubCommandType
    *
    * @return  The description for the subcommand.
    */
+  @NotNull()
   public String getDescription()
   {
     return description;
@@ -1005,7 +1113,8 @@ public enum ManageAccountSubCommandType
    * @return  The subcommand type with the specified name, or {@code null} if
    *          there is no subcommand type for the given name.
    */
-  public static ManageAccountSubCommandType forName(final String name)
+  @Nullable()
+  public static ManageAccountSubCommandType forName(@NotNull final String name)
   {
     ensureMapsPopulated();
 
@@ -1025,6 +1134,7 @@ public enum ManageAccountSubCommandType
    *          operation type, or {@code null} if there is no subcommand type for
    *          the given operation type.
    */
+  @Nullable()
   public static ManageAccountSubCommandType forOperationType(final int opType)
   {
     ensureMapsPopulated();

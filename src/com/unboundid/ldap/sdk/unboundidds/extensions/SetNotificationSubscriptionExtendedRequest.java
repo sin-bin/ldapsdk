@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -36,6 +51,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -79,8 +96,9 @@ public final class SetNotificationSubscriptionExtendedRequest
    * The OID (1.3.6.1.4.1.30221.2.6.38) for the set notification subscription
    * extended request.
    */
-  public static final String SET_NOTIFICATION_SUBSCRIPTION_REQUEST_OID =
-       "1.3.6.1.4.1.30221.2.6.38";
+  @NotNull public static final String
+       SET_NOTIFICATION_SUBSCRIPTION_REQUEST_OID =
+            "1.3.6.1.4.1.30221.2.6.38";
 
 
 
@@ -92,16 +110,16 @@ public final class SetNotificationSubscriptionExtendedRequest
 
 
   // The implementation-specific details for the notification subscription.
-  private final List<ASN1OctetString> subscriptionDetails;
+  @NotNull private final List<ASN1OctetString> subscriptionDetails;
 
   // The notification destination ID.
-  private final String destinationID;
+  @NotNull private final String destinationID;
 
   // The notification manager ID.
-  private final String managerID;
+  @NotNull private final String managerID;
 
   // The notification subscription ID.
-  private final String subscriptionID;
+  @NotNull private final String subscriptionID;
 
 
 
@@ -119,9 +137,11 @@ public final class SetNotificationSubscriptionExtendedRequest
    *                              notification subscription.  At least one
    *                              detail value must be provided.
    */
-  public SetNotificationSubscriptionExtendedRequest(final String managerID,
-              final String destinationID, final String subscriptionID,
-              final ASN1OctetString... subscriptionDetails)
+  public SetNotificationSubscriptionExtendedRequest(
+              @NotNull final String managerID,
+              @NotNull final String destinationID,
+              @NotNull final String subscriptionID,
+              @Nullable final ASN1OctetString... subscriptionDetails)
   {
     this(managerID, destinationID, subscriptionID,
          StaticUtils.toList(subscriptionDetails));
@@ -149,10 +169,12 @@ public final class SetNotificationSubscriptionExtendedRequest
    *                              It may be {@code null} or empty if no controls
    *                              are needed.
    */
-  public SetNotificationSubscriptionExtendedRequest(final String managerID,
-              final String destinationID, final String subscriptionID,
-              final Collection<ASN1OctetString> subscriptionDetails,
-              final Control... controls)
+  public SetNotificationSubscriptionExtendedRequest(
+              @NotNull final String managerID,
+              @NotNull final String destinationID,
+              @NotNull final String subscriptionID,
+              @NotNull final Collection<ASN1OctetString> subscriptionDetails,
+              @Nullable final Control... controls)
   {
     super(SET_NOTIFICATION_SUBSCRIPTION_REQUEST_OID,
          encodeValue(managerID, destinationID, subscriptionID,
@@ -178,7 +200,7 @@ public final class SetNotificationSubscriptionExtendedRequest
    * @throws  LDAPException  If a problem occurs while decoding the request.
    */
   public SetNotificationSubscriptionExtendedRequest(
-              final ExtendedRequest extendedRequest)
+              @NotNull final ExtendedRequest extendedRequest)
          throws LDAPException
   {
     super(extendedRequest);
@@ -239,9 +261,11 @@ public final class SetNotificationSubscriptionExtendedRequest
    *
    * @return  The ASN.1 octet string containing the encoded value.
    */
-  private static ASN1OctetString encodeValue(final String managerID,
-                      final String destinationID, final String subscriptionID,
-                      final Collection<ASN1OctetString> subscriptionDetails)
+  @NotNull()
+  private static ASN1OctetString encodeValue(@NotNull final String managerID,
+               @NotNull final String destinationID,
+               @NotNull final String subscriptionID,
+               @NotNull final Collection<ASN1OctetString> subscriptionDetails)
   {
     Validator.ensureNotNull(managerID);
     Validator.ensureNotNull(destinationID);
@@ -264,6 +288,7 @@ public final class SetNotificationSubscriptionExtendedRequest
    *
    * @return  The notification manager ID.
    */
+  @NotNull()
   public String getManagerID()
   {
     return managerID;
@@ -276,6 +301,7 @@ public final class SetNotificationSubscriptionExtendedRequest
    *
    * @return  The notification destination ID.
    */
+  @NotNull()
   public String getDestinationID()
   {
     return destinationID;
@@ -288,6 +314,7 @@ public final class SetNotificationSubscriptionExtendedRequest
    *
    * @return  The notification subscription ID.
    */
+  @NotNull()
   public String getSubscriptionID()
   {
     return subscriptionID;
@@ -302,6 +329,7 @@ public final class SetNotificationSubscriptionExtendedRequest
    * @return  The implementation-specific details for the notification
    *          subscription.
    */
+  @NotNull()
   public List<ASN1OctetString> getSubscriptionDetails()
   {
     return subscriptionDetails;
@@ -313,6 +341,7 @@ public final class SetNotificationSubscriptionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public SetNotificationSubscriptionExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -324,8 +353,9 @@ public final class SetNotificationSubscriptionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public SetNotificationSubscriptionExtendedRequest
-              duplicate(final Control[] controls)
+  @NotNull()
+  public SetNotificationSubscriptionExtendedRequest duplicate(
+              @Nullable final Control[] controls)
   {
     final SetNotificationSubscriptionExtendedRequest r =
          new SetNotificationSubscriptionExtendedRequest(managerID,
@@ -340,6 +370,7 @@ public final class SetNotificationSubscriptionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_EXTENDED_REQUEST_NAME_SET_NOTIFICATION_SUB.get();
@@ -351,7 +382,7 @@ public final class SetNotificationSubscriptionExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("SetNotificationSubscriptionExtendedRequest(managerID='");
     buffer.append(managerID);

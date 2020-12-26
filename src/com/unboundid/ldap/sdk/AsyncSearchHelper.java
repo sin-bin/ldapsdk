@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,8 @@ import com.unboundid.ldap.protocol.LDAPResponse;
 import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.InternalUseOnly;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 
 import static com.unboundid.ldap.sdk.LDAPMessages.*;
@@ -51,13 +68,13 @@ final class AsyncSearchHelper
 
 
   // The async request ID created for the associated operation.
-  private final AsyncRequestID asyncRequestID;
+  @NotNull private final AsyncRequestID asyncRequestID;
 
   // The async result listener to be notified when the response arrives.
-  private final AsyncSearchResultListener resultListener;
+  @NotNull private final AsyncSearchResultListener resultListener;
 
   // Indicates whether the final response has been returned.
-  private final AtomicBoolean responseReturned;
+  @NotNull private final AtomicBoolean responseReturned;
 
   // The number of entries returned from this search.
   private int numEntries;
@@ -67,10 +84,11 @@ final class AsyncSearchHelper
 
   // The intermediate response listener to be notified of any intermediate
   // response messages received.
-  private final IntermediateResponseListener intermediateResponseListener;
+  @Nullable private final IntermediateResponseListener
+       intermediateResponseListener;
 
   // The connection with which this async helper is associated.
-  private final LDAPConnection connection;
+  @NotNull private final LDAPConnection connection;
 
   // The time that this async helper was created.
   private final long createTime;
@@ -92,9 +110,11 @@ final class AsyncSearchHelper
    *                                       response messages received.
    */
   @InternalUseOnly()
-  AsyncSearchHelper(final LDAPConnection connection, final int messageID,
-       final AsyncSearchResultListener resultListener,
-       final IntermediateResponseListener intermediateResponseListener)
+  AsyncSearchHelper(@NotNull final LDAPConnection connection,
+       final int messageID,
+       @NotNull final AsyncSearchResultListener resultListener,
+       @Nullable final IntermediateResponseListener
+                         intermediateResponseListener)
   {
     this.connection                   = connection;
     this.resultListener               = resultListener;
@@ -113,6 +133,7 @@ final class AsyncSearchHelper
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public AsyncRequestID getAsyncRequestID()
   {
     return asyncRequestID;
@@ -124,6 +145,7 @@ final class AsyncSearchHelper
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPConnection getConnection()
   {
     return connection;
@@ -146,6 +168,7 @@ final class AsyncSearchHelper
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public OperationType getOperationType()
   {
     return OperationType.SEARCH;
@@ -182,7 +205,7 @@ final class AsyncSearchHelper
    */
   @InternalUseOnly()
   @Override()
-  public void responseReceived(final LDAPResponse response)
+  public void responseReceived(@Nullable final LDAPResponse response)
          throws LDAPException
   {
     if (responseReturned.get())
@@ -255,7 +278,7 @@ final class AsyncSearchHelper
   @InternalUseOnly()
   @Override()
   public void intermediateResponseReturned(
-                   final IntermediateResponse intermediateResponse)
+                   @NotNull final IntermediateResponse intermediateResponse)
   {
     if (intermediateResponseListener == null)
     {

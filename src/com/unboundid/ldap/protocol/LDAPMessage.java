@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -47,6 +62,8 @@ import com.unboundid.ldap.sdk.schema.Schema;
 import com.unboundid.util.Debug;
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -231,10 +248,10 @@ public final class LDAPMessage
   private final int messageID;
 
   // The protocol op for this LDAP message.
-  private final ProtocolOp protocolOp;
+  @NotNull private final ProtocolOp protocolOp;
 
   // The set of controls for this LDAP message.
-  private final List<Control> controls;
+  @NotNull private final List<Control> controls;
 
 
 
@@ -247,8 +264,8 @@ public final class LDAPMessage
    * @param  controls    The set of controls for this LDAP message.  It may be
    *                     {@code null} or empty if no controls are required.
    */
-  public LDAPMessage(final int messageID, final ProtocolOp protocolOp,
-                     final Control... controls)
+  public LDAPMessage(final int messageID, @NotNull final ProtocolOp protocolOp,
+                     @Nullable final Control... controls)
   {
     this.messageID  = messageID;
     this.protocolOp = protocolOp;
@@ -274,8 +291,8 @@ public final class LDAPMessage
    * @param  controls    The set of controls for this LDAP message.  It may be
    *                     {@code null} or empty if no controls are required.
    */
-  public LDAPMessage(final int messageID, final ProtocolOp protocolOp,
-                     final List<Control> controls)
+  public LDAPMessage(final int messageID, @NotNull final ProtocolOp protocolOp,
+                     @Nullable final List<Control> controls)
   {
     this.messageID  = messageID;
     this.protocolOp = protocolOp;
@@ -309,6 +326,7 @@ public final class LDAPMessage
    *
    * @return  The protocol op for this LDAP message.
    */
+  @NotNull()
   public ProtocolOp getProtocolOp()
   {
     return protocolOp;
@@ -338,6 +356,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not an abandon request protocol op.
    */
+  @NotNull()
   public AbandonRequestProtocolOp getAbandonRequestProtocolOp()
          throws ClassCastException
   {
@@ -356,6 +375,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not an add request protocol op.
    */
+  @NotNull()
   public AddRequestProtocolOp getAddRequestProtocolOp()
          throws ClassCastException
   {
@@ -374,6 +394,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not an add response protocol op.
    */
+  @NotNull()
   public AddResponseProtocolOp getAddResponseProtocolOp()
          throws ClassCastException
   {
@@ -392,6 +413,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a bind request protocol op.
    */
+  @NotNull()
   public BindRequestProtocolOp getBindRequestProtocolOp()
          throws ClassCastException
   {
@@ -410,6 +432,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a bind response protocol op.
    */
+  @NotNull()
   public BindResponseProtocolOp getBindResponseProtocolOp()
          throws ClassCastException
   {
@@ -428,6 +451,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a compare request protocol op.
    */
+  @NotNull()
   public CompareRequestProtocolOp getCompareRequestProtocolOp()
          throws ClassCastException
   {
@@ -446,6 +470,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a compare response protocol op.
    */
+  @NotNull()
   public CompareResponseProtocolOp getCompareResponseProtocolOp()
          throws ClassCastException
   {
@@ -464,6 +489,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a delete request protocol op.
    */
+  @NotNull()
   public DeleteRequestProtocolOp getDeleteRequestProtocolOp()
          throws ClassCastException
   {
@@ -482,6 +508,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a delete response protocol op.
    */
+  @NotNull()
   public DeleteResponseProtocolOp getDeleteResponseProtocolOp()
          throws ClassCastException
   {
@@ -500,6 +527,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not an extended request protocol op.
    */
+  @NotNull()
   public ExtendedRequestProtocolOp getExtendedRequestProtocolOp()
          throws ClassCastException
   {
@@ -518,6 +546,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not an extended response protocol op.
    */
+  @NotNull()
   public ExtendedResponseProtocolOp getExtendedResponseProtocolOp()
          throws ClassCastException
   {
@@ -536,6 +565,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a modify request protocol op.
    */
+  @NotNull()
   public ModifyRequestProtocolOp getModifyRequestProtocolOp()
          throws ClassCastException
   {
@@ -554,6 +584,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a modify response protocol op.
    */
+  @NotNull()
   public ModifyResponseProtocolOp getModifyResponseProtocolOp()
          throws ClassCastException
   {
@@ -572,6 +603,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a modify DN request protocol op.
    */
+  @NotNull()
   public ModifyDNRequestProtocolOp getModifyDNRequestProtocolOp()
          throws ClassCastException
   {
@@ -590,6 +622,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a modify DN response protocol op.
    */
+  @NotNull()
   public ModifyDNResponseProtocolOp getModifyDNResponseProtocolOp()
          throws ClassCastException
   {
@@ -608,6 +641,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a search request protocol op.
    */
+  @NotNull()
   public SearchRequestProtocolOp getSearchRequestProtocolOp()
          throws ClassCastException
   {
@@ -626,6 +660,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a search result entry protocol op.
    */
+  @NotNull()
   public SearchResultEntryProtocolOp getSearchResultEntryProtocolOp()
          throws ClassCastException
   {
@@ -644,6 +679,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a search result reference protocol op.
    */
+  @NotNull()
   public SearchResultReferenceProtocolOp getSearchResultReferenceProtocolOp()
          throws ClassCastException
   {
@@ -662,6 +698,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not a search result done protocol op.
    */
+  @NotNull()
   public SearchResultDoneProtocolOp getSearchResultDoneProtocolOp()
          throws ClassCastException
   {
@@ -680,6 +717,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not an unbind request protocol op.
    */
+  @NotNull()
   public UnbindRequestProtocolOp getUnbindRequestProtocolOp()
          throws ClassCastException
   {
@@ -698,6 +736,7 @@ public final class LDAPMessage
    * @throws  ClassCastException  If the protocol op for this LDAP message is
    *                              not an intermediate response protocol op.
    */
+  @NotNull()
   public IntermediateResponseProtocolOp getIntermediateResponseProtocolOp()
          throws ClassCastException
   {
@@ -711,6 +750,7 @@ public final class LDAPMessage
    *
    * @return  The set of controls for this LDAP message.
    */
+  @NotNull()
   public List<Control> getControls()
   {
     return controls;
@@ -724,6 +764,7 @@ public final class LDAPMessage
    * @return  The ASN.1 element containing the encoded representation of this
    *          LDAP message.
    */
+  @NotNull()
   public ASN1Element encode()
   {
     if (controls.isEmpty())
@@ -756,7 +797,8 @@ public final class LDAPMessage
    * @throws  LDAPException  If the provided ASN.1 element cannot be decoded as
    *                         a valid LDAP message.
    */
-  public static LDAPMessage decode(final ASN1Element element)
+  @NotNull()
+  public static LDAPMessage decode(@NotNull final ASN1Element element)
          throws LDAPException
   {
     try
@@ -883,7 +925,7 @@ public final class LDAPMessage
    * @param  buffer  The ASN.1 buffer to which the encoded representation should
    *                 be written.
    */
-  public void writeTo(final ASN1Buffer buffer)
+  public void writeTo(@NotNull final ASN1Buffer buffer)
   {
     final ASN1BufferSequence messageSequence = buffer.beginSequence();
     buffer.addInteger(messageID);
@@ -919,12 +961,13 @@ public final class LDAPMessage
    *                              that will be handled by the connection reader.
    *
    * @return  The decoded LDAP message, or {@code null} if the end of the input
-   *          stream has been reached..
+   *          stream has been reached.
    *
    * @throws  LDAPException  If an error occurs while attempting to read or
    *                         decode the LDAP message.
    */
-  public static LDAPMessage readFrom(final ASN1StreamReader reader,
+  @Nullable()
+  public static LDAPMessage readFrom(@NotNull final ASN1StreamReader reader,
                                      final boolean ignoreSocketTimeout)
          throws LDAPException
   {
@@ -1102,12 +1145,14 @@ public final class LDAPMessage
    *                              that will be handled by the connection reader.
    *
    * @return  The decoded LDAP message, or {@code null} if the end of the input
-   *          stream has been reached..
+   *          stream has been reached.
    *
    * @throws  LDAPException  If an error occurs while attempting to read or
    *                         decode the LDAP message.
    */
-  public static LDAPResponse readLDAPResponseFrom(final ASN1StreamReader reader,
+  @Nullable()
+  public static LDAPResponse readLDAPResponseFrom(
+                                  @NotNull final ASN1StreamReader reader,
                                   final boolean ignoreSocketTimeout)
          throws LDAPException
   {
@@ -1134,14 +1179,16 @@ public final class LDAPMessage
    *                              response.
    *
    * @return  The decoded LDAP message, or {@code null} if the end of the input
-   *          stream has been reached..
+   *          stream has been reached.
    *
    * @throws  LDAPException  If an error occurs while attempting to read or
    *                         decode the LDAP message.
    */
-  public static LDAPResponse readLDAPResponseFrom(final ASN1StreamReader reader,
+  @Nullable()
+  public static LDAPResponse readLDAPResponseFrom(
+                                  @NotNull final ASN1StreamReader reader,
                                   final boolean ignoreSocketTimeout,
-                                  final Schema schema)
+                                  @Nullable final Schema schema)
          throws LDAPException
   {
     final ASN1StreamReaderSequence messageSequence;
@@ -1281,6 +1328,7 @@ public final class LDAPMessage
    * @return  A string representation of this LDAP message.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -1297,7 +1345,7 @@ public final class LDAPMessage
    * @param  buffer  The buffer to which the string representation should be
    *                 appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("LDAPMessage(msgID=");
     buffer.append(messageID);

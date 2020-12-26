@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -48,6 +63,8 @@ import com.unboundid.ldif.LDIFReader;
 import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.CommandLineTool;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ObjectPair;
 import com.unboundid.util.PassphraseEncryptedOutputStream;
 import com.unboundid.util.StaticUtils;
@@ -137,38 +154,43 @@ public final class SplitLDIF
 
 
   // The global arguments used by this tool.
-  private BooleanArgument addEntriesOutsideSplitBaseDNToAllSets = null;
-  private BooleanArgument addEntriesOutsideSplitBaseDNToDedicatedSet = null;
-  private BooleanArgument compressTarget = null;
-  private BooleanArgument encryptTarget = null;
-  private BooleanArgument sourceCompressed = null;
-  private DNArgument splitBaseDN = null;
-  private FileArgument encryptionPassphraseFile = null;
-  private FileArgument schemaPath = null;
-  private FileArgument sourceLDIF = null;
-  private FileArgument targetLDIFBasePath = null;
-  private IntegerArgument numThreads = null;
+  @Nullable private BooleanArgument addEntriesOutsideSplitBaseDNToAllSets =
+       null;
+  @Nullable private BooleanArgument addEntriesOutsideSplitBaseDNToDedicatedSet =
+       null;
+  @Nullable private BooleanArgument compressTarget = null;
+  @Nullable private BooleanArgument encryptTarget = null;
+  @Nullable private BooleanArgument sourceCompressed = null;
+  @Nullable private DNArgument splitBaseDN = null;
+  @Nullable private FileArgument encryptionPassphraseFile = null;
+  @Nullable private FileArgument schemaPath = null;
+  @Nullable private FileArgument sourceLDIF = null;
+  @Nullable private FileArgument targetLDIFBasePath = null;
+  @Nullable private IntegerArgument numThreads = null;
 
   // The arguments used to split using a hash of the RDN.
-  private IntegerArgument splitUsingHashOnRDNNumSets = null;
-  private SubCommand splitUsingHashOnRDN = null;
+  @Nullable private IntegerArgument splitUsingHashOnRDNNumSets = null;
+  @Nullable private SubCommand splitUsingHashOnRDN = null;
 
   // The arguments used to split using a hash on a specified attribute.
-  private BooleanArgument splitUsingHashOnAttributeAssumeFlatDIT = null;
-  private BooleanArgument splitUsingHashOnAttributeUseAllValues = null;
-  private IntegerArgument splitUsingHashOnAttributeNumSets = null;
-  private StringArgument splitUsingHashOnAttributeAttributeName = null;
-  private SubCommand splitUsingHashOnAttribute = null;
+  @Nullable private BooleanArgument splitUsingHashOnAttributeAssumeFlatDIT =
+       null;
+  @Nullable private BooleanArgument splitUsingHashOnAttributeUseAllValues =
+       null;
+  @Nullable private IntegerArgument splitUsingHashOnAttributeNumSets = null;
+  @Nullable private StringArgument splitUsingHashOnAttributeAttributeName =
+       null;
+  @Nullable private SubCommand splitUsingHashOnAttribute = null;
 
   // The arguments used to choose the set with the fewest entries.
-  private BooleanArgument splitUsingFewestEntriesAssumeFlatDIT = null;
-  private IntegerArgument splitUsingFewestEntriesNumSets = null;
-  private SubCommand splitUsingFewestEntries = null;
+  @Nullable private BooleanArgument splitUsingFewestEntriesAssumeFlatDIT = null;
+  @Nullable private IntegerArgument splitUsingFewestEntriesNumSets = null;
+  @Nullable private SubCommand splitUsingFewestEntries = null;
 
   // The arguments used to choose the set using a provided set of filters.
-  private BooleanArgument splitUsingFilterAssumeFlatDIT = null;
-  private FilterArgument splitUsingFilterFilter = null;
-  private SubCommand splitUsingFilter = null;
+  @Nullable private BooleanArgument splitUsingFilterAssumeFlatDIT = null;
+  @Nullable private FilterArgument splitUsingFilterFilter = null;
+  @Nullable private SubCommand splitUsingFilter = null;
 
 
 
@@ -177,7 +199,7 @@ public final class SplitLDIF
    *
    * @param  args  The command-line arguments provided to this tool.
    */
-  public static void main(final String... args)
+  public static void main(@NotNull final String... args)
   {
     final ResultCode resultCode = main(System.out, System.err, args);
     if (resultCode != ResultCode.SUCCESS)
@@ -201,8 +223,10 @@ public final class SplitLDIF
    *          Any result code other than {@link ResultCode#SUCCESS} indicates
    *          that an error occurred.
    */
-  public static ResultCode main(final OutputStream out, final OutputStream err,
-                                final String... args)
+  @NotNull()
+  public static ResultCode main(@Nullable final OutputStream out,
+                                @Nullable final OutputStream err,
+                                @NotNull final String... args)
   {
     final SplitLDIF tool = new SplitLDIF(out, err);
     return tool.runTool(args);
@@ -218,7 +242,8 @@ public final class SplitLDIF
    * @param  err  The output stream used for standard error.  It may be
    *              {@code null} if standard error should be suppressed.
    */
-  public SplitLDIF(final OutputStream out, final OutputStream err)
+  public SplitLDIF(@Nullable final OutputStream out,
+                   @Nullable final OutputStream err)
   {
     super(out, err);
   }
@@ -229,6 +254,7 @@ public final class SplitLDIF
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "split-ldif";
@@ -240,6 +266,7 @@ public final class SplitLDIF
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return INFO_SPLIT_LDIF_TOOL_DESCRIPTION.get();
@@ -251,6 +278,7 @@ public final class SplitLDIF
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -295,7 +323,7 @@ public final class SplitLDIF
    * {@inheritDoc}
    */
   @Override()
-  public void addToolArguments(final ArgumentParser parser)
+  public void addToolArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     // Add the global arguments.
@@ -624,6 +652,7 @@ public final class SplitLDIF
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     // Get the schema to use during processing.
@@ -1097,6 +1126,7 @@ readLoop:
    * @throws  LDAPException  If a problem is encountered while retrieving the
    *                         schema.
    */
+  @Nullable()
   private Schema getSchema()
           throws LDAPException
   {
@@ -1154,7 +1184,8 @@ readLoop:
       // schema files in it, then read the schema from that directory.
       try
       {
-        final String instanceRootStr = System.getenv("INSTANCE_ROOT");
+        final String instanceRootStr =
+             StaticUtils.getEnvironmentVariable("INSTANCE_ROOT");
         if (instanceRootStr != null)
         {
           final File instanceRoot = new File(instanceRootStr);
@@ -1203,7 +1234,8 @@ readLoop:
    * @return  A file object that refers to an output file with the provided
    *          extension.
    */
-  private File getOutputFile(final String extension)
+  @NotNull()
+  private File getOutputFile(@NotNull final String extension)
   {
     final File baseFile;
     if (targetLDIFBasePath.isPresent())
@@ -1224,6 +1256,7 @@ readLoop:
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> exampleMap =

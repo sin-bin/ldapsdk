@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -23,6 +38,8 @@ package com.unboundid.ldap.sdk.unboundidds.logs;
 
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -57,19 +74,19 @@ public final class ExtendedForwardFailedAccessLogMessage
 
 
   // The numeric result code for the failure.
-  private final Integer resultCode;
+  @Nullable private final Integer resultCode;
 
   // The port of the backend server to which the request has been forwarded.
-  private final Integer targetPort;
+  @Nullable private final Integer targetPort;
 
   // The diagnostic message for the failure.
-  private final String message;
+  @Nullable private final String message;
 
   // The address of the backend server to which the request has been forwarded.
-  private final String targetHost;
+  @Nullable private final String targetHost;
 
   // The protocol used to forward the request to the backend server.
-  private final String targetProtocol;
+  @Nullable private final String targetProtocol;
 
 
 
@@ -83,7 +100,7 @@ public final class ExtendedForwardFailedAccessLogMessage
    * @throws  LogException  If the provided string cannot be parsed as a valid
    *                        log message.
    */
-  public ExtendedForwardFailedAccessLogMessage(final String s)
+  public ExtendedForwardFailedAccessLogMessage(@NotNull final String s)
          throws LogException
   {
     this(new LogMessage(s));
@@ -98,7 +115,7 @@ public final class ExtendedForwardFailedAccessLogMessage
    * @param  m  The log message to be parsed as an extended forward failed
    *            access log message.
    */
-  public ExtendedForwardFailedAccessLogMessage(final LogMessage m)
+  public ExtendedForwardFailedAccessLogMessage(@NotNull final LogMessage m)
   {
     super(m);
 
@@ -119,6 +136,7 @@ public final class ExtendedForwardFailedAccessLogMessage
    *          forwarded, or {@code null} if it is not included in the log
    *          message.
    */
+  @Nullable()
   public String getTargetHost()
   {
     return targetHost;
@@ -134,6 +152,7 @@ public final class ExtendedForwardFailedAccessLogMessage
    *          forwarded, or {@code null} if it is not included in the log
    *          message.
    */
+  @Nullable()
   public Integer getTargetPort()
   {
     return targetPort;
@@ -147,6 +166,7 @@ public final class ExtendedForwardFailedAccessLogMessage
    * @return  The protocol used to forward the request to the backend server, or
    *          {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public String getTargetProtocol()
   {
     return targetProtocol;
@@ -160,6 +180,7 @@ public final class ExtendedForwardFailedAccessLogMessage
    * @return  The result code received for the forwarded operation, or
    *          {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public Integer getResultCode()
   {
     return resultCode;
@@ -173,6 +194,7 @@ public final class ExtendedForwardFailedAccessLogMessage
    * @return  The diagnostic message received for the forwarded operation, or
    *          {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public String getDiagnosticMessage()
   {
     return message;
@@ -184,6 +206,7 @@ public final class ExtendedForwardFailedAccessLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public AccessLogMessageType getMessageType()
   {
     return AccessLogMessageType.FORWARD_FAILED;

@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -36,6 +51,7 @@ import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
 import com.unboundid.ldap.sdk.unboundidds.extensions.
             StartBatchedTransactionExtendedRequest;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -97,8 +113,9 @@ public final class BatchedTransactionSpecificationRequestControl
    * The OID (1.3.6.1.4.1.30221.2.5.1) for the batched transaction specification
    * request control.
    */
-  public static final String BATCHED_TRANSACTION_SPECIFICATION_REQUEST_OID =
-       "1.3.6.1.4.1.30221.2.5.1";
+  @NotNull public static final String
+       BATCHED_TRANSACTION_SPECIFICATION_REQUEST_OID =
+            "1.3.6.1.4.1.30221.2.5.1";
 
 
 
@@ -110,7 +127,7 @@ public final class BatchedTransactionSpecificationRequestControl
 
 
   // The transaction ID for the associated transaction.
-  private final ASN1OctetString transactionID;
+  @NotNull private final ASN1OctetString transactionID;
 
 
 
@@ -123,7 +140,7 @@ public final class BatchedTransactionSpecificationRequestControl
    *                        extended operation.  It must not be {@code null}.
    */
   public BatchedTransactionSpecificationRequestControl(
-              final ASN1OctetString transactionID)
+              @NotNull final ASN1OctetString transactionID)
   {
     super(BATCHED_TRANSACTION_SPECIFICATION_REQUEST_OID, true,
          new ASN1OctetString(transactionID.getValue()));
@@ -143,7 +160,8 @@ public final class BatchedTransactionSpecificationRequestControl
    * @throws  LDAPException  If the provided control cannot be decoded as a
    *                         batched transaction specification request control.
    */
-  public BatchedTransactionSpecificationRequestControl(final Control control)
+  public BatchedTransactionSpecificationRequestControl(
+              @NotNull final Control control)
          throws LDAPException
   {
     super(control);
@@ -163,6 +181,7 @@ public final class BatchedTransactionSpecificationRequestControl
    *
    * @return  The transaction ID for the associated transaction.
    */
+  @NotNull()
   public ASN1OctetString getTransactionID()
   {
     return transactionID;
@@ -174,6 +193,7 @@ public final class BatchedTransactionSpecificationRequestControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_BATCHED_TXN_REQUEST.get();
@@ -185,7 +205,7 @@ public final class BatchedTransactionSpecificationRequestControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("BatchedTransactionSpecificationRequestControl(" +
                   "transactionID='");

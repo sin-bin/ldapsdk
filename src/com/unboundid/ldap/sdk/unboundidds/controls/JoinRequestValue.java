@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,6 +53,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -101,7 +118,7 @@ public final class JoinRequestValue
    * The set of attributes that will be used if all user attributes should be
    * requested.
    */
-  private static final String[] NO_ATTRIBUTES = StaticUtils.NO_STRINGS;
+  @NotNull private static final String[] NO_ATTRIBUTES = StaticUtils.NO_STRINGS;
 
 
 
@@ -166,28 +183,28 @@ public final class JoinRequestValue
   private final boolean requireMatch;
 
   // The dereference policy for this join request value.
-  private final DereferencePolicy derefPolicy;
+  @Nullable private final DereferencePolicy derefPolicy;
 
   // The filter for this join request value.
-  private final Filter filter;
+  @Nullable private final Filter filter;
 
   // The client-requested size limit for this join request value.
-  private final Integer sizeLimit;
+  @Nullable private final Integer sizeLimit;
 
   // The base DN to use for this join request value.
-  private final JoinBaseDN baseDN;
+  @NotNull private final JoinBaseDN baseDN;
 
   // The nested join criteria for this join request value.
-  private final JoinRequestValue nestedJoin;
+  @Nullable private final JoinRequestValue nestedJoin;
 
   // The join rule for this join request value.
-  private final JoinRule joinRule;
+  @NotNull private final JoinRule joinRule;
 
   // The scope for this join request value.
-  private final SearchScope scope;
+  @Nullable private final SearchScope scope;
 
   // The set of attributes to include in entries matching the join criteria.
-  private final String[] attributes;
+  @NotNull  private final String[] attributes;
 
 
 
@@ -235,11 +252,15 @@ public final class JoinRequestValue
    *                       entries joined with this join request value.  It may
    *                       be {@code null} if no nested join is needed.
    */
-  public JoinRequestValue(final JoinRule joinRule, final JoinBaseDN baseDN,
-              final SearchScope scope, final DereferencePolicy derefPolicy,
-              final Integer sizeLimit, final Filter filter,
-              final String[] attributes, final boolean requireMatch,
-              final JoinRequestValue nestedJoin)
+  public JoinRequestValue(@NotNull final JoinRule joinRule,
+                          @NotNull final JoinBaseDN baseDN,
+                          @Nullable final SearchScope scope,
+                          @Nullable final DereferencePolicy derefPolicy,
+                          @Nullable final Integer sizeLimit,
+                          @Nullable final Filter filter,
+                          @Nullable final String[] attributes,
+                          final boolean requireMatch,
+                          @Nullable final JoinRequestValue nestedJoin)
   {
     Validator.ensureNotNull(joinRule, baseDN);
 
@@ -269,6 +290,7 @@ public final class JoinRequestValue
    *
    * @return  The join rule for this join request value.
    */
+  @NotNull()
   public JoinRule getJoinRule()
   {
     return joinRule;
@@ -281,6 +303,7 @@ public final class JoinRequestValue
    *
    * @return  The join base DN for this join request value.
    */
+  @NotNull()
   public JoinBaseDN getBaseDN()
   {
     return baseDN;
@@ -294,6 +317,7 @@ public final class JoinRequestValue
    * @return  The scope for this join request value, or {@code null} if the
    *          scope from the associated search request should be used.
    */
+  @Nullable()
   public SearchScope getScope()
   {
     return scope;
@@ -308,6 +332,7 @@ public final class JoinRequestValue
    *          {@code null} if the policy from the associated search request
    *          should be used.
    */
+  @Nullable()
   public DereferencePolicy getDerefPolicy()
   {
     return derefPolicy;
@@ -324,6 +349,7 @@ public final class JoinRequestValue
    * @return  The size limit for this join request value, or {@code null} if the
    *          size limit from the associated search request should be used.
    */
+  @Nullable()
   public Integer getSizeLimit()
   {
     return sizeLimit;
@@ -339,6 +365,7 @@ public final class JoinRequestValue
    *          for it to be joined with a search result entry, or {@code null} if
    *          no additional filter is needed.
    */
+  @Nullable()
   public Filter getFilter()
   {
     return filter;
@@ -354,6 +381,7 @@ public final class JoinRequestValue
    *          entries, or an empty array if all user attributes should be
    *          requested.
    */
+  @NotNull()
   public String[] getAttributes()
   {
     return attributes;
@@ -383,6 +411,7 @@ public final class JoinRequestValue
    * @return  The nested join for this join request value, or {@code null} if
    *          there is no nested join for this join request value.
    */
+  @Nullable()
   public JoinRequestValue getNestedJoin()
   {
     return nestedJoin;
@@ -396,6 +425,7 @@ public final class JoinRequestValue
    *
    * @return  The ASN.1 element containing the encoded join request value.
    */
+  @NotNull()
   ASN1Element encode()
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(9);
@@ -460,7 +490,8 @@ public final class JoinRequestValue
    * @throws  LDAPException  If the provided ASN.1 element cannot be decoded as
    *                         a join request value.
    */
-  static JoinRequestValue decode(final ASN1Element element)
+  @NotNull()
+  static JoinRequestValue decode(@NotNull final ASN1Element element)
          throws LDAPException
   {
     try
@@ -553,6 +584,7 @@ public final class JoinRequestValue
    * @return  A string representation of this join request value.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -568,7 +600,7 @@ public final class JoinRequestValue
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("JoinRequestValue(joinRule=");
     joinRule.toString(buffer);

@@ -1,9 +1,24 @@
 /*
- * Copyright 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2012-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -60,16 +77,16 @@ public final class SubtreeAccessibilityRestriction
 
 
   // The time the subtree accessibility restriction was created.
-  private final Date effectiveTime;
+  @NotNull private final Date effectiveTime;
 
   // The DN of a user allowed to bypass any associated restrictions.
-  private final String bypassUserDN;
+  @Nullable private final String bypassUserDN;
 
   // The base DN of the affected subtree.
-  private final String subtreeBaseDN;
+  @NotNull private final String subtreeBaseDN;
 
   // The accessibility state of the affected subtree.
-  private final SubtreeAccessibilityState accessibilityState;
+  @NotNull private final SubtreeAccessibilityState accessibilityState;
 
 
 
@@ -84,9 +101,10 @@ public final class SubtreeAccessibilityRestriction
    *                             associated restrictions, if defined.
    * @param  effectiveTime       The time this restriction was put into place.
    */
-  public SubtreeAccessibilityRestriction(final String subtreeBaseDN,
-              final SubtreeAccessibilityState accessibilityState,
-              final String bypassUserDN, final Date effectiveTime)
+  public SubtreeAccessibilityRestriction(@NotNull final String subtreeBaseDN,
+              @NotNull final SubtreeAccessibilityState accessibilityState,
+              @Nullable final String bypassUserDN,
+              @NotNull final Date effectiveTime)
   {
     this.subtreeBaseDN      = subtreeBaseDN;
     this.accessibilityState = accessibilityState;
@@ -101,6 +119,7 @@ public final class SubtreeAccessibilityRestriction
    *
    * @return  The base DN for the affected subtree.
    */
+  @NotNull()
   public String getSubtreeBaseDN()
   {
     return subtreeBaseDN;
@@ -113,6 +132,7 @@ public final class SubtreeAccessibilityRestriction
    *
    * @return  The accessibility state for the affected subtree.
    */
+  @NotNull()
   public SubtreeAccessibilityState getAccessibilityState()
   {
     return accessibilityState;
@@ -128,6 +148,7 @@ public final class SubtreeAccessibilityRestriction
    *          on the affected subtree, or {@code null} if no bypass user is
    *          defined.
    */
+  @Nullable()
   public String getBypassUserDN()
   {
     return bypassUserDN;
@@ -140,6 +161,7 @@ public final class SubtreeAccessibilityRestriction
    *
    * @return  The time the accessibility restriction was put into place.
    */
+  @NotNull()
   public Date getEffectiveTime()
   {
     return effectiveTime;
@@ -153,6 +175,7 @@ public final class SubtreeAccessibilityRestriction
    * @return  A string representation of this accessibility restriction.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -168,7 +191,7 @@ public final class SubtreeAccessibilityRestriction
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("SubtreeAccessibilityRestriction(base='");
     buffer.append(subtreeBaseDN.replace("\\\"", "\\22"));

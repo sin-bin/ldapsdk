@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,8 @@ import com.unboundid.asn1.ASN1StreamReaderSequence;
 import com.unboundid.ldap.protocol.LDAPResponse;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -61,13 +78,13 @@ public final class SearchResultReference
 
 
   // The set of controls returned with this search result reference.
-  private final Control[] controls;
+  @NotNull private final Control[] controls;
 
   // The message ID for the LDAP message containing this response.
   private final int messageID;
 
   // The set of referral URLs for this search result reference.
-  private final String[] referralURLs;
+  @NotNull private final String[] referralURLs;
 
 
 
@@ -79,8 +96,8 @@ public final class SearchResultReference
    * @param  controls      The set of controls returned with this search result
    *                       reference.  It must not be {@code null}.
    */
-  public SearchResultReference(final String[] referralURLs,
-                               final Control[] controls)
+  public SearchResultReference(@NotNull final String[] referralURLs,
+                               @NotNull final Control[] controls)
   {
     this(-1, referralURLs, controls);
   }
@@ -97,8 +114,9 @@ public final class SearchResultReference
    * @param  controls      The set of controls returned with this search result
    *                       reference.  It must not be {@code null}.
    */
-  public SearchResultReference(final int messageID, final String[] referralURLs,
-                               final Control[] controls)
+  public SearchResultReference(final int messageID,
+                               @NotNull final String[] referralURLs,
+                               @NotNull final Control[] controls)
   {
     Validator.ensureNotNull(referralURLs);
 
@@ -133,9 +151,10 @@ public final class SearchResultReference
    * @throws  LDAPException  If a problem occurs while reading or decoding data
    *                         from the ASN.1 stream reader.
    */
+  @NotNull()
   static SearchResultReference readSearchReferenceFrom(final int messageID,
-              final ASN1StreamReaderSequence messageSequence,
-              final ASN1StreamReader reader)
+              @NotNull final ASN1StreamReaderSequence messageSequence,
+              @NotNull final ASN1StreamReader reader)
          throws LDAPException
   {
     try
@@ -199,6 +218,7 @@ public final class SearchResultReference
    *
    * @return  The set of referral URLs for this search result reference.
    */
+  @NotNull()
   public String[] getReferralURLs()
   {
     return referralURLs;
@@ -213,6 +233,7 @@ public final class SearchResultReference
    *
    * @return  The set of controls returned with this search result reference.
    */
+  @NotNull()
   public Control[] getControls()
   {
     return controls;
@@ -229,7 +250,8 @@ public final class SearchResultReference
    * @return  The control with the requested OID, or {@code null} if there is no
    *          such control for this search result reference.
    */
-  public Control getControl(final String oid)
+  @Nullable()
+  public Control getControl(@NotNull final String oid)
   {
     for (final Control c : controls)
     {
@@ -250,6 +272,7 @@ public final class SearchResultReference
    * @return  A string representation of this search result reference.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -267,7 +290,7 @@ public final class SearchResultReference
    *                 this search result reference.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("SearchResultReference(referralURLs={");
     for (int i=0; i < referralURLs.length; i++)

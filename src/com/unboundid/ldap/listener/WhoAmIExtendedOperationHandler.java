@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -32,6 +47,7 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.extensions.WhoAmIExtendedRequest;
 import com.unboundid.ldap.sdk.extensions.WhoAmIExtendedResult;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -64,6 +80,7 @@ public final class WhoAmIExtendedOperationHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedOperationHandlerName()
   {
     return "Who Am I?";
@@ -75,6 +92,7 @@ public final class WhoAmIExtendedOperationHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<String> getSupportedExtendedRequestOIDs()
   {
     return Collections.singletonList(
@@ -87,9 +105,11 @@ public final class WhoAmIExtendedOperationHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ExtendedResult processExtendedOperation(
-                             final InMemoryRequestHandler handler,
-                             final int messageID, final ExtendedRequest request)
+              @NotNull final InMemoryRequestHandler handler,
+              final int messageID,
+              @NotNull final ExtendedRequest request)
   {
     // This extended operation handler does not support any controls.  If the
     // request has any critical controls, then reject it.

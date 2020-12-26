@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,8 @@ import java.util.Map;
 
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -81,7 +98,7 @@ public final class ConnectionHandlerMonitorEntry
   /**
    * The structural object class used in connection handler monitor entries.
    */
-  static final String CONNECTION_HANDLER_MONITOR_OC =
+  @NotNull static final String CONNECTION_HANDLER_MONITOR_OC =
        "ds-connectionhandler-monitor-entry";
 
 
@@ -90,7 +107,7 @@ public final class ConnectionHandlerMonitorEntry
    * The name of the attribute that contains information about the established
    * connections.
    */
-  private static final String ATTR_CONNECTION =
+  @NotNull private static final String ATTR_CONNECTION =
        "ds-connectionhandler-connection";
 
 
@@ -98,7 +115,7 @@ public final class ConnectionHandlerMonitorEntry
   /**
    * The name of the attribute that contains information about the listeners.
    */
-  private static final String ATTR_LISTENER =
+  @NotNull private static final String ATTR_LISTENER =
        "ds-connectionhandler-listener";
 
 
@@ -107,7 +124,7 @@ public final class ConnectionHandlerMonitorEntry
    * The name of the attribute that contains information about the number of
    * established connections.
    */
-  private static final String ATTR_NUM_CONNECTIONS =
+  @NotNull private static final String ATTR_NUM_CONNECTIONS =
        "ds-connectionhandler-num-connections";
 
 
@@ -115,7 +132,7 @@ public final class ConnectionHandlerMonitorEntry
   /**
    * The name of the attribute that contains information about the protocol.
    */
-  private static final String ATTR_PROTOCOL =
+  @NotNull private static final String ATTR_PROTOCOL =
        "ds-connectionhandler-protocol";
 
 
@@ -128,16 +145,16 @@ public final class ConnectionHandlerMonitorEntry
 
 
   // The list of connections currently established.
-  private final List<String> connections;
+  @NotNull private final List<String> connections;
 
   // The list of listeners for the connection handler.
-  private final List<String> listeners;
+  @NotNull private final List<String> listeners;
 
   // The number of connections established.
-  private final Long numConnections;
+  @Nullable private final Long numConnections;
 
   // The protocol used by the connection handler.
-  private final String protocol;
+  @Nullable private final String protocol;
 
 
 
@@ -147,7 +164,7 @@ public final class ConnectionHandlerMonitorEntry
    * @param  entry  The entry to be parsed as a connection handler monitor
    *                entry.  It must not be {@code null}.
    */
-  public ConnectionHandlerMonitorEntry(final Entry entry)
+  public ConnectionHandlerMonitorEntry(@NotNull final Entry entry)
   {
     super(entry);
 
@@ -170,6 +187,7 @@ public final class ConnectionHandlerMonitorEntry
    *          if it was not included in the monitor entry or there are no
    *          established connections.
    */
+  @NotNull()
   public List<String> getConnections()
   {
     return connections;
@@ -184,6 +202,7 @@ public final class ConnectionHandlerMonitorEntry
    *          an empty list if it was not included in the monitor entry or the
    *          connection handler does not have any listeners.
    */
+  @NotNull()
   public List<String> getListeners()
   {
     return listeners;
@@ -199,6 +218,7 @@ public final class ConnectionHandlerMonitorEntry
    *          connection handler, or {@code null} if it was not included in the
    *          monitor entry.
    */
+  @Nullable()
   public Long getNumConnections()
   {
     return numConnections;
@@ -212,6 +232,7 @@ public final class ConnectionHandlerMonitorEntry
    * @return  The protocol for the associated connection handler, or
    *          {@code null} if it was not included in the monitor entry.
    */
+  @Nullable()
   public String getProtocol()
   {
     return protocol;
@@ -223,6 +244,7 @@ public final class ConnectionHandlerMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDisplayName()
   {
     return INFO_CONNECTION_HANDLER_MONITOR_DISPNAME.get();
@@ -234,6 +256,7 @@ public final class ConnectionHandlerMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDescription()
   {
     return INFO_CONNECTION_HANDLER_MONITOR_DESC.get();
@@ -245,6 +268,7 @@ public final class ConnectionHandlerMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<String,MonitorAttribute> getMonitorAttributes()
   {
     final LinkedHashMap<String,MonitorAttribute> attrs =

@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -36,6 +51,8 @@ import com.unboundid.ldap.sdk.LDAPInterface;
 import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -129,13 +146,13 @@ public abstract class LDIFChangeRecord
 
 
   // The set of controls for the LDIF change record.
-  private final List<Control> controls;
+  @NotNull private final List<Control> controls;
 
   // The parsed DN for this LDIF change record.
-  private volatile DN parsedDN;
+  @Nullable private volatile DN parsedDN;
 
   // The DN for this LDIF change record.
-  private final String dn;
+  @NotNull private final String dn;
 
 
 
@@ -147,7 +164,8 @@ public abstract class LDIFChangeRecord
    * @param  controls  The set of controls for the change record to create.  It
    *                   may be {@code null} or empty if no controls are needed.
    */
-  protected LDIFChangeRecord(final String dn, final List<Control> controls)
+  protected LDIFChangeRecord(@NotNull final String dn,
+                             @Nullable final List<Control> controls)
   {
     Validator.ensureNotNull(dn);
 
@@ -172,6 +190,7 @@ public abstract class LDIFChangeRecord
    * @return  The DN for this LDIF change record.
    */
   @Override()
+  @NotNull()
   public final String getDN()
   {
     return dn;
@@ -187,6 +206,7 @@ public abstract class LDIFChangeRecord
    * @throws  LDAPException  If a problem occurs while trying to parse the DN.
    */
   @Override()
+  @NotNull()
   public final DN getParsedDN()
          throws LDAPException
   {
@@ -205,6 +225,7 @@ public abstract class LDIFChangeRecord
    *
    * @return  The type of operation represented by this LDIF change record.
    */
+  @NotNull()
   public abstract ChangeType getChangeType();
 
 
@@ -215,6 +236,7 @@ public abstract class LDIFChangeRecord
    * @return  The set of controls for this LDIF change record, or an empty array
    *          if there are no controls.
    */
+  @NotNull()
   public List<Control> getControls()
   {
     return controls;
@@ -233,7 +255,8 @@ public abstract class LDIFChangeRecord
    * @return  A duplicate of this LDIF change record with the provided set of
    *          controls.
    */
-  public abstract LDIFChangeRecord duplicate(Control... controls);
+  @NotNull()
+  public abstract LDIFChangeRecord duplicate(@Nullable Control... controls);
 
 
 
@@ -249,7 +272,8 @@ public abstract class LDIFChangeRecord
    * @throws  LDAPException  If an error occurs while processing this change
    *                         in the associated directory server.
    */
-  public final LDAPResult processChange(final LDAPInterface connection)
+  @NotNull()
+  public final LDAPResult processChange(@NotNull final LDAPInterface connection)
          throws LDAPException
   {
     return processChange(connection, true);
@@ -271,7 +295,8 @@ public abstract class LDIFChangeRecord
    * @throws  LDAPException  If an error occurs while processing this change
    *                         in the associated directory server.
    */
-  public abstract LDAPResult processChange(LDAPInterface connection,
+  @NotNull()
+  public abstract LDAPResult processChange(@NotNull LDAPInterface connection,
                                            boolean includeControls)
          throws LDAPException;
 
@@ -292,6 +317,7 @@ public abstract class LDIFChangeRecord
    * @throws  LDIFException  If this change record cannot be represented as a
    *                         valid entry.
    */
+  @NotNull()
   final Entry toEntry()
         throws LDIFException
   {
@@ -308,6 +334,7 @@ public abstract class LDIFChangeRecord
    *          change record.
    */
   @Override()
+  @NotNull()
   public final String[] toLDIF()
   {
     return toLDIF(0);
@@ -327,6 +354,7 @@ public abstract class LDIFChangeRecord
    *          change record.
    */
   @Override()
+  @NotNull()
   public abstract String[] toLDIF(int wrapColumn);
 
 
@@ -341,8 +369,9 @@ public abstract class LDIFChangeRecord
    * @param  value  The attribute value to be encoded.
    * @param  lines  The list of lines to be updated.
    */
-  static void encodeNameAndValue(final String name, final ASN1OctetString value,
-                                 final List<String> lines)
+  static void encodeNameAndValue(@NotNull final String name,
+                                 @NotNull final ASN1OctetString value,
+                                 @NotNull final List<String> lines)
   {
     final String line = LDIFWriter.encodeNameAndValue(name, value);
     if (LDIFWriter.commentAboutBase64EncodedValues() &&
@@ -370,7 +399,7 @@ public abstract class LDIFChangeRecord
    *                 this change record.
    */
   @Override()
-  public final void toLDIF(final ByteStringBuffer buffer)
+  public final void toLDIF(@NotNull final ByteStringBuffer buffer)
   {
     toLDIF(buffer, 0);
   }
@@ -388,7 +417,7 @@ public abstract class LDIFChangeRecord
    *                     wrapping should be performed.
    */
   @Override()
-  public abstract void toLDIF(ByteStringBuffer buffer, int wrapColumn);
+  public abstract void toLDIF(@NotNull ByteStringBuffer buffer, int wrapColumn);
 
 
 
@@ -398,6 +427,7 @@ public abstract class LDIFChangeRecord
    * @return  An LDIF string representation of this change record.
    */
   @Override()
+  @NotNull()
   public final String toLDIFString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -417,6 +447,7 @@ public abstract class LDIFChangeRecord
    * @return  An LDIF string representation of this change record.
    */
   @Override()
+  @NotNull()
   public final String toLDIFString(final int wrapColumn)
   {
     final StringBuilder buffer = new StringBuilder();
@@ -434,7 +465,7 @@ public abstract class LDIFChangeRecord
    *                 this change record.
    */
   @Override()
-  public final void toLDIFString(final StringBuilder buffer)
+  public final void toLDIFString(@NotNull final StringBuilder buffer)
   {
     toLDIFString(buffer, 0);
   }
@@ -452,7 +483,8 @@ public abstract class LDIFChangeRecord
    *                     wrapping should be performed.
    */
   @Override()
-  public abstract void toLDIFString(StringBuilder buffer, int wrapColumn);
+  public abstract void toLDIFString(@NotNull StringBuilder buffer,
+                                    int wrapColumn);
 
 
 
@@ -475,7 +507,7 @@ public abstract class LDIFChangeRecord
    *          record, or {@code false} if not.
    */
   @Override()
-  public abstract boolean equals(Object o);
+  public abstract boolean equals(@Nullable Object o);
 
 
 
@@ -487,7 +519,8 @@ public abstract class LDIFChangeRecord
    *
    * @return  The string representation of the control.
    */
-  static ASN1OctetString encodeControlString(final Control c)
+  @NotNull()
+  static ASN1OctetString encodeControlString(@NotNull final Control c)
   {
     final ByteStringBuffer buffer = new ByteStringBuffer();
     buffer.append(c.getOID());
@@ -518,6 +551,7 @@ public abstract class LDIFChangeRecord
    * @return  A single-line string representation of this change record.
    */
   @Override()
+  @NotNull()
   public final String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -534,5 +568,5 @@ public abstract class LDIFChangeRecord
    * @param  buffer  The buffer to which the information should be written.
    */
   @Override()
-  public abstract void toString(StringBuilder buffer);
+  public abstract void toString(@NotNull StringBuilder buffer);
 }

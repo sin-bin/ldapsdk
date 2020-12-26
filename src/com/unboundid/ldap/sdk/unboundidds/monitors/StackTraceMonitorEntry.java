@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,7 @@ import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -75,7 +91,7 @@ public final class StackTraceMonitorEntry
   /**
    * The structural object class used in stack trace monitor entries.
    */
-  static final String STACK_TRACE_MONITOR_OC =
+  @NotNull static final String STACK_TRACE_MONITOR_OC =
        "ds-stack-trace-monitor-entry";
 
 
@@ -84,7 +100,7 @@ public final class StackTraceMonitorEntry
    * The name of the attribute that contains the JVM stack trace for each
    * thread.
    */
-  private static final String ATTR_JVM_STACK_TRACE = "jvmThread";
+  @NotNull private static final String ATTR_JVM_STACK_TRACE = "jvmThread";
 
 
 
@@ -96,7 +112,7 @@ public final class StackTraceMonitorEntry
 
 
   // The list of thread stack traces.
-  private final List<ThreadStackTrace> stackTraces;
+  @NotNull private final List<ThreadStackTrace> stackTraces;
 
 
 
@@ -106,7 +122,7 @@ public final class StackTraceMonitorEntry
    * @param  entry  The entry to be parsed as a stack trace monitor entry.
    *                It must not be {@code null}.
    */
-  public StackTraceMonitorEntry(final Entry entry)
+  public StackTraceMonitorEntry(@NotNull final Entry entry)
   {
     super(entry);
 
@@ -211,6 +227,7 @@ public final class StackTraceMonitorEntry
    *          included in the monitor entry or a problem occurs while decoding
    *          the stack traces.
    */
+  @NotNull()
   public List<ThreadStackTrace> getStackTraces()
   {
     return stackTraces;
@@ -222,6 +239,7 @@ public final class StackTraceMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDisplayName()
   {
     return INFO_STACK_TRACE_MONITOR_DISPNAME.get();
@@ -233,6 +251,7 @@ public final class StackTraceMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getMonitorDescription()
   {
     return INFO_STACK_TRACE_MONITOR_DESC.get();
@@ -244,6 +263,7 @@ public final class StackTraceMonitorEntry
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<String,MonitorAttribute> getMonitorAttributes()
   {
     final LinkedHashMap<String,MonitorAttribute> attrs =

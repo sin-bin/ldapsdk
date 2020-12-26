@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,7 +39,7 @@ package com.unboundid.util.ssl;
 
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
@@ -64,10 +79,20 @@ public class SSLUtilTestCase
   private final String originalPropertyEnabledSSLProtocols =
        System.getProperty(SSLUtil.PROPERTY_ENABLED_SSL_PROTOCOLS);
 
+  // The original value for the property used to specify the enabled SSL
+  // cipher suites when this class was loaded by the JVM.
+  private final String originalPropertyEnabledSSLCipherSuites =
+       System.getProperty(SSLUtil.PROPERTY_ENABLED_SSL_CIPHER_SUITES);
+
   // The default enabled SSL protocols configured when the SSLUtils class was
   // loaded by the JVM.
   private final Set<String> originalEnabledSSLProtocols =
        SSLUtil.getEnabledSSLProtocols();
+
+  // The default enabled SSL cipher suites configured when the SSLUtils class
+  // was loaded by the JVM.
+  private final Set<String> originalEnabledSSLCipherSuites =
+       SSLUtil.getEnabledSSLCipherSuites();
 
 
 
@@ -80,6 +105,7 @@ public class SSLUtilTestCase
   {
     SSLUtil.setDefaultSSLProtocol(originalDefaultSSLProtocol);
     SSLUtil.setEnabledSSLProtocols(originalEnabledSSLProtocols);
+    SSLUtil.setEnabledSSLCipherSuites(originalEnabledSSLCipherSuites);
 
     if (originalPropertyDefaultSSLProtocol == null)
     {
@@ -99,6 +125,16 @@ public class SSLUtilTestCase
     {
       System.setProperty(SSLUtil.PROPERTY_ENABLED_SSL_PROTOCOLS,
            originalPropertyEnabledSSLProtocols);
+    }
+
+    if (originalPropertyEnabledSSLCipherSuites == null)
+    {
+      System.clearProperty(SSLUtil.PROPERTY_ENABLED_SSL_CIPHER_SUITES);
+    }
+    else
+    {
+      System.setProperty(SSLUtil.PROPERTY_ENABLED_SSL_CIPHER_SUITES,
+           originalPropertyEnabledSSLCipherSuites);
     }
   }
 
@@ -644,9 +680,9 @@ public class SSLUtilTestCase
     assertNotNull(SSLUtil.getEnabledSSLProtocols());
     assertFalse(SSLUtil.getEnabledSSLProtocols().isEmpty());
     assertEquals(SSLUtil.getEnabledSSLProtocols(),
-         new HashSet<String>(Arrays.asList("foo")));
+         new LinkedHashSet<>(Arrays.asList("foo")));
 
-    SSLUtil.setEnabledSSLProtocols(new HashSet<String>(0));
+    SSLUtil.setEnabledSSLProtocols(new LinkedHashSet<String>(0));
     assertNotNull(SSLUtil.getEnabledSSLProtocols());
     assertTrue(SSLUtil.getEnabledSSLProtocols().isEmpty());
 
@@ -654,12 +690,51 @@ public class SSLUtilTestCase
     assertNotNull(SSLUtil.getEnabledSSLProtocols());
     assertFalse(SSLUtil.getEnabledSSLProtocols().isEmpty());
     assertEquals(SSLUtil.getEnabledSSLProtocols(),
-         new HashSet<String>(Arrays.asList("bar", "baz")));
+         new LinkedHashSet<>(Arrays.asList("bar", "baz")));
 
     SSLUtil.setEnabledSSLProtocols(enabledProtocols);
     assertNotNull(SSLUtil.getEnabledSSLProtocols());
     assertFalse(SSLUtil.getEnabledSSLProtocols().isEmpty());
     assertEquals(SSLUtil.getEnabledSSLProtocols(), enabledProtocols);
+  }
+
+
+
+  /**
+   * Tests methods involving the enabled SSL cipher suites.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testEnabledSSLCipherSuites()
+         throws Exception
+  {
+    final Set<String> enabledCipherSuites = SSLUtil.getEnabledSSLCipherSuites();
+
+    SSLUtil.setEnabledSSLCipherSuites(null);
+    assertNotNull(SSLUtil.getEnabledSSLCipherSuites());
+    assertTrue(SSLUtil.getEnabledSSLCipherSuites().isEmpty());
+
+    SSLUtil.setEnabledSSLCipherSuites(Arrays.asList("foo"));
+    assertNotNull(SSLUtil.getEnabledSSLCipherSuites());
+    assertFalse(SSLUtil.getEnabledSSLCipherSuites().isEmpty());
+    assertEquals(SSLUtil.getEnabledSSLCipherSuites(),
+         new LinkedHashSet<>(Arrays.asList("foo")));
+
+    SSLUtil.setEnabledSSLCipherSuites(new LinkedHashSet<String>(0));
+    assertNotNull(SSLUtil.getEnabledSSLCipherSuites());
+    assertTrue(SSLUtil.getEnabledSSLCipherSuites().isEmpty());
+
+    SSLUtil.setEnabledSSLCipherSuites(Arrays.asList("bar", "baz"));
+    assertNotNull(SSLUtil.getEnabledSSLCipherSuites());
+    assertFalse(SSLUtil.getEnabledSSLCipherSuites().isEmpty());
+    assertEquals(SSLUtil.getEnabledSSLCipherSuites(),
+         new LinkedHashSet<>(Arrays.asList("bar", "baz")));
+
+    SSLUtil.setEnabledSSLCipherSuites(enabledCipherSuites);
+    assertNotNull(SSLUtil.getEnabledSSLCipherSuites());
+    assertFalse(SSLUtil.getEnabledSSLCipherSuites().isEmpty());
+    assertEquals(SSLUtil.getEnabledSSLCipherSuites(), enabledCipherSuites);
   }
 
 
@@ -676,6 +751,7 @@ public class SSLUtilTestCase
   {
     System.clearProperty(SSLUtil.PROPERTY_DEFAULT_SSL_PROTOCOL);
     System.clearProperty(SSLUtil.PROPERTY_ENABLED_SSL_PROTOCOLS);
+    System.clearProperty(SSLUtil.PROPERTY_ENABLED_SSL_CIPHER_SUITES);
 
     SSLUtil.configureSSLDefaults();
 
@@ -684,43 +760,48 @@ public class SSLUtilTestCase
     assertNotNull(SSLUtil.getEnabledSSLProtocols());
     assertFalse(SSLUtil.getEnabledSSLProtocols().isEmpty());
 
+    assertNotNull(SSLUtil.getEnabledSSLCipherSuites());
+    assertFalse(SSLUtil.getEnabledSSLCipherSuites().isEmpty());
+
     if (SSLUtil.getDefaultSSLProtocol().equals("TLSv1.3"))
     {
       assertEquals(SSLUtil.getEnabledSSLProtocols(),
-           new HashSet<String>(
-                Arrays.asList("TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3")));
+           new LinkedHashSet<>(Arrays.asList(
+                "TLSv1.3", "TLSv1.2", "TLSv1.1", "TLSv1")));
     }
     else if (SSLUtil.getDefaultSSLProtocol().equals("TLSv1.2"))
     {
       assertEquals(SSLUtil.getEnabledSSLProtocols(),
-           new HashSet<String>(Arrays.asList("TLSv1", "TLSv1.1", "TLSv1.2")));
+           new LinkedHashSet<>(Arrays.asList("TLSv1.2", "TLSv1.1", "TLSv1")));
     }
     else if (SSLUtil.getDefaultSSLProtocol().equals("TLSv1.1"))
     {
       assertEquals(SSLUtil.getEnabledSSLProtocols(),
-           new HashSet<String>(Arrays.asList("TLSv1", "TLSv1.1")));
+           new LinkedHashSet<>(Arrays.asList("TLSv1.1", "TLSv1")));
     }
     else
     {
       assertEquals(SSLUtil.getEnabledSSLProtocols(),
-           new HashSet<String>(Arrays.asList("TLSv1")));
+           new LinkedHashSet<>(Arrays.asList("TLSv1")));
     }
   }
 
 
 
   /**
-   * Tests the behavior of the {@code configureSSLDefault} method when both
+   * Tests the behavior of the {@code configureSSLDefault} method when all
    * properties are set.
    *
    * @throws  Exception  If an unexpected problem occurs.
    */
   @Test()
-  public void testConfigureSSLDefaultsBothProperties()
+  public void testConfigureSSLDefaultsAllProperties()
          throws Exception
   {
     System.setProperty(SSLUtil.PROPERTY_DEFAULT_SSL_PROTOCOL, "def");
     System.setProperty(SSLUtil.PROPERTY_ENABLED_SSL_PROTOCOLS, "e1,e2 , e3,e4");
+    System.setProperty(SSLUtil.PROPERTY_ENABLED_SSL_CIPHER_SUITES,
+         "s1,s2 , s3,s4,   s5");
 
     SSLUtil.configureSSLDefaults();
 
@@ -730,15 +811,20 @@ public class SSLUtilTestCase
     assertNotNull(SSLUtil.getEnabledSSLProtocols());
     assertFalse(SSLUtil.getEnabledSSLProtocols().isEmpty());
     assertEquals(SSLUtil.getEnabledSSLProtocols(),
-         new HashSet<String>(Arrays.asList("e1", "e2", "e3", "e4")));
+         new LinkedHashSet<>(Arrays.asList("e1", "e2", "e3", "e4")));
+
+    assertNotNull(SSLUtil.getEnabledSSLCipherSuites());
+    assertFalse(SSLUtil.getEnabledSSLCipherSuites().isEmpty());
+    assertEquals(SSLUtil.getEnabledSSLCipherSuites(),
+         new LinkedHashSet<>(Arrays.asList("s1", "s2", "s3", "s4", "s5")));
   }
 
 
 
   /**
    * Tests the behavior of the {@code configureSSLDefault} method when the
-   * default protocol is set via property to TLS and the enabled protocols
-   * are not set with a property.
+   * default protocol is set via property to TLS and the enabled protocols and
+   * cipher suites are not set with a property.
    *
    * @throws  Exception  If an unexpected problem occurs.
    */
@@ -748,6 +834,7 @@ public class SSLUtilTestCase
   {
     System.setProperty(SSLUtil.PROPERTY_DEFAULT_SSL_PROTOCOL, "TLS");
     System.clearProperty(SSLUtil.PROPERTY_ENABLED_SSL_PROTOCOLS);
+    System.clearProperty(SSLUtil.PROPERTY_ENABLED_SSL_CIPHER_SUITES);
 
     SSLUtil.configureSSLDefaults();
 
@@ -757,15 +844,18 @@ public class SSLUtilTestCase
     assertNotNull(SSLUtil.getEnabledSSLProtocols());
     assertFalse(SSLUtil.getEnabledSSLProtocols().isEmpty());
     assertEquals(SSLUtil.getEnabledSSLProtocols(),
-         new HashSet<String>(Arrays.asList("TLSv1")));
+         new LinkedHashSet<>(Arrays.asList("TLSv1")));
+
+    assertNotNull(SSLUtil.getEnabledSSLCipherSuites());
+    assertFalse(SSLUtil.getEnabledSSLCipherSuites().isEmpty());
   }
 
 
 
   /**
    * Tests the behavior of the {@code configureSSLDefault} method when the
-   * default protocol is set via property to TLSv1 and the enabled protocols are
-   * not set with a property.
+   * default protocol is set via property to TLSv1 and the enabled protocols and
+   * cipher suites are not set with a property.
    *
    * @throws  Exception  If an unexpected problem occurs.
    */
@@ -775,6 +865,7 @@ public class SSLUtilTestCase
   {
     System.setProperty(SSLUtil.PROPERTY_DEFAULT_SSL_PROTOCOL, "TLSv1");
     System.clearProperty(SSLUtil.PROPERTY_ENABLED_SSL_PROTOCOLS);
+    System.clearProperty(SSLUtil.PROPERTY_ENABLED_SSL_CIPHER_SUITES);
 
     SSLUtil.configureSSLDefaults();
 
@@ -784,7 +875,10 @@ public class SSLUtilTestCase
     assertNotNull(SSLUtil.getEnabledSSLProtocols());
     assertFalse(SSLUtil.getEnabledSSLProtocols().isEmpty());
     assertEquals(SSLUtil.getEnabledSSLProtocols(),
-         new HashSet<String>(Arrays.asList("TLSv1")));
+         new LinkedHashSet<>(Arrays.asList("TLSv1")));
+
+    assertNotNull(SSLUtil.getEnabledSSLCipherSuites());
+    assertFalse(SSLUtil.getEnabledSSLCipherSuites().isEmpty());
   }
 
 
@@ -792,7 +886,7 @@ public class SSLUtilTestCase
   /**
    * Tests the behavior of the {@code configureSSLDefault} method when the
    * default protocol is set via property to TLSv1.1 and the enabled protocols
-   * are not set with a property.
+   * and cipher suites are not set with a property.
    *
    * @throws  Exception  If an unexpected problem occurs.
    */
@@ -802,6 +896,7 @@ public class SSLUtilTestCase
   {
     System.setProperty(SSLUtil.PROPERTY_DEFAULT_SSL_PROTOCOL, "TLSv1.1");
     System.clearProperty(SSLUtil.PROPERTY_ENABLED_SSL_PROTOCOLS);
+    System.clearProperty(SSLUtil.PROPERTY_ENABLED_SSL_CIPHER_SUITES);
 
     SSLUtil.configureSSLDefaults();
 
@@ -811,7 +906,10 @@ public class SSLUtilTestCase
     assertNotNull(SSLUtil.getEnabledSSLProtocols());
     assertFalse(SSLUtil.getEnabledSSLProtocols().isEmpty());
     assertEquals(SSLUtil.getEnabledSSLProtocols(),
-         new HashSet<String>(Arrays.asList("TLSv1", "TLSv1.1")));
+         new LinkedHashSet<>(Arrays.asList("TLSv1.1", "TLSv1")));
+
+    assertNotNull(SSLUtil.getEnabledSSLCipherSuites());
+    assertFalse(SSLUtil.getEnabledSSLCipherSuites().isEmpty());
   }
 
 
@@ -819,7 +917,7 @@ public class SSLUtilTestCase
   /**
    * Tests the behavior of the {@code configureSSLDefault} method when the
    * default protocol is set via property to TLSv1.2 and the enabled protocols
-   * are not set with a property.
+   * and cipher suites are not set with a property.
    *
    * @throws  Exception  If an unexpected problem occurs.
    */
@@ -829,6 +927,7 @@ public class SSLUtilTestCase
   {
     System.setProperty(SSLUtil.PROPERTY_DEFAULT_SSL_PROTOCOL, "TLSv1.2");
     System.clearProperty(SSLUtil.PROPERTY_ENABLED_SSL_PROTOCOLS);
+    System.clearProperty(SSLUtil.PROPERTY_ENABLED_SSL_CIPHER_SUITES);
 
     SSLUtil.configureSSLDefaults();
 
@@ -838,7 +937,10 @@ public class SSLUtilTestCase
     assertNotNull(SSLUtil.getEnabledSSLProtocols());
     assertFalse(SSLUtil.getEnabledSSLProtocols().isEmpty());
     assertEquals(SSLUtil.getEnabledSSLProtocols(),
-         new HashSet<String>(Arrays.asList("TLSv1", "TLSv1.1", "TLSv1.2")));
+         new LinkedHashSet<>(Arrays.asList("TLSv1.2", "TLSv1.1", "TLSv1")));
+
+    assertNotNull(SSLUtil.getEnabledSSLCipherSuites());
+    assertFalse(SSLUtil.getEnabledSSLCipherSuites().isEmpty());
   }
 
 
@@ -846,7 +948,7 @@ public class SSLUtilTestCase
   /**
    * Tests the behavior of the {@code configureSSLDefault} method when the
    * default protocol is set via property to TLSv1.3 and the enabled protocols
-   * are not set with a property.
+   * and cipher suites are not set with a property.
    *
    * @throws  Exception  If an unexpected problem occurs.
    */
@@ -856,6 +958,7 @@ public class SSLUtilTestCase
   {
     System.setProperty(SSLUtil.PROPERTY_DEFAULT_SSL_PROTOCOL, "TLSv1.3");
     System.clearProperty(SSLUtil.PROPERTY_ENABLED_SSL_PROTOCOLS);
+    System.clearProperty(SSLUtil.PROPERTY_ENABLED_SSL_CIPHER_SUITES);
 
     SSLUtil.configureSSLDefaults();
 
@@ -865,8 +968,11 @@ public class SSLUtilTestCase
     assertNotNull(SSLUtil.getEnabledSSLProtocols());
     assertFalse(SSLUtil.getEnabledSSLProtocols().isEmpty());
     assertEquals(SSLUtil.getEnabledSSLProtocols(),
-         new HashSet<String>(
-              Arrays.asList("TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3")));
+         new LinkedHashSet<>(Arrays.asList(
+              "TLSv1.3", "TLSv1.2", "TLSv1.1", "TLSv1")));
+
+    assertNotNull(SSLUtil.getEnabledSSLCipherSuites());
+    assertFalse(SSLUtil.getEnabledSSLCipherSuites().isEmpty());
   }
 
 
@@ -1219,6 +1325,178 @@ public class SSLUtilTestCase
     {
       SSLUtil.applyEnabledSSLProtocols(s);
       fail("Expected an exception because of unsupported enabled protocols");
+    }
+    catch (final LDAPException le)
+    {
+      // This was expected.
+    }
+    finally
+    {
+      s.getOutputStream().write(new byte[]
+           { 0x30, 0x05, 0x02, 0x01, 0x01, 0x42, 0x00 });
+      s.getOutputStream().flush();
+      s.close();
+    }
+  }
+
+
+
+  /**
+   * Tests the {@code applyEnabledSSLCipherSuites} method with a null socket.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testApplyEnabledSSLCipherSuitesNull()
+       throws Exception
+  {
+    SSLUtil.applyEnabledSSLCipherSuites(null);
+  }
+
+
+
+  /**
+   * Tests the {@code applyEnabledSSLCipherSuites} method with a socket that is
+   * not an SSL socket.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testApplyEnabledSSLCipherSuitesNonSSLSocket()
+       throws Exception
+  {
+    final InMemoryDirectoryServer ds = getTestDS();
+
+    final Socket s = new Socket("localhost", ds.getListenPort());
+    SSLUtil.applyEnabledSSLCipherSuites(s);
+    s.getOutputStream().write(new byte[]
+         { 0x30, 0x05, 0x02, 0x01, 0x01, 0x42, 0x00 });
+    s.getOutputStream().flush();
+    s.close();
+  }
+
+
+
+  /**
+   * Tests the {@code applyEnabledSSLCipherSuites} method with an SSL socket and
+   * the default settings.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testApplyEnabledSSLCipherSuitesSSLSocketDefaults()
+       throws Exception
+  {
+    final InMemoryDirectoryServer ds = getTestDSWithSSL();
+
+    final SSLUtil sslUtil = new SSLUtil(new TrustAllTrustManager());
+    final Socket s = sslUtil.createSSLSocketFactory().createSocket(
+         "localhost", ds.getListenPort("LDAPS"));
+    assertTrue(s instanceof SSLSocket);
+
+    SSLUtil.applyEnabledSSLCipherSuites(s);
+
+    final SSLSocket sslSocket = (SSLSocket) s;
+    assertNotNull(sslSocket.getEnabledCipherSuites());
+    assertTrue(sslSocket.getEnabledCipherSuites().length > 0);
+
+    s.getOutputStream().write(new byte[]
+         { 0x30, 0x05, 0x02, 0x01, 0x01, 0x42, 0x00 });
+    s.getOutputStream().flush();
+    s.close();
+  }
+
+
+
+  /**
+   * Tests the {@code applyEnabledSSLCipherSuites} method with an SSL socket and
+   * an empty set of enabled cipher suites.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testApplyEnabledSSLCipherSuitesEnabledEmptySet()
+       throws Exception
+  {
+    final InMemoryDirectoryServer ds = getTestDSWithSSL();
+
+    final SSLUtil sslUtil = new SSLUtil(new TrustAllTrustManager());
+    final Socket s = sslUtil.createSSLSocketFactory().createSocket(
+         "localhost", ds.getListenPort("LDAPS"));
+    assertTrue(s instanceof SSLSocket);
+
+    SSLUtil.setEnabledSSLCipherSuites(null);
+    SSLUtil.applyEnabledSSLCipherSuites(s);
+
+    final SSLSocket sslSocket = (SSLSocket) s;
+    assertNotNull(sslSocket.getEnabledCipherSuites());
+    assertTrue(sslSocket.getEnabledCipherSuites().length > 0);
+
+    s.getOutputStream().write(new byte[]
+         { 0x30, 0x05, 0x02, 0x01, 0x01, 0x42, 0x00 });
+    s.getOutputStream().flush();
+    s.close();
+  }
+
+
+
+  /**
+   * Tests the {@code applyEnabledSSLCipherSuites} method with an SSL socket and
+   * the full set of supported cipher suites.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testApplyEnabledSSLCipherSuitesFullSet()
+       throws Exception
+  {
+    final InMemoryDirectoryServer ds = getTestDSWithSSL();
+
+    final SSLUtil sslUtil = new SSLUtil(new TrustAllTrustManager());
+    final Socket s = sslUtil.createSSLSocketFactory().createSocket(
+         "localhost", ds.getListenPort("LDAPS"));
+    assertTrue(s instanceof SSLSocket);
+
+    SSLUtil.setEnabledSSLCipherSuites(
+         TLSCipherSuiteSelector.getSupportedCipherSuites());
+    SSLUtil.applyEnabledSSLCipherSuites(s);
+
+    final SSLSocket sslSocket = (SSLSocket) s;
+    assertNotNull(sslSocket.getEnabledCipherSuites());
+    assertTrue(sslSocket.getEnabledCipherSuites().length > 0);
+
+    s.getOutputStream().write(new byte[]
+         { 0x30, 0x05, 0x02, 0x01, 0x01, 0x42, 0x00 });
+    s.getOutputStream().flush();
+    s.close();
+  }
+
+
+
+  /**
+   * Tests the {@code applyEnabledSSLCipherSuites} method with an SSL socket and
+   * only unsupported values in the set of enabled cipher suites.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testApplyEnabledSSLCipherSuitesEnabledBogusSet()
+       throws Exception
+  {
+    final InMemoryDirectoryServer ds = getTestDSWithSSL();
+
+    final SSLUtil sslUtil = new SSLUtil(new TrustAllTrustManager());
+    final Socket s = sslUtil.createSSLSocketFactory().createSocket(
+         "localhost", ds.getListenPort("LDAPS"));
+    assertTrue(s instanceof SSLSocket);
+
+    SSLUtil.setEnabledSSLCipherSuites(Arrays.asList("unsupported1",
+         "unsupported2"));
+    try
+    {
+      SSLUtil.applyEnabledSSLCipherSuites(s);
+      fail("Expected an exception because of unsupported enabled cipher " +
+           "suites");
     }
     catch (final LDAPException le)
     {

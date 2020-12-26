@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -41,6 +56,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -93,7 +110,19 @@ import static com.unboundid.ldap.sdk.unboundidds.controls.ControlMessages.*;
  * introduced by the change itself or by another change happening at the same
  * time.  If a conflict is detected in the post-commit phase, then the server
  * won't have prevented it, but at least the control can be used to provide
- * notification about it.
+ * notification about it.  The server may also raise an administrative alert to
+ * notify administrators about the conflict.
+ * <BR><BR>
+ * Although post-commit validation on its own should be able to detect conflicts
+ * that arise as a result of concurrent changes in other instances, it is also
+ * possible to take additional measures to help prevent conflicts from arising
+ * in the first place.  The control may indicate that the server should create
+ * a temporary conflict prevention details entry before beginning pre-commit
+ * validation processing.  This entry may be found during pre-commit validation
+ * performed for any conflicting concurrent updates so that the conflicting
+ * operation is rejected.  This temporary entry will be automatically removed
+ * after uniqueness processing has completed, regardless of its success or
+ * failure.
  * <BR><BR>
  * This request control may be sent either directly to a Directory Server
  * instance, or it may be sent to a Directory Proxy Server with or without entry
@@ -134,7 +163,137 @@ import static com.unboundid.ldap.sdk.unboundidds.controls.ControlMessages.*;
  *       allBackendSets              (2),
  *       allAvailableBackendServers  (3),
  *       ... } DEFAULT allSubtreeViews,
+ *     alertOnPostCommitConflictDetection      [8] BOOLEAN DEFAULT TRUE,
+ *     createConflictPreventionDetailsEntry    [9] BOOLEAN DEFAULT FALSE,
  *     ... }
+ * </PRE>
+ * <BR><BR>
+ * <H2>Example</H2>
+ * The following example demonstrates how to use the uniqueness request control
+ * to only process an add operation if it does not result in multiple entries
+ * that have the same uid value:
+ * <BR><BR>
+ * <PRE>
+ * // Create the properties to build a uniqueness request control that
+ * // will try to prevent an add operation from creating a new entry
+ * // that has the same uid as an existing entry in the server.  During
+ * // pre-commit processing (which happens before the server actually
+ * // processes the add), the server will check at least one server in
+ * // each entry-balancing backend set (or just one server in a
+ * // non-entry-balanced deployment).  During post-commit processing
+ * // (which happens if the add succeeds), the server will double-check
+ * // that no conflicting entry was added on any available server in the
+ * // topology.  Also ensure that the server will not allow conflicts
+ * // with soft-deleted entries.
+ * final UniquenessRequestControlProperties uniquenessProperties =
+ *      new UniquenessRequestControlProperties("uid");
+ * uniquenessProperties.setPreCommitValidationLevel(
+ *      UniquenessValidationLevel.ALL_BACKEND_SETS);
+ * uniquenessProperties.setPostCommitValidationLevel(
+ *      UniquenessValidationLevel.ALL_AVAILABLE_BACKEND_SERVERS);
+ * uniquenessProperties.setPreventConflictsWithSoftDeletedEntries(true);
+ *
+ * // Create the request control.  It will be critical so that the
+ * // server will not attempt to process the add if it can't honor the
+ * // uniqueness request.
+ * final boolean isCritical = true;
+ * final String uniquenessID = "uid-uniqueness";
+ * final UniquenessRequestControl uniquenessRequestControl =
+ *      new UniquenessRequestControl(isCritical, uniquenessID,
+ *           uniquenessProperties);
+ *
+ * // Attach the control to an add request.
+ * addRequest.addControl(uniquenessRequestControl);
+ *
+ * // Send the add request to the server and read the result.
+ * try
+ * {
+ *   final LDAPResult addResult = connection.add(addRequest);
+ *
+ *   // The add operation succeeded, so the entry should have been
+ *   // created, but there is still the possibility that a post-commit
+ *   // conflict was discovered, indicating that another request
+ *   // processed at about the same time as our add introduced a
+ *   // conflicting entry.
+ *   final Map&lt;String,UniquenessResponseControl&gt; uniquenessResponses;
+ *   try
+ *   {
+ *     uniquenessResponses = UniquenessResponseControl.get(addResult);
+ *   }
+ *   catch (final LDAPException e)
+ *   {
+ *     throw new RuntimeException(
+ *          "The add succeeded, but an error occurred while trying " +
+ *               "to decode a uniqueness response control in add " +
+ *               "result " + addResult + ":  " +
+ *               StaticUtils.getExceptionMessage(e),
+ *          e);
+ *   }
+ *
+ *   final UniquenessResponseControl uniquenessResponseControl =
+ *        uniquenessResponses.get(uniquenessID);
+ *   if ((uniquenessResponseControl != null) &amp;&amp;
+ *        uniquenessResponseControl.uniquenessConflictFound())
+ *   {
+ *     throw new RuntimeException(
+ *          "The add succeeded, but a uniqueness conflict was found  " +
+ *               "Uniqueness validation message:  " +
+ *               uniquenessResponseControl.getValidationMessage());
+ *   }
+ * }
+ * catch (final LDAPException e)
+ * {
+ *   // The add attempt failed.  It might have been because of a
+ *   // uniqueness problem, or it could have been for some other reason.
+ *   // To figure out which it was, look to see if there is an
+ *   // appropriate uniqueness response control.
+ *   final Map&lt;String, UniquenessResponseControl&gt; uniquenessResponses;
+ *   try
+ *   {
+ *     uniquenessResponses =
+ *          UniquenessResponseControl.get(e.toLDAPResult());
+ *   }
+ *   catch (final LDAPException e2)
+ *   {
+ *     throw new LDAPException(e.getResultCode(),
+ *          "The add attempt failed with result " + e.toLDAPResult() +
+ *               ", and an error occurred while trying to decode a " +
+ *               "uniqueness response control in the result:  " +
+ *               StaticUtils.getExceptionMessage(e2),
+ *          e);
+ *   }
+ *
+ *   final UniquenessResponseControl uniquenessResponseControl =
+ *        uniquenessResponses.get(uniquenessID);
+ *   if (uniquenessResponseControl == null)
+ *   {
+ *     // The add result didn't include a uniqueness response control,
+ *     // indicating that the failure was not because of a uniqueness
+ *     // conflict.
+ *     throw e;
+ *   }
+ *
+ *   if (uniquenessResponseControl.uniquenessConflictFound())
+ *   {
+ *     // The add failed, and the uniqueness response control indicates
+ *     // that the failure was because of a uniqueness conflict.
+ *
+ *     final UniquenessValidationResult preCommitResult =
+ *          uniquenessResponseControl.getPreCommitValidationResult();
+ *     final UniquenessValidationResult postCommitResult =
+ *          uniquenessResponseControl.getPreCommitValidationResult();
+ *     final String validationMessage =
+ *          uniquenessResponseControl.getValidationMessage();
+ *
+ *     throw e;
+ *   }
+ *   else
+ *   {
+ *     // The add failed, but the uniqueness response control indicates
+ *     // that the failure was not because of a uniqueness conflict.
+ *     throw e;
+ *   }
+ * }
  * </PRE>
  */
 @NotMutable()
@@ -145,7 +304,7 @@ public final class UniquenessRequestControl
   /**
    * The OID (1.3.6.1.4.1.30221.2.5.52) for the uniqueness request control.
    */
-  public static final String UNIQUENESS_REQUEST_OID =
+  @NotNull public static final String UNIQUENESS_REQUEST_OID =
        "1.3.6.1.4.1.30221.2.5.52";
 
 
@@ -210,41 +369,71 @@ public final class UniquenessRequestControl
 
 
   /**
+   * The BER type for the value sequence element that indicates whether to
+   * raise an administrative alert if a conflict is detected during post-commit
+   * validation.
+   */
+  private static final byte TYPE_ALERT_ON_POST_VALIDATION_CONFLICT_DETECTION =
+       (byte) 0x88;
+
+
+
+  /**
+   * The BER type for the value sequence element that indicates whether to
+   * create a conflict prevention details entry before pre-commit validation as
+   * a means of helping to avoid conflicts.
+   */
+  private static final byte TYPE_CREATE_CONFLICT_PREVENTION_DETAILS_ENTRY =
+       (byte) 0x89;
+
+
+
+  /**
    * The serial version UID for this serializable class.
    */
   private static final long serialVersionUID = 7976218379635922852L;
 
 
 
+  // Indicates whether the server should raise an administrative alert if a
+  // conflict is detected during post-commit validation.
+  private final boolean alertOnPostCommitConflictDetection;
+
+  // Indicates whether the server should create a conflict prevention details
+  // entry before pre-commit validation as a means of helping to avoid
+  // conflicts.
+  private final boolean createConflictPreventionDetailsEntry;
+
   // Indicates whether to prevent conflicts with soft-deleted entries.
   private final boolean preventConflictsWithSoftDeletedEntries;
 
   // An optional filter that should be used in the course of identifying
   // uniqueness conflicts.
-  private final Filter filter;
+  @Nullable private final Filter filter;
 
   // A potentially-empty set of attribute types that should be checked for
   // uniqueness conflicts.
-  private final Set<String> attributeTypes;
+  @NotNull private final Set<String> attributeTypes;
 
   // An optional base DN to use when checking for conflicts.
-  private final String baseDN;
+  @Nullable private final String baseDN;
 
   // A value that will be used to correlate this request control with its
   // corresponding response control.
-  private final String uniquenessID;
+  @NotNull private final String uniquenessID;
 
   // The behavior that the server should exhibit if multiple attribute types
   // are configured.
-  private final UniquenessMultipleAttributeBehavior multipleAttributeBehavior;
+  @NotNull private final UniquenessMultipleAttributeBehavior
+       multipleAttributeBehavior;
 
   // The level of validation that the server should perform before processing
   // the associated change.
-  private final UniquenessValidationLevel postCommitValidationLevel;
+  @NotNull private final UniquenessValidationLevel postCommitValidationLevel;
 
   // The level of validation that the server should perform after processing the
   // associated change.
-  private final UniquenessValidationLevel preCommitValidationLevel;
+  @NotNull private final UniquenessValidationLevel preCommitValidationLevel;
 
 
 
@@ -264,8 +453,8 @@ public final class UniquenessRequestControl
    *                         a valid uniqueness request control.
    */
   public UniquenessRequestControl(final boolean isCritical,
-              final String uniquenessID,
-              final UniquenessRequestControlProperties properties)
+              @Nullable final String uniquenessID,
+              @NotNull final UniquenessRequestControlProperties properties)
          throws LDAPException
   {
     this((uniquenessID == null
@@ -283,19 +472,19 @@ public final class UniquenessRequestControl
    * the two versions), and with the additional constraint that the uniqueness
    * ID must not be {@code null}.
    *
-   * @param  isCritical    Indicates whether the control should be considered
-   *                       critical.
    * @param  uniquenessID  A value that will be used to correlate this request
    *                       control with its corresponding response control.  It
    *                       must not be {@code null}.
    * @param  properties    The set of properties for this control.  It must not
    *                       be {@code null}.
+   * @param  isCritical    Indicates whether the control should be considered
+   *                       critical.
    *
    * @throws  LDAPException  If the provided properties cannot be used to create
    *                         a valid uniqueness request control.
    */
-  private UniquenessRequestControl(final String uniquenessID,
-               final UniquenessRequestControlProperties properties,
+  private UniquenessRequestControl(@NotNull final String uniquenessID,
+               @NotNull final UniquenessRequestControlProperties properties,
                final boolean isCritical)
           throws LDAPException
   {
@@ -313,6 +502,10 @@ public final class UniquenessRequestControl
          properties.preventConflictsWithSoftDeletedEntries();
     preCommitValidationLevel = properties.getPreCommitValidationLevel();
     postCommitValidationLevel = properties.getPostCommitValidationLevel();
+    alertOnPostCommitConflictDetection =
+         properties.alertOnPostCommitConflictDetection();
+    createConflictPreventionDetailsEntry =
+         properties.createConflictPreventionDetailsEntry();
 
     if (attributeTypes.isEmpty() && (filter == null))
     {
@@ -335,10 +528,11 @@ public final class UniquenessRequestControl
    *
    * @return  The encoded value that was created.
    */
-  private static ASN1OctetString encodeValue(final String uniquenessID,
-                      final UniquenessRequestControlProperties properties)
+  @NotNull()
+  private static ASN1OctetString encodeValue(@NotNull final String uniquenessID,
+       @NotNull final UniquenessRequestControlProperties properties)
   {
-    final ArrayList<ASN1Element> elements = new ArrayList<>(8);
+    final ArrayList<ASN1Element> elements = new ArrayList<>(10);
 
     elements.add(new ASN1OctetString(TYPE_UNIQUENESS_ID, uniquenessID));
 
@@ -398,6 +592,18 @@ public final class UniquenessRequestControl
            postCommitValidationLevel.intValue()));
     }
 
+    if (! properties.alertOnPostCommitConflictDetection())
+    {
+      elements.add(new ASN1Boolean(
+           TYPE_ALERT_ON_POST_VALIDATION_CONFLICT_DETECTION, false));
+    }
+
+    if (properties.createConflictPreventionDetailsEntry())
+    {
+      elements.add(new ASN1Boolean(
+           TYPE_CREATE_CONFLICT_PREVENTION_DETAILS_ENTRY, true));
+    }
+
     return new ASN1OctetString(new ASN1Sequence(elements).encode());
   }
 
@@ -413,7 +619,7 @@ public final class UniquenessRequestControl
    * @throws  LDAPException  If the provided control cannot be decoded as a
    *                         valid uniqueness request control.
    */
-  public UniquenessRequestControl(final Control control)
+  public UniquenessRequestControl(@NotNull final Control control)
          throws LDAPException
   {
     super(control);
@@ -427,6 +633,8 @@ public final class UniquenessRequestControl
 
     try
     {
+      boolean decodedAlertOnPostCommitConflictDetection = true;
+      boolean decodedCreateConflictPreventionDetailsEntry = false;
       boolean decodedPreventSoftDeletedConflicts = false;
       Filter decodedFilter = null;
       Set<String> decodedAttributeTypes = Collections.emptySet();
@@ -507,6 +715,14 @@ public final class UniquenessRequestControl
                         postCommitIntValue));
             }
             break;
+          case TYPE_ALERT_ON_POST_VALIDATION_CONFLICT_DETECTION:
+            decodedAlertOnPostCommitConflictDetection =
+                 ASN1Boolean.decodeAsBoolean(e).booleanValue();
+            break;
+          case TYPE_CREATE_CONFLICT_PREVENTION_DETAILS_ENTRY:
+            decodedCreateConflictPreventionDetailsEntry =
+                 ASN1Boolean.decodeAsBoolean(e).booleanValue();
+            break;
           default:
             throw new LDAPException(ResultCode.DECODING_ERROR,
                  ERR_UNIQUENESS_REQ_DECODE_UNKNOWN_ELEMENT_TYPE.get(
@@ -535,6 +751,10 @@ public final class UniquenessRequestControl
            decodedPreventSoftDeletedConflicts;
       preCommitValidationLevel = decodedPreCommitLevel;
       postCommitValidationLevel = decodedPostCommitLevel;
+      alertOnPostCommitConflictDetection =
+           decodedAlertOnPostCommitConflictDetection;
+      createConflictPreventionDetailsEntry =
+           decodedCreateConflictPreventionDetailsEntry;
     }
     catch (final LDAPException le)
     {
@@ -561,6 +781,7 @@ public final class UniquenessRequestControl
    *
    * @return  The uniqueness identifier for this control.
    */
+  @NotNull()
   public String getUniquenessID()
   {
     return uniquenessID;
@@ -576,6 +797,7 @@ public final class UniquenessRequestControl
    *          uniqueness conflicts, or an empty set if only a filter should be
    *          used to identify conflicts.
    */
+  @NotNull()
   public Set<String> getAttributeTypes()
   {
     return attributeTypes;
@@ -590,6 +812,7 @@ public final class UniquenessRequestControl
    * @return  The behavior that the server should exhibit if multiple attribute
    *          types are configured.
    */
+  @NotNull()
   public UniquenessMultipleAttributeBehavior getMultipleAttributeBehavior()
   {
     return multipleAttributeBehavior;
@@ -605,6 +828,7 @@ public final class UniquenessRequestControl
    *          uniqueness conflicts, or {@code null} if the server should search
    *          below all public naming contexts.
    */
+  @Nullable()
   public String getBaseDN()
   {
     return baseDN;
@@ -619,6 +843,7 @@ public final class UniquenessRequestControl
    * @return  A filter that will be used to identify uniqueness conflicts, or
    *          {@code null} if no filter has been defined.
    */
+  @Nullable()
   public Filter getFilter()
   {
     return filter;
@@ -647,6 +872,7 @@ public final class UniquenessRequestControl
    *
    * @return  The pre-commit validation level.
    */
+  @NotNull()
   public UniquenessValidationLevel getPreCommitValidationLevel()
   {
     return preCommitValidationLevel;
@@ -661,6 +887,7 @@ public final class UniquenessRequestControl
    *
    * @return  The post-commit validation level.
    */
+  @NotNull()
   public UniquenessValidationLevel getPostCommitValidationLevel()
   {
     return postCommitValidationLevel;
@@ -669,9 +896,42 @@ public final class UniquenessRequestControl
 
 
   /**
+   * Indicates whether the server should raise an administrative alert if a
+   * conflict is detected during post-commit validation processing.
+   *
+   * @return  {@code true} if the server should raise an administrative alert if
+   *          a conflict is detected during post-commit validation processing,
+   *          or {@code false} if not.
+   */
+  public boolean alertOnPostCommitConflictDetection()
+  {
+    return alertOnPostCommitConflictDetection;
+  }
+
+
+
+  /**
+   * Indicates whether the server should create a temporary conflict prevention
+   * details entry before beginning pre-commit validation to provide better
+   * support for preventing conflicts.  If created, the entry will be removed
+   * after post-commit validation processing has completed.
+   *
+   * @return  {@code true} if the server should create a temporary conflict
+   *          prevention details entry before beginning pre-commit validation,
+   *          or {@code false} if not.
+   */
+  public boolean createConflictPreventionDetailsEntry()
+  {
+    return createConflictPreventionDetailsEntry;
+  }
+
+
+
+  /**
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_UNIQUENESS_REQ_CONTROL_NAME.get();
@@ -683,7 +943,7 @@ public final class UniquenessRequestControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("UniquenessRequestControl(isCritical=");
     buffer.append(isCritical());
@@ -727,6 +987,10 @@ public final class UniquenessRequestControl
     buffer.append(preCommitValidationLevel);
     buffer.append(", postCommitValidationLevel=");
     buffer.append(postCommitValidationLevel);
+    buffer.append(", alertOnPostCommitConflictDetection=");
+    buffer.append(alertOnPostCommitConflictDetection);
+    buffer.append(", createConflictPreventionDetailsEntry=");
+    buffer.append(createConflictPreventionDetailsEntry);
     buffer.append(')');
   }
 }

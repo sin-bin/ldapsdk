@@ -1,9 +1,24 @@
 /*
- * Copyright 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2013-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,8 @@ package com.unboundid.ldap.sdk;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -41,25 +58,25 @@ import com.unboundid.util.Validator;
 final class DisconnectInfo
 {
   // Indicates whether the disconnect handler has been notified of a disconnect.
-  private final AtomicBoolean handlerNotified;
+  @NotNull private final AtomicBoolean handlerNotified;
 
   // The disconnect type.
-  private final DisconnectType type;
+  @NotNull private final DisconnectType type;
 
   // The port to which the connection was established.
   private final int port;
 
   // The connection with which this disconnect info is associated.
-  private final LDAPConnection connection;
+  @NotNull private final LDAPConnection connection;
 
   // The address to which the connection was established.
-  private final String host;
+  @NotNull private final String host;
 
   // The disconnect message, if available.
-  private final String message;
+  @Nullable private final String message;
 
   // The disconnect cause, if available.
-  private final Throwable cause;
+  @Nullable private final Throwable cause;
 
 
 
@@ -76,8 +93,10 @@ final class DisconnectInfo
    *                     disconnect.  It may be {@code null} if the disconnect
    *                     was not triggered by an exception.
    */
-  DisconnectInfo(final LDAPConnection connection, final DisconnectType type,
-                 final String message, final Throwable cause)
+  DisconnectInfo(@NotNull final LDAPConnection connection,
+                 @NotNull final DisconnectType type,
+                 @Nullable final String message,
+                 @Nullable final Throwable cause)
   {
     Validator.ensureNotNull(connection);
     Validator.ensureNotNull(type);
@@ -99,6 +118,7 @@ final class DisconnectInfo
    *
    * @return  The disconnect type.
    */
+  @NotNull()
   DisconnectType getType()
   {
     return type;
@@ -111,6 +131,7 @@ final class DisconnectInfo
    *
    * @return  The disconnect message, or {@code null} if none was provided.
    */
+  @Nullable()
   String getMessage()
   {
     return message;
@@ -123,6 +144,7 @@ final class DisconnectInfo
    *
    * @return  The disconnect cause, or {@code null} if none was provided.
    */
+  @Nullable()
   Throwable getCause()
   {
     return cause;
@@ -142,6 +164,13 @@ final class DisconnectInfo
       return;
     }
 
+    final ServerSet serverSet = connection.getServerSet();
+    if (serverSet != null)
+    {
+      serverSet.handleConnectionClosed(connection, host, port, type, message,
+           cause);
+    }
+
     final DisconnectHandler handler =
          connection.getConnectionOptions().getDisconnectHandler();
     if (handler != null)
@@ -158,6 +187,7 @@ final class DisconnectInfo
    * @return  A string representation of this disconnect info object.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -173,7 +203,7 @@ final class DisconnectInfo
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  void toString(final StringBuilder buffer)
+  void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("DisconnectInfo(type=");
     buffer.append(type.name());

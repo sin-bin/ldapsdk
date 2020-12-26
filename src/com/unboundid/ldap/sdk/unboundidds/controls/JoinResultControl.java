@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,6 +53,8 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -80,7 +97,8 @@ public final class JoinResultControl
   /**
    * The OID (1.3.6.1.4.1.30221.2.5.9) for the join result control.
    */
-  public static final String JOIN_RESULT_OID = "1.3.6.1.4.1.30221.2.5.9";
+  @NotNull public static final String JOIN_RESULT_OID =
+       "1.3.6.1.4.1.30221.2.5.9";
 
 
 
@@ -107,19 +125,19 @@ public final class JoinResultControl
 
   // The set of entries which have been joined with the associated search result
   // entry.
-  private final List<JoinedEntry> joinResults;
+  @NotNull private final List<JoinedEntry> joinResults;
 
   // The set of referral URLs for this join result.
-  private final List<String> referralURLs;
+  @NotNull private final List<String> referralURLs;
 
   // The result code for this join result.
-  private final ResultCode resultCode;
+  @NotNull private final ResultCode resultCode;
 
   // The diagnostic message for this join result.
-  private final String diagnosticMessage;
+  @Nullable private final String diagnosticMessage;
 
   // The matched DN for this join result.
-  private final String matchedDN;
+  @Nullable private final String matchedDN;
 
 
 
@@ -146,7 +164,7 @@ public final class JoinResultControl
    *                      {@code null} or empty if no entries were joined with
    *                      the search result entry.
    */
-  public JoinResultControl(final List<JoinedEntry> joinResults)
+  public JoinResultControl(@Nullable final List<JoinedEntry> joinResults)
   {
     this(ResultCode.SUCCESS, null, null, null, joinResults);
   }
@@ -172,10 +190,11 @@ public final class JoinResultControl
    *                            {@code null} or empty if no entries were joined
    *                            with the search result entry.
    */
-  public JoinResultControl(final ResultCode resultCode,
-              final String diagnosticMessage, final String matchedDN,
-              final List<String> referralURLs,
-              final List<JoinedEntry> joinResults)
+  public JoinResultControl(@NotNull final ResultCode resultCode,
+              @Nullable final String diagnosticMessage,
+              @Nullable final String matchedDN,
+              @Nullable final List<String> referralURLs,
+              @Nullable final List<JoinedEntry> joinResults)
   {
     super(JOIN_RESULT_OID, false,
           encodeValue(resultCode, diagnosticMessage, matchedDN, referralURLs,
@@ -218,8 +237,8 @@ public final class JoinResultControl
    * @throws  LDAPException  If the provided control cannot be decoded as an
    *                         account usable response control.
    */
-  public JoinResultControl(final String oid, final boolean isCritical,
-                           final ASN1OctetString value)
+  public JoinResultControl(@NotNull final String oid, final boolean isCritical,
+                           @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     super(oid, isCritical, value);
@@ -331,10 +350,13 @@ public final class JoinResultControl
    * @return  An ASN.1 element containing an encoded representation of the
    *          value for this control.
    */
-  private static ASN1OctetString encodeValue(final ResultCode resultCode,
-                      final String diagnosticMessage, final String matchedDN,
-                      final List<String> referralURLs,
-                      final List<JoinedEntry> joinResults)
+  @NotNull()
+  private static ASN1OctetString encodeValue(
+                      @NotNull final ResultCode resultCode,
+                      @Nullable final String diagnosticMessage,
+                      @Nullable final String matchedDN,
+                      @Nullable final List<String> referralURLs,
+                      @Nullable final List<JoinedEntry> joinResults)
   {
     Validator.ensureNotNull(resultCode);
 
@@ -395,6 +417,7 @@ public final class JoinResultControl
    *
    * @return  The result code for this join result.
    */
+  @NotNull()
   public ResultCode getResultCode()
   {
     return resultCode;
@@ -408,6 +431,7 @@ public final class JoinResultControl
    * @return  The diagnostic message for this join result, or {@code null} if
    *          there is no diagnostic message.
    */
+  @Nullable()
   public String getDiagnosticMessage()
   {
     return diagnosticMessage;
@@ -421,6 +445,7 @@ public final class JoinResultControl
    * @return  The matched DN for this join result, or {@code null} if there is
    *          no matched DN.
    */
+  @Nullable()
   public String getMatchedDN()
   {
     return matchedDN;
@@ -434,6 +459,7 @@ public final class JoinResultControl
    * @return  The set of referral URLs for this join result, or an empty list
    *          if there are no referral URLs.
    */
+  @NotNull()
   public List<String> getReferralURLs()
   {
     return referralURLs;
@@ -448,6 +474,7 @@ public final class JoinResultControl
    * @return  The set of entries that have been joined with the associated
    *          search result entry.
    */
+  @NotNull()
   public List<JoinedEntry> getJoinResults()
   {
     return joinResults;
@@ -459,9 +486,10 @@ public final class JoinResultControl
    * {@inheritDoc}
    */
   @Override()
-  public JoinResultControl decodeControl(final String oid,
+  @NotNull()
+  public JoinResultControl decodeControl(@NotNull final String oid,
                                          final boolean isCritical,
-                                         final ASN1OctetString value)
+                                         @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     return new JoinResultControl(oid, isCritical, value);
@@ -483,7 +511,8 @@ public final class JoinResultControl
    *                         decode the join result control contained in the
    *                         provided search result entry.
    */
-  public static JoinResultControl get(final SearchResultEntry entry)
+  @Nullable()
+  public static JoinResultControl get(@NotNull final SearchResultEntry entry)
          throws LDAPException
   {
     final Control c = entry.getControl(JOIN_RESULT_OID);
@@ -508,6 +537,7 @@ public final class JoinResultControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_JOIN_RESULT.get();
@@ -519,7 +549,7 @@ public final class JoinResultControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("JoinResultControl(resultCode='");
     buffer.append(resultCode.getName());

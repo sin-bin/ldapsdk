@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -51,6 +66,8 @@ import com.unboundid.ldap.sdk.unboundidds.extensions.
 import com.unboundid.ldif.LDIFWriter;
 import com.unboundid.util.Debug;
 import com.unboundid.util.FixedRateBarrier;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.args.ArgumentParser;
 import com.unboundid.util.args.BooleanValueArgument;
@@ -80,40 +97,40 @@ import static com.unboundid.ldap.sdk.unboundidds.tools.ToolMessages.*;
 final class ManageAccountProcessor
 {
   // The argument parser for the manage-account tool.
-  private final ArgumentParser parser;
+  @NotNull private final ArgumentParser parser;
 
   // Indicates whether to suppress result operations without values.
   private final boolean suppressEmptyResultOperations;
 
   // The optional rate limiter that will be used when processing operations.
-  private final FixedRateBarrier rateLimiter;
+  @Nullable private final FixedRateBarrier rateLimiter;
 
   // The connection pool to use for all LDAP communication.
-  private final LDAPConnectionPool pool;
+  @NotNull private final LDAPConnectionPool pool;
 
   // An LDIF writer that will be used to record information about all results.
-  private final LDIFWriter outputWriter;
+  @NotNull private final LDIFWriter outputWriter;
 
   // An optional LDIF writer that will be used to record information about
   // failed operations.
-  private final LDIFWriter rejectWriter;
+  @Nullable private final LDIFWriter rejectWriter;
 
   // An optional queue used to hold the DNs of entries to process.
-  private final LinkedBlockingQueue<String> dnQueue;
+  @Nullable private final LinkedBlockingQueue<String> dnQueue;
 
   // The list of processor threads that have been created.
-  private final List<ManageAccountProcessorThread> processorThreads;
+  @NotNull private final List<ManageAccountProcessorThread> processorThreads;
 
   // A handle to the manage-account tool instance with which this processor is
   // associated.
-  private final ManageAccount manageAccount;
+  @NotNull private final ManageAccount manageAccount;
 
   // The password policy state operation to be processed.
-  private final PasswordPolicyStateOperation pwpStateOperation;
+  @NotNull private final PasswordPolicyStateOperation pwpStateOperation;
 
   // The string representation of the core manage-account command line (minus
   // connection, authentication, and target user arguments) being processed.
-  private final String commandLine;
+  @NotNull private final String commandLine;
 
 
 
@@ -135,11 +152,11 @@ final class ManageAccountProcessor
    * @throws  LDAPException  If a problem is encountered while initializing this
    *                         account processor.
    */
-  ManageAccountProcessor(final ManageAccount manageAccount,
-                         final LDAPConnectionPool pool,
-                         final FixedRateBarrier rateLimiter,
-                         final LDIFWriter outputWriter,
-                         final LDIFWriter rejectWriter)
+  ManageAccountProcessor(@NotNull final ManageAccount manageAccount,
+                         @NotNull final LDAPConnectionPool pool,
+                         @Nullable final FixedRateBarrier rateLimiter,
+                         @NotNull final LDIFWriter outputWriter,
+                         @Nullable final LDIFWriter rejectWriter)
        throws LDAPException
   {
     this.manageAccount = manageAccount;
@@ -196,7 +213,7 @@ final class ManageAccountProcessor
    *
    * @param  dn  The DN of the entry to process.
    */
-  void process(final String dn)
+  void process(@NotNull final String dn)
   {
     if (dnQueue == null)
     {
@@ -238,6 +255,7 @@ final class ManageAccountProcessor
    * @return  The next password policy state extended request to be processed,
    *          or {@code null} if no more processing should be performed.
    */
+  @Nullable()
   PasswordPolicyStateExtendedRequest getRequest()
   {
     // If the tool has been interrupted, then return null to signal that the
@@ -304,7 +322,7 @@ final class ManageAccountProcessor
    *
    * @param  request  The password policy state extended request to process.
    */
-  void process(final PasswordPolicyStateExtendedRequest request)
+  void process(@NotNull final PasswordPolicyStateExtendedRequest request)
   {
     // Get a connection to use to process the operation.
     LDAPConnection conn;
@@ -441,8 +459,9 @@ final class ManageAccountProcessor
    * @param  request  The request that was processed.
    * @param  le       The exception caught during processing.
    */
-  private void handleResult(final PasswordPolicyStateExtendedRequest request,
-                            final LDAPException le)
+  private void handleResult(
+                    @NotNull final PasswordPolicyStateExtendedRequest request,
+                    @NotNull final LDAPException le)
   {
     try
     {
@@ -467,8 +486,9 @@ final class ManageAccountProcessor
    * @param  request  The request that was processed.
    * @param  result   The result of the processing.
    */
-  private void handleResult(final PasswordPolicyStateExtendedRequest request,
-                            final PasswordPolicyStateExtendedResult result)
+  private void handleResult(
+                    @NotNull final PasswordPolicyStateExtendedRequest request,
+                    @NotNull final PasswordPolicyStateExtendedResult result)
   {
     handleResult(createResultEntry(request, result),
          (result.getResultCode() != ResultCode.SUCCESS));
@@ -486,7 +506,7 @@ final class ManageAccountProcessor
    * @param  isFailure  Indicates whether the message should also be written to
    *                    the reject writer if one is defined.
    */
-  void handleMessage(final String message, final boolean isFailure)
+  void handleMessage(@NotNull final String message, final boolean isFailure)
   {
     synchronized (outputWriter)
     {
@@ -530,9 +550,10 @@ final class ManageAccountProcessor
    *
    * @return  The entry that was created.
    */
+  @NotNull()
   private Entry createResultEntry(
-                     final PasswordPolicyStateExtendedRequest request,
-                     final LDAPResult result)
+                     @NotNull final PasswordPolicyStateExtendedRequest request,
+                     @NotNull final LDAPResult result)
   {
     final Entry e = new Entry(request.getUserDN());
     e.addAttribute("base-command-line",
@@ -692,7 +713,8 @@ final class ManageAccountProcessor
    * @param  isFailure    Indicates whether the operation was considered a
    *                      failure and should be recorded in the reject writer.
    */
-  private void handleResult(final Entry resultEntry, final boolean isFailure)
+  private void handleResult(@NotNull final Entry resultEntry,
+                            final boolean isFailure)
   {
     synchronized (outputWriter)
     {
@@ -740,8 +762,9 @@ final class ManageAccountProcessor
    * @throws  LDAPException  If a problem is encountered while creating the
    *                         password policy state operation.
    */
+  @NotNull()
   private PasswordPolicyStateOperation createPasswordPolicyStateOperation(
-                                            final StringBuilder commandBuffer)
+               @NotNull final StringBuilder commandBuffer)
           throws LDAPException
   {
     final SubCommand subcommand = parser.getSelectedSubCommand();
@@ -1058,7 +1081,8 @@ final class ManageAccountProcessor
              createGetAvailableOTPDeliveryMechanismsOperation();
 
       case GET_HAS_TOTP_SHARED_SECRET:
-        return PasswordPolicyStateOperation.createHasTOTPSharedSecret();
+        return PasswordPolicyStateOperation.
+             createHasTOTPSharedSecretOperation();
 
       case ADD_TOTP_SHARED_SECRET:
         return PasswordPolicyStateOperation.createAddTOTPSharedSecretOperation(
@@ -1106,6 +1130,40 @@ final class ManageAccountProcessor
       case GET_HAS_STATIC_PASSWORD:
         return PasswordPolicyStateOperation.createHasStaticPasswordOperation();
 
+      case GET_LAST_BIND_PASSWORD_VALIDATION_TIME:
+        return PasswordPolicyStateOperation.
+             createGetLastBindPasswordValidationTimeOperation();
+
+      case GET_SECONDS_SINCE_LAST_BIND_PASSWORD_VALIDATION:
+        return PasswordPolicyStateOperation.
+             createGetSecondsSinceLastBindPasswordValidationOperation();
+
+      case SET_LAST_BIND_PASSWORD_VALIDATION_TIME:
+        return PasswordPolicyStateOperation.
+             createSetLastBindPasswordValidationTimeOperation(
+                  getDate(subcommand, commandBuffer));
+
+      case CLEAR_LAST_BIND_PASSWORD_VALIDATION_TIME:
+        return PasswordPolicyStateOperation.
+             createClearLastBindPasswordValidationTimeOperation();
+
+      case GET_ACCOUNT_IS_VALIDATION_LOCKED:
+        return PasswordPolicyStateOperation.
+             createGetAccountIsValidationLockedOperation();
+
+      case SET_ACCOUNT_IS_VALIDATION_LOCKED:
+        return PasswordPolicyStateOperation.
+             createSetAccountIsValidationLockedOperation(
+                  getBoolean(subcommand, commandBuffer));
+
+      case GET_RECENT_LOGIN_HISTORY:
+        return PasswordPolicyStateOperation.
+             createGetRecentLoginHistoryOperation();
+
+      case CLEAR_RECENT_LOGIN_HISTORY:
+        return PasswordPolicyStateOperation.
+             createClearRecentLoginHistoryOperation();
+
       default:
         // This should never happen.
         throw new LDAPException(ResultCode.LOCAL_ERROR,
@@ -1126,8 +1184,8 @@ final class ManageAccountProcessor
    *
    * @return  The value of the "operationValue" argument.
    */
-  private static boolean getBoolean(final SubCommand subcommand,
-                                    final StringBuilder commandBuffer)
+  private static boolean getBoolean(@NotNull final SubCommand subcommand,
+                                    @NotNull final StringBuilder commandBuffer)
   {
     final ArgumentParser parser = subcommand.getArgumentParser();
     final BooleanValueArgument arg =
@@ -1157,8 +1215,9 @@ final class ManageAccountProcessor
    *
    * @return  The value of the "operationValue" argument.
    */
-  private static Date getDate(final SubCommand subcommand,
-                              final StringBuilder commandBuffer)
+  @NotNull()
+  private static Date getDate(@NotNull final SubCommand subcommand,
+                              @NotNull final StringBuilder commandBuffer)
   {
     final ArgumentParser parser = subcommand.getArgumentParser();
     final TimestampArgument arg = parser.getTimestampArgument("operationValue");
@@ -1187,8 +1246,9 @@ final class ManageAccountProcessor
    *
    * @return  The value of the "operationValue" argument.
    */
-  private static Date[] getDates(final SubCommand subcommand,
-                                 final StringBuilder commandBuffer)
+  @NotNull()
+  private static Date[] getDates(@NotNull final SubCommand subcommand,
+                                 @NotNull final StringBuilder commandBuffer)
   {
     final ArgumentParser parser = subcommand.getArgumentParser();
     final TimestampArgument arg = parser.getTimestampArgument("operationValue");
@@ -1223,8 +1283,9 @@ final class ManageAccountProcessor
    *
    * @return  The value of the "operationValue" argument.
    */
-  private static String getString(final SubCommand subcommand,
-                                  final StringBuilder commandBuffer)
+  @NotNull()
+  private static String getString(@NotNull final SubCommand subcommand,
+                                  @NotNull final StringBuilder commandBuffer)
   {
     final ArgumentParser parser = subcommand.getArgumentParser();
     final StringArgument arg = parser.getStringArgument("operationValue");
@@ -1255,8 +1316,9 @@ final class ManageAccountProcessor
    *
    * @return  The value of the "operationValue" argument.
    */
-  private static String[] getStrings(final SubCommand subcommand,
-                                     final StringBuilder commandBuffer)
+  @NotNull()
+  private static String[] getStrings(@NotNull final SubCommand subcommand,
+                                     @NotNull final StringBuilder commandBuffer)
   {
     final ArgumentParser parser = subcommand.getArgumentParser();
     final StringArgument arg = parser.getStringArgument("operationValue");

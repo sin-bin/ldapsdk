@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,6 +53,8 @@ import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.FixedRateBarrier;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -56,19 +73,19 @@ public final class RateLimiterRequestHandler
        extends LDAPListenerRequestHandler
 {
   // The rate limiters that will be used for each type of operation.
-  private final FixedRateBarrier abandonRateLimiter;
-  private final FixedRateBarrier addRateLimiter;
-  private final FixedRateBarrier bindRateLimiter;
-  private final FixedRateBarrier compareRateLimiter;
-  private final FixedRateBarrier deleteRateLimiter;
-  private final FixedRateBarrier extendedRateLimiter;
-  private final FixedRateBarrier modifyRateLimiter;
-  private final FixedRateBarrier modifyDNRateLimiter;
-  private final FixedRateBarrier searchRateLimiter;
+  @Nullable private final FixedRateBarrier abandonRateLimiter;
+  @Nullable private final FixedRateBarrier addRateLimiter;
+  @Nullable private final FixedRateBarrier bindRateLimiter;
+  @Nullable private final FixedRateBarrier compareRateLimiter;
+  @Nullable private final FixedRateBarrier deleteRateLimiter;
+  @Nullable private final FixedRateBarrier extendedRateLimiter;
+  @Nullable private final FixedRateBarrier modifyRateLimiter;
+  @Nullable private final FixedRateBarrier modifyDNRateLimiter;
+  @Nullable private final FixedRateBarrier searchRateLimiter;
 
   // The downstream request handler that will be used to process the requests
   // after any appropriate rate limiting has been performed.
-  private final LDAPListenerRequestHandler downstreamRequestHandler;
+  @NotNull private final LDAPListenerRequestHandler downstreamRequestHandler;
 
 
 
@@ -89,8 +106,8 @@ public final class RateLimiterRequestHandler
    *                                   unbind.  It must be greater than zero.
    */
   public RateLimiterRequestHandler(
-              final LDAPListenerRequestHandler downstreamRequestHandler,
-              final int maxPerSecond)
+       @NotNull final LDAPListenerRequestHandler downstreamRequestHandler,
+       final int maxPerSecond)
   {
     Validator.ensureNotNull(downstreamRequestHandler);
     Validator.ensureTrue(maxPerSecond > 0);
@@ -132,8 +149,8 @@ public final class RateLimiterRequestHandler
    *                                   operation types.
    */
   public RateLimiterRequestHandler(
-              final LDAPListenerRequestHandler downstreamRequestHandler,
-              final FixedRateBarrier rateLimiter)
+       @NotNull final LDAPListenerRequestHandler downstreamRequestHandler,
+       @Nullable final FixedRateBarrier rateLimiter)
   {
     this(downstreamRequestHandler, null, rateLimiter, rateLimiter, rateLimiter,
          rateLimiter, rateLimiter, rateLimiter, rateLimiter, rateLimiter);
@@ -196,16 +213,16 @@ public final class RateLimiterRequestHandler
    *                                   be enforced for search operations.
    */
   public RateLimiterRequestHandler(
-              final LDAPListenerRequestHandler downstreamRequestHandler,
-              final FixedRateBarrier abandonRateLimiter,
-              final FixedRateBarrier addRateLimiter,
-              final FixedRateBarrier bindRateLimiter,
-              final FixedRateBarrier compareRateLimiter,
-              final FixedRateBarrier deleteRateLimiter,
-              final FixedRateBarrier extendedRateLimiter,
-              final FixedRateBarrier modifyRateLimiter,
-              final FixedRateBarrier modifyDNRateLimiter,
-              final FixedRateBarrier searchRateLimiter)
+       @Nullable final LDAPListenerRequestHandler downstreamRequestHandler,
+       @Nullable final FixedRateBarrier abandonRateLimiter,
+       @Nullable final FixedRateBarrier addRateLimiter,
+       @Nullable final FixedRateBarrier bindRateLimiter,
+       @Nullable final FixedRateBarrier compareRateLimiter,
+       @Nullable final FixedRateBarrier deleteRateLimiter,
+       @Nullable final FixedRateBarrier extendedRateLimiter,
+       @Nullable final FixedRateBarrier modifyRateLimiter,
+       @Nullable final FixedRateBarrier modifyDNRateLimiter,
+       @Nullable final FixedRateBarrier searchRateLimiter)
   {
     Validator.ensureNotNull(downstreamRequestHandler);
 
@@ -227,8 +244,9 @@ public final class RateLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull
   public RateLimiterRequestHandler newInstance(
-              final LDAPListenerClientConnection connection)
+              @NotNull final LDAPListenerClientConnection connection)
          throws LDAPException
   {
     return new RateLimiterRequestHandler(
@@ -245,8 +263,8 @@ public final class RateLimiterRequestHandler
    */
   @Override()
   public void processAbandonRequest(final int messageID,
-                                    final AbandonRequestProtocolOp request,
-                                    final List<Control> controls)
+                   @NotNull final AbandonRequestProtocolOp request,
+                   @NotNull final List<Control> controls)
   {
     if (abandonRateLimiter != null)
     {
@@ -263,9 +281,10 @@ public final class RateLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processAddRequest(final int messageID,
-                                       final AddRequestProtocolOp request,
-                                       final List<Control> controls)
+                          @NotNull final AddRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     if (addRateLimiter != null)
     {
@@ -282,9 +301,10 @@ public final class RateLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processBindRequest(final int messageID,
-                                        final BindRequestProtocolOp request,
-                                        final List<Control> controls)
+                          @NotNull final BindRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     if (bindRateLimiter != null)
     {
@@ -301,9 +321,10 @@ public final class RateLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processCompareRequest(final int messageID,
-                          final CompareRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final CompareRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     if (compareRateLimiter != null)
     {
@@ -320,9 +341,10 @@ public final class RateLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processDeleteRequest(final int messageID,
-                                          final DeleteRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final DeleteRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     if (deleteRateLimiter != null)
     {
@@ -339,9 +361,10 @@ public final class RateLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processExtendedRequest(final int messageID,
-                          final ExtendedRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final ExtendedRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     if (extendedRateLimiter != null)
     {
@@ -358,9 +381,10 @@ public final class RateLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processModifyRequest(final int messageID,
-                                          final ModifyRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final ModifyRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     if (modifyRateLimiter != null)
     {
@@ -377,9 +401,10 @@ public final class RateLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processModifyDNRequest(final int messageID,
-                          final ModifyDNRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final ModifyDNRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     if (modifyDNRateLimiter != null)
     {
@@ -396,9 +421,10 @@ public final class RateLimiterRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processSearchRequest(final int messageID,
-                                          final SearchRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final SearchRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     if (searchRateLimiter != null)
     {

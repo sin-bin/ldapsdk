@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -35,6 +50,8 @@ import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -123,7 +140,7 @@ public final class FileRetentionTask
    * The fully-qualified name of the Java class that is used for the file
    * retention task.
    */
-  static final String FILE_RETENTION_TASK_CLASS =
+  @NotNull static final String FILE_RETENTION_TASK_CLASS =
        "com.unboundid.directory.server.tasks.FileRetentionTask";
 
 
@@ -132,7 +149,7 @@ public final class FileRetentionTask
    * The name of the attribute that is used to specify the path to the directory
    * containing the files to delete.
    */
-  private static final String ATTR_TARGET_DIRECTORY =
+  @NotNull private static final String ATTR_TARGET_DIRECTORY =
        "ds-task-file-retention-target-directory";
 
 
@@ -141,7 +158,7 @@ public final class FileRetentionTask
    * The name of the attribute that is used to specify the filename pattern that
    * is used to identify the files to examine.
    */
-  private static final String ATTR_FILENAME_PATTERN =
+  @NotNull private static final String ATTR_FILENAME_PATTERN =
        "ds-task-file-retention-filename-pattern";
 
 
@@ -150,7 +167,7 @@ public final class FileRetentionTask
    * The name of the attribute that is used to specify the format to use for
    * timestamp values in the filename pattern.
    */
-  private static final String ATTR_TIMESTAMP_FORMAT =
+  @NotNull private static final String ATTR_TIMESTAMP_FORMAT =
        "ds-task-file-retention-timestamp-format";
 
 
@@ -159,7 +176,7 @@ public final class FileRetentionTask
    * The name of the attribute that is used to specify the minimum number of
    * files to retain.
    */
-  private static final String ATTR_RETAIN_FILE_COUNT =
+  @NotNull private static final String ATTR_RETAIN_FILE_COUNT =
        "ds-task-file-retention-retain-file-count";
 
 
@@ -168,7 +185,7 @@ public final class FileRetentionTask
    * The name of the attribute that is used to specify the minimum age of
    * files to retain.
    */
-  private static final String ATTR_RETAIN_FILE_AGE =
+  @NotNull private static final String ATTR_RETAIN_FILE_AGE =
        "ds-task-file-retention-retain-file-age";
 
 
@@ -177,7 +194,7 @@ public final class FileRetentionTask
    * The name of the attribute that is used to specify the minimum aggregate
    * size, in bytes, of files to retain.
    */
-  private static final String ATTR_RETAIN_AGGREGATE_FILE_SIZE_BYTES =
+  @NotNull private static final String ATTR_RETAIN_AGGREGATE_FILE_SIZE_BYTES =
        "ds-task-file-retention-retain-aggregate-file-size-bytes";
 
 
@@ -185,14 +202,15 @@ public final class FileRetentionTask
   /**
    * The name of the object class used in file retention task entries.
    */
-  private static final String OC_FILE_RETENTION_TASK = "ds-task-file-retention";
+  @NotNull private static final String OC_FILE_RETENTION_TASK =
+       "ds-task-file-retention";
 
 
 
   /**
    * The task property that will be used for the target directory.
    */
-  private static final TaskProperty PROPERTY_TARGET_DIRECTORY =
+  @NotNull private static final TaskProperty PROPERTY_TARGET_DIRECTORY =
      new TaskProperty(ATTR_TARGET_DIRECTORY,
           INFO_FILE_RETENTION_DISPLAY_NAME_TARGET_DIRECTORY.get(),
           INFO_FILE_RETENTION_DESCRIPTION_TARGET_DIRECTORY.get(), String.class,
@@ -203,7 +221,7 @@ public final class FileRetentionTask
   /**
    * The task property that will be used for the filename pattern.
    */
-  private static final TaskProperty PROPERTY_FILENAME_PATTERN =
+  @NotNull private static final TaskProperty PROPERTY_FILENAME_PATTERN =
      new TaskProperty(ATTR_FILENAME_PATTERN,
           INFO_FILE_RETENTION_DISPLAY_NAME_FILENAME_PATTERN.get(),
           INFO_FILE_RETENTION_DESCRIPTION_FILENAME_PATTERN.get(), String.class,
@@ -214,7 +232,7 @@ public final class FileRetentionTask
   /**
    * The task property that will be used for the timestamp format.
    */
-  private static final TaskProperty PROPERTY_TIMESTAMP_FORMAT =
+  @NotNull private static final TaskProperty PROPERTY_TIMESTAMP_FORMAT =
      new TaskProperty(ATTR_TIMESTAMP_FORMAT,
           INFO_FILE_RETENTION_DISPLAY_NAME_TIMESTAMP_FORMAT.get(),
           INFO_FILE_RETENTION_DESCRIPTION_TIMESTAMP_FORMAT.get(), String.class,
@@ -239,7 +257,7 @@ public final class FileRetentionTask
   /**
    * The task property that will be used for the file retention count.
    */
-  private static final TaskProperty PROPERTY_RETAIN_FILE_COUNT =
+  @NotNull private static final TaskProperty PROPERTY_RETAIN_FILE_COUNT =
      new TaskProperty(ATTR_RETAIN_FILE_COUNT,
           INFO_FILE_RETENTION_DISPLAY_NAME_RETAIN_COUNT.get(),
           INFO_FILE_RETENTION_DESCRIPTION_RETAIN_COUNT.get(), Long.class,
@@ -250,7 +268,7 @@ public final class FileRetentionTask
   /**
    * The task property that will be used for the file retention age.
    */
-  private static final TaskProperty PROPERTY_RETAIN_FILE_AGE_MILLIS =
+  @NotNull private static final TaskProperty PROPERTY_RETAIN_FILE_AGE_MILLIS =
      new TaskProperty(ATTR_RETAIN_FILE_AGE,
           INFO_FILE_RETENTION_DISPLAY_NAME_RETAIN_AGE.get(),
           INFO_FILE_RETENTION_DESCRIPTION_RETAIN_AGE.get(), Long.class,
@@ -261,11 +279,12 @@ public final class FileRetentionTask
   /**
    * The task property that will be used for the file retention size.
    */
-  private static final TaskProperty PROPERTY_RETAIN_AGGREGATE_FILE_SIZE_BYTES =
-     new TaskProperty(ATTR_RETAIN_AGGREGATE_FILE_SIZE_BYTES,
-          INFO_FILE_RETENTION_DISPLAY_NAME_RETAIN_SIZE.get(),
-          INFO_FILE_RETENTION_DESCRIPTION_RETAIN_SIZE.get(), Long.class, false,
-          false, false);
+  @NotNull private static final TaskProperty
+       PROPERTY_RETAIN_AGGREGATE_FILE_SIZE_BYTES = new TaskProperty(
+            ATTR_RETAIN_AGGREGATE_FILE_SIZE_BYTES,
+            INFO_FILE_RETENTION_DISPLAY_NAME_RETAIN_SIZE.get(),
+            INFO_FILE_RETENTION_DESCRIPTION_RETAIN_SIZE.get(), Long.class,
+            false, false, false);
 
 
 
@@ -277,22 +296,22 @@ public final class FileRetentionTask
 
 
   // The format for the timestamp that may be used in the filename pattern.
-  private final FileRetentionTaskTimestampFormat timestampFormat;
+  @NotNull private final FileRetentionTaskTimestampFormat timestampFormat;
 
   // The file retention count.
-  private final Integer retainFileCount;
+  @Nullable private final Integer retainFileCount;
 
   // The file retention aggregate size in bytes.
-  private final Long retainAggregateFileSizeBytes;
+  @Nullable private final Long retainAggregateFileSizeBytes;
 
   // The file retention age in milliseconds.
-  private final Long retainFileAgeMillis;
+  @Nullable private final Long retainFileAgeMillis;
 
   // The pattern that identifies the files to examine.
-  private final String filenamePattern;
+  @NotNull private final String filenamePattern;
 
   // The path to the directory containing the files to examine.
-  private final String targetDirectory;
+  @NotNull private final String targetDirectory;
 
 
 
@@ -359,11 +378,12 @@ public final class FileRetentionTask
    *              non-{@code null}.  If this value is non-{@code null}, then it
    *              must be greater than zero.
    */
-  public FileRetentionTask(final String targetDirectory,
-              final String filenamePattern,
-              final FileRetentionTaskTimestampFormat timestampFormat,
-              final Integer retainFileCount, final Long retainFileAgeMillis,
-              final Long retainAggregateFileSizeBytes)
+  public FileRetentionTask(@NotNull final String targetDirectory,
+              @NotNull final String filenamePattern,
+              @NotNull final FileRetentionTaskTimestampFormat timestampFormat,
+              @Nullable final Integer retainFileCount,
+              @Nullable final Long retainFileAgeMillis,
+              @Nullable final Long retainAggregateFileSizeBytes)
   {
     this(null, targetDirectory, filenamePattern, timestampFormat,
          retainFileCount, retainFileAgeMillis, retainAggregateFileSizeBytes,
@@ -449,18 +469,23 @@ public final class FileRetentionTask
    *              Indicates whether the server should send an alert notification
    *              if this task fails to complete successfully.
    */
-  public FileRetentionTask(final String taskID, final String targetDirectory,
-              final String filenamePattern,
-              final FileRetentionTaskTimestampFormat timestampFormat,
-              final Integer retainFileCount, final Long retainFileAgeMillis,
-              final Long retainAggregateFileSizeBytes,
-              final Date scheduledStartTime, final List<String> dependencyIDs,
-              final FailedDependencyAction failedDependencyAction,
-              final List<String> notifyOnStart,
-              final List<String> notifyOnCompletion,
-              final List<String> notifyOnSuccess,
-              final List<String> notifyOnError, final Boolean alertOnStart,
-              final Boolean alertOnSuccess, final Boolean alertOnError)
+  public FileRetentionTask(@Nullable final String taskID,
+              @NotNull final String targetDirectory,
+              @NotNull final String filenamePattern,
+              @NotNull final FileRetentionTaskTimestampFormat timestampFormat,
+              @Nullable final Integer retainFileCount,
+              @Nullable final Long retainFileAgeMillis,
+              @Nullable final Long retainAggregateFileSizeBytes,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnStart,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnSuccess,
+              @Nullable final List<String> notifyOnError,
+              @Nullable final Boolean alertOnStart,
+              @Nullable final Boolean alertOnSuccess,
+              @Nullable final Boolean alertOnError)
   {
     super(taskID, FILE_RETENTION_TASK_CLASS, scheduledStartTime, dependencyIDs,
          failedDependencyAction, notifyOnStart, notifyOnCompletion,
@@ -510,7 +535,7 @@ public final class FileRetentionTask
    * @throws  TaskException  If the provided entry cannot be parsed as a file
    *                         retention task entry.
    */
-  public FileRetentionTask(final Entry entry)
+  public FileRetentionTask(@NotNull final Entry entry)
          throws TaskException
   {
     super(entry);
@@ -680,7 +705,8 @@ public final class FileRetentionTask
    * @throws  TaskException  If the provided set of properties cannot be used to
    *                         create a valid file retention task.
    */
-  public FileRetentionTask(final Map<TaskProperty,List<Object>> properties)
+  public FileRetentionTask(
+              @NotNull final Map<TaskProperty,List<Object>> properties)
          throws TaskException
   {
     super(FILE_RETENTION_TASK_CLASS, properties);
@@ -769,6 +795,7 @@ public final class FileRetentionTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskName()
   {
     return INFO_TASK_NAME_FILE_RETENTION.get();
@@ -780,6 +807,7 @@ public final class FileRetentionTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskDescription()
   {
     return INFO_TASK_DESCRIPTION_FILE_RETENTION.get();
@@ -794,6 +822,7 @@ public final class FileRetentionTask
    * @return  The path to the directory (on the server filesystem) containing
    *          the files to examine.
    */
+  @NotNull()
   public String getTargetDirectory()
   {
     return targetDirectory;
@@ -808,6 +837,7 @@ public final class FileRetentionTask
    * @return  The filename pattern that the task should use to identify which
    *          files to examine.
    */
+  @NotNull()
   public String getFilenamePattern()
   {
     return filenamePattern;
@@ -822,6 +852,7 @@ public final class FileRetentionTask
    * @return  The format to use to interpret the timestamp element in the
    *          filename pattern.
    */
+  @NotNull()
   public FileRetentionTaskTimestampFormat getTimestampFormat()
   {
     return timestampFormat;
@@ -835,6 +866,7 @@ public final class FileRetentionTask
    * @return  The minimum number of files to retain, or {@code null} if there
    *          is no count-based retention criteria.
    */
+  @Nullable()
   public Integer getRetainFileCount()
   {
     return retainFileCount;
@@ -848,6 +880,7 @@ public final class FileRetentionTask
    * @return  The minimum age (in milliseconds) of files to retain, or
    *          {@code null} if there is no age-based retention criteria.
    */
+  @Nullable()
   public Long getRetainFileAgeMillis()
   {
     return retainFileAgeMillis;
@@ -862,6 +895,7 @@ public final class FileRetentionTask
    * @return  The minimum aggregate size (in bytes) of files to retain, or
    *          {@code null} if there is no size-based retention criteria.
    */
+  @Nullable()
   public Long getRetainAggregateFileSizeBytes()
   {
     return retainAggregateFileSizeBytes;
@@ -873,6 +907,7 @@ public final class FileRetentionTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<String> getAdditionalObjectClasses()
   {
     return Collections.singletonList(OC_FILE_RETENTION_TASK);
@@ -884,6 +919,7 @@ public final class FileRetentionTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<Attribute> getAdditionalAttributes()
   {
     final LinkedList<Attribute> attrList = new LinkedList<>();
@@ -920,6 +956,7 @@ public final class FileRetentionTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<TaskProperty> getTaskSpecificProperties()
   {
     return Collections.unmodifiableList(Arrays.asList(
@@ -937,6 +974,7 @@ public final class FileRetentionTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<TaskProperty,List<Object>> getTaskPropertyValues()
   {
     final LinkedHashMap<TaskProperty, List<Object>> props =

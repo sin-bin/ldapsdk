@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,8 @@ import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.ldap.sdk.ModifyDNRequest;
 import com.unboundid.ldap.sdk.ReadOnlyModifyDNRequest;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -47,10 +64,10 @@ final class InterceptedModifyDNOperation
                  InMemoryInterceptedModifyDNResult
 {
   // The modify DN request for this operation.
-  private ModifyDNRequest modifyDNRequest;
+  @NotNull private ModifyDNRequest modifyDNRequest;
 
   // The modify DN result for this operation.
-  private LDAPResult modifyDNResult;
+  @Nullable private LDAPResult modifyDNResult;
 
 
 
@@ -67,9 +84,9 @@ final class InterceptedModifyDNOperation
    *                           client.
    */
   InterceptedModifyDNOperation(
-       final LDAPListenerClientConnection clientConnection, final int messageID,
-       final ModifyDNRequestProtocolOp requestOp,
-       final Control... requestControls)
+       @NotNull final LDAPListenerClientConnection clientConnection,
+       final int messageID, @NotNull final ModifyDNRequestProtocolOp requestOp,
+       @Nullable final Control... requestControls)
   {
     super(clientConnection, messageID);
 
@@ -83,6 +100,7 @@ final class InterceptedModifyDNOperation
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ReadOnlyModifyDNRequest getRequest()
   {
     return modifyDNRequest;
@@ -94,7 +112,7 @@ final class InterceptedModifyDNOperation
    * {@inheritDoc}
    */
   @Override()
-  public void setRequest(final ModifyDNRequest modifyDNRequest)
+  public void setRequest(@NotNull final ModifyDNRequest modifyDNRequest)
   {
     this.modifyDNRequest = modifyDNRequest;
   }
@@ -105,6 +123,7 @@ final class InterceptedModifyDNOperation
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public LDAPResult getResult()
   {
     return modifyDNResult;
@@ -116,7 +135,7 @@ final class InterceptedModifyDNOperation
    * {@inheritDoc}
    */
   @Override()
-  public void setResult(final LDAPResult modifyDNResult)
+  public void setResult(@NotNull final LDAPResult modifyDNResult)
   {
     this.modifyDNResult = modifyDNResult;
   }
@@ -127,7 +146,7 @@ final class InterceptedModifyDNOperation
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("InterceptedModifyDNOperation(");
     appendCommonToString(buffer);

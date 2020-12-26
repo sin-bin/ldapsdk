@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -104,16 +119,17 @@ final class TimestampValuePatternComponent
 
   // The random number generator that will be used to seed the thread-local
   // random number generators.
-  private final Random seedRandom;
+  @NotNull private final Random seedRandom;
 
   // The format string that will be used to format timestamps.
-  private final String dateFormatString;
+  @Nullable private final String dateFormatString;
 
   // The random-number generators that will be used by this class.
-  private final ThreadLocal<Random> threadLocalRandoms;
+  @NotNull private final ThreadLocal<Random> threadLocalRandoms;
 
   // The date formatters that will be used by this class.
-  private final ThreadLocal<SimpleDateFormat> threadLocalDateFormatters;
+  @NotNull private final ThreadLocal<SimpleDateFormat>
+       threadLocalDateFormatters;
 
 
 
@@ -129,7 +145,8 @@ final class TimestampValuePatternComponent
    * @throws  ParseException  If the provided pattern cannot be parsed to create
    *                          a valid timestamp value pattern component.
    */
-  TimestampValuePatternComponent(final String pattern, final long randomSeed)
+  TimestampValuePatternComponent(@NotNull final String pattern,
+                                 final long randomSeed)
        throws ParseException
   {
     seedRandom = new Random(randomSeed);
@@ -335,7 +352,7 @@ final class TimestampValuePatternComponent
    * {@inheritDoc}
    */
   @Override()
-  void append(final StringBuilder buffer)
+  void append(@NotNull final StringBuilder buffer)
   {
     final long selectedTime;
     if (lowerBound == -1L)
@@ -385,6 +402,7 @@ final class TimestampValuePatternComponent
    *
    * @return  A random number generator for use by the current thread.
    */
+  @NotNull()
   private Random getRandom()
   {
     Random random = threadLocalRandoms.get();
@@ -408,6 +426,7 @@ final class TimestampValuePatternComponent
    *
    * @return  A date formatter for use byt he current thread.
    */
+  @NotNull()
   private SimpleDateFormat getDateFormatter()
   {
     SimpleDateFormat dateFormatter = threadLocalDateFormatters.get();

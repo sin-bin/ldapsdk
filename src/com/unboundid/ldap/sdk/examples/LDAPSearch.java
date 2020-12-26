@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -43,6 +58,8 @@ import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldap.sdk.Version;
 import com.unboundid.util.Debug;
 import com.unboundid.util.LDAPCommandLineTool;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -121,7 +138,7 @@ public final class LDAPSearch
   /**
    * The date formatter that should be used when writing timestamps.
    */
-  private static final SimpleDateFormat DATE_FORMAT =
+  @NotNull private static final SimpleDateFormat DATE_FORMAT =
        new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss.SSS");
 
 
@@ -134,34 +151,34 @@ public final class LDAPSearch
 
 
   // The argument parser used by this program.
-  private ArgumentParser parser;
+  @Nullable private ArgumentParser parser;
 
   // Indicates whether the search should be repeated.
   private boolean repeat;
 
   // The argument used to indicate whether to follow referrals.
-  private BooleanArgument followReferrals;
+  @Nullable private BooleanArgument followReferrals;
 
   // The argument used to indicate whether to use terse mode.
-  private BooleanArgument terseMode;
+  @Nullable private BooleanArgument terseMode;
 
   // The argument used to specify any bind controls that should be used.
-  private ControlArgument bindControls;
+  @Nullable private ControlArgument bindControls;
 
   // The argument used to specify any search controls that should be used.
-  private ControlArgument searchControls;
+  @Nullable private ControlArgument searchControls;
 
   // The number of times to perform the search.
-  private IntegerArgument numSearches;
+  @Nullable private IntegerArgument numSearches;
 
   // The interval in milliseconds between repeated searches.
-  private IntegerArgument repeatIntervalMillis;
+  @Nullable private IntegerArgument repeatIntervalMillis;
 
   // The argument used to specify the base DN for the search.
-  private DNArgument baseDN;
+  @Nullable private DNArgument baseDN;
 
   // The argument used to specify the scope for the search.
-  private ScopeArgument scopeArg;
+  @Nullable private ScopeArgument scopeArg;
 
 
 
@@ -171,7 +188,7 @@ public final class LDAPSearch
    *
    * @param  args  The command line arguments provided to this program.
    */
-  public static void main(final String[] args)
+  public static void main(@NotNull final String[] args)
   {
     final ResultCode resultCode = main(args, System.out, System.err);
     if (resultCode != ResultCode.SUCCESS)
@@ -196,9 +213,10 @@ public final class LDAPSearch
    *
    * @return  A result code indicating whether the processing was successful.
    */
-  public static ResultCode main(final String[] args,
-                                final OutputStream outStream,
-                                final OutputStream errStream)
+  @NotNull()
+  public static ResultCode main(@NotNull final String[] args,
+                                @Nullable final OutputStream outStream,
+                                @Nullable final OutputStream errStream)
   {
     final LDAPSearch ldapSearch = new LDAPSearch(outStream, errStream);
     return ldapSearch.runTool(args);
@@ -216,7 +234,8 @@ public final class LDAPSearch
    *                    written.  It may be {@code null} if error messages
    *                    should be suppressed.
    */
-  public LDAPSearch(final OutputStream outStream, final OutputStream errStream)
+  public LDAPSearch(@Nullable final OutputStream outStream,
+                    @Nullable final OutputStream errStream)
   {
     super(outStream, errStream);
   }
@@ -229,6 +248,7 @@ public final class LDAPSearch
    * @return  The name for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolName()
   {
     return "ldapsearch";
@@ -242,6 +262,7 @@ public final class LDAPSearch
    * @return  The description for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolDescription()
   {
     return "Search an LDAP directory server.";
@@ -255,6 +276,7 @@ public final class LDAPSearch
    * @return  The version string for this tool.
    */
   @Override()
+  @NotNull()
   public String getToolVersion()
   {
     return Version.NUMERIC_VERSION_STRING;
@@ -300,6 +322,7 @@ public final class LDAPSearch
    *          trailing arguments are allowed.
    */
   @Override()
+  @NotNull()
   public String getTrailingArgumentsPlaceholder()
   {
     return "{filter} [attr1 [attr2 [...]]]";
@@ -416,6 +439,24 @@ public final class LDAPSearch
 
 
   /**
+   * Indicates whether this tool should provide a command-line argument that
+   * allows for low-level SSL debugging.  If this returns {@code true}, then an
+   * "--enableSSLDebugging}" argument will be added that sets the
+   * "javax.net.debug" system property to "all" before attempting any
+   * communication.
+   *
+   * @return  {@code true} if this tool should offer an "--enableSSLDebugging"
+   *          argument, or {@code false} if not.
+   */
+  @Override()
+  protected boolean supportsSSLDebugging()
+  {
+    return true;
+  }
+
+
+
+  /**
    * Adds the arguments used by this program that aren't already provided by the
    * generic {@code LDAPCommandLineTool} framework.
    *
@@ -424,7 +465,7 @@ public final class LDAPSearch
    * @throws  ArgumentException  If a problem occurs while adding the arguments.
    */
   @Override()
-  public void addNonLDAPArguments(final ArgumentParser parser)
+  public void addNonLDAPArguments(@NotNull final ArgumentParser parser)
          throws ArgumentException
   {
     this.parser = parser;
@@ -532,6 +573,7 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<Control> getBindControls()
   {
     return bindControls.getValues();
@@ -547,6 +589,7 @@ public final class LDAPSearch
    * @return  The result code for the processing that was performed.
    */
   @Override()
+  @NotNull()
   public ResultCode doToolProcessing()
   {
     // Make sure that at least one trailing argument was provided, which will be
@@ -724,7 +767,7 @@ public final class LDAPSearch
    * @param  entry  The entry that was returned from the search.
    */
   @Override()
-  public void searchEntryReturned(final SearchResultEntry entry)
+  public void searchEntryReturned(@NotNull final SearchResultEntry entry)
   {
     if (repeat)
     {
@@ -743,7 +786,8 @@ public final class LDAPSearch
    * @param  reference  The reference that was returned from the search.
    */
   @Override()
-  public void searchReferenceReturned(final SearchResultReference reference)
+  public void searchReferenceReturned(
+                   @NotNull final SearchResultReference reference)
   {
     if (repeat)
     {
@@ -759,6 +803,7 @@ public final class LDAPSearch
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LinkedHashMap<String[],String> getExampleUsages()
   {
     final LinkedHashMap<String[],String> examples =

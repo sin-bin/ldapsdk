@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -36,6 +51,8 @@ import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotExtensible;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -64,7 +81,7 @@ public class LDAPUrl
 
 
   // The LDAP URL for this object.
-  private final LDAPURL ldapURL;
+  @NotNull private final LDAPURL ldapURL;
 
 
 
@@ -77,7 +94,7 @@ public class LDAPUrl
    * @throws  MalformedURLException  If the provided string cannot be parsed as
    *                                 a valid LDAP URL.
    */
-  public LDAPUrl(final String url)
+  public LDAPUrl(@NotNull final String url)
          throws MalformedURLException
   {
     try
@@ -104,7 +121,8 @@ public class LDAPUrl
    * @throws  RuntimeException  If any of the provided information cannot be
    *                            used to create a valid LDAP URL.
    */
-  public LDAPUrl(final String host, final int port, final String dn)
+  public LDAPUrl(@Nullable final String host, final int port,
+                 @Nullable final String dn)
          throws RuntimeException
   {
     try
@@ -135,9 +153,10 @@ public class LDAPUrl
    * @throws  RuntimeException  If any of the provided information cannot be
    *                            used to create a valid LDAP URL.
    */
-  public LDAPUrl(final String host, final int port, final String dn,
-                 final String[] attributes, final int scope,
-                 final String filter)
+  public LDAPUrl(@Nullable final String host, final int port,
+                 @Nullable final String dn,
+                 @Nullable final String[] attributes, final int scope,
+                 @NotNull final String filter)
          throws RuntimeException
   {
     try
@@ -171,9 +190,10 @@ public class LDAPUrl
    * @throws  RuntimeException  If any of the provided information cannot be
    *                            used to create a valid LDAP URL.
    */
-  public LDAPUrl(final String host, final int port, final String dn,
-                 final Enumeration<String> attributes, final int scope,
-                 final String filter)
+  public LDAPUrl(@Nullable final String host, final int port,
+                 @Nullable final String dn,
+                 @Nullable final Enumeration<String> attributes,
+                 final int scope, @NotNull final String filter)
          throws RuntimeException
   {
     try
@@ -216,7 +236,7 @@ public class LDAPUrl
    *
    * @param  ldapURL  The {@code LDAPURL} object to use to create this LDAP URL.
    */
-  public LDAPUrl(final LDAPURL ldapURL)
+  public LDAPUrl(@NotNull final LDAPURL ldapURL)
   {
     this.ldapURL = ldapURL;
   }
@@ -229,6 +249,7 @@ public class LDAPUrl
    * @return  The address for this LDAP URL, or {@code null} if it is not
    *          available.
    */
+  @Nullable()
   public String getHost()
   {
     return ldapURL.getHost();
@@ -253,6 +274,7 @@ public class LDAPUrl
    *
    * @return  The DN for this LDAP URL, or {@code null} if it is not available.
    */
+  @Nullable()
   public String getDN()
   {
     if (ldapURL.baseDNProvided())
@@ -274,6 +296,7 @@ public class LDAPUrl
    * @return  An enumeration of the names of the requested attributes for this
    *          LDAP URL, or {@code null} if there are none.
    */
+  @Nullable()
   public Enumeration<String> getAttributes()
   {
     final String[] attributes = ldapURL.getAttributes();
@@ -296,6 +319,7 @@ public class LDAPUrl
    * @return  An array of the names of the requested attributes for this LDAP
    *          URL, or {@code null} if there are none.
    */
+  @Nullable()
   public String[] getAttributeArray()
   {
     final String[] attributes = ldapURL.getAttributes();
@@ -328,6 +352,7 @@ public class LDAPUrl
    *
    * @return  The filter for this LDAP URL.
    */
+  @NotNull()
   public String getFilter()
   {
     return ldapURL.getFilter().toString();
@@ -357,7 +382,7 @@ public class LDAPUrl
    *          {@code false} if not.
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == null)
     {
@@ -379,6 +404,7 @@ public class LDAPUrl
    *
    * @return  A string representation of this LDAP URL.
    */
+  @NotNull()
   public String getUrl()
   {
     return ldapURL.toString();
@@ -392,6 +418,7 @@ public class LDAPUrl
    *
    * @return  An {@code LDAPURL} object that is the equivalent of this LDAP URL.
    */
+  @NotNull()
   public final LDAPURL toLDAPURL()
   {
     return ldapURL;
@@ -405,6 +432,7 @@ public class LDAPUrl
    * @return  A string representation of this LDAP URL.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return ldapURL.toString();

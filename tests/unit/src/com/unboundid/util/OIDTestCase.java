@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -21,6 +36,8 @@
 package com.unboundid.util;
 
 
+
+import java.text.ParseException;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -297,5 +314,219 @@ public final class OIDTestCase
     // This is valid because the first component has a value of 2 and the
     // second component can be anything.
     assertTrue(OID.isStrictlyValidNumericOID("2.40"));
+  }
+
+
+
+  /**
+   * Tests the behavior when attempting to create a new OID that is a child of a
+   * provided valid numeric OID.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testCreateOIDAsChildOfValidNumericOID()
+         throws Exception
+  {
+    final OID parentOID = new OID(1, 2, 3, 4);
+    final OID childOID = new OID(parentOID, 5);
+
+    assertEquals(childOID, new OID(1, 2, 3, 4, 5));
+
+    assertNotNull(childOID.getParent());
+    assertEquals(childOID.getParent(), parentOID);
+
+    assertTrue(parentOID.isAncestorOf(childOID));
+    assertFalse(childOID.isAncestorOf(parentOID));
+
+    assertFalse(parentOID.isDescendantOf(childOID));
+    assertTrue(childOID.isDescendantOf(parentOID));
+  }
+
+
+
+  /**
+   * Tests the behavior when attempting to create a new OID that is a child of
+   * an OID that is not a valid numeric OID.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(expectedExceptions = { ParseException.class })
+  public void testCreateOIDAsChildOfInvalidNumericOID()
+         throws Exception
+  {
+    final OID parentOID = new OID("not-a-valid-numeric-oid");
+    new OID(parentOID, 5);
+  }
+
+
+
+  /**
+   * Tests the behavior of the getParent method for a valid numeric OID.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testGetParentValidNumericOID()
+         throws Exception
+  {
+    final OID oid = new OID(1, 2, 3, 4);
+
+    final OID parentOID = oid.getParent();
+    assertNotNull(parentOID);
+    assertEquals(parentOID, new OID(1, 2, 3));
+
+    final OID grandparentOID = parentOID.getParent();
+    assertNotNull(grandparentOID);
+    assertEquals(grandparentOID, new OID(1, 2));
+
+    final OID greatGrandparentOID = grandparentOID.getParent();
+    assertNotNull(greatGrandparentOID);
+    assertEquals(greatGrandparentOID, new OID(1));
+
+    final OID greatGreatGrandparentOID = greatGrandparentOID.getParent();
+    assertNull(greatGreatGrandparentOID);
+  }
+
+
+
+  /**
+   * Tests the behavior of the getParent method for an OID that is not a valid
+   * numeric OID.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(expectedExceptions = { ParseException.class })
+  public void testGetParentInvalidNumericOID()
+         throws Exception
+  {
+    final OID oid = new OID("not-a-valid-numeric-oid");
+    oid.getParent();
+  }
+
+
+
+  /**
+   * Tests the behavior of the isAncestorOf method with two valid numeric OIDs.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testIsAncestorOfValidNumericOIDs()
+         throws Exception
+  {
+    final OID oid = new OID(1, 2, 3, 4);
+    oid.getParent();
+
+    assertFalse(oid.isAncestorOf(new OID(1)));
+
+    assertFalse(oid.isAncestorOf(new OID(1, 2)));
+
+    assertFalse(oid.isAncestorOf(new OID(1, 2, 3)));
+
+    assertFalse(oid.isAncestorOf(new OID(1, 2, 3, 4)));
+
+    assertTrue(oid.isAncestorOf(new OID(1, 2, 3, 4, 5)));
+
+    assertTrue(oid.isAncestorOf(new OID(1, 2, 3, 4, 5, 6)));
+
+    assertTrue(oid.isAncestorOf(new OID(1, 2, 3, 4, 5, 6, 7)));
+
+    assertFalse(oid.isAncestorOf(new OID(0, 1, 2, 3, 4, 5, 6, 7)));
+  }
+
+
+
+  /**
+   * Tests the behavior of the isAncestorOf method on an object that is not a
+   * valid numeric OID.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(expectedExceptions = { ParseException.class })
+  public void testIsAncestorOfThisNotValidNumericOID()
+         throws Exception
+  {
+    final OID oid = new OID("not-a-valid-numeric-oid");
+    oid.isAncestorOf(new OID(1, 2, 3, 4));
+  }
+
+
+
+  /**
+   * Tests the behavior of the isAncestorOf method with an argument that is not
+   * a valid numeric OID.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(expectedExceptions = { ParseException.class })
+  public void testIsAncestorOfArgumentNotValidNumericOID()
+         throws Exception
+  {
+    final OID oid = new OID(1, 2, 3, 4);
+    oid.isAncestorOf(new OID("not-a-valid-numeric-oid"));
+  }
+
+
+
+  /**
+   * Tests the behavior of the isDescendant method with two valid numeric OIDs.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testIsDescendantOfValidNumericOIDs()
+         throws Exception
+  {
+    final OID oid = new OID(1, 2, 3, 4);
+    oid.getParent();
+
+    assertFalse(oid.isDescendantOf(new OID(0)));
+
+    assertTrue(oid.isDescendantOf(new OID(1)));
+
+    assertTrue(oid.isDescendantOf(new OID(1, 2)));
+
+    assertTrue(oid.isDescendantOf(new OID(1, 2, 3)));
+
+    assertFalse(oid.isDescendantOf(new OID(1, 2, 3, 4)));
+
+    assertFalse(oid.isDescendantOf(new OID(1, 2, 3, 4, 5)));
+
+    assertFalse(oid.isDescendantOf(new OID(1, 2, 3, 4, 5, 6)));
+
+    assertFalse(oid.isDescendantOf(new OID(1, 2, 3, 4, 5, 6, 7)));
+  }
+
+
+
+  /**
+   * Tests the behavior of the isDescendantOf method on an object that is not a
+   * valid numeric OID.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(expectedExceptions = { ParseException.class })
+  public void testIsDescendantOfThisNotValidNumericOID()
+         throws Exception
+  {
+    final OID oid = new OID("not-a-valid-numeric-oid");
+    oid.isDescendantOf(new OID(1, 2, 3, 4));
+  }
+
+
+
+  /**
+   * Tests the behavior of the isDescendantOf method with an argument that is
+   * not a valid numeric OID.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(expectedExceptions = { ParseException.class })
+  public void testIsDescendantOfArgumentNotValidNumericOID()
+         throws Exception
+  {
+    final OID oid = new OID(1, 2, 3, 4);
+    oid.isDescendantOf(new OID("not-a-valid-numeric-oid"));
   }
 }

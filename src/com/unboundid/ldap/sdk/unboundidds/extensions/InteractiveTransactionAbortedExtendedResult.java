@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,8 @@ import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.ExtendedResult;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -34,6 +51,25 @@ import static com.unboundid.ldap.sdk.unboundidds.extensions.ExtOpMessages.*;
 
 
 /**
+ * <BLOCKQUOTE>
+ *   <B>NOTE:</B>  The use of interactive transactions is strongly discouraged
+ *   because it can create conditions which are prone to deadlocks between
+ *   operations that may significantly affect performance and will result in the
+ *   cancellation of one or both operations.  It is strongly recommended that
+ *   standard LDAP transactions (which may be started using a
+ *   {@link com.unboundid.ldap.sdk.extensions.StartTransactionExtendedRequest})
+ *   or a {@link MultiUpdateExtendedRequest} be used instead.  Although they
+ *   cannot include arbitrary read operations, LDAP transactions and
+ *   multi-update operations may be used in conjunction with the
+ *   {@link com.unboundid.ldap.sdk.controls.AssertionRequestControl},
+ *   {@link com.unboundid.ldap.sdk.controls.PreReadRequestControl}, and
+ *   {@link com.unboundid.ldap.sdk.controls.PostReadRequestControl} to
+ *   incorporate some read capability into a transaction, and in conjunction
+ *   with the {@link com.unboundid.ldap.sdk.ModificationType#INCREMENT}
+ *   modification type to increment integer values without the need to know the
+ *   precise value before or after the operation (although the pre-read and/or
+ *   post-read controls may be used to determine that).
+ * </BLOCKQUOTE>
  * This class provides an implementation of the interactive transaction aborted
  * extended result, which is used as an unsolicited notification to indicate
  * that the server has aborted an interactive transaction without the client's
@@ -48,7 +84,13 @@ import static com.unboundid.ldap.sdk.unboundidds.extensions.ExtOpMessages.*;
  *   considered stable or mature enough to be guaranteed to work in an
  *   interoperable way with other types of LDAP servers.
  * </BLOCKQUOTE>
+ *
+ * @deprecated  The use of interactive transactions is strongly discouraged
+ *              because it can create conditions which are prone to deadlocks
+ *              between operations that may significantly affect performance and
+ *              will result in the cancellation of one or both operations.
  */
+@Deprecated()
 @NotMutable()
 @ThreadSafety(level=ThreadSafetyLevel.COMPLETELY_THREADSAFE)
 public final class InteractiveTransactionAbortedExtendedResult
@@ -58,8 +100,9 @@ public final class InteractiveTransactionAbortedExtendedResult
    * The OID (1.3.6.1.4.1.30221.2.6.5) for the interactive transaction aborted
    * extended result.
    */
-  public static final String INTERACTIVE_TRANSACTION_ABORTED_RESULT_OID =
-       "1.3.6.1.4.1.30221.2.6.5";
+  @NotNull public static final String
+       INTERACTIVE_TRANSACTION_ABORTED_RESULT_OID =
+            "1.3.6.1.4.1.30221.2.6.5";
 
 
 
@@ -78,7 +121,7 @@ public final class InteractiveTransactionAbortedExtendedResult
    *                         interactive transaction aborted extended result.
    */
   public InteractiveTransactionAbortedExtendedResult(
-              final ExtendedResult extendedResult)
+              @NotNull final ExtendedResult extendedResult)
   {
     super(extendedResult);
   }
@@ -101,9 +144,11 @@ public final class InteractiveTransactionAbortedExtendedResult
    *                            available.
    */
   public InteractiveTransactionAbortedExtendedResult(
-              final int messageID, final ResultCode resultCode,
-              final String diagnosticMessage, final String matchedDN,
-              final String[] referralURLs, final Control[] responseControls)
+              final int messageID, @NotNull final ResultCode resultCode,
+              @Nullable final String diagnosticMessage,
+              @Nullable final String matchedDN,
+              @Nullable final String[] referralURLs,
+              @Nullable final Control[] responseControls)
   {
     super(messageID, resultCode, diagnosticMessage, matchedDN, referralURLs,
           INTERACTIVE_TRANSACTION_ABORTED_RESULT_OID, null, responseControls);
@@ -115,6 +160,7 @@ public final class InteractiveTransactionAbortedExtendedResult
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedResultName()
   {
     return INFO_EXTENDED_RESULT_NAME_INTERACTIVE_TXN_ABORTED.get();
@@ -130,7 +176,7 @@ public final class InteractiveTransactionAbortedExtendedResult
    *                 extended result will be appended.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("InteractiveTransactionAbortedExtendedResult(resultCode=");
     buffer.append(getResultCode());

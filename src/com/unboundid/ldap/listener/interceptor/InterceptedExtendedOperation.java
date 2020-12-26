@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,8 @@ import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.ExtendedRequest;
 import com.unboundid.ldap.sdk.ExtendedResult;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -46,10 +63,10 @@ final class InterceptedExtendedOperation
                  InMemoryInterceptedExtendedResult
 {
   // The extended request for this operation.
-  private ExtendedRequest extendedRequest;
+  @NotNull private ExtendedRequest extendedRequest;
 
   // The extended result for this operation.
-  private ExtendedResult extendedResult;
+  @Nullable private ExtendedResult extendedResult;
 
 
 
@@ -66,9 +83,9 @@ final class InterceptedExtendedOperation
    *                           client.
    */
   InterceptedExtendedOperation(
-       final LDAPListenerClientConnection clientConnection, final int messageID,
-       final ExtendedRequestProtocolOp requestOp,
-       final Control... requestControls)
+       @NotNull final LDAPListenerClientConnection clientConnection,
+       final int messageID, @NotNull final ExtendedRequestProtocolOp requestOp,
+       @Nullable final Control... requestControls)
   {
     super(clientConnection, messageID);
 
@@ -82,6 +99,7 @@ final class InterceptedExtendedOperation
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ExtendedRequest getRequest()
   {
     return extendedRequest;
@@ -93,7 +111,7 @@ final class InterceptedExtendedOperation
    * {@inheritDoc}
    */
   @Override()
-  public void setRequest(final ExtendedRequest extendedRequest)
+  public void setRequest(@NotNull final ExtendedRequest extendedRequest)
   {
     this.extendedRequest = extendedRequest;
   }
@@ -104,6 +122,7 @@ final class InterceptedExtendedOperation
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public ExtendedResult getResult()
   {
     return extendedResult;
@@ -115,7 +134,7 @@ final class InterceptedExtendedOperation
    * {@inheritDoc}
    */
   @Override()
-  public void setResult(final ExtendedResult extendedResult)
+  public void setResult(@NotNull final ExtendedResult extendedResult)
   {
     this.extendedResult = extendedResult;
   }
@@ -126,7 +145,7 @@ final class InterceptedExtendedOperation
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("InterceptedExtendedOperation(");
     appendCommonToString(buffer);

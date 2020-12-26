@@ -1,9 +1,24 @@
 /*
- * Copyright 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2013-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -23,6 +38,8 @@ package com.unboundid.ldap.sdk.unboundidds.logs;
 
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -56,13 +73,13 @@ public final class AddAssuranceCompletedAccessLogMessage
 
 
   // Indicates whether the local assurance requirement was satisfied.
-  private final Boolean localAssuranceSatisfied;
+  @Nullable private final Boolean localAssuranceSatisfied;
 
   // Indicates whether the remote assurance requirement was satisfied.
-  private final Boolean remoteAssuranceSatisfied;
+  @Nullable private final Boolean remoteAssuranceSatisfied;
 
   // A string with information about the per-server assurance results.
-  private final String serverAssuranceResults;
+  @Nullable private final String serverAssuranceResults;
 
 
 
@@ -76,7 +93,7 @@ public final class AddAssuranceCompletedAccessLogMessage
    * @throws  LogException  If the provided string cannot be parsed as a valid
    *                        log message.
    */
-  public AddAssuranceCompletedAccessLogMessage(final String s)
+  public AddAssuranceCompletedAccessLogMessage(@NotNull final String s)
          throws LogException
   {
     this(new LogMessage(s));
@@ -91,7 +108,7 @@ public final class AddAssuranceCompletedAccessLogMessage
    * @param  m  The log message to be parsed as an add assurance complete access
    *            log message.
    */
-  public AddAssuranceCompletedAccessLogMessage(final LogMessage m)
+  public AddAssuranceCompletedAccessLogMessage(@NotNull final LogMessage m)
   {
     super(m);
 
@@ -111,6 +128,7 @@ public final class AddAssuranceCompletedAccessLogMessage
    *          satisfied, or {@code null} if it was not included in the log
    *          message.
    */
+  @Nullable()
   public Boolean getLocalAssuranceSatisfied()
   {
     return localAssuranceSatisfied;
@@ -126,6 +144,7 @@ public final class AddAssuranceCompletedAccessLogMessage
    *          satisfied, or {@code null} if it was not included in the log
    *          message.
    */
+  @Nullable()
   public Boolean getRemoteAssuranceSatisfied()
   {
     return remoteAssuranceSatisfied;
@@ -141,6 +160,7 @@ public final class AddAssuranceCompletedAccessLogMessage
    *          individual servers in the replication environment, or
    *          {@code null} if it was not included in the log message.
    */
+  @Nullable()
   public String getServerAssuranceResults()
   {
     return serverAssuranceResults;
@@ -152,6 +172,7 @@ public final class AddAssuranceCompletedAccessLogMessage
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public AccessLogMessageType getMessageType()
   {
     return AccessLogMessageType.ASSURANCE_COMPLETE;

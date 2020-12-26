@@ -1,9 +1,24 @@
 /*
- * Copyright 2012-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2012-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2012-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,6 +37,8 @@ package com.unboundid.ldap.sdk.unboundidds.extensions;
 
 
 
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 
 
@@ -111,6 +128,7 @@ public enum MultiUpdateChangesApplied
    *          value, or {@code null} if there is no changes applied value with
    *          the specified integer value.
    */
+  @Nullable()
   public static MultiUpdateChangesApplied valueOf(final int intValue)
   {
     for (final MultiUpdateChangesApplied v : values())
@@ -135,7 +153,8 @@ public enum MultiUpdateChangesApplied
    * @return  The requested multi-update changes applied value, or {@code null}
    *          if no such value is defined.
    */
-  public static MultiUpdateChangesApplied forName(final String name)
+  @Nullable()
+  public static MultiUpdateChangesApplied forName(@NotNull final String name)
   {
     switch (StaticUtils.toLowerCase(name))
     {

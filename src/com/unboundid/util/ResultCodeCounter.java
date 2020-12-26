@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -55,7 +70,8 @@ public final class ResultCodeCounter
 
 
   // The reference to the current map used to hold result code counts.
-  private final AtomicReference<ConcurrentHashMap<ResultCode,AtomicLong>> rcMap;
+  @NotNull private final
+       AtomicReference<ConcurrentHashMap<ResultCode,AtomicLong>> rcMap;
 
 
 
@@ -76,7 +92,7 @@ public final class ResultCodeCounter
    *
    * @param  resultCode  The result code for which to increment the count.
    */
-  public void increment(final ResultCode resultCode)
+  public void increment(@NotNull final ResultCode resultCode)
   {
     increment(resultCode, 1);
   }
@@ -89,7 +105,7 @@ public final class ResultCodeCounter
    * @param  resultCode  The result code for which to increment the count.
    * @param  amount      The amount by which to increment the count.
    */
-  public void increment(final ResultCode resultCode, final int amount)
+  public void increment(@NotNull final ResultCode resultCode, final int amount)
   {
     final ConcurrentHashMap<ResultCode,AtomicLong> m = rcMap.get();
 
@@ -132,6 +148,7 @@ public final class ResultCodeCounter
    * @return  A list of the result codes of each type along with their
    *          respective counts.
    */
+  @NotNull()
   public List<ObjectPair<ResultCode,Long>> getCounts(final boolean reset)
   {
     final ConcurrentHashMap<ResultCode,AtomicLong> m;

@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,7 @@ import java.io.Serializable;
 import com.unboundid.ldap.sdk.LDAPConnectionOptions;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.ssl.HostNameSSLSocketVerifier;
@@ -50,7 +66,7 @@ final class ConnectionOptions
    * timeout should be enforced for the LDAP SDK.  If it is absent, then a
    * default of 60000 (1 minute) will be used.
    */
-  private static final String FIELD_CONNECT_TIMEOUT_MILLIS =
+  @NotNull private static final String FIELD_CONNECT_TIMEOUT_MILLIS =
        "connect-timeout-millis";
 
 
@@ -63,7 +79,7 @@ final class ConnectionOptions
    * 300000 (5 minutes) will be used.  This response timeout can be overridden
    * on a per-operation basis.
    */
-  private static final String FIELD_DEFAULT_RESPONSE_TIMEOUT_MILLIS =
+  @NotNull private static final String FIELD_DEFAULT_RESPONSE_TIMEOUT_MILLIS =
        "default-response-timeout-millis";
 
 
@@ -74,7 +90,8 @@ final class ConnectionOptions
    * value should be a boolean.  If it is absent, then a default of
    * {@code false} will be used.
    */
-  private static final String FIELD_FOLLOW_REFERRALS = "follow-referrals";
+  @NotNull private static final String FIELD_FOLLOW_REFERRALS =
+       "follow-referrals";
 
 
 
@@ -84,7 +101,7 @@ final class ConnectionOptions
    * operations.  If it is present, then value should be a boolean.  If it is
    * absent, then a default of {@code false} will be used.
    */
-  private static final String FIELD_USE_SCHEMA = "use-schema";
+  @NotNull private static final String FIELD_USE_SCHEMA = "use-schema";
 
 
 
@@ -98,7 +115,7 @@ final class ConnectionOptions
    * it is present, then the value should be a boolean.  If it is absent, then a
    * default of {@code false} will be used.
    */
-  private static final String FIELD_USE_SYNCHRONOUS_MODE =
+  @NotNull private static final String FIELD_USE_SYNCHRONOUS_MODE =
        "use-synchronous-mode";
 
 
@@ -137,7 +154,7 @@ final class ConnectionOptions
    * @throws LDAPException  If there is a problem with the connection options
    *                         data in the provided JSON object.
    */
-  ConnectionOptions(final JSONObject connectionDetailsObject)
+  ConnectionOptions(@NotNull final JSONObject connectionDetailsObject)
        throws LDAPException
   {
     boolean referrals = false;
@@ -193,8 +210,9 @@ final class ConnectionOptions
    *
    * @return  The {@code LDAPConnectionOptions} object that was created.
    */
+  @NotNull()
   LDAPConnectionOptions createConnectionOptions(
-                             final SecurityOptions securityOptions)
+                             @NotNull final SecurityOptions securityOptions)
   {
     final LDAPConnectionOptions options = new LDAPConnectionOptions();
 

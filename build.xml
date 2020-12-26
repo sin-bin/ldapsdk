@@ -1,9 +1,24 @@
 <!--
- ! Copyright 2007-2019 Ping Identity Corporation
+ ! Copyright 2007-2020 Ping Identity Corporation
  ! All Rights Reserved.
  -->
 <!--
- ! Copyright (C) 2008-2019 Ping Identity Corporation
+ ! Copyright 2007-2020 Ping Identity Corporation
+ !
+ ! Licensed under the Apache License, Version 2.0 (the "License");
+ ! you may not use this file except in compliance with the License.
+ ! You may obtain a copy of the License at
+ !
+ !    http://www.apache.org/licenses/LICENSE-2.0
+ !
+ ! Unless required by applicable law or agreed to in writing, software
+ ! distributed under the License is distributed on an "AS IS" BASIS,
+ ! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ! See the License for the specific language governing permissions and
+ ! limitations under the License.
+ -->
+<!--
+ ! Copyright (C) 2007-2020 Ping Identity Corporation
  !
  ! This program is free software; you can redistribute it and/or modify
  ! it under the terms of the GNU General Public License (GPLv2 only)
@@ -54,6 +69,12 @@
   <!-- Define properties used for copying the documentation into place. -->
   <property name="copydocs.src.dir"     location="${build-src.dir}/copydocs" />
   <property name="copydocs.classes.dir" location="${build.dir}/copydocs" />
+
+
+  <!-- Define properties used for generating tool usage information. -->
+  <property name="toolusage.src.dir"
+            location="${build-src.dir}/toolusage" />
+  <property name="toolusage.classes.dir" location="${build.dir}/toolusage" />
 
 
   <!-- Define properties used for generating file digests. -->
@@ -225,6 +246,9 @@
     <copy file="${resource.dir}/standard-schema.ldif"
           toDir="${classes.dir}/com/unboundid/ldap/sdk/schema/"
           overwrite="true" />
+    <copy file="${resource.dir}/oid-registry.json"
+          toDir="${classes.dir}/com/unboundid/util/"
+          overwrite="true" />
   </target>
 
 
@@ -282,7 +306,7 @@
 
   <!-- Create a distributable package including the JAR file, docs, etc. -->
   <target name="package" description="Create a distributable package"
-          depends="compile,define-copydocs,checkstyle">
+          depends="compile,define-copydocs,define-toolusage,checkstyle">
     <mkdir dir="${package.dir}" />
 
     <property name="base-name"
@@ -329,6 +353,11 @@
         <exclude name="**/package-info.java" />
       </fileset>
     </copy>
+
+    <property name="toolusage.localdocs.dir"
+              location="${sdk.package.dir}/docs/tool-usages" />
+    <mkdir dir="${toolusage.localdocs.dir}" />
+    <toolusage outputDirectory="${toolusage.localdocs.dir}" />
 
     <copy todir="${sdk.package.dir}/android-ldap-client">
       <fileset dir="android-ldap-client">
@@ -386,6 +415,7 @@
              bottom="&lt;div id=&quot;footer&quot;&gt;Copyright &amp;copy; 2008-${year} &amp;ndash; Ping Identity &amp;ndash; All Rights Reserved.&lt;/div&gt;">
       <fileset dir="${src.dir}" defaultexcludes="yes">
         <exclude name="**/*Helper*" />
+        <exclude name="**/*InteractiveTransaction*" />
         <exclude name="**/*Constants*" />
         <exclude name="com/unboundid/util/parallel/**" />
       </fileset>
@@ -406,7 +436,8 @@
       </fileset>
     </chmod>
 
-    <zip destfile="${sdk.package.dir}/src.zip" compress="true">
+    <zip destfile="${sdk.package.dir}/src.zip"
+         compress="true">
       <zipfileset dir="${src.dir}" filemode="644" dirmode="755" />
       <zipfileset dir="${messages.gensrc.dir}" filemode="644" dirmode="755" />
       <zipfileset dir="${messages.dir}" filemode="644" dirmode="755" />
@@ -454,6 +485,31 @@
              className="com.unboundid.buildtools.copydocs.CopyDocs">
       <classpath>
         <pathelement location="${copydocs.classes.dir}" />
+      </classpath>
+    </taskdef>
+  </target>
+
+
+
+  <!-- Define the task used to generate tool usage information. -->
+  <target name="define-toolusage">
+    <mkdir dir="${toolusage.classes.dir}" />
+    <javac srcdir="${toolusage.src.dir}" destdir="${toolusage.classes.dir}"
+           source="1.7" target="1.7" deprecation="true" fork="true"
+           memoryInitialSize="${MEM}" memoryMaximumSize="${MEM}"
+           optimize="true" debug="on" debuglevel="lines,source,vars"
+           includeAntRuntime="true">
+      <compilerarg value="-Xlint:all" />
+      <classpath>
+        <pathelement location="${classes.dir}" />
+      </classpath>
+    </javac>
+
+    <taskdef name="toolusage"
+             className="com.unboundid.buildtools.toolusage.GenerateToolUsage">
+      <classpath>
+        <pathelement location="${toolusage.classes.dir}" />
+        <pathelement location="${classes.dir}" />
       </classpath>
     </taskdef>
   </target>
@@ -663,6 +719,7 @@
              bottom="&lt;div id=&quot;footer&quot;&gt;Copyright &amp;copy; 2008-${year} &amp;ndash; Ping Identity Corporation &amp;ndash; All Rights Reserved.&lt;/div&gt;">
       <fileset dir="${src.dir}" defaultexcludes="yes">
         <exclude name="**/*Helper*" />
+        <exclude name="**/*InteractiveTransaction*" />
         <exclude name="**/*Constants*" />
         <exclude name="com/unboundid/util/parallel/**" />
       </fileset>
@@ -674,6 +731,11 @@
     <delete file="${package.dir}/www/javadoc/resources/inherit.gif" />
     <copy file="${resource.dir}/inherit.gif"
           toFile="${package.dir}/www/javadoc/resources/inherit.gif" />
+
+    <property name="toolusage.online.dir"
+              location="${package.dir}/www/tool-usages" />
+    <mkdir dir="${toolusage.online.dir}" />
+    <toolusage outputDirectory="${toolusage.online.dir}" />
 
     <zip destfile="${package.dir}/unboundid-ldapsdk-${MMPQ}-www.zip" compress="true">
       <zipfileset dir="${package.dir}/www" filemode="644" dirmode="755" />

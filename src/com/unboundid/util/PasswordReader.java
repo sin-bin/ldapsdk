@@ -1,9 +1,24 @@
 /*
- * Copyright 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2013-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,9 +39,9 @@ package com.unboundid.util;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
@@ -47,22 +62,33 @@ import static com.unboundid.util.UtilityMessages.*;
  */
 @ThreadSafety(level=ThreadSafetyLevel.NOT_THREADSAFE)
 public final class PasswordReader
-       extends Thread
 {
   /**
    * The input stream from which to read the password.  This should only be set
    * when running unit tests.
    */
-  private static volatile BufferedReader TEST_READER = null;
+  @Nullable private static volatile BufferedReader TEST_READER = null;
 
 
 
-  // Indicates whether a request has been made for the backspace thread to
-  // stop running.
-  private final AtomicBoolean stopRequested;
+  /**
+   * The default value to use for the environment variable.  This should only
+   * be set when running unit tests.
+   */
+  @Nullable private static volatile String DEFAULT_ENVIRONMENT_VARIABLE_VALUE =
+       null;
 
-  // An object that will be used to wait for the reader thread to be started.
-  private final Object startMutex;
+
+
+  /**
+   * The name of an environment variable that can be used to specify the path
+   * to a file that contains the password to be read.  This is also
+   * predominantly intended for use when running unit tests, and may be
+   * necessary for tests running in a separate process that can't use the
+   * {@code TEST_READER}.
+   */
+  @NotNull private static final String PASSWORD_FILE_ENVIRONMENT_VARIABLE =
+       "LDAP_SDK_PASSWORD_READER_PASSWORD_FILE";
 
 
 
@@ -71,12 +97,7 @@ public final class PasswordReader
    */
   private PasswordReader()
   {
-    startMutex = new Object();
-    stopRequested = new AtomicBoolean(false);
-
-    setName("Password Reader Thread");
-    setDaemon(true);
-    setPriority(Thread.MAX_PRIORITY);
+    // No implementation is required.
   }
 
 
@@ -89,6 +110,7 @@ public final class PasswordReader
    * @throws  LDAPException  If a problem is encountered while trying to read
    *                         the password.
    */
+  @NotNull()
   public static char[] readPasswordChars()
          throws LDAPException
   {
@@ -109,6 +131,36 @@ public final class PasswordReader
       }
     }
 
+
+    // If a password input file environment variable has been set, then read
+    // the password from that file.
+    final String environmentVariableValue = StaticUtils.getEnvironmentVariable(
+         PASSWORD_FILE_ENVIRONMENT_VARIABLE,
+         DEFAULT_ENVIRONMENT_VARIABLE_VALUE);
+    if (environmentVariableValue != null)
+    {
+      try
+      {
+        final File f = new File(environmentVariableValue);
+        final PasswordFileReader r = new PasswordFileReader();
+        return r.readPassword(f);
+      }
+      catch (final Exception e)
+      {
+        Debug.debugException(e);
+        throw new LDAPException(ResultCode.LOCAL_ERROR,
+             ERR_PW_READER_FAILURE.get(StaticUtils.getExceptionMessage(e)),
+             e);
+      }
+    }
+
+
+    if (System.console() == null)
+    {
+      throw new LDAPException(ResultCode.LOCAL_ERROR,
+           ERR_PW_READER_CANNOT_READ_PW_WITH_NO_CONSOLE.get());
+    }
+
     return System.console().readPassword();
   }
 
@@ -122,6 +174,7 @@ public final class PasswordReader
    * @throws  LDAPException  If a problem is encountered while trying to read
    *                         the password.
    */
+  @NotNull()
   public static byte[] readPassword()
          throws LDAPException
   {
@@ -140,22 +193,17 @@ public final class PasswordReader
 
 
   /**
-   * Repeatedly sends backspace and space characters to standard output in an
-   * attempt to try to hide what the user enters.
+   * This is a legacy method that now does nothing.  It was required by a
+   * former version of this class when older versions of Java were still
+   * supported, and is retained only for the purpose of API backward
+   * compatibility.
+   *
+   * @deprecated  This method is no longer used.
    */
-  @Override()
+  @Deprecated()
   public void run()
   {
-    synchronized (startMutex)
-    {
-      startMutex.notifyAll();
-    }
-
-    while (! stopRequested.get())
-    {
-      System.out.print("\u0008 ");
-      yield();
-    }
+    // No implementation is required.
   }
 
 
@@ -172,7 +220,7 @@ public final class PasswordReader
    *                It must not be {@code null} but may be empty.
    */
   @InternalUseOnly()
-  public static void setTestReaderLines(final String... lines)
+  public static void setTestReaderLines(@NotNull final String... lines)
   {
     final ByteStringBuffer buffer = new ByteStringBuffer();
     for (final String line : lines)
@@ -198,8 +246,24 @@ public final class PasswordReader
    *                 means.
    */
   @InternalUseOnly()
-  public static void setTestReader(final BufferedReader reader)
+  public static void setTestReader(@Nullable final BufferedReader reader)
   {
     TEST_READER = reader;
+  }
+
+
+
+  /**
+   * Sets the default value that should be used for the environment variable if
+   * it is not set.  This is only intended for use in testing purposes.
+   *
+   * @param  value  The default value that should be used for the environment
+   *                variable if it is not set.  It may be {@code null} if the
+   *                environment variable should be treated as unset.
+   */
+  @InternalUseOnly()
+  static void setDefaultEnvironmentVariableValue(@Nullable final String value)
+  {
+    DEFAULT_ENVIRONMENT_VARIABLE_VALUE = value;
   }
 }

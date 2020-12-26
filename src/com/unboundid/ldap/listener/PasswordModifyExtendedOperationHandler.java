@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -40,8 +55,10 @@ import com.unboundid.ldap.sdk.ModificationType;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.extensions.PasswordModifyExtendedRequest;
 import com.unboundid.ldap.sdk.extensions.PasswordModifyExtendedResult;
+import com.unboundid.ldap.sdk.unboundidds.controls.NoOpRequestControl;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils ;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -75,6 +92,7 @@ public final class PasswordModifyExtendedOperationHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedOperationHandlerName()
   {
     return "Password Modify";
@@ -86,6 +104,7 @@ public final class PasswordModifyExtendedOperationHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<String> getSupportedExtendedRequestOIDs()
   {
     return Collections.singletonList(
@@ -98,15 +117,22 @@ public final class PasswordModifyExtendedOperationHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ExtendedResult processExtendedOperation(
-                             final InMemoryRequestHandler handler,
-                             final int messageID, final ExtendedRequest request)
+                             @NotNull final InMemoryRequestHandler handler,
+                             final int messageID,
+                             @NotNull final ExtendedRequest request)
   {
-    // This extended operation handler does not support any controls.  If the
-    // request has any critical controls, then reject it.
+    // This extended operation handler supports the no operation control.  If
+    // any other control is present, then reject it if it's critical.
+    boolean noOperation = false;
     for (final Control c : request.getControls())
     {
-      if (c.isCritical())
+      if (c.getOID().equalsIgnoreCase(NoOpRequestControl.NO_OP_REQUEST_OID))
+      {
+        noOperation = true;
+      }
+      else if (c.isCritical())
       {
         return new ExtendedResult(messageID,
              ResultCode.UNAVAILABLE_CRITICAL_EXTENSION,
@@ -289,6 +315,16 @@ public final class PasswordModifyExtendedOperationHandler
     }
 
 
+    // If the no operation request control was provided, then return an
+    // appropriate result now.
+    if (noOperation)
+    {
+      return new PasswordModifyExtendedResult(messageID,
+           ResultCode.NO_OPERATION, INFO_PW_MOD_EXTOP_NO_OP.get(), null, null,
+           genPW, null);
+    }
+
+
     // Attempt to modify the user password.
     try
     {
@@ -302,7 +338,7 @@ public final class PasswordModifyExtendedOperationHandler
       return new PasswordModifyExtendedResult(messageID, le.getResultCode(),
            ERR_PW_MOD_EXTOP_CANNOT_CHANGE_PW.get(userEntry.getDN(),
                 le.getMessage()),
-           null, null, null, null);
+           le.getMatchedDN(), le.getReferralURLs(), null, null);
     }
   }
 }

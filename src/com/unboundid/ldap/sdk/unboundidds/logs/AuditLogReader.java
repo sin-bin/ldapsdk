@@ -1,9 +1,24 @@
 /*
- * Copyright 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2018-2019 Ping Identity Corporation
+ * Copyright 2018-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2018-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -41,6 +56,8 @@ import com.unboundid.ldif.LDIFModifyDNChangeRecord;
 import com.unboundid.ldif.LDIFReader;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -69,7 +86,7 @@ public final class AuditLogReader
        implements Closeable
 {
   // The reader used to read the contents of the log file.
-  private final BufferedReader reader;
+  @NotNull private final BufferedReader reader;
 
 
 
@@ -82,7 +99,7 @@ public final class AuditLogReader
    * @throws  IOException  If a problem occurs while opening the file for
    *                       reading.
    */
-  public AuditLogReader(final String path)
+  public AuditLogReader(@NotNull final String path)
          throws IOException
   {
     reader = new BufferedReader(new FileReader(path));
@@ -99,7 +116,7 @@ public final class AuditLogReader
    * @throws  IOException  If a problem occurs while opening the file for
    *                       reading.
    */
-  public AuditLogReader(final File file)
+  public AuditLogReader(@NotNull final File file)
          throws IOException
   {
     reader = new BufferedReader(new FileReader(file));
@@ -113,7 +130,7 @@ public final class AuditLogReader
    *
    * @param  reader  The reader to use to read log messages.
    */
-  public AuditLogReader(final Reader reader)
+  public AuditLogReader(@NotNull final Reader reader)
   {
     if (reader instanceof BufferedReader)
     {
@@ -133,7 +150,7 @@ public final class AuditLogReader
    *
    * @param  inputStream  The input stream from which to read log messages.
    */
-  public AuditLogReader(final InputStream inputStream)
+  public AuditLogReader(@NotNull final InputStream inputStream)
   {
     reader = new BufferedReader(new InputStreamReader(inputStream));
   }
@@ -152,6 +169,7 @@ public final class AuditLogReader
    * @throws  AuditLogException  If an error occurs while trying to parse the
    *                             log message.
    */
+  @Nullable()
   public AuditLogMessage read()
          throws IOException, AuditLogException
   {

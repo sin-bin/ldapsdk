@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -36,6 +51,8 @@ import com.unboundid.ldap.protocol.LDAPResponse;
 import com.unboundid.util.Debug;
 import com.unboundid.util.Extensible;
 import com.unboundid.util.InternalUseOnly;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -77,7 +94,7 @@ public abstract class SASLBindRequest
   private int messageID;
 
   // The queue used to receive responses from the server.
-  private final LinkedBlockingQueue<LDAPResponse> responseQueue;
+  @NotNull private final LinkedBlockingQueue<LDAPResponse> responseQueue;
 
 
 
@@ -86,7 +103,7 @@ public abstract class SASLBindRequest
    *
    * @param  controls  The set of controls to include in this SASL bind request.
    */
-  protected SASLBindRequest(final Control[] controls)
+  protected SASLBindRequest(@Nullable final Control[] controls)
   {
     super(controls);
 
@@ -100,6 +117,7 @@ public abstract class SASLBindRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getBindType()
   {
     return getSASLMechanismName();
@@ -112,6 +130,7 @@ public abstract class SASLBindRequest
    *
    * @return  The name of the SASL mechanism used in this SASL bind request.
    */
+  @NotNull()
   public abstract String getSASLMechanismName();
 
 
@@ -138,8 +157,8 @@ public abstract class SASLBindRequest
    *                          required.
    * @param  controls         The set of controls to include in the request.  It
    *                          may be {@code null} if no controls are required.
-   * @param  timeoutMillis   The maximum length of time in milliseconds to wait
-   *                         for a response, or zero if it should wait forever.
+   * @param  timeoutMillis    The maximum length of time in milliseconds to wait
+   *                          for a response, or zero if it should wait forever.
    *
    * @return  The bind response message returned by the directory server.
    *
@@ -147,11 +166,13 @@ public abstract class SASLBindRequest
    *                         reading the response, or if a timeout occurred
    *                         while waiting for the response.
    */
-  protected final BindResult sendBindRequest(final LDAPConnection connection,
-                                  final String bindDN,
-                                  final ASN1OctetString saslCredentials,
-                                  final Control[] controls,
-                                  final long timeoutMillis)
+  @NotNull()
+  protected final BindResult sendBindRequest(
+                       @NotNull final LDAPConnection connection,
+                       @Nullable final String bindDN,
+                       @Nullable final ASN1OctetString saslCredentials,
+                       @Nullable final Control[] controls,
+                       final long timeoutMillis)
             throws LDAPException
   {
     messageID = connection.nextMessageID();
@@ -181,9 +202,11 @@ public abstract class SASLBindRequest
    *                         reading the response, or if a timeout occurred
    *                         while waiting for the response.
    */
-  protected final BindResult sendMessage(final LDAPConnection connection,
-                                         final LDAPMessage requestMessage,
-                                         final long timeoutMillis)
+  @NotNull()
+  protected final BindResult sendMessage(
+                                  @NotNull final LDAPConnection connection,
+                                  @NotNull final LDAPMessage requestMessage,
+                                  final long timeoutMillis)
             throws LDAPException
   {
     if (connection.synchronousMode())
@@ -196,6 +219,14 @@ public abstract class SASLBindRequest
     try
     {
       Debug.debugLDAPRequest(Level.INFO, this, msgID, connection);
+
+      final LDAPConnectionLogger logger =
+           connection.getConnectionOptions().getConnectionLogger();
+      if (logger != null)
+      {
+        logger.logBindRequest(connection, messageID, this);
+      }
+
       final long requestTime = System.nanoTime();
       connection.getConnectionStatistics().incrementNumBindRequests();
       connection.sendMessage(requestMessage, timeoutMillis);
@@ -247,13 +278,22 @@ public abstract class SASLBindRequest
    *                         reading the response, or if a timeout occurred
    *                         while waiting for the response.
    */
-  private BindResult sendMessageSync(final LDAPConnection connection,
-                                     final LDAPMessage requestMessage,
+  @NotNull()
+  private BindResult sendMessageSync(@NotNull final LDAPConnection connection,
+                                     @NotNull final LDAPMessage requestMessage,
                                      final long timeoutMillis)
             throws LDAPException
   {
     final int msgID = requestMessage.getMessageID();
     Debug.debugLDAPRequest(Level.INFO, this, msgID, connection);
+
+    final LDAPConnectionLogger logger =
+         connection.getConnectionOptions().getConnectionLogger();
+    if (logger != null)
+    {
+      logger.logBindRequest(connection, messageID, this);
+    }
+
     final long requestTime = System.nanoTime();
     connection.getConnectionStatistics().incrementNumBindRequests();
     connection.sendMessage(requestMessage, timeoutMillis);
@@ -291,8 +331,9 @@ public abstract class SASLBindRequest
    *
    * @throws  LDAPException  If a problem occurs.
    */
-  private BindResult handleResponse(final LDAPConnection connection,
-                                    final LDAPResponse response,
+  @NotNull()
+  private BindResult handleResponse(@NotNull final LDAPConnection connection,
+                                    @Nullable final LDAPResponse response,
                                     final long requestTime)
           throws LDAPException
   {
@@ -337,7 +378,7 @@ public abstract class SASLBindRequest
    */
   @InternalUseOnly()
   @Override()
-  public final void responseReceived(final LDAPResponse response)
+  public final void responseReceived(@NotNull final LDAPResponse response)
          throws LDAPException
   {
     try
@@ -366,7 +407,8 @@ public abstract class SASLBindRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toCode(final List<String> lineList, final String requestID,
+  public void toCode(@NotNull final List<String> lineList,
+                     @NotNull final String requestID,
                      final int indentSpaces, final boolean includeProcessing)
   {
     // Create the request variable.

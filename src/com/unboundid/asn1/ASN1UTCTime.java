@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,7 @@ import java.util.TimeZone;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.StaticUtils;
@@ -82,7 +98,7 @@ public final class ASN1UTCTime
   /**
    * The thread-local date formatter used to encode and decode UTC time values.
    */
-  private static final ThreadLocal<SimpleDateFormat> DATE_FORMATTERS =
+  @NotNull private static final ThreadLocal<SimpleDateFormat> DATE_FORMATTERS =
        new ThreadLocal<>();
 
 
@@ -98,7 +114,7 @@ public final class ASN1UTCTime
   private final long time;
 
   // The string representation of the UTC time value.
-  private final String stringRepresentation;
+  @NotNull private final String stringRepresentation;
 
 
 
@@ -135,7 +151,7 @@ public final class ASN1UTCTime
    *               actually represented by the element will have its
    *               milliseconds component set to zero.
    */
-  public ASN1UTCTime(final Date date)
+  public ASN1UTCTime(@NotNull final Date date)
   {
     this(ASN1Constants.UNIVERSAL_UTC_TIME_TYPE, date.getTime());
   }
@@ -152,7 +168,7 @@ public final class ASN1UTCTime
    *               actually represented by the element will have its
    *               milliseconds component set to zero.
    */
-  public ASN1UTCTime(final byte type, final Date date)
+  public ASN1UTCTime(final byte type, @NotNull final Date date)
   {
     this(type, date.getTime());
   }
@@ -214,7 +230,7 @@ public final class ASN1UTCTime
    * @throws  ASN1Exception  If the provided timestamp does not represent a
    *                         valid ASN.1 UTC time string representation.
    */
-  public ASN1UTCTime(final String timestamp)
+  public ASN1UTCTime(@NotNull final String timestamp)
          throws ASN1Exception
   {
     this(ASN1Constants.UNIVERSAL_UTC_TIME_TYPE, timestamp);
@@ -233,7 +249,7 @@ public final class ASN1UTCTime
    * @throws  ASN1Exception  If the provided timestamp does not represent a
    *                         valid ASN.1 UTC time string representation.
    */
-  public ASN1UTCTime(final byte type, final String timestamp)
+  public ASN1UTCTime(final byte type, @NotNull final String timestamp)
          throws ASN1Exception
   {
     super(type, StaticUtils.getBytes(timestamp));
@@ -253,7 +269,8 @@ public final class ASN1UTCTime
    *
    * @return  The encoded timestamp.
    */
-  public static String encodeTimestamp(final Date date)
+  @NotNull()
+  public static String encodeTimestamp(@NotNull final Date date)
   {
     return getDateFormatter().format(date);
   }
@@ -266,6 +283,7 @@ public final class ASN1UTCTime
    *
    * @return  A date formatter instance.
    */
+  @NotNull()
   private static SimpleDateFormat getDateFormatter()
   {
     final SimpleDateFormat existingFormatter = DATE_FORMATTERS.get();
@@ -294,6 +312,7 @@ public final class ASN1UTCTime
    *
    * @return  The encoded timestamp.
    */
+  @NotNull()
   public static String encodeTimestamp(final long time)
   {
     return encodeTimestamp(new Date(time));
@@ -315,7 +334,7 @@ public final class ASN1UTCTime
    *                         valid string representation of an ASN.1 UTC time
    *                         value.
    */
-  public static long decodeTimestamp(final String timestamp)
+  public static long decodeTimestamp(@NotNull final String timestamp)
          throws ASN1Exception
   {
     if (timestamp.length() != 13)
@@ -411,6 +430,7 @@ public final class ASN1UTCTime
    * @return  A {@code Date} object that is set ot the time represented by this
    *          UTC time element.
    */
+  @NotNull()
   public Date getDate()
   {
     return new Date(time);
@@ -425,6 +445,7 @@ public final class ASN1UTCTime
    * @return  The string representation of the UTC time value contained in this
    *          element.
    */
+  @NotNull()
   public String getStringRepresentation()
   {
     return stringRepresentation;
@@ -443,7 +464,8 @@ public final class ASN1UTCTime
    * @throws  ASN1Exception  If the provided array cannot be decoded as a UTC
    *                         time element.
    */
-  public static ASN1UTCTime decodeAsUTCTime(final byte[] elementBytes)
+  @NotNull()
+  public static ASN1UTCTime decodeAsUTCTime(@NotNull final byte[] elementBytes)
          throws ASN1Exception
   {
     try
@@ -498,7 +520,8 @@ public final class ASN1UTCTime
    * @throws  ASN1Exception  If the provided element cannot be decoded as a UTC
    *                         time element.
    */
-  public static ASN1UTCTime decodeAsUTCTime(final ASN1Element element)
+  @NotNull()
+  public static ASN1UTCTime decodeAsUTCTime(@NotNull final ASN1Element element)
          throws ASN1Exception
   {
     return new ASN1UTCTime(element.getType(),
@@ -511,7 +534,7 @@ public final class ASN1UTCTime
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append(stringRepresentation);
   }

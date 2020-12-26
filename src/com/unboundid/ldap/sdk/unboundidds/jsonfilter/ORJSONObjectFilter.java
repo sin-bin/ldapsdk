@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -121,7 +138,7 @@ public final class ORJSONObjectFilter
    * The value that should be used for the filterType element of the JSON object
    * that represents an "OR" filter.
    */
-  public static final String FILTER_TYPE = "or";
+  @NotNull public static final String FILTER_TYPE = "or";
 
 
 
@@ -129,7 +146,7 @@ public final class ORJSONObjectFilter
    * The name of the JSON field that is used to specify the set of filters to
    * include in this OR filter.
    */
-  public static final String FIELD_OR_FILTERS = "orFilters";
+  @NotNull public static final String FIELD_OR_FILTERS = "orFilters";
 
 
 
@@ -137,14 +154,14 @@ public final class ORJSONObjectFilter
    * The name of the JSON field that is used to indicate whether this should be
    * an exclusive OR.
    */
-  public static final String FIELD_EXCLUSIVE = "exclusive";
+  @NotNull public static final String FIELD_EXCLUSIVE = "exclusive";
 
 
 
   /**
    * The pre-allocated set of required field names.
    */
-  private static final Set<String> REQUIRED_FIELD_NAMES =
+  @NotNull private static final Set<String> REQUIRED_FIELD_NAMES =
        Collections.unmodifiableSet(new HashSet<>(
             Collections.singletonList(FIELD_OR_FILTERS)));
 
@@ -153,7 +170,7 @@ public final class ORJSONObjectFilter
   /**
    * The pre-allocated set of optional field names.
    */
-  private static final Set<String> OPTIONAL_FIELD_NAMES =
+  @NotNull private static final Set<String> OPTIONAL_FIELD_NAMES =
        Collections.unmodifiableSet(new HashSet<>(
             Collections.singletonList(FIELD_EXCLUSIVE)));
 
@@ -170,7 +187,7 @@ public final class ORJSONObjectFilter
   private volatile boolean exclusive;
 
   // The set of embedded filters for this OR filter.
-  private volatile List<JSONObjectFilter> orFilters;
+  @NotNull private volatile List<JSONObjectFilter> orFilters;
 
 
 
@@ -183,7 +200,7 @@ public final class ORJSONObjectFilter
    *                    {@code null} or empty, then this OR filter will never
    *                    match any JSON object.
    */
-  public ORJSONObjectFilter(final JSONObjectFilter... orFilters)
+  public ORJSONObjectFilter(@Nullable final JSONObjectFilter... orFilters)
   {
     this(StaticUtils.toList(orFilters));
   }
@@ -199,7 +216,8 @@ public final class ORJSONObjectFilter
    *                    {@code null} or empty, then this OR filter will never
    *                    match any JSON object.
    */
-  public ORJSONObjectFilter(final Collection<JSONObjectFilter> orFilters)
+  public ORJSONObjectFilter(
+              @Nullable final Collection<JSONObjectFilter> orFilters)
   {
     setORFilters(orFilters);
 
@@ -215,6 +233,7 @@ public final class ORJSONObjectFilter
    *
    * @return  The set of filters for this OR filter.
    */
+  @NotNull()
   public List<JSONObjectFilter> getORFilters()
   {
     return orFilters;
@@ -233,7 +252,7 @@ public final class ORJSONObjectFilter
    *                    {@code null} or empty, then this OR filter will never
    *                    match any JSON object.
    */
-  public void setORFilters(final JSONObjectFilter... orFilters)
+  public void setORFilters(@Nullable final JSONObjectFilter... orFilters)
   {
     setORFilters(StaticUtils.toList(orFilters));
   }
@@ -251,7 +270,8 @@ public final class ORJSONObjectFilter
    *                    {@code null} or empty, then this OR filter will never
    *                    match any JSON object.
    */
-  public void setORFilters(final Collection<JSONObjectFilter> orFilters)
+  public void setORFilters(
+                   @Nullable final Collection<JSONObjectFilter> orFilters)
   {
     if ((orFilters == null) || orFilters.isEmpty())
     {
@@ -302,6 +322,7 @@ public final class ORJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getFilterType()
   {
     return FILTER_TYPE;
@@ -313,6 +334,7 @@ public final class ORJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected Set<String> getRequiredFieldNames()
   {
     return REQUIRED_FIELD_NAMES;
@@ -324,6 +346,7 @@ public final class ORJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected Set<String> getOptionalFieldNames()
   {
     return OPTIONAL_FIELD_NAMES;
@@ -335,7 +358,7 @@ public final class ORJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
-  public boolean matchesJSONObject(final JSONObject o)
+  public boolean matchesJSONObject(@NotNull final JSONObject o)
   {
     boolean matchFound = false;
     for (final JSONObjectFilter f : orFilters)
@@ -369,6 +392,7 @@ public final class ORJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public JSONObject toJSONObject()
   {
     final LinkedHashMap<String,JSONValue> fields =
@@ -397,7 +421,9 @@ public final class ORJSONObjectFilter
    * {@inheritDoc}
    */
   @Override()
-  protected ORJSONObjectFilter decodeFilter(final JSONObject filterObject)
+  @NotNull()
+  protected ORJSONObjectFilter decodeFilter(
+                 @NotNull final JSONObject filterObject)
             throws JSONException
   {
     final ORJSONObjectFilter orFilter =

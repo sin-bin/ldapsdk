@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -23,11 +38,13 @@ package com.unboundid.ldap.sdk;
 
 
 import java.io.Serializable;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
+import com.unboundid.util.ByteStringBuffer;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -122,7 +139,7 @@ public final class LDAPURL
   /**
    * The default filter that will be used if none is provided.
    */
-  private static final Filter DEFAULT_FILTER =
+  @NotNull private static final Filter DEFAULT_FILTER =
        Filter.createPresenceFilter("objectClass");
 
 
@@ -154,21 +171,22 @@ public final class LDAPURL
   /**
    * The default scope that will be used if none is provided.
    */
-  private static final SearchScope DEFAULT_SCOPE = SearchScope.BASE;
+  @NotNull private static final SearchScope DEFAULT_SCOPE = SearchScope.BASE;
 
 
 
   /**
    * The default base DN that will be used if none is provided.
    */
-  private static final DN DEFAULT_BASE_DN = DN.NULL_DN;
+  @NotNull private static final DN DEFAULT_BASE_DN = DN.NULL_DN;
 
 
 
   /**
    * The default set of attributes that will be used if none is provided.
    */
-  private static final String[] DEFAULT_ATTRIBUTES = StaticUtils.NO_STRINGS;
+  @NotNull private static final String[] DEFAULT_ATTRIBUTES =
+       StaticUtils.NO_STRINGS;
 
 
 
@@ -195,32 +213,32 @@ public final class LDAPURL
   private final boolean scopeProvided;
 
   // The base DN used by this URL.
-  private final DN baseDN;
+  @NotNull private final DN baseDN;
 
   // The filter used by this URL.
-  private final Filter filter;
+  @NotNull private final Filter filter;
 
   // The port used by this URL.
   private final int port;
 
   // The search scope used by this URL.
-  private final SearchScope scope;
+  @NotNull private final SearchScope scope;
 
   // The host used by this URL.
-  private final String host;
+  @Nullable private final String host;
 
   // The normalized representation of this LDAP URL.
-  private volatile String normalizedURLString;
+  @Nullable private volatile String normalizedURLString;
 
   // The scheme used by this LDAP URL.  The standard only accepts "ldap", but
   // we will also accept "ldaps" and "ldapi".
-  private final String scheme;
+  @NotNull private final String scheme;
 
   // The string representation of this LDAP URL.
-  private final String urlString;
+  @NotNull private final String urlString;
 
   // The set of attributes included in this URL.
-  private final String[] attributes;
+  @NotNull private final String[] attributes;
 
 
 
@@ -233,7 +251,7 @@ public final class LDAPURL
    * @throws  LDAPException  If the provided URL string cannot be parsed as an
    *                         LDAP URL.
    */
-  public LDAPURL(final String urlString)
+  public LDAPURL(@NotNull final String urlString)
          throws LDAPException
   {
     Validator.ensureNotNull(urlString);
@@ -503,9 +521,11 @@ public final class LDAPURL
    * @throws  LDAPException  If there is a problem with any of the provided
    *                         arguments.
    */
-  public LDAPURL(final String scheme, final String host, final Integer port,
-                 final DN baseDN, final String[] attributes,
-                 final SearchScope scope, final Filter filter)
+  public LDAPURL(@NotNull final String scheme, @Nullable final String host,
+                 @Nullable final Integer port, @Nullable final DN baseDN,
+                 @Nullable final String[] attributes,
+                 @Nullable final SearchScope scope,
+                 @Nullable final Filter filter)
          throws LDAPException
   {
     Validator.ensureNotNull(scheme);
@@ -685,8 +705,8 @@ public final class LDAPURL
    * @throws  LDAPException  If the provided string cannot be decoded as a
    *                         hostport element.
    */
-  private static int decodeHostPort(final String hostPort,
-                                    final StringBuilder hostBuffer)
+  private static int decodeHostPort(@NotNull final String hostPort,
+                                    @NotNull final StringBuilder hostBuffer)
           throws LDAPException
   {
     final int length = hostPort.length();
@@ -807,7 +827,8 @@ public final class LDAPURL
    * @throws  LDAPException  If an error occurred while attempting to decode the
    *                         attribute list.
    */
-  private static String[] decodeAttributes(final String s)
+  @NotNull()
+  private static String[] decodeAttributes(@NotNull final String s)
           throws LDAPException
   {
     final int length = s.length();
@@ -887,7 +908,8 @@ public final class LDAPURL
    * @throws  LDAPException  If a problem occurs while attempting to decode the
    *                         provided string.
    */
-  public static String percentDecode(final String s)
+  @NotNull()
+  public static String percentDecode(@NotNull final String s)
           throws LDAPException
   {
     // First, see if there are any percent characters at all in the provided
@@ -909,7 +931,7 @@ public final class LDAPURL
     }
 
     int pos = firstPercentPos;
-    final StringBuilder buffer = new StringBuilder(2 * length);
+    final ByteStringBuffer buffer = new ByteStringBuffer(2 * length);
     buffer.append(s.substring(0, firstPercentPos));
 
     while (pos < length)
@@ -923,152 +945,136 @@ public final class LDAPURL
                                   ERR_LDAPURL_HEX_STRING_TOO_SHORT.get(s));
         }
 
-
-        final ByteBuffer byteBuffer = ByteBuffer.allocate(length - pos);
-        while (pos < length)
+        final byte b;
+        switch (s.charAt(pos++))
         {
-          final byte b;
-          switch (s.charAt(pos++))
-          {
-            case '0':
-              b = 0x00;
-              break;
-            case '1':
-              b = 0x10;
-              break;
-            case '2':
-              b = 0x20;
-              break;
-            case '3':
-              b = 0x30;
-              break;
-            case '4':
-              b = 0x40;
-              break;
-            case '5':
-              b = 0x50;
-              break;
-            case '6':
-              b = 0x60;
-              break;
-            case '7':
-              b = 0x70;
-              break;
-            case '8':
-              b = (byte) 0x80;
-              break;
-            case '9':
-              b = (byte) 0x90;
-              break;
-            case 'a':
-            case 'A':
-              b = (byte) 0xA0;
-              break;
-            case 'b':
-            case 'B':
-              b = (byte) 0xB0;
-              break;
-            case 'c':
-            case 'C':
-              b = (byte) 0xC0;
-              break;
-            case 'd':
-            case 'D':
-              b = (byte) 0xD0;
-              break;
-            case 'e':
-            case 'E':
-              b = (byte) 0xE0;
-              break;
-            case 'f':
-            case 'F':
-              b = (byte) 0xF0;
-              break;
-            default:
-              throw new LDAPException(ResultCode.DECODING_ERROR,
-                                      ERR_LDAPURL_INVALID_HEX_CHAR.get(
-                                           s.charAt(pos-1)));
-          }
-
-          if (pos >= length)
-          {
-            throw new LDAPException(ResultCode.DECODING_ERROR,
-                                    ERR_LDAPURL_HEX_STRING_TOO_SHORT.get(s));
-          }
-
-          switch (s.charAt(pos++))
-          {
-            case '0':
-              byteBuffer.put(b);
-              break;
-            case '1':
-              byteBuffer.put((byte) (b | 0x01));
-              break;
-            case '2':
-              byteBuffer.put((byte) (b | 0x02));
-              break;
-            case '3':
-              byteBuffer.put((byte) (b | 0x03));
-              break;
-            case '4':
-              byteBuffer.put((byte) (b | 0x04));
-              break;
-            case '5':
-              byteBuffer.put((byte) (b | 0x05));
-              break;
-            case '6':
-              byteBuffer.put((byte) (b | 0x06));
-              break;
-            case '7':
-              byteBuffer.put((byte) (b | 0x07));
-              break;
-            case '8':
-              byteBuffer.put((byte) (b | 0x08));
-              break;
-            case '9':
-              byteBuffer.put((byte) (b | 0x09));
-              break;
-            case 'a':
-            case 'A':
-              byteBuffer.put((byte) (b | 0x0A));
-              break;
-            case 'b':
-            case 'B':
-              byteBuffer.put((byte) (b | 0x0B));
-              break;
-            case 'c':
-            case 'C':
-              byteBuffer.put((byte) (b | 0x0C));
-              break;
-            case 'd':
-            case 'D':
-              byteBuffer.put((byte) (b | 0x0D));
-              break;
-            case 'e':
-            case 'E':
-              byteBuffer.put((byte) (b | 0x0E));
-              break;
-            case 'f':
-            case 'F':
-              byteBuffer.put((byte) (b | 0x0F));
-              break;
-            default:
-              throw new LDAPException(ResultCode.DECODING_ERROR,
-                                      ERR_LDAPURL_INVALID_HEX_CHAR.get(
-                                           s.charAt(pos-1)));
-          }
-
-          if ((pos < length) && (s.charAt(pos) != '%'))
-          {
+          case '0':
+            b = 0x00;
             break;
-          }
+          case '1':
+            b = 0x10;
+            break;
+          case '2':
+            b = 0x20;
+            break;
+          case '3':
+            b = 0x30;
+            break;
+          case '4':
+            b = 0x40;
+            break;
+          case '5':
+            b = 0x50;
+            break;
+          case '6':
+            b = 0x60;
+            break;
+          case '7':
+            b = 0x70;
+            break;
+          case '8':
+            b = (byte) 0x80;
+            break;
+          case '9':
+            b = (byte) 0x90;
+            break;
+          case 'a':
+          case 'A':
+            b = (byte) 0xA0;
+            break;
+          case 'b':
+          case 'B':
+            b = (byte) 0xB0;
+            break;
+          case 'c':
+          case 'C':
+            b = (byte) 0xC0;
+            break;
+          case 'd':
+          case 'D':
+            b = (byte) 0xD0;
+            break;
+          case 'e':
+          case 'E':
+            b = (byte) 0xE0;
+            break;
+          case 'f':
+          case 'F':
+            b = (byte) 0xF0;
+            break;
+          default:
+            throw new LDAPException(ResultCode.DECODING_ERROR,
+                                    ERR_LDAPURL_INVALID_HEX_CHAR.get(
+                                         s.charAt(pos-1)));
         }
 
-        byteBuffer.flip();
-        final byte[] byteArray = new byte[byteBuffer.limit()];
-        byteBuffer.get(byteArray);
+        if (pos >= length)
+        {
+          throw new LDAPException(ResultCode.DECODING_ERROR,
+                                  ERR_LDAPURL_HEX_STRING_TOO_SHORT.get(s));
+        }
 
-        buffer.append(StaticUtils.toUTF8String(byteArray));
+        switch (s.charAt(pos++))
+        {
+          case '0':
+            buffer.append(b);
+            break;
+          case '1':
+            buffer.append((byte) (b | 0x01));
+            break;
+          case '2':
+            buffer.append((byte) (b | 0x02));
+            break;
+          case '3':
+            buffer.append((byte) (b | 0x03));
+            break;
+          case '4':
+            buffer.append((byte) (b | 0x04));
+            break;
+          case '5':
+            buffer.append((byte) (b | 0x05));
+            break;
+          case '6':
+            buffer.append((byte) (b | 0x06));
+            break;
+          case '7':
+            buffer.append((byte) (b | 0x07));
+            break;
+          case '8':
+            buffer.append((byte) (b | 0x08));
+            break;
+          case '9':
+            buffer.append((byte) (b | 0x09));
+            break;
+          case 'a':
+          case 'A':
+            buffer.append((byte) (b | 0x0A));
+            break;
+          case 'b':
+          case 'B':
+            buffer.append((byte) (b | 0x0B));
+            break;
+          case 'c':
+          case 'C':
+            buffer.append((byte) (b | 0x0C));
+            break;
+          case 'd':
+          case 'D':
+            buffer.append((byte) (b | 0x0D));
+            break;
+          case 'e':
+          case 'E':
+            buffer.append((byte) (b | 0x0E));
+            break;
+          case 'f':
+          case 'F':
+            buffer.append((byte) (b | 0x0F));
+            break;
+          default:
+            throw new LDAPException(ResultCode.DECODING_ERROR,
+                                    ERR_LDAPURL_INVALID_HEX_CHAR.get(
+                                         s.charAt(pos-1)));
+        }
       }
       else
       {
@@ -1090,7 +1096,8 @@ public final class LDAPURL
    * @param  s       The string to be encoded.
    * @param  buffer  The buffer to which the encoded string will be written.
    */
-  private static void percentEncode(final String s, final StringBuilder buffer)
+  private static void percentEncode(@NotNull final String s,
+                                    @NotNull final StringBuilder buffer)
   {
     final int length = s.length();
     for (int i=0; i < length; i++)
@@ -1200,6 +1207,7 @@ public final class LDAPURL
    *
    * @return  The scheme for this LDAP URL.
    */
+  @NotNull()
   public String getScheme()
   {
     return scheme;
@@ -1214,6 +1222,7 @@ public final class LDAPURL
    *          include a host and the client is supposed to have some external
    *          knowledge of what the host should be.
    */
+  @Nullable()
   public String getHost()
   {
     return host;
@@ -1264,6 +1273,7 @@ public final class LDAPURL
    *
    * @return  The base DN for this LDAP URL.
    */
+  @NotNull()
   public DN getBaseDN()
   {
     return baseDN;
@@ -1289,6 +1299,7 @@ public final class LDAPURL
    *
    * @return  The attribute list for this LDAP URL.
    */
+  @NotNull()
   public String[] getAttributes()
   {
     return attributes;
@@ -1314,6 +1325,7 @@ public final class LDAPURL
    *
    * @return  The scope for this LDAP URL.
    */
+  @NotNull()
   public SearchScope getScope()
   {
     return scope;
@@ -1339,6 +1351,7 @@ public final class LDAPURL
    *
    * @return  The filter for this LDAP URL.
    */
+  @NotNull()
   public Filter getFilter()
   {
     return filter;
@@ -1366,6 +1379,7 @@ public final class LDAPURL
    * @return  The search request created from the base DN, scope, filter, and
    *          requested attributes from this LDAP URL.
    */
+  @NotNull()
   public SearchRequest toSearchRequest()
   {
     return new SearchRequest(baseDN.toString(), scope, filter, attributes);
@@ -1397,7 +1411,7 @@ public final class LDAPURL
    *          {@code false} if not.
    */
   @Override()
-  public boolean equals(final Object o)
+  public boolean equals(@Nullable final Object o)
   {
     if (o == null)
     {
@@ -1426,6 +1440,7 @@ public final class LDAPURL
    * @return  A string representation of this LDAP URL.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return urlString;
@@ -1438,6 +1453,7 @@ public final class LDAPURL
    *
    * @return  A normalized string representation of this LDAP URL.
    */
+  @NotNull()
   public String toNormalizedString()
   {
     if (normalizedURLString == null)
@@ -1459,7 +1475,7 @@ public final class LDAPURL
    * @param  buffer  The buffer to which to append the normalized string
    *                 representation of this LDAP URL.
    */
-  public void toNormalizedString(final StringBuilder buffer)
+  public void toNormalizedString(@NotNull final StringBuilder buffer)
   {
     buffer.append(scheme);
     buffer.append("://");

@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.ldap.sdk.LDAPEntrySource;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -71,11 +88,11 @@ public final class PersistedObjects<T>
 
 
   // The LDAP entry source that will be used to read matching entries.
-  private final EntrySource entrySource;
+  @NotNull private final EntrySource entrySource;
 
   // The LDAP persister that will be used to decode the entries that are
   // returned.
-  private final LDAPPersister<T> persister;
+  @NotNull private final LDAPPersister<T> persister;
 
 
 
@@ -88,8 +105,8 @@ public final class PersistedObjects<T>
    * @param  entrySource  The entry source that will be used to read entries
    *                      returned from the search.
    */
-  PersistedObjects(final LDAPPersister<T> persister,
-                   final EntrySource entrySource)
+  PersistedObjects(@NotNull final LDAPPersister<T> persister,
+                   @NotNull final EntrySource entrySource)
   {
     this.persister   = persister;
     this.entrySource = entrySource;
@@ -109,6 +126,7 @@ public final class PersistedObjects<T>
    *                                entry from the server, or when trying to
    *                                decode that entry as an object.
    */
+  @Nullable()
   public T next()
          throws LDAPPersistException
   {
@@ -172,6 +190,7 @@ public final class PersistedObjects<T>
    * @return  The search result for the search operation, or {@code null} if it
    *          is not available (e.g., because the search has not yet completed).
    */
+  @Nullable()
   public SearchResult getSearchResult()
   {
     if (entrySource instanceof LDAPEntrySource)

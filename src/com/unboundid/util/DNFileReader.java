@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -52,13 +67,13 @@ public final class DNFileReader
 {
   // A counter used to keep track of the line number for information read from
   // the file.
-  private final AtomicLong lineNumberCounter;
+  @NotNull private final AtomicLong lineNumberCounter;
 
   // The reader to use to read the DNs.
-  private final BufferedReader reader;
+  @NotNull private final BufferedReader reader;
 
   // The file from which the DNs are being read.
-  private final File dnFile;
+  @NotNull private final File dnFile;
 
 
 
@@ -72,7 +87,7 @@ public final class DNFileReader
    * @throws  IOException  If a problem is encountered while opening the file
    *                       for reading.
    */
-  public DNFileReader(final String path)
+  public DNFileReader(@NotNull final String path)
          throws IOException
   {
     this(new File(path));
@@ -89,7 +104,7 @@ public final class DNFileReader
    * @throws  IOException  If a problem is encountered while opening the file
    *                       for reading.
    */
-  public DNFileReader(final File dnFile)
+  public DNFileReader(@NotNull final File dnFile)
          throws IOException
   {
     this.dnFile = dnFile;
@@ -111,6 +126,7 @@ public final class DNFileReader
    *
    * @throws  LDAPException  If data read from the file can't be parsed as a DN.
    */
+  @Nullable()
   public DN readDN()
          throws IOException, LDAPException
   {

@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -45,6 +60,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.extensions.StartTLSExtendedRequest;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -63,15 +80,23 @@ import static com.unboundid.ldap.listener.ListenerMessages.*;
 public final class StartTLSRequestHandler
        extends LDAPListenerRequestHandler
 {
+  // Indicates whether the listener should request that the client provide a
+  // certificate.
+  private final boolean requestClientCertificate;
+
+  // Indicates whether the listener should require that the client provide a
+  // certificate.
+  private final boolean requireClientCertificate;
+
   // The client connection with which this request handler is associated.
-  private final LDAPListenerClientConnection connection;
+  @Nullable private final LDAPListenerClientConnection connection;
 
   // The request handler that will be used to process all operations except the
   // StartTLS extended operation.
-  private final LDAPListenerRequestHandler requestHandler;
+  @NotNull private final LDAPListenerRequestHandler requestHandler;
 
   // The SSL socket factory that will be used to SSL-enable the existing socket.
-  private final SSLSocketFactory sslSocketFactory;
+  @NotNull private final SSLSocketFactory sslSocketFactory;
 
 
 
@@ -85,11 +110,48 @@ public final class StartTLSRequestHandler
    *                           all operations except StartTLS extended
    *                           operations.
    */
-  public StartTLSRequestHandler(final SSLSocketFactory sslSocketFactory,
-                                final LDAPListenerRequestHandler requestHandler)
+  public StartTLSRequestHandler(
+              @NotNull final SSLSocketFactory sslSocketFactory,
+              @NotNull final LDAPListenerRequestHandler requestHandler)
   {
-    this.sslSocketFactory = sslSocketFactory;
-    this.requestHandler   = requestHandler;
+    this(sslSocketFactory, requestHandler, false, false);
+  }
+
+
+
+  /**
+   * Creates a new StartTLS request handler with the provided information.
+   *
+   * @param  sslSocketFactory          The SSL socket factory that will be used
+   *                                   to convert the existing socket to use SSL
+   *                                   encryption.
+   * @param  requestHandler            The request handler that will be used to
+   *                                   process all operations except StartTLS
+   *                                   extended operations.
+   * @param  requestClientCertificate  Indicates whether the listener should
+   *                                   request that the client present its own
+   *                                   certificate chain during TLS negotiation.
+   *                                   This will be ignored for non-TLS-based
+   *                                   connections.
+   * @param  requireClientCertificate  Indicates whether the listener should
+   *                                   require that the client present its own
+   *                                   certificate chain during TLS negotiation,
+   *                                   and should fail negotiation if the client
+   *                                   does not present one.  This will be
+   *                                   ignored for non-TLS-based connections or
+   *                                   if {@code requestClientCertificate} is
+   *                                   {@code false}.
+   */
+  public StartTLSRequestHandler(
+              @NotNull final SSLSocketFactory sslSocketFactory,
+              @NotNull final LDAPListenerRequestHandler requestHandler,
+              final boolean requestClientCertificate,
+              final boolean requireClientCertificate)
+  {
+    this.sslSocketFactory         = sslSocketFactory;
+    this.requestHandler           = requestHandler;
+    this.requestClientCertificate = requestClientCertificate;
+    this.requireClientCertificate = requireClientCertificate;
 
     connection = null;
   }
@@ -99,21 +161,39 @@ public final class StartTLSRequestHandler
   /**
    * Creates a new StartTLS request handler with the provided information.
    *
-   * @param  sslSocketFactory  The SSL socket factory that will be used to
-   *                           convert the existing socket to use SSL
-   *                           encryption.
-   * @param  requestHandler    The request handler that will be used to process
-   *                           all operations except StartTLS extended
-   *                           operations.
+   * @param  sslSocketFactory          The SSL socket factory that will be used
+   *                                   to convert the existing socket to use SSL
+   *                                   encryption.
+   * @param  requestHandler            The request handler that will be used to
+   *                                   process all operations except StartTLS
+   *                                   extended operations.
    * @param  connection        The connection to the associated client.
+   * @param  requestClientCertificate  Indicates whether the listener should
+   *                                   request that the client present its own
+   *                                   certificate chain during TLS negotiation.
+   *                                   This will be ignored for non-TLS-based
+   *                                   connections.
+   * @param  requireClientCertificate  Indicates whether the listener should
+   *                                   require that the client present its own
+   *                                   certificate chain during TLS negotiation,
+   *                                   and should fail negotiation if the client
+   *                                   does not present one.  This will be
+   *                                   ignored for non-TLS-based connections or
+   *                                   if {@code requestClientCertificate} is
+   *                                   {@code false}.
    */
-  private StartTLSRequestHandler(final SSLSocketFactory sslSocketFactory,
-               final LDAPListenerRequestHandler requestHandler,
-               final LDAPListenerClientConnection connection)
+  private StartTLSRequestHandler(
+               @NotNull final SSLSocketFactory sslSocketFactory,
+               @NotNull final LDAPListenerRequestHandler requestHandler,
+               @NotNull final LDAPListenerClientConnection connection,
+               final boolean requestClientCertificate,
+               final boolean requireClientCertificate)
   {
-    this.sslSocketFactory = sslSocketFactory;
-    this.requestHandler   = requestHandler;
-    this.connection       = connection;
+    this.sslSocketFactory         = sslSocketFactory;
+    this.requestHandler           = requestHandler;
+    this.connection               = connection;
+    this.requestClientCertificate = requestClientCertificate;
+    this.requireClientCertificate = requireClientCertificate;
   }
 
 
@@ -122,12 +202,14 @@ public final class StartTLSRequestHandler
    * {@inheritDoc}
    */
   @Override()
-  public StartTLSRequestHandler
-              newInstance(final LDAPListenerClientConnection connection)
+  @NotNull()
+  public StartTLSRequestHandler newInstance(
+              @NotNull final LDAPListenerClientConnection connection)
          throws LDAPException
   {
     return new StartTLSRequestHandler(sslSocketFactory,
-         requestHandler.newInstance(connection), connection);
+         requestHandler.newInstance(connection), connection,
+         requestClientCertificate, requireClientCertificate);
   }
 
 
@@ -148,8 +230,8 @@ public final class StartTLSRequestHandler
    */
   @Override()
   public void processAbandonRequest(final int messageID,
-                                    final AbandonRequestProtocolOp request,
-                                    final List<Control> controls)
+                   @NotNull final AbandonRequestProtocolOp request,
+                   @NotNull final List<Control> controls)
   {
     requestHandler.processAbandonRequest(messageID, request, controls);
   }
@@ -160,9 +242,10 @@ public final class StartTLSRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processAddRequest(final int messageID,
-                                       final AddRequestProtocolOp request,
-                                       final List<Control> controls)
+                          @NotNull final AddRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     return requestHandler.processAddRequest(messageID, request, controls);
   }
@@ -173,9 +256,10 @@ public final class StartTLSRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processBindRequest(final int messageID,
-                                        final BindRequestProtocolOp request,
-                                        final List<Control> controls)
+                          @NotNull final BindRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     return requestHandler.processBindRequest(messageID, request, controls);
   }
@@ -186,9 +270,10 @@ public final class StartTLSRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processCompareRequest(final int messageID,
-                          final CompareRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final CompareRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     return requestHandler.processCompareRequest(messageID, request, controls);
   }
@@ -199,9 +284,10 @@ public final class StartTLSRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processDeleteRequest(final int messageID,
-                                          final DeleteRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final DeleteRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     return requestHandler.processDeleteRequest(messageID, request, controls);
   }
@@ -212,9 +298,10 @@ public final class StartTLSRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processExtendedRequest(final int messageID,
-                          final ExtendedRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final ExtendedRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     if (request.getOID().equals(StartTLSExtendedRequest.STARTTLS_REQUEST_OID))
     {
@@ -225,8 +312,9 @@ public final class StartTLSRequestHandler
              new StartTLSExtendedRequest(new ExtendedRequest(request.getOID(),
                   request.getValue()));
 
-        final OutputStream clearOutputStream =
-             connection.convertToTLS(sslSocketFactory);
+        final OutputStream clearOutputStream = connection.convertToTLS(
+             sslSocketFactory, requestClientCertificate,
+             requireClientCertificate);
 
         final LDAPMessage responseMessage = new LDAPMessage(messageID,
              new ExtendedResponseProtocolOp(ResultCode.SUCCESS_INT_VALUE, null,
@@ -276,9 +364,10 @@ public final class StartTLSRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processModifyRequest(final int messageID,
-                                          final ModifyRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final ModifyRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     return requestHandler.processModifyRequest(messageID, request, controls);
   }
@@ -289,9 +378,10 @@ public final class StartTLSRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processModifyDNRequest(final int messageID,
-                          final ModifyDNRequestProtocolOp request,
-                          final List<Control> controls)
+                          @NotNull final ModifyDNRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     return requestHandler.processModifyDNRequest(messageID, request, controls);
   }
@@ -302,9 +392,10 @@ public final class StartTLSRequestHandler
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public LDAPMessage processSearchRequest(final int messageID,
-                                          final SearchRequestProtocolOp request,
-                                          final List<Control> controls)
+                          @NotNull final SearchRequestProtocolOp request,
+                          @NotNull final List<Control> controls)
   {
     return requestHandler.processSearchRequest(messageID, request, controls);
   }
@@ -316,8 +407,8 @@ public final class StartTLSRequestHandler
    */
   @Override()
   public void processUnbindRequest(final int messageID,
-                                   final UnbindRequestProtocolOp request,
-                                   final List<Control> controls)
+                   @NotNull final UnbindRequestProtocolOp request,
+                   @NotNull final List<Control> controls)
   {
     requestHandler.processUnbindRequest(messageID, request, controls);
   }

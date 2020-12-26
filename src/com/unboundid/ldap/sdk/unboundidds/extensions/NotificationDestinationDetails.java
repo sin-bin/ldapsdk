@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import java.util.List;
 
 import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -65,13 +82,13 @@ public final class NotificationDestinationDetails
 
 
   // The encoded details for this notification destination.
-  private final List<ASN1OctetString> details;
+  @NotNull private final List<ASN1OctetString> details;
 
   // The subscriptions defined for this notification destination.
-  private final List<NotificationSubscriptionDetails> subscriptions;
+  @NotNull private final List<NotificationSubscriptionDetails> subscriptions;
 
   // The unique ID for this notification destination.
-  private final String id;
+  @NotNull private final String id;
 
 
 
@@ -87,9 +104,10 @@ public final class NotificationDestinationDetails
    *                        destination.  It may be {@code null} or empty if
    *                        there are no subscriptions for this destination.
    */
-  public NotificationDestinationDetails(final String id,
-              final Collection<ASN1OctetString> details,
-              final Collection<NotificationSubscriptionDetails> subscriptions)
+  public NotificationDestinationDetails(@NotNull final String id,
+       @NotNull final Collection<ASN1OctetString> details,
+       @Nullable final Collection<NotificationSubscriptionDetails>
+            subscriptions)
   {
     Validator.ensureNotNull(id);
     Validator.ensureNotNull(details);
@@ -117,6 +135,7 @@ public final class NotificationDestinationDetails
    *
    * @return The unique ID for this destination details object.
    */
+  @NotNull()
   public String getID()
   {
     return id;
@@ -129,6 +148,7 @@ public final class NotificationDestinationDetails
    *
    * @return  The encoded details for this destination details object.
    */
+  @NotNull()
   public List<ASN1OctetString> getDetails()
   {
     return details;
@@ -143,6 +163,7 @@ public final class NotificationDestinationDetails
    * @return  The subscriptions defined for this notification destination, or
    *          an empty list if there are no subscriptions for this destination.
    */
+  @NotNull()
   public List<NotificationSubscriptionDetails> getSubscriptions()
   {
     return subscriptions;
@@ -158,6 +179,7 @@ public final class NotificationDestinationDetails
    *          object.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -173,7 +195,7 @@ public final class NotificationDestinationDetails
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("NotificationDestination(id='");
     buffer.append(id);

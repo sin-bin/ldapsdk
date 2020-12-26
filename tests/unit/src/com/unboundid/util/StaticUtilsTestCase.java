@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,8 +39,10 @@ package com.unboundid.util;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,9 +53,12 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.TimeZone;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.testng.annotations.DataProvider;
@@ -618,27 +638,69 @@ public class StaticUtilsTestCase
   private static Date getDate(int year, int month, int day, int hour, int min,
                               int sec, int msec, int offset)
   {
-    GregorianCalendar gc =
+    return getDate(year, month, day, hour, min, sec, msec, offset, 0);
+  }
+
+
+
+  /**
+   * Retrieves a {@code Date} object that corresponds to the specified time.
+   *
+   * @param  year          The year to use for the date.
+   * @param  month         The month of the year to use for the date.  Note that
+   *                       this is zero-based (so January is 0, February is 1,
+   *                       ..., and December is 11).
+   * @param  day           The day of the month to use for the date.  Note that
+   *                       this is 1-based, so values should be between 1 and 31
+   *                       (or less in months with fewer days).
+   * @param  hour          The hour of the day to use for the date.  It should
+   *                       be between 0 and 23.
+   * @param  min           The minute of the hour to use for the date.  It
+   *                       should be between 0 and 59.
+   * @param  sec           The second of the hour to use for the date.  It
+   *                       should be between 0 and 61.
+   * @param  msec          The millisecond value to use for the date.  It should
+   *                       be between 0 and 999.
+   * @param  hourOffset    The number of hours to be offset from GMT.
+   * @param  minuteOffset  The number of minutes to be offset from GMT.
+   *
+   * @return  A {@code Date} object that corresponds to the specified time.
+   */
+  private static Date getDate(int year, int month, int day, int hour, int min,
+                              int sec, int msec, int hourOffset,
+                              int minuteOffset)
+  {
+    final GregorianCalendar gc =
          new GregorianCalendar(year, month, day, hour, min, sec);
     gc.set(GregorianCalendar.MILLISECOND, msec);
 
     String tzID;
-    if (offset >= 10)
+    if (hourOffset >= 10)
     {
-      tzID = "GMT+" + offset + "00";
+      tzID = "GMT+" + hourOffset;
     }
-    else if (offset >= 0)
+    else if (hourOffset >= 0)
     {
-      tzID = "GMT+0" + offset + "00";
+      tzID = "GMT+0" + hourOffset;
     }
-    else if (offset >= -9)
+    else if (hourOffset >= -9)
     {
-      tzID = "GMT-0" + Math.abs(offset) + "00";
+      tzID = "GMT-0" + Math.abs(hourOffset);
     }
     else
     {
-      tzID = "GMT" + offset + "00";
+      tzID = "GMT" + hourOffset;
     }
+
+    if (minuteOffset >= 10)
+    {
+      tzID += ":" + minuteOffset;
+    }
+    else
+    {
+      tzID += ":0" + minuteOffset;
+    }
+
     gc.setTimeZone(TimeZone.getTimeZone(tzID));
 
     return gc.getTime();
@@ -2037,7 +2099,8 @@ public class StaticUtilsTestCase
 
 
   /**
-   * Provides a set of test cases for the isASCIIString method.
+   * Provides a set of test cases for the isASCIIString method that takes a byte
+   * array argument.
    *
    * @param  b        The array to be examined.
    * @param  isASCII  Indicates whether the contents of the provided array
@@ -2046,10 +2109,30 @@ public class StaticUtilsTestCase
    * @throws  Exception  If an unexpected problem occurs.
    */
   @Test(dataProvider = "testIsASCII")
-  public void testIsASCIIString(final byte[] b, final boolean isASCII)
+  public void testIsByteArrayASCIIString(final byte[] b, final boolean isASCII)
          throws Exception
   {
     assertEquals(StaticUtils.isASCIIString(b), isASCII);
+  }
+
+
+
+  /**
+   * Provides a set of test cases for the isASCIIString method that takes a
+   * string argument.
+   *
+   * @param  b        The array to be examined.
+   * @param  isASCII  Indicates whether the contents of the provided array
+   *                  represent a valid ASCII string.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(dataProvider = "testIsASCII")
+  public void testIsStringASCIIString(final byte[] b, final boolean isASCII)
+         throws Exception
+  {
+    assertEquals(StaticUtils.isASCIIString(StaticUtils.toUTF8String(b)),
+         isASCII);
   }
 
 
@@ -2170,6 +2253,49 @@ public class StaticUtilsTestCase
       {
         StaticUtils.getBytes("jalape\u00F1o"),
         false
+      },
+
+      new Object[]
+      {
+        StaticUtils.getBytes("regular-hyphen"),
+        true
+      },
+
+      new Object[]
+      {
+        StaticUtils.getBytes("en\u2013dash"),
+        false
+      },
+
+      new Object[]
+      {
+        StaticUtils.getBytes("em\u2014dash"),
+        false
+      },
+
+      new Object[]
+      {
+        StaticUtils.getBytes("\u2018curly single quotes\u2019"),
+        false
+      },
+
+      new Object[]
+      {
+        StaticUtils.getBytes("\u201ccurly double quotes\u201d"),
+        false
+      },
+
+      new Object[]
+      {
+        StaticUtils.getBytes("Smiley Face Emoji \uD83D\uDE00"),
+        false
+      },
+
+      new Object[]
+      {
+        StaticUtils.getBytes(
+             "United States Flag Emoji \uD83C\uDDFA\uD83C\uDDF8"),
+        false
       }
     };
   }
@@ -2177,7 +2303,8 @@ public class StaticUtilsTestCase
 
 
   /**
-   * Provides a set of test cases for the isPrintableString method.
+   * Provides a set of test cases for the isPrintableString method that takes a
+   * byte array argument.
    *
    * @param  b            The array to be examined.
    * @param  isPrintable  Indicates whether the contents of the provided array
@@ -2186,10 +2313,32 @@ public class StaticUtilsTestCase
    * @throws  Exception  If an unexpected problem occurs.
    */
   @Test(dataProvider = "testIsPrintable")
-  public void testIsPrintableString(final byte[] b, final boolean isPrintable)
+  public void testByteArrayIsPrintableString(final byte[] b,
+                                             final boolean isPrintable)
          throws Exception
   {
     assertEquals(StaticUtils.isPrintableString(b), isPrintable);
+  }
+
+
+
+  /**
+   * Provides a set of test cases for the isPrintableString method that takes a
+   * string argument.
+   *
+   * @param  b            The array to be examined.
+   * @param  isPrintable  Indicates whether the provided string represents a
+   *                      valid LDAP printable string.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(dataProvider = "testIsPrintable")
+  public void testStringIsPrintableString(final byte[] b,
+                                          final boolean isPrintable)
+         throws Exception
+  {
+    assertEquals(StaticUtils.isPrintableString(StaticUtils.toUTF8String(b)),
+         isPrintable);
   }
 
 
@@ -2455,6 +2604,47 @@ public class StaticUtilsTestCase
     assertEquals(StaticUtils.stringToLines(
          "\r\ntest1\ntest2\r\ntest3\n\ntest4\r\n\r\n"),
          Arrays.asList("", "test1", "test2", "test3", "", "test4", ""));
+  }
+
+
+
+  /**
+   * Tests the {@code linesToString} methods.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testLinesToString()
+         throws Exception
+  {
+    final String[] nullStringArray = null;
+    assertNotNull(StaticUtils.linesToString(nullStringArray));
+    assertEquals(StaticUtils.linesToString(nullStringArray), "");
+
+    final List<String> nullStringList = null;
+    assertNotNull(StaticUtils.linesToString(nullStringList));
+    assertEquals(StaticUtils.linesToString(nullStringList), "");
+
+    assertNotNull(StaticUtils.linesToString(StaticUtils.NO_STRINGS));
+    assertEquals(StaticUtils.linesToString(StaticUtils.NO_STRINGS), "");
+
+    assertNotNull(StaticUtils.linesToString());
+    assertEquals(StaticUtils.linesToString(), "");
+
+    assertEquals(StaticUtils.linesToString(""),
+         StaticUtils.EOL);
+
+    assertEquals(StaticUtils.linesToString("line1"),
+         "line1" + StaticUtils.EOL);
+
+    assertEquals(StaticUtils.linesToString("line1", "line2"),
+         "line1" + StaticUtils.EOL +
+              "line2" + StaticUtils.EOL);
+
+    assertEquals(StaticUtils.linesToString("line1", "", "line2"),
+         "line1" + StaticUtils.EOL +
+              StaticUtils.EOL +
+              "line2" + StaticUtils.EOL);
   }
 
 
@@ -2787,6 +2977,232 @@ public class StaticUtilsTestCase
 
 
   /**
+   * Provides test coverage for the {@code treeSetOf} method.
+   *
+   * @throws  Exception  If an unexpected error occurs.
+   */
+  @Test()
+  public void testTreeSetOf()
+         throws Exception
+  {
+    assertEquals(StaticUtils.treeSetOf(), new TreeSet<>());
+
+    assertEquals(StaticUtils.treeSetOf("foo"),
+         new TreeSet<>(Collections.singleton("foo")));
+
+    assertEquals(StaticUtils.treeSetOf("foo", "bar"),
+         new TreeSet<>(Arrays.asList("foo", "bar")));
+  }
+
+
+
+  /**
+   * Tests the {@code mapOf} methods that take varying numbers of key-value
+   * pairs.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testMapOfVariousSizes()
+         throws Exception
+  {
+    final Map<String,Integer> m1 = StaticUtils.mapOf("k1", 1);
+    assertNotNull(m1);
+    assertEquals(m1.size(), 1);
+    assertEquals(m1.get("k1"), Integer.valueOf(1));
+
+    final Map<String,Integer> m2 = StaticUtils.mapOf("k1", 1, "k2", 2);
+    assertNotNull(m2);
+    assertEquals(m2.size(), 2);
+    assertEquals(m2.get("k1"), Integer.valueOf(1));
+    assertEquals(m2.get("k2"), Integer.valueOf(2));
+
+    final Map<String,Integer> m3 = StaticUtils.mapOf("k1", 1, "k2", 2, "k3", 3);
+    assertNotNull(m3);
+    assertEquals(m3.size(), 3);
+    assertEquals(m3.get("k1"), Integer.valueOf(1));
+    assertEquals(m3.get("k2"), Integer.valueOf(2));
+    assertEquals(m3.get("k3"), Integer.valueOf(3));
+
+    final Map<String,Integer> m4 = StaticUtils.mapOf("k1", 1, "k2", 2, "k3", 3,
+         "k4", 4);
+    assertNotNull(m4);
+    assertEquals(m4.size(), 4);
+    assertEquals(m4.get("k1"), Integer.valueOf(1));
+    assertEquals(m4.get("k2"), Integer.valueOf(2));
+    assertEquals(m4.get("k3"), Integer.valueOf(3));
+    assertEquals(m4.get("k4"), Integer.valueOf(4));
+
+    final Map<String,Integer> m5 = StaticUtils.mapOf("k1", 1, "k2", 2, "k3", 3,
+         "k4", 4, "k5", 5);
+    assertNotNull(m5);
+    assertEquals(m5.size(), 5);
+    assertEquals(m5.get("k1"), Integer.valueOf(1));
+    assertEquals(m5.get("k2"), Integer.valueOf(2));
+    assertEquals(m5.get("k3"), Integer.valueOf(3));
+    assertEquals(m5.get("k4"), Integer.valueOf(4));
+    assertEquals(m5.get("k5"), Integer.valueOf(5));
+
+    final Map<String,Integer> m6 = StaticUtils.mapOf("k1", 1, "k2", 2, "k3", 3,
+         "k4", 4, "k5", 5, "k6", 6);
+    assertNotNull(m6);
+    assertEquals(m6.size(), 6);
+    assertEquals(m6.get("k1"), Integer.valueOf(1));
+    assertEquals(m6.get("k2"), Integer.valueOf(2));
+    assertEquals(m6.get("k3"), Integer.valueOf(3));
+    assertEquals(m6.get("k4"), Integer.valueOf(4));
+    assertEquals(m6.get("k5"), Integer.valueOf(5));
+    assertEquals(m6.get("k6"), Integer.valueOf(6));
+
+    final Map<String,Integer> m7 = StaticUtils.mapOf("k1", 1, "k2", 2, "k3", 3,
+         "k4", 4, "k5", 5, "k6", 6, "k7", 7);
+    assertNotNull(m7);
+    assertEquals(m7.size(), 7);
+    assertEquals(m7.get("k1"), Integer.valueOf(1));
+    assertEquals(m7.get("k2"), Integer.valueOf(2));
+    assertEquals(m7.get("k3"), Integer.valueOf(3));
+    assertEquals(m7.get("k4"), Integer.valueOf(4));
+    assertEquals(m7.get("k5"), Integer.valueOf(5));
+    assertEquals(m7.get("k6"), Integer.valueOf(6));
+    assertEquals(m7.get("k7"), Integer.valueOf(7));
+
+    final Map<String,Integer> m8 = StaticUtils.mapOf("k1", 1, "k2", 2, "k3", 3,
+         "k4", 4, "k5", 5, "k6", 6, "k7", 7, "k8", 8);
+    assertNotNull(m8);
+    assertEquals(m8.size(), 8);
+    assertEquals(m8.get("k1"), Integer.valueOf(1));
+    assertEquals(m8.get("k2"), Integer.valueOf(2));
+    assertEquals(m8.get("k3"), Integer.valueOf(3));
+    assertEquals(m8.get("k4"), Integer.valueOf(4));
+    assertEquals(m8.get("k5"), Integer.valueOf(5));
+    assertEquals(m8.get("k6"), Integer.valueOf(6));
+    assertEquals(m8.get("k7"), Integer.valueOf(7));
+    assertEquals(m8.get("k8"), Integer.valueOf(8));
+
+    final Map<String,Integer> m9 = StaticUtils.mapOf("k1", 1, "k2", 2, "k3", 3,
+         "k4", 4, "k5", 5, "k6", 6, "k7", 7, "k8", 8, "k9", 9);
+    assertNotNull(m9);
+    assertEquals(m9.size(), 9);
+    assertEquals(m9.get("k1"), Integer.valueOf(1));
+    assertEquals(m9.get("k2"), Integer.valueOf(2));
+    assertEquals(m9.get("k3"), Integer.valueOf(3));
+    assertEquals(m9.get("k4"), Integer.valueOf(4));
+    assertEquals(m9.get("k5"), Integer.valueOf(5));
+    assertEquals(m9.get("k6"), Integer.valueOf(6));
+    assertEquals(m9.get("k7"), Integer.valueOf(7));
+    assertEquals(m9.get("k8"), Integer.valueOf(8));
+    assertEquals(m9.get("k9"), Integer.valueOf(9));
+
+    final Map<String,Integer> m10 = StaticUtils.mapOf("k1", 1, "k2", 2, "k3", 3,
+         "k4", 4, "k5", 5, "k6", 6, "k7", 7, "k8", 8, "k9", 9, "k10", 10);
+    assertNotNull(m10);
+    assertEquals(m10.size(), 10);
+    assertEquals(m10.get("k1"), Integer.valueOf(1));
+    assertEquals(m10.get("k2"), Integer.valueOf(2));
+    assertEquals(m10.get("k3"), Integer.valueOf(3));
+    assertEquals(m10.get("k4"), Integer.valueOf(4));
+    assertEquals(m10.get("k5"), Integer.valueOf(5));
+    assertEquals(m10.get("k6"), Integer.valueOf(6));
+    assertEquals(m10.get("k7"), Integer.valueOf(7));
+    assertEquals(m10.get("k8"), Integer.valueOf(8));
+    assertEquals(m10.get("k9"), Integer.valueOf(9));
+    assertEquals(m10.get("k10"), Integer.valueOf(10));
+  }
+
+
+
+  /**
+   * Tests the {@code mapOf} method that takes keys and values of the same type
+   * provided as varargs with keys in even-numbered indexes and values in
+   * odd-numbered indexes.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testMapOfArray()
+         throws Exception
+  {
+    final Map<String,String> m1 = StaticUtils.mapOf();
+    assertNotNull(m1);
+    assertTrue(m1.isEmpty());
+
+    final Map<String,String> m2 = StaticUtils.mapOf((String[]) null);
+    assertNotNull(m2);
+    assertTrue(m2.isEmpty());
+
+    try
+    {
+      StaticUtils.mapOf("foo");
+    }
+    catch (final LDAPSDKUsageException e)
+    {
+      // This was expected.
+    }
+
+    final Map<String,String> m3 = StaticUtils.mapOf("key1", "value1",
+         "key2", "value2", "key3", "value3", "key4", "value4", "key5", "value5",
+         "key6", "value6", "key7", "value7", "key8", "value8", "key9", "value9",
+         "key10", "value10", "key11", "value11", "key12", "value12");
+    assertNotNull(m3);
+    assertEquals(m3.size(), 12);
+    assertEquals(m3.get("key1"), "value1");
+    assertEquals(m3.get("key2"), "value2");
+    assertEquals(m3.get("key3"), "value3");
+    assertEquals(m3.get("key4"), "value4");
+    assertEquals(m3.get("key5"), "value5");
+    assertEquals(m3.get("key6"), "value6");
+    assertEquals(m3.get("key7"), "value7");
+    assertEquals(m3.get("key8"), "value8");
+    assertEquals(m3.get("key9"), "value9");
+    assertEquals(m3.get("key10"), "value10");
+    assertEquals(m3.get("key11"), "value11");
+    assertEquals(m3.get("key12"), "value12");
+  }
+
+
+
+  /**
+   * Tests the {@code mapOfObjectPairs} method.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testMapOfObjectPairs()
+         throws Exception
+  {
+    final Map<String,Integer> m1 = StaticUtils.mapOfObjectPairs();
+    assertNotNull(m1);
+    assertTrue(m1.isEmpty());
+
+    final ObjectPair<String,Integer>[] nullItems = null;
+    final Map<String,Integer> m2 = StaticUtils.mapOfObjectPairs(nullItems);
+    assertNotNull(m2);
+    assertTrue(m2.isEmpty());
+
+    final Map<String,Integer> m3 = StaticUtils.mapOfObjectPairs(
+         new ObjectPair<>("k1", 1));
+    assertNotNull(m3);
+    assertEquals(m3.size(), 1);
+    assertEquals(m3.get("k1"), Integer.valueOf(1));
+
+    final Map<String,Integer> m4 = StaticUtils.mapOfObjectPairs(
+         new ObjectPair<>("k1", 1),
+         new ObjectPair<>("k2", 2),
+         new ObjectPair<>("k3", 3),
+         new ObjectPair<>("k4", 4),
+         new ObjectPair<>("k5", 5));
+    assertNotNull(m4);
+    assertEquals(m4.size(), 5);
+    assertEquals(m4.get("k1"), Integer.valueOf(1));
+    assertEquals(m4.get("k2"), Integer.valueOf(2));
+    assertEquals(m4.get("k3"), Integer.valueOf(3));
+    assertEquals(m4.get("k4"), Integer.valueOf(4));
+    assertEquals(m4.get("k5"), Integer.valueOf(5));
+  }
+
+
+
+  /**
    * Provides test coverage for the {@code getSystemProperties} method.
    *
    * @throws  Exception  If an unexpected problem occurs.
@@ -2828,5 +3244,988 @@ public class StaticUtilsTestCase
     assertNotNull(StaticUtils.getSystemProperties("foo", "bar"));
     assertEquals(StaticUtils.getSystemProperties("foo", "bar"),
          System.getProperties());
+  }
+
+
+
+  /**
+   * Tests the behavior of methods for interacting with environment variables.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testGetEnvironmentVariables()
+         throws Exception
+  {
+    final Map<String,String> definedVariables =
+         StaticUtils.getEnvironmentVariables();
+    assertNotNull(definedVariables);
+
+    for (final Map.Entry<String,String> e : definedVariables.entrySet())
+    {
+      final String name = e.getKey();
+      final String expectedValue = e.getValue();
+      final String actualValue = StaticUtils.getEnvironmentVariable(name);
+      assertEquals(actualValue, expectedValue);
+
+      assertEquals(StaticUtils.getEnvironmentVariable(name, "default value"),
+           expectedValue);
+    }
+
+    while (true)
+    {
+      final String randomKey = UUID.randomUUID().toString();
+      if (! definedVariables.containsKey(randomKey))
+      {
+        assertNull(StaticUtils.getEnvironmentVariable(randomKey));
+        assertEquals(
+             StaticUtils.getEnvironmentVariable(randomKey, "default value"),
+             "default value");
+        break;
+      }
+    }
+  }
+
+
+
+  /**
+   * Tests the behavior when trying to encode and decode the current time
+   * in the ISO 8601 format described in RFC 3339.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testCurrentTimeAsRFC3339Timestamps()
+         throws Exception
+  {
+    final long currentTime = System.currentTimeMillis();
+    final String timestamp = StaticUtils.encodeRFC3339Time(currentTime);
+    final Date decodedDate = StaticUtils.decodeRFC3339Time(timestamp);
+    assertEquals(decodedDate.getTime(), currentTime);
+  }
+
+
+
+  /**
+   * Tests the behavior when trying to encode and decode the current time (as a
+   * Date) in the ISO 8601 format described in RFC 3339.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testCurrentDateAsRFC3339Timestamps()
+         throws Exception
+  {
+    final Date currentDate = new Date();
+    final String timestamp = StaticUtils.encodeRFC3339Time(currentDate);
+    final Date decodedDate = StaticUtils.decodeRFC3339Time(timestamp);
+    assertEquals(decodedDate, currentDate);
+  }
+
+
+
+  /**
+   * Tests the behavior when trying to decode the example timestamps provided in
+   * RFC 3339.
+   *
+   * @param  timestamp     The timestamp to decode.
+   * @param  expectedDate  The date expected from decoding the timestamp.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(dataProvider="rfc3339Examples")
+  public void testDecodeRFC3339Examples(final String timestamp,
+                                        final Date expectedDate)
+         throws Exception
+  {
+    final Date decodedDate = StaticUtils.decodeRFC3339Time(timestamp);
+    assertEquals(decodedDate, expectedDate);
+  }
+
+
+
+  /**
+   * Retrieves test data based on the examples provided in RFC 3339 section 5.8.
+   *
+   * @return  Test data based on the examples provided in RFC 3339 section 5.8.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @DataProvider(name="rfc3339Examples")
+  public Object[][] getRFC3339Examples()
+         throws Exception
+  {
+    return new Object[][]
+    {
+      new Object[]
+      {
+        "1985-04-12T23:20:50.52Z",
+        getDate(1985, 3, 12, 23, 20, 50, 520, 0)
+      },
+
+      new Object[]
+      {
+        "1996-12-19T16:39:57-08:00",
+        getDate(1996, 11, 19, 16, 39, 57, 0, -8)
+      },
+
+      new Object[]
+      {
+        "1990-12-31T23:59:60Z",
+        getDate(1990, 11, 31, 23, 59, 60, 0, 0)
+      },
+
+      new Object[]
+      {
+        "1990-12-31T15:59:60-08:00",
+        getDate(1990, 11, 31, 15, 59, 60, 0, -8)
+      },
+
+      new Object[]
+      {
+        "1937-01-01T12:00:27.87+00:20",
+        getDate(1937, 0, 1, 12, 0, 27, 870, 0, 20)
+      }
+    };
+  }
+
+
+
+  /**
+   * Tests the behavior when trying to decode malformed RFC 3339 timestamps.
+   *
+   * @param  timestamp      The timestamp to decode.
+   * @param  invalidReason  The reason that the provided timestamp is invalid.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(dataProvider="malformedRFC3339Timestamps",
+       expectedExceptions = { ParseException.class })
+  public void testDecodeMalformedRFC3339Timestamps(final String timestamp,
+                                                   final String invalidReason)
+         throws Exception
+  {
+    StaticUtils.decodeRFC3339Time(timestamp);
+  }
+
+
+
+  /**
+   * Retrieves data used to test decoding with malformed RFC 3339 timestamps.
+   *
+   * @return  Data used to test decoding with malformed RFC 3339 timestamps.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @DataProvider(name="malformedRFC3339Timestamps")
+  public Object[][] getMalformedRFC3339Timestamps()
+         throws Exception
+  {
+    return new Object[][]
+    {
+      new Object[]
+      {
+        "",
+        "An empty string"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:00",
+        "Missing time zone after seconds"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:00.000",
+        "Missing time zone after sub-seconds"
+      },
+
+      new Object[]
+      {
+        "2o20-01-01T00:00:00.000Z",
+        "Non-numeric character in the year"
+      },
+
+      new Object[]
+      {
+        "2020_01-01T00:00:00.000Z",
+        "Incorrect separator between the year and month"
+      },
+
+      new Object[]
+      {
+        "2020-o1-01T00:00:00.000Z",
+        "Non-numeric character in the month"
+      },
+
+      new Object[]
+      {
+        "2020-00-01T00:00:00.000Z",
+        "Invalid month -- zero"
+      },
+
+      new Object[]
+      {
+        "2020-13-01T00:00:00.000Z",
+        "Invalid month -- too large"
+      },
+
+      new Object[]
+      {
+        "2020-01_01T00:00:00.000Z",
+        "Incorrect separator between the month and the day"
+      },
+
+      new Object[]
+      {
+        "2020-01-o1T00:00:00.000Z",
+        "Non-numeric character in the day"
+      },
+
+      new Object[]
+      {
+        "2020-01-00T00:00:00.000Z",
+        "Invalid day -- zero"
+      },
+
+      new Object[]
+      {
+        "2020-01-32T00:00:00.000Z",
+        "Invalid day -- too large for January"
+      },
+
+      new Object[]
+      {
+        "2020-02-30T00:00:00.000Z",
+        "Invalid day -- too large for February"
+      },
+
+      new Object[]
+      {
+        "2020-03-32T00:00:00.000Z",
+        "Invalid day -- too large for March"
+      },
+
+      new Object[]
+      {
+        "2020-04-31T00:00:00.000Z",
+        "Invalid day -- too large for April"
+      },
+
+      new Object[]
+      {
+        "2020-05-32T00:00:00.000Z",
+        "Invalid day -- too large for May"
+      },
+
+      new Object[]
+      {
+        "2020-06-31T00:00:00.000Z",
+        "Invalid day -- too large for June"
+      },
+
+      new Object[]
+      {
+        "2020-07-32T00:00:00.000Z",
+        "Invalid day -- too large for July"
+      },
+
+      new Object[]
+      {
+        "2020-08-32T00:00:00.000Z",
+        "Invalid day -- too large for August"
+      },
+
+      new Object[]
+      {
+        "2020-09-31T00:00:00.000Z",
+        "Invalid day -- too large for September"
+      },
+
+      new Object[]
+      {
+        "2020-10-32T00:00:00.000Z",
+        "Invalid day -- too large for October"
+      },
+
+      new Object[]
+      {
+        "2020-11-31T00:00:00.000Z",
+        "Invalid day -- too large for November"
+      },
+
+      new Object[]
+      {
+        "2020-12-32T00:00:00.000Z",
+        "Invalid day -- too large for December"
+      },
+
+      new Object[]
+      {
+        "2020-01-01t00:00:00.000Z",
+        "Invalid separator between day and hour"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T0o:00:00.000Z",
+        "Non-numeric character in hour"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T24:00:00.000Z",
+        "Invalid hour"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00;00:00.000Z",
+        "Invalid separator between hour and minute"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:0o:00.000Z",
+        "Non-numeric character in minute"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:60:00.000Z",
+        "Invalid minute"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00;00.000Z",
+        "Invalid separator between minute and second"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:o0.000Z",
+        "Non-numeric character in second"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:61.000Z",
+        "Invalid second"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:00.Z",
+        "No sub-second digits"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:00.0000Z",
+        "Too many sub-second digits"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:00.oooZ",
+        "Non-numeric character in sub-second"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:00.0+00",
+        "Time zone offset too short"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:00.010_00:00",
+        "Invalid time zone offset first character with sub-seconds"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:00_00:00",
+        "Invalid time zone offset first character without sub-seconds"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:00.000+0o:00",
+        "Non-numeric character in time zone hour offset"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:00.000+24:00",
+        "Invalid time zone hour offset"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:00.000+00;00",
+        "Invalid separator between time zone offset hour and minute"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:00.000+00:0o",
+        "Non-numeric character in time zone minute offset"
+      },
+
+      new Object[]
+      {
+        "2020-01-01T00:00:00.000+00:60",
+        "Invalid time zone minute offset"
+      },
+    };
+  }
+
+
+
+  /**
+   * Provides coverage for the methods used to read and write the contents of a
+   * file using bytes.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testReadAndWriteFileBytes()
+         throws Exception
+  {
+    final File f = createTempFile();
+    assertTrue(f.delete());
+
+    StaticUtils.writeFile(f.getAbsolutePath(), StaticUtils.NO_BYTES);
+    assertEquals(StaticUtils.readFileBytes(f.getAbsolutePath()),
+         StaticUtils.NO_BYTES);
+
+    final byte[] randomBytes = new byte[1024];
+    new Random().nextBytes(randomBytes);
+
+    StaticUtils.writeFile(f.getAbsolutePath(), randomBytes);
+    assertEquals(StaticUtils.readFileBytes(f.getAbsolutePath()), randomBytes);
+  }
+
+
+
+  /**
+   * Provides coverage for the methods used to read and write the contents of a
+   * file as a string.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testReadAndWriteString()
+         throws Exception
+  {
+    final File f = createTempFile();
+    assertTrue(f.delete());
+
+    StaticUtils.writeFile(f.getAbsolutePath(), "");
+    assertEquals(StaticUtils.readFileAsString(f.getAbsolutePath(), true),
+         StaticUtils.EOL);
+    assertEquals(StaticUtils.readFileAsString(f.getAbsolutePath(), false), "");
+
+    StaticUtils.writeFile(f.getAbsolutePath(), "This is a test");
+    assertEquals(StaticUtils.readFileAsString(f.getAbsolutePath(), true),
+         "This is a test" + StaticUtils.EOL);
+    assertEquals(StaticUtils.readFileAsString(f.getAbsolutePath(), false),
+         "This is a test");
+  }
+
+
+
+  /**
+   * Provides coverage for the methods used to read and write the contents of a
+   * file as a set of lines.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testReadAndWriteLines()
+         throws Exception
+  {
+    final File f = createTempFile();
+    assertTrue(f.delete());
+
+    StaticUtils.writeFile(f.getAbsolutePath(), (String[]) null);
+    assertEquals(StaticUtils.readFileLines(f.getAbsolutePath()),
+         Collections.emptyList());
+
+    StaticUtils.writeFile(f.getAbsolutePath(), (List<String>) null);
+    assertEquals(StaticUtils.readFileLines(f.getAbsolutePath()),
+         Collections.emptyList());
+
+    StaticUtils.writeFile(f.getAbsolutePath(), "Line 1");
+    assertEquals(StaticUtils.readFileLines(f.getAbsolutePath()),
+         Collections.singletonList("Line 1"));
+
+    StaticUtils.writeFile(f.getAbsolutePath(), "Line 1", "Line 2", "Line 3");
+    assertEquals(StaticUtils.readFileLines(f.getAbsolutePath()),
+         Arrays.asList("Line 1", "Line 2", "Line 3"));
+  }
+
+
+
+  /**
+   * Tests the behavior of the {@code getAllLocalAddresses} methods.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testGetAllLocalAddresses()
+         throws Exception
+  {
+    // Test when loopback addresses are implicitly included.
+    final Set<InetAddress> addressesWithLoopbackImplicitlyIncluded =
+         StaticUtils.getAllLocalAddresses(null);
+    assertNotNull(addressesWithLoopbackImplicitlyIncluded);
+    assertFalse(addressesWithLoopbackImplicitlyIncluded.isEmpty());
+
+    boolean loopbackAddressFound = false;
+    for (final InetAddress address : addressesWithLoopbackImplicitlyIncluded)
+    {
+      if (address.isLoopbackAddress())
+      {
+        loopbackAddressFound = true;
+        break;
+      }
+    }
+
+    assertTrue(loopbackAddressFound);
+
+
+    // Test when loopback addresses are explicitly included.
+    final Set<InetAddress> addressesWithLoopbackExplicitlyIncluded =
+         StaticUtils.getAllLocalAddresses(null, true);
+    assertNotNull(addressesWithLoopbackExplicitlyIncluded);
+    assertFalse(addressesWithLoopbackExplicitlyIncluded.isEmpty());
+
+    assertEquals(addressesWithLoopbackExplicitlyIncluded,
+         addressesWithLoopbackImplicitlyIncluded);
+
+
+    // Test when loopback addresses are explicitly excluded.
+    final Set<InetAddress> addressesWithLoopbackExplicitlyExcluded =
+         StaticUtils.getAllLocalAddresses(null, false);
+    assertNotNull(addressesWithLoopbackExplicitlyExcluded);
+    assertFalse(addressesWithLoopbackExplicitlyExcluded.isEmpty());
+    assertTrue(addressesWithLoopbackExplicitlyExcluded.size() <
+         addressesWithLoopbackImplicitlyIncluded.size());
+
+    for (final InetAddress address : addressesWithLoopbackExplicitlyExcluded)
+    {
+      assertFalse(address.isLoopbackAddress());
+      assertTrue(addressesWithLoopbackImplicitlyIncluded.contains(address));
+    }
+
+    for (final InetAddress address : addressesWithLoopbackImplicitlyIncluded)
+    {
+      if (! address.isLoopbackAddress())
+      {
+        assertTrue(addressesWithLoopbackExplicitlyExcluded.contains(address));
+      }
+    }
+  }
+
+
+
+  /**
+   * Tests the behavior for the {@code isIANAReservedIPAddress} method with the
+   * provided information.
+   *
+   * @param  address                 The address to test.  It must not be
+   *                                 {@code null}.
+   * @param  isPrivateUseAddress     Indicates whether the provided address is
+   *                                 an address from a range reserved for
+   *                                 private-use networks.
+   * @param  isOtherReservedAddress  Indicates whether the provided address is
+   *                                 a reserved address from a non-private-use
+   *                                 range.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(dataProvider="isIANAReservedIPAddressTestData")
+  public void testIsIANAReservedIPAddress(final InetAddress address,
+                                          final boolean isPrivateUseAddress,
+                                          final boolean isOtherReservedAddress)
+         throws Exception
+  {
+    if (StaticUtils.isIANAReservedIPAddress(address, true))
+    {
+      if (StaticUtils.isIANAReservedIPAddress(address, false))
+      {
+        assertFalse(isPrivateUseAddress);
+        assertTrue(isOtherReservedAddress);
+      }
+      else
+      {
+        assertTrue(isPrivateUseAddress);
+        assertFalse(isOtherReservedAddress);
+      }
+    }
+    else
+    {
+      assertFalse(isPrivateUseAddress);
+      assertFalse(isOtherReservedAddress);
+    }
+  }
+
+
+
+  /**
+   * Retrieves a set of test data for use in testing the
+   * {@code isIANAReservedIPAddress} method.
+   *
+   * @return  A set of data for use in testing the
+   *          {@code isIANAReservedIPAddress} method.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @DataProvider(name="isIANAReservedIPAddressTestData")
+  public Object[][] getIsIANAReservedIPAddressTestData()
+         throws Exception
+  {
+    return new Object[][]
+    {
+      new Object[]
+      {
+        InetAddress.getByName("0.1.2.3"),
+        false,  // Not a private-use address
+        true    // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("1.2.3.4"),
+        false,  // Not a private-use address
+        false   // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("10.11.12.13"),
+        true,  // It is a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("100.1.2.3"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("100.64.65.66"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("100.127.128.129"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("127.0.0.1"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("127.128.129.130"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("169.253.2.3"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("169.254.1.2"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("169.255.2.3"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("172.15.1.2"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("172.16.1.2"),
+        true,  // It is a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("172.31.1.2"),
+        true,  // It is a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("172.32.1.2"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("192.0.0.1"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("192.0.1.1"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("192.0.2.1"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("192.0.3.1"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("192.88.98.1"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("192.88.99.1"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("192.88.100.1"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("192.167.1.2"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("192.168.1.2"),
+        true,  // It is a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("192.169.1.2"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("198.17.1.2"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("198.18.1.2"),
+        false, // Not a private-use address
+        true  //  It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("198.19.1.2"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("198.20.1.2"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("198.51.99.1"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("198.51.100.1"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("198.51.101.1"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("203.0.112.1"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("203.0.113.1"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("203.0.114.1"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("223.255.1.2"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("224.1.2.3"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("255.1.2.3"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("::1"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("::1"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("1F01:0203:0405:0607:0809:0A0B:0C0D:0E0F"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("2001:0203:0405:0607:0809:0A0B:0C0D:0E0F"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("3F01:0203:0405:0607:0809:0A0B:0C0D:0E0F"),
+        false, // Not a private-use address
+        false  // Not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("4001:0203:0405:0607:0809:0A0B:0C0D:0E0F"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("FB01:0203:0405:0607:0809:0A0B:0C0D:0E0F"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("FC01:0203:0405:0607:0809:0A0B:0C0D:0E0F"),
+        true,  // It is a private-use address
+        false  // It is not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("FD01:0203:0405:0607:0809:0A0B:0C0D:0E0F"),
+        true,  // It is a private-use address
+        false  // It is not a reserved address
+      },
+
+      new Object[]
+      {
+        InetAddress.getByName("FE01:0203:0405:0607:0809:0A0B:0C0D:0E0F"),
+        false, // Not a private-use address
+        true   // It is a reserved address
+      }
+    };
   }
 }

@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 
 
 
@@ -39,17 +56,17 @@ class LDAPConnectionPoolHealthCheckThread
 {
   // Indicates whether a request has been made to shut down this health check
   // thread.
-  private final AtomicBoolean stopRequested;
+  @NotNull private final AtomicBoolean stopRequested;
 
   // The connection pool with which this thread is associated.
-  private final AbstractConnectionPool pool;
+  @NotNull private final AbstractConnectionPool pool;
 
   // A blocking queue used to control sleeping between checks and to wait for a
   // shutdown signal.
-  private final LinkedBlockingQueue<Object> queue;
+  @NotNull private final LinkedBlockingQueue<Object> queue;
 
   // A reference to the thread used to perform the periodic health checks.
-  private volatile Thread thread;
+  @Nullable private volatile Thread thread;
 
 
 
@@ -60,7 +77,8 @@ class LDAPConnectionPoolHealthCheckThread
    * @param  pool  The connection pool with which this thread will be
    *               associated.
    */
-  LDAPConnectionPoolHealthCheckThread(final AbstractConnectionPool pool)
+  LDAPConnectionPoolHealthCheckThread(
+       @NotNull final AbstractConnectionPool pool)
   {
     setName("Health Check Thread for " + pool.toString());
     setDaemon(true);

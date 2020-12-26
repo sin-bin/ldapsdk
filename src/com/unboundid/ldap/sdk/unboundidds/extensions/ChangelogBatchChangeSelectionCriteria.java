@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,7 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -71,6 +87,7 @@ public abstract class ChangelogBatchChangeSelectionCriteria
    * @return  An ASN.1 element containing the encoded representation of this
    *          changelog batch change selection criteria value.
    */
+  @NotNull()
   public final ASN1Element encode()
   {
     return new ASN1Element(TYPE_SELECTION_CRITERIA,
@@ -87,6 +104,7 @@ public abstract class ChangelogBatchChangeSelectionCriteria
    *          encoded representation of the changelog batch change selection
    *          criteria element.
    */
+  @NotNull()
   protected abstract ASN1Element encodeInnerElement();
 
 
@@ -103,8 +121,9 @@ public abstract class ChangelogBatchChangeSelectionCriteria
    * @throws  LDAPException  If the provided ASN.1 element cannot be decoded as
    *                         a changelog batch starting point.
    */
+  @NotNull()
   public static ChangelogBatchChangeSelectionCriteria decode(
-                     final ASN1Element element)
+                     @NotNull final ASN1Element element)
          throws LDAPException
   {
     Validator.ensureNotNull(element);
@@ -160,6 +179,7 @@ public abstract class ChangelogBatchChangeSelectionCriteria
    *          criteria value.
    */
   @Override()
+  @NotNull()
   public final String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -175,5 +195,5 @@ public abstract class ChangelogBatchChangeSelectionCriteria
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public abstract void toString(StringBuilder buffer);
+  public abstract void toString(@NotNull StringBuilder buffer);
 }

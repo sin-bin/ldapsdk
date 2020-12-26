@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,6 +49,7 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.OperationType;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -56,7 +72,7 @@ public final class DraftChuLDAPLogSchema00DeleteEntry
    * The name of the attribute used to hold information about attributes
    * contained in the entry that was deleted.
    */
-  public static final String ATTR_DELETED_ATTRIBUTE = "reqOld";
+  @NotNull public static final String ATTR_DELETED_ATTRIBUTE = "reqOld";
 
 
 
@@ -68,7 +84,7 @@ public final class DraftChuLDAPLogSchema00DeleteEntry
 
 
   // The list of deleted attributes, if available.
-  private final List<Attribute> deletedAttributes;
+  @NotNull private final List<Attribute> deletedAttributes;
 
 
 
@@ -82,7 +98,7 @@ public final class DraftChuLDAPLogSchema00DeleteEntry
    *                         delete access log entry as per the specification
    *                         contained in draft-chu-ldap-logschema-00.
    */
-  public DraftChuLDAPLogSchema00DeleteEntry(final Entry entry)
+  public DraftChuLDAPLogSchema00DeleteEntry(@NotNull final Entry entry)
          throws LDAPException
   {
     super(entry, OperationType.DELETE);
@@ -185,6 +201,7 @@ public final class DraftChuLDAPLogSchema00DeleteEntry
    *          empty list if no deleted attribute information was included in the
    *          access log entry.
    */
+  @NotNull()
   public List<Attribute> getDeletedAttributes()
   {
     return deletedAttributes;
@@ -199,6 +216,7 @@ public final class DraftChuLDAPLogSchema00DeleteEntry
    * @return  The {@code DeleteRequest} created from this delete access log
    *          entry.
    */
+  @NotNull()
   public DeleteRequest toDeleteRequest()
   {
     return new DeleteRequest(getTargetEntryDN(), getRequestControlArray());

@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -31,6 +46,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -78,7 +95,7 @@ public final class ConsumeSingleUseTokenExtendedRequest
    * The OID (1.3.6.1.4.1.30221.2.6.51) for the consume single-use token
    * extended request.
    */
-  public static final String CONSUME_SINGLE_USE_TOKEN_REQUEST_OID =
+  @NotNull public static final String CONSUME_SINGLE_USE_TOKEN_REQUEST_OID =
        "1.3.6.1.4.1.30221.2.6.51";
 
 
@@ -91,13 +108,13 @@ public final class ConsumeSingleUseTokenExtendedRequest
 
 
   // The identifier for the token to consume.
-  private final String tokenID;
+  @NotNull private final String tokenID;
 
   // The value for the single-use token to consume.
-  private final String tokenValue;
+  @NotNull private final String tokenValue;
 
   // The DN of the user whose account contains the token to consume.
-  private final String userDN;
+  @NotNull private final String userDN;
 
 
 
@@ -115,10 +132,10 @@ public final class ConsumeSingleUseTokenExtendedRequest
    *                     It may be {@code null} or empty if no controls are
    *                     required.
    */
-  public ConsumeSingleUseTokenExtendedRequest(final String userDN,
-                                              final String tokenID,
-                                              final String tokenValue,
-                                              final Control... controls)
+  public ConsumeSingleUseTokenExtendedRequest(@NotNull final String userDN,
+              @NotNull final String tokenID,
+              @NotNull final String tokenValue,
+              @Nullable final Control... controls)
   {
     super(CONSUME_SINGLE_USE_TOKEN_REQUEST_OID,
          encodeValue(userDN, tokenID, tokenValue),
@@ -141,7 +158,8 @@ public final class ConsumeSingleUseTokenExtendedRequest
    * @throws  LDAPException  If the provided extended request cannot be decoded
    *                         as a consume single-use token request.
    */
-  public ConsumeSingleUseTokenExtendedRequest(final ExtendedRequest request)
+  public ConsumeSingleUseTokenExtendedRequest(
+              @NotNull final ExtendedRequest request)
          throws LDAPException
   {
     super(request);
@@ -187,8 +205,9 @@ public final class ConsumeSingleUseTokenExtendedRequest
    *
    * @return  An ASN.1 octet string containing the encoded value.
    */
-  private static ASN1OctetString encodeValue(final String userDN,
-       final String tokenID, final String tokenValue)
+  @NotNull()
+  private static ASN1OctetString encodeValue(@NotNull final String userDN,
+       @NotNull final String tokenID, @NotNull final String tokenValue)
   {
     Validator.ensureNotNull(userDN);
     Validator.ensureNotNull(tokenID);
@@ -208,6 +227,7 @@ public final class ConsumeSingleUseTokenExtendedRequest
    *
    * @return  The DN of the user whose account contains the token to consume.
    */
+  @NotNull()
   public String getUserDN()
   {
     return userDN;
@@ -220,6 +240,7 @@ public final class ConsumeSingleUseTokenExtendedRequest
    *
    * @return  The identifier for the token to consume.
    */
+  @NotNull()
   public String getTokenID()
   {
     return tokenID;
@@ -232,6 +253,7 @@ public final class ConsumeSingleUseTokenExtendedRequest
    *
    * @return  The value for the token to consume.
    */
+  @NotNull()
   public String getTokenValue()
   {
     return tokenValue;
@@ -243,6 +265,7 @@ public final class ConsumeSingleUseTokenExtendedRequest
    * {@inheritDoc}.
    */
   @Override()
+  @NotNull()
   public ConsumeSingleUseTokenExtendedRequest duplicate()
   {
     return duplicate(getControls());
@@ -254,8 +277,9 @@ public final class ConsumeSingleUseTokenExtendedRequest
    * {@inheritDoc}.
    */
   @Override()
+  @NotNull()
   public ConsumeSingleUseTokenExtendedRequest duplicate(
-                                                   final Control[] controls)
+              @Nullable final Control[] controls)
   {
     final ConsumeSingleUseTokenExtendedRequest r =
          new ConsumeSingleUseTokenExtendedRequest(userDN, tokenID, tokenValue,
@@ -270,6 +294,7 @@ public final class ConsumeSingleUseTokenExtendedRequest
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedRequestName()
   {
     return INFO_EXTENDED_REQUEST_NAME_CONSUME_SINGLE_USE_TOKEN.get();
@@ -281,7 +306,7 @@ public final class ConsumeSingleUseTokenExtendedRequest
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ConsumeSingleUseTokenExtendedRequest(userDN='");
     buffer.append(userDN);

@@ -1,9 +1,24 @@
 /*
- * Copyright 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2011-2019 Ping Identity Corporation
+ * Copyright 2011-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2011-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,7 @@ package com.unboundid.ldap.listener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
@@ -731,6 +747,254 @@ public final class InMemoryDirectoryServerTestCase
     // Try to clear and add entries starting with the base DN.
     assertEquals(ds.importFromLDIF(true, ldifFile1.getAbsolutePath()), 3);
     assertEquals(ds.countEntries(), 3);
+  }
+
+
+
+  /**
+   * Tests operations involving applying changes from LDIF.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testApplyChangesFromLDIF()
+         throws Exception
+  {
+    // Create the in-memory directory server.  Enable a changelog.
+    final InMemoryDirectoryServerConfig cfg =
+         new InMemoryDirectoryServerConfig("dc=example,dc=com");
+    cfg.setAccessLogHandler(new MemoryBasedLogHandler());
+    cfg.setLDAPDebugLogHandler(new MemoryBasedLogHandler());
+    cfg.setCodeLogDetails(createTempFile().getAbsolutePath(), true);
+    cfg.setSchema(Schema.getDefaultStandardSchema());
+    cfg.setMaxChangeLogEntries(1000);
+
+    final InMemoryDirectoryServer ds = new InMemoryDirectoryServer(cfg);
+
+
+    // Make sure that the server has the expected state.
+    assertNotNull(ds);
+    assertEquals(ds.countEntries(), 0);
+    assertNull(ds.getEntry("dc=example,dc=com"));
+    assertNotNull(ds.getEntry("cn=changelog"));
+    assertNotNull(ds.getEntry("", "changeLog").getAttribute("changeLog"));
+    assertNotNull(ds.getEntry("", "firstChangeNumber").getAttribute(
+         "firstChangeNumber"));
+    assertEquals(
+         ds.getEntry("", "firstChangeNumber").getAttributeValue(
+              "firstChangeNumber"),
+         "0");
+    assertNotNull(ds.getEntry("", "lastChangeNumber").getAttribute(
+         "lastChangeNumber"));
+    assertEquals(
+         ds.getEntry("", "lastChangeNumber").getAttributeValue(
+              "lastChangeNumber"),
+         "0");
+
+    assertNotNull(ds.getSchema());
+
+    assertNotNull(ds.getBaseDNs());
+    assertFalse(ds.getBaseDNs().isEmpty());
+    assertEquals(ds.getBaseDNs().size(), 2);
+    assertTrue(ds.getBaseDNs().contains(new DN("dc=example,dc=com")));
+    assertTrue(ds.getBaseDNs().contains(new DN("cn=changelog")));
+
+
+    // Create an LDIF file with all types of changes.  Include a change that
+    // will fail as the last item.
+    final File ldifFile1 = createTempFile(
+         "dn: dc=example,dc=com",
+         "changetype: add",
+         "objectClass: top",
+         "objectClass: domain",
+         "dc: example",
+         "",
+         "dn: ou=People,dc=example,dc=com",
+         "changetype: add",
+         "objectClass: top",
+         "objectClass: organizationalUnit",
+         "ou: People",
+         "",
+         "dn: uid=test.user,ou=People,dc=example,dc=com",
+         "objectClass: top",
+         "objectClass: person",
+         "objectClass: organizationalPerson",
+         "objectClass: inetOrgPerson",
+         "uid: test.user",
+         "givenName: Test",
+         "sn: User",
+         "cn: Test User",
+         "userPassword: password",
+         "",
+         "dn: uid=test.user,ou=People,dc=example,dc=com",
+         "changetype: modify",
+         "replace: description",
+         "description: foo",
+         "",
+         "dn: uid=test.user,ou=People,dc=example,dc=com",
+         "changetype: moddn",
+         "newrdn: cn=Test User",
+         "deleteoldrdn: 0",
+         "",
+         "dn: cn=Test User,ou=People,dc=example,dc=com",
+         "changetype: delete",
+         "",
+         "dn: uid=test.user,ou=People,dc=example,dc=com",
+         "changetype: delete");
+
+
+    // Try to apply the changes.  Make sure we get an LDAPException.
+    try
+    {
+      ds.applyChangesFromLDIF(ldifFile1.getAbsolutePath());
+      fail("Expected an exception when trying to apply changes from LDIF " +
+           "when the last change should fail.");
+    }
+    catch (final LDAPException e)
+    {
+      // This was expected.
+    }
+
+
+    // Make sure that the server is still empty, and that there are no
+    // changelog records.
+    assertNotNull(ds);
+    assertEquals(ds.countEntries(), 0);
+    assertNull(ds.getEntry("dc=example,dc=com"));
+    assertNotNull(ds.getEntry("cn=changelog"));
+    assertNotNull(ds.getEntry("", "changeLog").getAttribute("changeLog"));
+    assertNotNull(ds.getEntry("", "firstChangeNumber").getAttribute(
+         "firstChangeNumber"));
+    assertEquals(
+         ds.getEntry("", "firstChangeNumber").getAttributeValue(
+              "firstChangeNumber"),
+         "0");
+    assertNotNull(ds.getEntry("", "lastChangeNumber").getAttribute(
+         "lastChangeNumber"));
+    assertEquals(
+         ds.getEntry("", "lastChangeNumber").getAttributeValue(
+              "lastChangeNumber"),
+         "0");
+
+
+    // Create another LDIF file with the same set of changes, minus the last one
+    // that failed.  We should be able to apply this successfully.
+    final File ldifFile2 = createTempFile(
+         "dn: dc=example,dc=com",
+         "changetype: add",
+         "objectClass: top",
+         "objectClass: domain",
+         "dc: example",
+         "",
+         "dn: ou=People,dc=example,dc=com",
+         "changetype: add",
+         "objectClass: top",
+         "objectClass: organizationalUnit",
+         "ou: People",
+         "",
+         "dn: uid=test.user,ou=People,dc=example,dc=com",
+         "objectClass: top",
+         "objectClass: person",
+         "objectClass: organizationalPerson",
+         "objectClass: inetOrgPerson",
+         "uid: test.user",
+         "givenName: Test",
+         "sn: User",
+         "cn: Test User",
+         "userPassword: password",
+         "",
+         "dn: uid=test.user,ou=People,dc=example,dc=com",
+         "changetype: modify",
+         "replace: description",
+         "description: foo",
+         "",
+         "dn: uid=test.user,ou=People,dc=example,dc=com",
+         "changetype: moddn",
+         "newrdn: cn=Test User",
+         "deleteoldrdn: 0",
+         "",
+         "dn: cn=Test User,ou=People,dc=example,dc=com",
+         "changetype: delete");
+
+
+    // Try to apply the changes.  Make sure that it succeeds and that the
+    // return value is what we expected.
+    final int changesApplied = ds.applyChangesFromLDIF(
+         ldifFile2.getAbsolutePath());
+    assertEquals(changesApplied, 6);
+
+
+    // Make sure that the server is now not empty.  It should have two
+    // entries and six changelog records.
+    assertNotNull(ds);
+    assertEquals(ds.countEntries(), 2);
+    assertNotNull(ds.getEntry("dc=example,dc=com"));
+    assertNotNull(ds.getEntry("ou=People,dc=example,dc=com"));
+    assertNull(ds.getEntry("uid=test.user,ou=People,dc=example,dc=com"));
+    assertNull(ds.getEntry("cn=Test User,ou=People,dc=example,dc=com"));
+    assertNotNull(ds.getEntry("cn=changelog"));
+    assertNotNull(ds.getEntry("", "changeLog").getAttribute("changeLog"));
+    assertNotNull(ds.getEntry("", "firstChangeNumber").getAttribute(
+         "firstChangeNumber"));
+    assertEquals(
+         ds.getEntry("", "firstChangeNumber").getAttributeValue(
+              "firstChangeNumber"),
+         "1");
+    assertNotNull(ds.getEntry("", "lastChangeNumber").getAttribute(
+         "lastChangeNumber"));
+    assertEquals(
+         ds.getEntry("", "lastChangeNumber").getAttributeValue(
+              "lastChangeNumber"),
+         "6");
+
+
+    // Create a third LDIF file with a malformed LDIF record.
+    final File ldifFile3 = createTempFile(
+         "dn: ou=People,dc=example,dc=com",
+         "changetype: delete",
+         "",
+         "dn: dc=example,dc=com",
+         "changetype: delete",
+         "",
+         "dn: malformedrecord",
+         "changetype: malformed");
+
+
+    // Try to apply the changes.  Make sure that we get an exception.
+    try
+    {
+      ds.applyChangesFromLDIF(ldifFile3.getAbsolutePath());
+      fail("Expected an LDAPException from trying to apply changes from an " +
+           "LDIF file with a malformed record.");
+    }
+    catch (final LDAPException e)
+    {
+      // This was expected.
+    }
+
+
+    // Make sure that the server still has the same content it had before the
+    // change attempt.
+    assertNotNull(ds);
+    assertEquals(ds.countEntries(), 2);
+    assertNotNull(ds.getEntry("dc=example,dc=com"));
+    assertNotNull(ds.getEntry("ou=People,dc=example,dc=com"));
+    assertNull(ds.getEntry("uid=test.user,ou=People,dc=example,dc=com"));
+    assertNull(ds.getEntry("cn=Test User,ou=People,dc=example,dc=com"));
+    assertNotNull(ds.getEntry("cn=changelog"));
+    assertNotNull(ds.getEntry("", "changeLog").getAttribute("changeLog"));
+    assertNotNull(ds.getEntry("", "firstChangeNumber").getAttribute(
+         "firstChangeNumber"));
+    assertEquals(
+         ds.getEntry("", "firstChangeNumber").getAttributeValue(
+              "firstChangeNumber"),
+         "1");
+    assertNotNull(ds.getEntry("", "lastChangeNumber").getAttribute(
+         "lastChangeNumber"));
+    assertEquals(
+         ds.getEntry("", "lastChangeNumber").getAttributeValue(
+              "lastChangeNumber"),
+         "6");
   }
 
 
@@ -6005,7 +6269,7 @@ public final class InMemoryDirectoryServerTestCase
    * @throws  Exception  If an unexpected problem occurs.
    */
   @Test()
-  public void testCustomRootDSE()
+  public void testCustomRootDSEEntry()
          throws Exception
   {
     final InMemoryDirectoryServerConfig cfg =
@@ -6028,6 +6292,219 @@ public final class InMemoryDirectoryServerTestCase
     ds.startListening();
 
     assertTrue(ds.getRootDSE().hasAttribute("description"));
+    ds.shutDown(true);
+  }
+
+
+
+  /**
+   * Tests the ability of the directory server to present a dynamically
+   * generated root DSE that includes custom static attributes.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testCustomRootDSEAttributes()
+         throws Exception
+  {
+    final InMemoryDirectoryServerConfig cfg =
+         new InMemoryDirectoryServerConfig("dc=example,dc=com");
+    cfg.setMaxChangeLogEntries(Integer.MAX_VALUE);
+
+    InMemoryDirectoryServer ds = new InMemoryDirectoryServer(cfg);
+    ds.startListening();
+
+    ds.add(
+         "dn: dc=example,dc=com",
+         "objectClass: top",
+         "objectClass: domain",
+         "dc: example");
+
+    RootDSE rootDSE = ds.getRootDSE();
+    assertNotNull(rootDSE);
+
+    assertNotNull(rootDSE.getChangelogDN());
+    assertDNsEqual(rootDSE.getChangelogDN(), "cn=changelog");
+
+    assertNotNull(rootDSE.getFirstChangeNumber());
+    assertEquals(rootDSE.getFirstChangeNumber().longValue(), 1L);
+
+    assertNotNull(rootDSE.getLastChangeNumber());
+    assertEquals(rootDSE.getLastChangeNumber().longValue(), 1L);
+
+    assertFalse(rootDSE.hasAttribute("description"));
+
+    ds.add(
+         "dn: ou=People,dc=example,dc=com",
+         "objectClass: top",
+         "objectClass: organizationalUnit",
+         "ou: People");
+
+    rootDSE = ds.getRootDSE();
+    assertNotNull(rootDSE);
+
+    assertNotNull(rootDSE.getChangelogDN());
+    assertDNsEqual(rootDSE.getChangelogDN(), "cn=changelog");
+
+    assertNotNull(rootDSE.getFirstChangeNumber());
+    assertEquals(rootDSE.getFirstChangeNumber().longValue(), 1L);
+
+    assertNotNull(rootDSE.getLastChangeNumber());
+    assertEquals(rootDSE.getLastChangeNumber().longValue(), 2L);
+
+    assertFalse(rootDSE.hasAttribute("description"));
+
+
+    ds.shutDown(true);
+    cfg.setCustomRootDSEAttributes(Collections.singletonList(
+         new Attribute("description", "custom description 1")));
+    ds = new InMemoryDirectoryServer(cfg);
+    ds.startListening();
+
+    ds.add(
+         "dn: dc=example,dc=com",
+         "objectClass: top",
+         "objectClass: domain",
+         "dc: example");
+
+    rootDSE = ds.getRootDSE();
+    assertNotNull(rootDSE);
+
+    assertNotNull(rootDSE.getChangelogDN());
+    assertDNsEqual(rootDSE.getChangelogDN(), "cn=changelog");
+
+    assertNotNull(rootDSE.getFirstChangeNumber());
+    assertEquals(rootDSE.getFirstChangeNumber().longValue(), 1L);
+
+    assertNotNull(rootDSE.getLastChangeNumber());
+    assertEquals(rootDSE.getLastChangeNumber().longValue(), 1L);
+
+    assertTrue(rootDSE.hasAttribute("description"));
+    assertEquals(rootDSE.getAttributeValue("description"),
+         "custom description 1");
+
+    ds.add(
+         "dn: ou=People,dc=example,dc=com",
+         "objectClass: top",
+         "objectClass: organizationalUnit",
+         "ou: People");
+
+    rootDSE = ds.getRootDSE();
+    assertNotNull(rootDSE);
+
+    assertNotNull(rootDSE.getChangelogDN());
+    assertDNsEqual(rootDSE.getChangelogDN(), "cn=changelog");
+
+    assertNotNull(rootDSE.getFirstChangeNumber());
+    assertEquals(rootDSE.getFirstChangeNumber().longValue(), 1L);
+
+    assertNotNull(rootDSE.getLastChangeNumber());
+    assertEquals(rootDSE.getLastChangeNumber().longValue(), 2L);
+
+    assertTrue(rootDSE.hasAttribute("description"));
+    assertEquals(rootDSE.getAttributeValue("description"),
+         "custom description 1");
+
+
+    ds.shutDown(true);
+    cfg.setCustomRootDSEAttributes(Arrays.asList(
+         new Attribute("description", "custom description 2"),
+         new Attribute("firstChangeNumber", "123"),
+         new Attribute("lastChangeNumber", "456")));
+    ds = new InMemoryDirectoryServer(cfg);
+    ds.startListening();
+
+    ds.add(
+         "dn: dc=example,dc=com",
+         "objectClass: top",
+         "objectClass: domain",
+         "dc: example");
+
+    rootDSE = ds.getRootDSE();
+    assertNotNull(rootDSE);
+
+    assertNotNull(rootDSE.getChangelogDN());
+    assertDNsEqual(rootDSE.getChangelogDN(), "cn=changelog");
+
+    assertNotNull(rootDSE.getFirstChangeNumber());
+    assertEquals(rootDSE.getFirstChangeNumber().longValue(), 123L);
+
+    assertNotNull(rootDSE.getLastChangeNumber());
+    assertEquals(rootDSE.getLastChangeNumber().longValue(), 456L);
+
+    assertTrue(rootDSE.hasAttribute("description"));
+    assertEquals(rootDSE.getAttributeValue("description"),
+         "custom description 2");
+
+    ds.add(
+         "dn: ou=People,dc=example,dc=com",
+         "objectClass: top",
+         "objectClass: organizationalUnit",
+         "ou: People");
+
+    rootDSE = ds.getRootDSE();
+    assertNotNull(rootDSE);
+
+    assertNotNull(rootDSE.getChangelogDN());
+    assertDNsEqual(rootDSE.getChangelogDN(), "cn=changelog");
+
+    assertNotNull(rootDSE.getFirstChangeNumber());
+    assertEquals(rootDSE.getFirstChangeNumber().longValue(), 123L);
+
+    assertNotNull(rootDSE.getLastChangeNumber());
+    assertEquals(rootDSE.getLastChangeNumber().longValue(), 456L);
+
+    assertTrue(rootDSE.hasAttribute("description"));
+    assertEquals(rootDSE.getAttributeValue("description"),
+         "custom description 2");
+
+
+    ds.shutDown(true);
+    cfg.setCustomRootDSEAttributes(null);
+    ds = new InMemoryDirectoryServer(cfg);
+    ds.startListening();
+
+    ds.add(
+         "dn: dc=example,dc=com",
+         "objectClass: top",
+         "objectClass: domain",
+         "dc: example");
+
+
+    rootDSE = ds.getRootDSE();
+    assertNotNull(rootDSE);
+
+    assertNotNull(rootDSE.getChangelogDN());
+    assertDNsEqual(rootDSE.getChangelogDN(), "cn=changelog");
+
+    assertNotNull(rootDSE.getFirstChangeNumber());
+    assertEquals(rootDSE.getFirstChangeNumber().longValue(), 1L);
+
+    assertNotNull(rootDSE.getLastChangeNumber());
+    assertEquals(rootDSE.getLastChangeNumber().longValue(), 1L);
+
+    assertFalse(rootDSE.hasAttribute("description"));
+
+    ds.add(
+         "dn: ou=People,dc=example,dc=com",
+         "objectClass: top",
+         "objectClass: organizationalUnit",
+         "ou: People");
+
+    rootDSE = ds.getRootDSE();
+    assertNotNull(rootDSE);
+
+    assertNotNull(rootDSE.getChangelogDN());
+    assertDNsEqual(rootDSE.getChangelogDN(), "cn=changelog");
+
+    assertNotNull(rootDSE.getFirstChangeNumber());
+    assertEquals(rootDSE.getFirstChangeNumber().longValue(), 1L);
+
+    assertNotNull(rootDSE.getLastChangeNumber());
+    assertEquals(rootDSE.getLastChangeNumber().longValue(), 2L);
+
+    assertFalse(rootDSE.hasAttribute("description"));
+
     ds.shutDown(true);
   }
 

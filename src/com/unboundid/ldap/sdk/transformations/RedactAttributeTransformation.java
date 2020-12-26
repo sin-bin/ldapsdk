@@ -1,9 +1,24 @@
 /*
- * Copyright 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2016-2019 Ping Identity Corporation
+ * Copyright 2016-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2016-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -44,6 +59,8 @@ import com.unboundid.ldif.LDIFDeleteChangeRecord;
 import com.unboundid.ldif.LDIFModifyChangeRecord;
 import com.unboundid.ldif.LDIFModifyDNChangeRecord;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -68,10 +85,10 @@ public final class RedactAttributeTransformation
   private final boolean redactDNAttributes;
 
   // The schema to use when processing.
-  private final Schema schema;
+  @Nullable private final Schema schema;
 
   // The set of attributes to strip from entries.
-  private final Set<String> attributes;
+  @NotNull private final Set<String> attributes;
 
 
 
@@ -103,10 +120,10 @@ public final class RedactAttributeTransformation
    *                             be redacted.  It must must not be {@code null}
    *                             or empty.
    */
-  public RedactAttributeTransformation(final Schema schema,
+  public RedactAttributeTransformation(@Nullable final Schema schema,
                                        final boolean redactDNAttributes,
                                        final boolean preserveValueCount,
-                                       final String... attributes)
+                                       @NotNull final String... attributes)
   {
     this(schema, redactDNAttributes, preserveValueCount,
          StaticUtils.toList(attributes));
@@ -142,10 +159,10 @@ public final class RedactAttributeTransformation
    *                             be redacted.  It must must not be {@code null}
    *                             or empty.
    */
-  public RedactAttributeTransformation(final Schema schema,
-                                       final boolean redactDNAttributes,
-                                       final boolean preserveValueCount,
-                                       final Collection<String> attributes)
+  public RedactAttributeTransformation(@Nullable final Schema schema,
+              final boolean redactDNAttributes,
+              final boolean preserveValueCount,
+              @NotNull  final Collection<String> attributes)
   {
     this.redactDNAttributes = redactDNAttributes;
     this.preserveValueCount = preserveValueCount;
@@ -200,7 +217,8 @@ public final class RedactAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry transformEntry(final Entry e)
+  @Nullable()
+  public Entry transformEntry(@NotNull final Entry e)
   {
     if (e == null)
     {
@@ -275,7 +293,8 @@ public final class RedactAttributeTransformation
    *
    * @return  The DN with any appropriate redaction applied.
    */
-  private String redactDN(final String dn)
+  @Nullable()
+  private String redactDN(@Nullable final String dn)
   {
     if (dn == null)
     {
@@ -329,7 +348,9 @@ public final class RedactAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public LDIFChangeRecord transformChangeRecord(final LDIFChangeRecord r)
+  @Nullable()
+  public LDIFChangeRecord transformChangeRecord(
+                               @NotNull final LDIFChangeRecord r)
   {
     if (r == null)
     {
@@ -479,7 +500,9 @@ public final class RedactAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry translate(final Entry original, final long firstLineNumber)
+  @Nullable()
+  public Entry translate(@NotNull final Entry original,
+                         final long firstLineNumber)
   {
     return transformEntry(original);
   }
@@ -490,7 +513,8 @@ public final class RedactAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public LDIFChangeRecord translate(final LDIFChangeRecord original,
+  @Nullable()
+  public LDIFChangeRecord translate(@NotNull final LDIFChangeRecord original,
                                     final long firstLineNumber)
   {
     return transformChangeRecord(original);
@@ -502,7 +526,8 @@ public final class RedactAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
-  public Entry translateEntryToWrite(final Entry original)
+  @Nullable()
+  public Entry translateEntryToWrite(@NotNull final Entry original)
   {
     return transformEntry(original);
   }
@@ -513,8 +538,9 @@ public final class RedactAttributeTransformation
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public LDIFChangeRecord translateChangeRecordToWrite(
-                               final LDIFChangeRecord original)
+                               @NotNull final LDIFChangeRecord original)
   {
     return transformChangeRecord(original);
   }

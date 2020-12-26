@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,6 +53,8 @@ import com.unboundid.ldap.sdk.ReadOnlyEntry;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -68,7 +85,7 @@ public final class PreReadResponseControl
   /**
    * The OID (1.3.6.1.1.13.1) for the pre-read response control.
    */
-  public static final String PRE_READ_RESPONSE_OID = "1.3.6.1.1.13.1";
+  @NotNull public static final String PRE_READ_RESPONSE_OID = "1.3.6.1.1.13.1";
 
 
 
@@ -80,7 +97,7 @@ public final class PreReadResponseControl
 
 
   // The entry returned in the response control.
-  private final ReadOnlyEntry entry;
+  @NotNull private final ReadOnlyEntry entry;
 
 
 
@@ -101,7 +118,7 @@ public final class PreReadResponseControl
    * @param  entry  The entry to include in this pre-read response control.  It
    *                must not be {@code null}.
    */
-  public PreReadResponseControl(final ReadOnlyEntry entry)
+  public PreReadResponseControl(@NotNull final ReadOnlyEntry entry)
   {
     super(PRE_READ_RESPONSE_OID, false, encodeValue(entry));
 
@@ -122,8 +139,9 @@ public final class PreReadResponseControl
    * @throws  LDAPException  If the provided control cannot be decoded as a
    *                         pre-read response control.
    */
-  public PreReadResponseControl(final String oid, final boolean isCritical,
-                                final ASN1OctetString value)
+  public PreReadResponseControl(@NotNull final String oid,
+                                final boolean isCritical,
+                                @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     super(oid, isCritical, value);
@@ -197,9 +215,10 @@ public final class PreReadResponseControl
    * {@inheritDoc}
    */
   @Override()
-  public PreReadResponseControl
-              decodeControl(final String oid, final boolean isCritical,
-                            final ASN1OctetString value)
+  @NotNull()
+  public PreReadResponseControl decodeControl(@NotNull final String oid,
+                                     final boolean isCritical,
+                                     @Nullable final ASN1OctetString value)
          throws LDAPException
   {
     return new PreReadResponseControl(oid, isCritical, value);
@@ -221,7 +240,8 @@ public final class PreReadResponseControl
    *                         decode the pre-read response control contained in
    *                         the provided result.
    */
-  public static PreReadResponseControl get(final LDAPResult result)
+  @Nullable()
+  public static PreReadResponseControl get(@NotNull final LDAPResult result)
          throws LDAPException
   {
     final Control c = result.getResponseControl(PRE_READ_RESPONSE_OID);
@@ -253,7 +273,8 @@ public final class PreReadResponseControl
    * @return  An ASN.1 octet string that can be used as the value for this
    *          control.
    */
-  private static ASN1OctetString encodeValue(final ReadOnlyEntry entry)
+  @NotNull()
+  private static ASN1OctetString encodeValue(@NotNull final ReadOnlyEntry entry)
   {
     Validator.ensureNotNull(entry);
 
@@ -282,6 +303,7 @@ public final class PreReadResponseControl
    * @return  A read-only copy of the entry returned by this post-read response
    *          control.
    */
+  @NotNull()
   public ReadOnlyEntry getEntry()
   {
     return entry;
@@ -293,6 +315,7 @@ public final class PreReadResponseControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_PRE_READ_RESPONSE.get();
@@ -304,7 +327,7 @@ public final class PreReadResponseControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("PreReadResponseControl(entry=");
     entry.toString(buffer);

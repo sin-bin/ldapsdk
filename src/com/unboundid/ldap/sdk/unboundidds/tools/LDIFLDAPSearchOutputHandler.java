@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,7 @@ import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchResultReference;
+import com.unboundid.util.NotNull;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -55,17 +71,17 @@ final class LDIFLDAPSearchOutputHandler
 {
   // A list used to hold the lines for a formatted representation of a search
   // result entry or reference.
-  private final ArrayList<String> formattedLines;
+  @NotNull private final ArrayList<String> formattedLines;
 
   // The maximum width to use for output content.
   private final int maxWidth;
 
   // The associated LDAPSearch tool instance.
-  private final LDAPSearch ldapSearch;
+  @NotNull private final LDAPSearch ldapSearch;
 
   // A string builder used to hold the formatted representation of the lines
   // that comprise a search result entry or reference.
-  private final StringBuilder formattedLineBuffer;
+  @NotNull private final StringBuilder formattedLineBuffer;
 
 
 
@@ -75,7 +91,8 @@ final class LDIFLDAPSearchOutputHandler
    * @param  ldapSearch  The {@link LDAPSearch} tool instance.
    * @param  maxWidth    The maximum width to use for the output.
    */
-  LDIFLDAPSearchOutputHandler(final LDAPSearch ldapSearch, final int maxWidth)
+  LDIFLDAPSearchOutputHandler(@NotNull final LDAPSearch ldapSearch,
+                              final int maxWidth)
   {
     this.ldapSearch = ldapSearch;
     this.maxWidth   = maxWidth;
@@ -101,7 +118,7 @@ final class LDIFLDAPSearchOutputHandler
    * {@inheritDoc}
    */
   @Override()
-  public void formatSearchResultEntry(final SearchResultEntry entry)
+  public void formatSearchResultEntry(@NotNull final SearchResultEntry entry)
   {
     formattedLines.clear();
     formattedLineBuffer.setLength(0);
@@ -122,7 +139,8 @@ final class LDIFLDAPSearchOutputHandler
    * {@inheritDoc}
    */
   @Override()
-  public void formatSearchResultReference(final SearchResultReference ref)
+  public void formatSearchResultReference(
+                   @NotNull final SearchResultReference ref)
   {
     formattedLines.clear();
     formattedLineBuffer.setLength(0);
@@ -143,7 +161,7 @@ final class LDIFLDAPSearchOutputHandler
    * {@inheritDoc}
    */
   @Override()
-  public void formatResult(final LDAPResult result)
+  public void formatResult(@NotNull final LDAPResult result)
   {
     formattedLines.clear();
     formattedLineBuffer.setLength(0);
@@ -163,8 +181,9 @@ final class LDIFLDAPSearchOutputHandler
    * {@inheritDoc}
    */
   @Override()
-  public void formatUnsolicitedNotification(final LDAPConnection connection,
-                                            final ExtendedResult notification)
+  public void formatUnsolicitedNotification(
+                   @NotNull final LDAPConnection connection,
+                   @NotNull final ExtendedResult notification)
   {
     formattedLines.clear();
     formattedLineBuffer.setLength(0);

@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -38,6 +53,8 @@ import com.unboundid.ldap.sdk.ReadOnlyEntry;
 import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -74,7 +91,7 @@ public final class EffectiveRightsEntry
   /**
    * The name of the attribute that includes the rights information.
    */
-  private static final String ATTR_ACL_RIGHTS = "aclRights";
+  @NotNull private static final String ATTR_ACL_RIGHTS = "aclRights";
 
 
 
@@ -86,11 +103,11 @@ public final class EffectiveRightsEntry
 
 
   // The set of entry-level rights parsed from the entry.
-  private final Set<EntryRight> entryRights;
+  @Nullable private final Set<EntryRight> entryRights;
 
   // The set of attribute-level rights parsed from the entry, mapped from the
   // name of the attribute to the set of the corresponding attribute rights.
-  private final Map<String,Set<AttributeRight>> attributeRights;
+  @Nullable private final Map<String,Set<AttributeRight>> attributeRights;
 
 
 
@@ -100,7 +117,7 @@ public final class EffectiveRightsEntry
    * @param  entry  The entry to use to create this get effective rights entry.
    *                It must not be {@code null}.
    */
-  public EffectiveRightsEntry(final Entry entry)
+  public EffectiveRightsEntry(@NotNull final Entry entry)
   {
     super(entry);
 
@@ -183,8 +200,9 @@ public final class EffectiveRightsEntry
    *
    * @return  The set of entry rights parsed from the entry.
    */
+  @NotNull()
   private static Set<EntryRight> parseEntryRights(
-                                      final List<Attribute> attrList)
+                                      @NotNull final List<Attribute> attrList)
   {
     final EnumSet<EntryRight> entryRightsSet = EnumSet.noneOf(EntryRight.class);
     for (final Attribute a : attrList)
@@ -228,7 +246,9 @@ public final class EffectiveRightsEntry
    *
    * @return  The set of attribute rights parsed from the provided attribute.
    */
-  private static Set<AttributeRight> parseAttributeRights(final Attribute a)
+  @NotNull()
+  private static Set<AttributeRight> parseAttributeRights(
+                                          @NotNull final Attribute a)
   {
     final EnumSet<AttributeRight> rightsSet =
          EnumSet.noneOf(AttributeRight.class);
@@ -285,6 +305,7 @@ public final class EffectiveRightsEntry
    *          {@code null} if the entry did not have any entry-level rights
    *          information.
    */
+  @Nullable()
   public Set<EntryRight> getEntryRights()
   {
     return entryRights;
@@ -301,7 +322,7 @@ public final class EffectiveRightsEntry
    * @return  {@code true} if the entry included entry-level rights information
    *          and the specified entry right is granted, or {@code false} if not.
    */
-  public boolean hasEntryRight(final EntryRight entryRight)
+  public boolean hasEntryRight(@NotNull final EntryRight entryRight)
   {
     Validator.ensureNotNull(entryRight);
 
@@ -319,6 +340,7 @@ public final class EffectiveRightsEntry
    *          {@code null} if the entry did not have any attribute-level rights
    *          information.
    */
+  @Nullable()
   public Map<String,Set<AttributeRight>> getAttributeRights()
   {
     return attributeRights;
@@ -338,7 +360,9 @@ public final class EffectiveRightsEntry
    *          {@code null} if the entry did not include any attribute-level
    *          rights information for the specified attribute.
    */
-  public Set<AttributeRight> getAttributeRights(final String attributeName)
+  @Nullable()
+  public Set<AttributeRight> getAttributeRights(
+                                  @NotNull final String attributeName)
   {
     Validator.ensureNotNull(attributeName);
 
@@ -365,8 +389,8 @@ public final class EffectiveRightsEntry
    *          information for the specified attribute and the indicated right is
    *          granted, or {@code false} if not.
    */
-  public boolean hasAttributeRight(final AttributeRight attributeRight,
-                                   final String attributeName)
+  public boolean hasAttributeRight(@NotNull final AttributeRight attributeRight,
+                                   @NotNull final String attributeName)
   {
     Validator.ensureNotNull(attributeName, attributeRight);
 

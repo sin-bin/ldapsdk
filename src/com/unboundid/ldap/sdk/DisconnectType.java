@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -22,6 +37,8 @@ package com.unboundid.ldap.sdk;
 
 
 
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -210,10 +227,10 @@ public enum DisconnectType
 
 
   // The result code most closely associated with this disconnect type.
-  private final ResultCode resultCode;
+  @NotNull private final ResultCode resultCode;
 
   // A description for this disconnect type.
-  private final String description;
+  @NotNull private final String description;
 
 
 
@@ -224,7 +241,8 @@ public enum DisconnectType
    * @param  resultCode   The result code most closely associated with this
    *                      disconnect type.
    */
-  DisconnectType(final String description, final ResultCode resultCode)
+  DisconnectType(@NotNull final String description,
+                 @NotNull final ResultCode resultCode)
   {
     this.description = description;
     this.resultCode  = resultCode;
@@ -237,6 +255,7 @@ public enum DisconnectType
    *
    * @return  The description for this disconnect type.
    */
+  @NotNull()
   public String getDescription()
   {
     return description;
@@ -250,6 +269,7 @@ public enum DisconnectType
    *
    * @return  The result code most closely associated with this disconnect type.
    */
+  @NotNull()
   public ResultCode getResultCode()
   {
     return resultCode;
@@ -265,7 +285,8 @@ public enum DisconnectType
    * @return  The requested change type, or {@code null} if no such
    *          disconnect type is defined.
    */
-  public static DisconnectType forName(final String name)
+  @Nullable()
+  public static DisconnectType forName(@NotNull final String name)
   {
     switch (StaticUtils.toLowerCase(name))
     {
@@ -362,7 +383,7 @@ public enum DisconnectType
    *          expected and there is likely nothing that a disconnect handler
    *          needs to do to handle it, or {@code false} if not.
    */
-  public static boolean isExpected(final DisconnectType disconnectType)
+  public static boolean isExpected(@NotNull final DisconnectType disconnectType)
   {
     switch (disconnectType)
     {
@@ -389,6 +410,7 @@ public enum DisconnectType
    * @return  A string representation for this disconnect type.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -405,7 +427,7 @@ public enum DisconnectType
    * @param  buffer  The buffer to which the string representation should be
    *                 appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("DisconnectType(name='");
     buffer.append(name());

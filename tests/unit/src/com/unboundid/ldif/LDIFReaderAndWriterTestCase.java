@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -9560,5 +9575,92 @@ public class LDIFReaderAndWriterTestCase
          "objectClass: top",
          "objectClass: domain",
          "dc: example");
+  }
+
+
+
+  /**
+   * Tests to ensure that values that need to be base64-encoded will have
+   * comments with the expected content.
+   *
+   * @param  valueString             The value string to include in the entry.
+   * @param  expectedCommentContent  The expected comment content that is
+   *                                 expected to be in the LDIF representation.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test(dataProvider="base64CommentTestData")
+  public void testBase64Comments(final String valueString,
+                                 final String expectedCommentContent)
+         throws Exception
+  {
+    final Entry e = new Entry(
+         "dc=example,dc=com",
+         new Attribute("objectClass", "top", "domain"),
+         new Attribute("dc", "example"),
+         new Attribute("description", valueString));
+
+    try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+         LDIFWriter writer = new LDIFWriter(out))
+    {
+      writer.setWrapColumn(Integer.MAX_VALUE);
+
+      writer.writeEntry(e);
+      writer.flush();
+
+      final String ldifString = StaticUtils.toUTF8String(out.toByteArray());
+      assertTrue(ldifString.contains(expectedCommentContent),
+           ldifString);
+    }
+  }
+
+
+
+  /**
+   * Retrieves data that may be used for testing comments for base64-encoded
+   * data.
+   *
+   * @return  Data that may be used for testing comments for base64-encoded
+   *          data.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @DataProvider(name="base64CommentTestData")
+  public Object[][] getBase64CommentTestData()
+         throws Exception
+  {
+    return new Object[][]
+    {
+      new Object[]
+      {
+        " a\tb\r\nc d ",
+        "{LEADING SPACE}a{TAB}b{LINE FEED}{CARRIAGE RETURN}c d{TRAILING SPACE}"
+      },
+      new Object[]
+      {
+        "jalape\\u00F1o",
+        "jalape\\u00F1o"
+      },
+      new Object[]
+      {
+        "::",
+        "{LEADING COLON}:"
+      },
+      new Object[]
+      {
+        "<<",
+        "{LEADING LESS THAN}<"
+      },
+      new Object[]
+      {
+        "{\ud83d\ude00}",
+        "{OPENING CURLY BRACE}{GRINNING FACE}{CLOSING CURLY BRACE}"
+      },
+      new Object[]
+      {
+        "\ud83d\udeff}",
+        "{0xf09f9bbf}"
+      },
+    };
   }
 }

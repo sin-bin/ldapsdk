@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -29,6 +44,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -71,7 +88,8 @@ public final class PasswordPolicyStateAccountUsabilityWarning
    * The name for the warning type that indicates the user's account is about
    * to expire.
    */
-  public static final String WARNING_NAME_ACCOUNT_EXPIRING = "account-expiring";
+  @NotNull public static final String WARNING_NAME_ACCOUNT_EXPIRING =
+       "account-expiring";
 
 
 
@@ -87,7 +105,7 @@ public final class PasswordPolicyStateAccountUsabilityWarning
    * The name for the warning type that indicates the user's password is about
    * to expire.
    */
-  public static final String WARNING_NAME_PASSWORD_EXPIRING =
+  @NotNull public static final String WARNING_NAME_PASSWORD_EXPIRING =
        "password-expiring";
 
 
@@ -106,7 +124,7 @@ public final class PasswordPolicyStateAccountUsabilityWarning
    * failed authentication attempts since the last successful bind, and that the
    * account may be locked if there are too many more failures.
    */
-  public static final String WARNING_NAME_OUTSTANDING_BIND_FAILURES =
+  @NotNull public static final String WARNING_NAME_OUTSTANDING_BIND_FAILURES =
        "outstanding-bind-failures";
 
 
@@ -125,7 +143,8 @@ public final class PasswordPolicyStateAccountUsabilityWarning
    * in some time, and the account may be locked in the near future if it
    * remains idle.
    */
-  public static final String WARNING_NAME_ACCOUNT_IDLE = "account-idle";
+  @NotNull public static final String WARNING_NAME_ACCOUNT_IDLE =
+       "account-idle";
 
 
 
@@ -143,15 +162,60 @@ public final class PasswordPolicyStateAccountUsabilityWarning
    * to change his/her password by a specific time because the password policy
    * requires all users to change their passwords by that time.
    */
-  public static final String WARNING_NAME_REQUIRE_PASSWORD_CHANGE_BY_TIME =
-       "require-password-change-by-time";
+  @NotNull public static final String
+       WARNING_NAME_REQUIRE_PASSWORD_CHANGE_BY_TIME =
+            "require-password-change-by-time";
+
+
+
+  /**
+   * The numeric value for the warning type that indicates that although the
+   * user's account should be locked as a result of too many outstanding
+   * failed authentication attempts, their password policy is configured with a
+   * failure lockout action that will not prevent them from authenticating
+   * (although it may still have an effect on their account's usability).
+   */
+  public static final int WARNING_TYPE_TOO_MANY_OUTSTANDING_BIND_FAILURES = 6;
+
+
+
+  /**
+   * The name for the warning type that indicates that although the user's
+   * account should be locked as a result of too many outstanding failed
+   * authentication attempts, their password policy is configured with a failure
+   * lockout action that will not prevent them from authenticating (although it
+   * may still have an effect on their account's usability).
+   */
+  @NotNull public static final String
+       WARNING_NAME_TOO_MANY_OUTSTANDING_BIND_FAILURES =
+            "too-many-outstanding-bind-failures";
+
+
+
+  /**
+   * The numeric value for the warning type that indicates that the user's
+   * account has a password that is encoded with a deprecated password storage
+   * scheme.
+   */
+  public static final int WARNING_TYPE_DEPRECATED_PASSWORD_STORAGE_SCHEME = 7;
+
+
+
+  /**
+   * The numeric value for the warning type that indicates that the user's
+   * account has a password that is encoded with a deprecated password storage
+   * scheme.
+   */
+  @NotNull public static final String
+       WARNING_NAME_DEPRECATED_PASSWORD_STORAGE_SCHEME =
+            "deprecated-password-storage-scheme";
 
 
 
   /**
    * The serial version UID for this serializable class.
    */
-  private static final long serialVersionUID = 4256291819633130578L;
+  private static final long serialVersionUID = -8585936121537239716L;
 
 
 
@@ -160,13 +224,13 @@ public final class PasswordPolicyStateAccountUsabilityWarning
 
   // A human-readable message that provides specific details about this account
   // usability warning.
-  private final String message;
+  @Nullable private final String message;
 
   // The name for this account usability warning.
-  private final String name;
+  @NotNull private final String name;
 
   // The encoded string representation for this account usability warning.
-  private final String stringRepresentation;
+  @NotNull private final String stringRepresentation;
 
 
 
@@ -181,8 +245,8 @@ public final class PasswordPolicyStateAccountUsabilityWarning
    *                   {@code null} if no message is available.
    */
   public PasswordPolicyStateAccountUsabilityWarning(final int intValue,
-                                                    final String name,
-                                                    final String message)
+              @NotNull final String name,
+              @Nullable final String message)
   {
     Validator.ensureNotNull(name);
 
@@ -219,7 +283,7 @@ public final class PasswordPolicyStateAccountUsabilityWarning
    *                         account usability warning.
    */
   public PasswordPolicyStateAccountUsabilityWarning(
-              final String stringRepresentation)
+              @NotNull final String stringRepresentation)
          throws LDAPException
   {
     this.stringRepresentation = stringRepresentation;
@@ -308,6 +372,7 @@ public final class PasswordPolicyStateAccountUsabilityWarning
    *
    * @return  The name for this account usability warning.
    */
+  @NotNull()
   public String getName()
   {
     return name;
@@ -323,6 +388,7 @@ public final class PasswordPolicyStateAccountUsabilityWarning
    *          account usability warning, or {@code null} if no message is
    *          available.
    */
+  @Nullable()
   public String getMessage()
   {
     return message;
@@ -336,6 +402,7 @@ public final class PasswordPolicyStateAccountUsabilityWarning
    * @return  A string representation of this account usability warning.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return stringRepresentation;

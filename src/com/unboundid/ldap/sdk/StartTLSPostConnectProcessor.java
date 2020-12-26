@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,8 @@ import javax.net.ssl.SSLSocketFactory;
 
 import com.unboundid.ldap.sdk.extensions.StartTLSExtendedRequest;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -75,10 +92,10 @@ public final class StartTLSPostConnectProcessor
        implements PostConnectProcessor
 {
   // The SSL context to use to perform the negotiation.
-  private final SSLContext sslContext;
+  @Nullable private final SSLContext sslContext;
 
   // The SSL socket factory to create the secure connection.
-  private final SSLSocketFactory sslSocketFactory;
+  @Nullable private final SSLSocketFactory sslSocketFactory;
 
 
 
@@ -89,7 +106,7 @@ public final class StartTLSPostConnectProcessor
    * @param  sslContext  The SSL context to use to perform the StartTLS
    *                     negotiation.  It must not be {@code null}.
    */
-  public StartTLSPostConnectProcessor(final SSLContext sslContext)
+  public StartTLSPostConnectProcessor(@NotNull final SSLContext sslContext)
   {
     Validator.ensureNotNull(sslContext);
 
@@ -106,7 +123,8 @@ public final class StartTLSPostConnectProcessor
    * @param  sslSocketFactory  The SSL socket factory to use to create the
    *                           TLS-secured socket.  It must not be {@code null}.
    */
-  public StartTLSPostConnectProcessor(final SSLSocketFactory sslSocketFactory)
+  public StartTLSPostConnectProcessor(
+              @NotNull final SSLSocketFactory sslSocketFactory)
   {
     Validator.ensureNotNull(sslSocketFactory);
 
@@ -120,7 +138,8 @@ public final class StartTLSPostConnectProcessor
    * {@inheritDoc}
    */
   @Override()
-  public void processPreAuthenticatedConnection(final LDAPConnection connection)
+  public void processPreAuthenticatedConnection(
+                   @NotNull final LDAPConnection connection)
          throws LDAPException
   {
     final StartTLSExtendedRequest startTLSRequest;
@@ -155,7 +174,7 @@ public final class StartTLSPostConnectProcessor
    */
   @Override()
   public void processPostAuthenticatedConnection(
-                   final LDAPConnection connection)
+                   @NotNull final LDAPConnection connection)
          throws LDAPException
   {
     // No implementation is required for this post-connect processor.

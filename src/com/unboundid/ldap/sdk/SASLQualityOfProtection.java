@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -73,7 +90,7 @@ public enum SASLQualityOfProtection
 
   // The string representation that should be used for this QoP when interacting
   // with the Java SASL framework.
-  private final String qopString;
+  @NotNull private final String qopString;
 
 
 
@@ -85,7 +102,7 @@ public enum SASLQualityOfProtection
    *                    that should be used when interacting with the Java SASL
    *                    framework.
    */
-  SASLQualityOfProtection(final String qopString)
+  SASLQualityOfProtection(@NotNull final String qopString)
   {
     this.qopString = qopString;
   }
@@ -101,7 +118,8 @@ public enum SASLQualityOfProtection
    * @return  The requested SASL quality of protection value, or {@code null} if
    *          there is no value with the provided name.
    */
-  public static SASLQualityOfProtection forName(final String name)
+  @Nullable()
+  public static SASLQualityOfProtection forName(@NotNull final String name)
   {
     switch (StaticUtils.toLowerCase(name))
     {
@@ -135,7 +153,9 @@ public enum SASLQualityOfProtection
    * @throws  LDAPException  If the provided string cannot be decoded as a valid
    *                         list of SASL quality of protection values.
    */
-  public static List<SASLQualityOfProtection> decodeQoPList(final String s)
+  @NotNull()
+  public static List<SASLQualityOfProtection> decodeQoPList(
+                                                   @Nullable final String s)
          throws LDAPException
   {
     final ArrayList<SASLQualityOfProtection> qopValues = new ArrayList<>(3);
@@ -173,6 +193,7 @@ public enum SASLQualityOfProtection
    * @return  A string representation of this SASL quality of protection.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     return qopString;
@@ -191,7 +212,9 @@ public enum SASLQualityOfProtection
    *          protection values, as may be provided to a Java
    *          {@code SaslClient}.
    */
-  public static String toString(final List<SASLQualityOfProtection> qopValues)
+  @NotNull()
+  public static String toString(
+              @NotNull final List<SASLQualityOfProtection> qopValues)
   {
     if ((qopValues == null) || qopValues.isEmpty())
     {

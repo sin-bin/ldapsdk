@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -201,6 +216,27 @@ public class GenerateMessages
         w(" * All Rights Reserved.");
         w(" */");
         w("/*");
+        w(" * Copyright 2020 Ping Identity Corporation");
+        w(" *");
+        w(" * Licensed under the Apache License, Version 2.0 (the " +
+             "\"License\");");
+        w(" * you may not use this file except in compliance with the " +
+             "License.");
+        w(" * You may obtain a copy of the License at");
+        w(" *");
+        w(" *    http://www.apache.org/licenses/LICENSE-2.0");
+        w(" *");
+        w(" * Unless required by applicable law or agreed to in writing, " +
+             "software");
+        w(" * distributed under the License is distributed on an \"AS IS\" " +
+             "BASIS,");
+        w(" * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express " +
+             "or implied.");
+        w(" * See the License for the specific language governing " +
+             "permissions and");
+        w(" * limitations under the License.");
+        w(" */");
+        w("/*");
         w(" * Copyright (C) ", year, " Ping Identity Corporation");
         w(" *");
         w(" * This program is free software; you can redistribute it and/or " +
@@ -252,89 +288,228 @@ public class GenerateMessages
         while (propertyNames.hasNext())
         {
           final String propertyName = String.valueOf(propertyNames.next());
-          final String message      = p.getProperty(propertyName);
+          final String formatString      = p.getProperty(propertyName);
 
-          if (message.contains("%s"))
+          if (formatString.contains("%s"))
           {
-            throw new BuildException("The message string for property " +
+            throw new BuildException("The format string for property " +
                  propertyName + " in file " + propertiesFileName +
                  " appears to contain %s instead of a positional indicator " +
                  "like {0}.");
           }
-          else if (message.contains("%d"))
+          else if (formatString.contains("%d"))
           {
-            throw new BuildException("The message string for property " +
+            throw new BuildException("The format string for property " +
                  propertyName + " in file " + propertiesFileName +
                  " appears to contain %d instead of a positional indicator " +
                  "like {0}.");
           }
 
-          int pos = message.indexOf("'{");
-          while (pos >= 0)
-          {
-            final int closePos = message.indexOf('}', pos);
-            if (closePos > 0)
-            {
-              try
-              {
-                final int value =
-                     Integer.parseInt(message.substring(pos+2, closePos));
-                if ((pos == 0) || (message.charAt(pos-1) != '\''))
-                {
-                  throw new BuildException("The message string for property " +
-                       propertyName + " in file " + propertiesFileName +
-                       " appears to contain '{" + value +
-                       "}' rather than ''{" + value + "}''.  This will cause " +
-                       "the raw string {" + value + "} to appear in the " +
-                       "message rather than the expected replacement value.");
-                }
-              }
-              catch (final NumberFormatException nfe)
-              {
-                // This is acceptable.
-              }
-            }
 
-            pos = message.indexOf("'{", pos+1);
+          // Validate the property name.
+          if (! (propertyName.startsWith("ERR_") ||
+               propertyName.startsWith("WARN_") ||
+               propertyName.startsWith("INFO_")))
+          {
+            throw new BuildException("Properties file " + propertiesFileName +
+                 " contains a property named '" + propertyName +
+                 "' that does not start with one of ERR_, WARN_, or INFO_.  " +
+                 "All property names must start with one of those prefixes.");
           }
 
-          pos = message.indexOf('{');
+          if (propertyName.contains("__"))
+          {
+            throw new BuildException("Properties file " + propertiesFileName +
+                 " contains a property named '" + propertyName +
+                 "' that has a double underscore.");
+          }
+
+          for (final char c : propertyName.toCharArray())
+          {
+            if (! (((c >= 'A') && (c <= 'Z')) ||
+                 ((c >= '0') && (c <= '9')) ||
+                 (c == '_')))
+            {
+              throw new BuildException("Properties file " + propertiesFileName +
+                   " contains a property named '" + propertyName +
+                   " that contains illegal character '" + c + "'.  Property " +
+                   "names can only contain uppercase letters, digits, or " +
+                   "underscores.");
+            }
+          }
+
+
+          // Validate argument references in the format string.
+          int pos = formatString.indexOf('{');
           while (pos >= 0)
           {
-            final int closePos = message.indexOf('}', pos);
+            if ((pos > 0) && (formatString.charAt(pos-1) == '\'') &&
+                 (pos < (formatString.length()-2)) &&
+                 (formatString.charAt(pos+1) == '\''))
+            {
+              pos = formatString.indexOf('{', pos+2);
+              continue;
+            }
+
+            final int closePos = formatString.indexOf('}', pos);
             if (closePos > 0)
             {
               try
               {
-                final int value =
-                     Integer.parseInt(message.substring(pos+1, closePos));
+                final int value;
+                final int commaPos = formatString.indexOf(",number,0}", pos+1);
+                if ((commaPos > 0) && (commaPos < closePos))
+                {
+                  value = Integer.parseInt(
+                       formatString.substring(pos+1, commaPos));
+                }
+                else
+                {
+                  value = Integer.parseInt(formatString.substring(pos+1,
+                       closePos));
+                }
+
                 for (int i=0; i < value; i++)
                 {
-                  if (! (message.contains("{" + i + '}') ||
-                         message.contains("{" + i + ",number,0}")))
+                  if (! (formatString.contains("{" + i + '}') ||
+                         formatString.contains("{" + i + ",number,0}")))
                   {
-                    throw new BuildException("The message string for " +
+                    throw new BuildException("The format string for " +
                          "property " + propertyName + " in file " +
                          propertiesFileName + " appears to contain {" + value +
-                         "} but not {" + i + "}.  The message string is " +
-                         message);
+                         "} but not {" + i + "}.  The format string is " +
+                         formatString);
                   }
                 }
               }
               catch (final NumberFormatException nfe)
               {
-                // This is acceptable.
+                throw new BuildException("The format string for property " +
+                     propertyName + " in file " + propertiesFileName +
+                     " appears to contain " +
+                     formatString.substring(pos, closePos+1) +
+                     " with a non-numeric value within unquoted braces.  If " +
+                     "you want to have curly braces containing static text " +
+                     "(rather than a reference to a message parameter), " +
+                     "place single quotes before and after each of the " +
+                     "braces.  The format string is " + formatString);
               }
             }
+            else
+            {
+              throw new BuildException("The format string for property " +
+                   propertyName + " in file " + propertiesFileName +
+                   " has an open curly brace without a corresponding " +
+                   "close curly brace.  The format string is " + formatString);
+            }
 
-            pos = message.indexOf('{', pos+1);
+            pos = formatString.indexOf('{', pos+1);
           }
 
+
+          // Validate single quote usage in the format string.
+          pos = formatString.indexOf("'");
+          while (pos >= 0)
+          {
+            if (pos == (formatString.length() - 1))
+            {
+              throw new BuildException("The format string for property " +
+                   propertyName + " in file " + propertiesFileName +
+                   " has a stray trailing single quote.  If you want the " +
+                   "quote to be there, then use two consecutive single " +
+                   "quote characters.  Otherwise, remove it.  The format " +
+                   "string is " + formatString);
+            }
+
+            final int numToSkip;
+            final char nextChar = formatString.charAt(pos+1);
+            if (nextChar == '\'')
+            {
+              // This is fine.  It's a single quote literal.
+              numToSkip = 2;
+            }
+            else if ((nextChar == '{') || (nextChar == '}'))
+            {
+              if (formatString.charAt(pos+2) != '\'')
+              {
+                throw new BuildException("The format string for property " +
+                     propertyName + " in file " + propertiesFileName +
+                     " has a curly brace that is preceded by a single quote " +
+                     "but is not followed by one.  Curly braces that you " +
+                     "want to actually appear in the formatted message must " +
+                     "be enclosed in single quotes.  The format string is " +
+                     formatString);
+              }
+              numToSkip = 3;
+            }
+            else
+            {
+              throw new BuildException("The format string for property " +
+                   propertyName + " in file " + propertiesFileName +
+                   " has a single quote that is not followed by another " +
+                   "single quote or an open or close curly brace.  If you " +
+                   "want a single quote to show up in the formatted messge, " +
+                   "you need to use two consecutive quotes in the format " +
+                   "string.  The format string is " + formatString);
+            }
+
+            pos = formatString.indexOf("'", (pos + numToSkip));
+          }
+
+
+          // Validate double quote usage in the format string.
+          if (formatString.contains("\""))
+          {
+            throw new BuildException("The format string for property " +
+                 propertyName + " in file " + propertiesFileName +
+                 " contains a double quote character.  Message format " +
+                 "strings should only include single quotes so that they can " +
+                 "be enclosed in quoted strings with less hassle.  The " +
+                 "format string is " + formatString);
+          }
+
+
+          // Check space usage in the format string.
+          if (formatString.endsWith(" "))
+          {
+            throw new BuildException("The format string for property " +
+                 propertyName + " in file " + propertiesFileName +
+                 " contains one or more trailing spaces.  The format string " +
+                 "is " + formatString);
+          }
+
+          if (formatString.contains("   "))
+          {
+            throw new BuildException("The format string for property " +
+                 propertyName + " in file " + propertiesFileName +
+                 " contains three or more consecutive spaces.  The format " +
+                 "string is " + formatString);
+          }
+
+          pos = formatString.indexOf("  ");
+          while (pos > 0)
+          {
+            final char previousCharacter = formatString.charAt(pos-1);
+            if (! ((previousCharacter == ':') || (previousCharacter == '.') ||
+               (previousCharacter == '?') || (previousCharacter == '}')))
+            {
+              throw new BuildException("The format string for property " +
+                   propertyName + " in file " + propertiesFileName +
+                   " contains consecutive spaces that do not immediately " +
+                   "follow a colon, period, question mark, or closing curly " +
+                   "brace.  The format string is " + formatString);
+            }
+
+            pos = formatString.indexOf("  ", (pos+1));
+          }
+
+
+
           w("  /**");
-          w("   * ", message);
+          w("   * ", formatString);
           w("   */");
 
-          final String quotedMessage = message.replace("\"", "\\\"");
+          final String quotedMessage = formatString.replace("\"", "\\\"");
           if (propertyNames.hasNext())
           {
             w("  ", propertyName, "(\"" + quotedMessage + "\"),");
@@ -358,6 +533,14 @@ public class GenerateMessages
              "\"com.unboundid.ldap.sdk.RunningUnitTests\") ||");
         w("       Boolean.getBoolean(" +
              "\"com.unboundid.directory.server.RunningUnitTests\");");
+        w();
+        w();
+        w();
+        w("  /**");
+        w("   * A pre-allocated array of zero objects to use for messages");
+        w("   * that do not require any arguments.");
+        w("   */");
+        w("  private static final Object[] NO_ARGS = new Object[0];");
         w();
         w();
         w();
@@ -423,54 +606,76 @@ public class GenerateMessages
         w();
         w("  /**");
         w("   * Retrieves a localized version of the message.");
-        w("   * This method should only be used for messages which do not ",
-          "take any arguments.");
+        w("   * This method should only be used for messages that do not ",
+          "take any");
+        w("   * arguments.");
         w("   *");
         w("   * @return  A localized version of the message.");
         w("   */");
         w("  public String get()");
         w("  {");
-        w("    String s = MESSAGE_STRINGS.get(this);");
-        w("    if (s == null)");
+       w("    MessageFormat f = MESSAGES.get(this);");
+        w("    if (f == null)");
         w("    {");
         w("      if (RESOURCE_BUNDLE == null)");
         w("      {");
-        w("        s = defaultText;");
+        w("        f = new MessageFormat(defaultText);");
         w("      }");
         w("      else");
         w("      {");
         w("        try");
         w("        {");
-        w("          s = RESOURCE_BUNDLE.getString(name());");
+        w("          f = new MessageFormat(RESOURCE_BUNDLE.getString(" +
+             "name()));");
         w("        }");
         w("        catch (final Exception e)");
         w("        {");
-        w("          s = defaultText;");
+        w("          f = new MessageFormat(defaultText);");
         w("        }");
-        w("        MESSAGE_STRINGS.putIfAbsent(this, s);");
+        w("      }");
+        w("      MESSAGES.putIfAbsent(this, f);");
+        w("    }");
+        w();
+        w("    final String formattedMessage;");
+        w("    synchronized (f)");
+        w("    {");
+        w("      formattedMessage = f.format(NO_ARGS);");
+        w("    }");
+        w();
+        w("    if (IS_WITHIN_UNIT_TESTS)");
+        w("    {");
+        w("      if (formattedMessage.contains(\"{0}\") ||");
+        w("          formattedMessage.contains(\"{0,number,0}\") ||");
+        w("          formattedMessage.contains(\"{1}\") ||");
+        w("          formattedMessage.contains(\"{1,number,0}\") ||");
+        w("          formattedMessage.contains(\"{2}\") ||");
+        w("          formattedMessage.contains(\"{2,number,0}\") ||");
+        w("          formattedMessage.contains(\"{3}\") ||");
+        w("          formattedMessage.contains(\"{3,number,0}\") ||");
+        w("          formattedMessage.contains(\"{4}\") ||");
+        w("          formattedMessage.contains(\"{4,number,0}\") ||");
+        w("          formattedMessage.contains(\"{5}\") ||");
+        w("          formattedMessage.contains(\"{5,number,0}\") ||");
+        w("          formattedMessage.contains(\"{6}\") ||");
+        w("          formattedMessage.contains(\"{6,number,0}\") ||");
+        w("          formattedMessage.contains(\"{7}\") ||");
+        w("          formattedMessage.contains(\"{7,number,0}\") ||");
+        w("          formattedMessage.contains(\"{8}\") ||");
+        w("          formattedMessage.contains(\"{8,number,0}\") ||");
+        w("          formattedMessage.contains(\"{9}\") ||");
+        w("          formattedMessage.contains(\"{9,number,0}\") ||");
+        w("          formattedMessage.contains(\"{10}\") ||");
+        w("          formattedMessage.contains(\"{10,number,0}\"))");
+        w("      {");
+        w("        throw new IllegalArgumentException(");
+        w("             \"Message \" + getClass().getName() + '.' + name() +");
+        w("                  \" contains an un-replaced token:  \" + " +
+             "formattedMessage);");
         w("      }");
         w("    }");
         w();
-        w("    if (IS_WITHIN_UNIT_TESTS &&");
-        w("        (s.contains(\"{0}\") || s.contains(\"{0,number,0}\") ||");
-        w("         s.contains(\"{1}\") || s.contains(\"{1,number,0}\") ||");
-        w("         s.contains(\"{2}\") || s.contains(\"{2,number,0}\") ||");
-        w("         s.contains(\"{3}\") || s.contains(\"{3,number,0}\") ||");
-        w("         s.contains(\"{4}\") || s.contains(\"{4,number,0}\") ||");
-        w("         s.contains(\"{5}\") || s.contains(\"{5,number,0}\") ||");
-        w("         s.contains(\"{6}\") || s.contains(\"{6,number,0}\") ||");
-        w("         s.contains(\"{7}\") || s.contains(\"{7,number,0}\") ||");
-        w("         s.contains(\"{8}\") || s.contains(\"{8,number,0}\") ||");
-        w("         s.contains(\"{9}\") || s.contains(\"{9,number,0}\") ||");
-        w("         s.contains(\"{10}\") ||  s.contains(\"{10,number,0}\")))");
-        w("    {");
-        w("         throw new IllegalArgumentException(");
-        w("              \"Message \" + getClass().getName() + '.' + name() +");
-        w("                   \" contains an un-replaced token:  \" + s);");
-        w("    }");
-        w();
-        w("    return s;");
-        w("  }");
+        w("    return formattedMessage;");
+         w("  }");
 
 
         // Add a method that may be used to get the message string formatted
@@ -515,37 +720,39 @@ public class GenerateMessages
         w("      formattedMessage = f.format(args);");
         w("    }");
         w();
-        w("    if (IS_WITHIN_UNIT_TESTS &&");
-        w("        (formattedMessage.contains(\"{0}\") ||");
-        w("         formattedMessage.contains(\"{0,number,0}\") ||");
-        w("         formattedMessage.contains(\"{1}\") ||");
-        w("         formattedMessage.contains(\"{1,number,0}\") ||");
-        w("         formattedMessage.contains(\"{2}\") ||");
-        w("         formattedMessage.contains(\"{2,number,0}\") ||");
-        w("         formattedMessage.contains(\"{3}\") ||");
-        w("         formattedMessage.contains(\"{3,number,0}\") ||");
-        w("         formattedMessage.contains(\"{4}\") ||");
-        w("         formattedMessage.contains(\"{4,number,0}\") ||");
-        w("         formattedMessage.contains(\"{5}\") ||");
-        w("         formattedMessage.contains(\"{5,number,0}\") ||");
-        w("         formattedMessage.contains(\"{6}\") ||");
-        w("         formattedMessage.contains(\"{6,number,0}\") ||");
-        w("         formattedMessage.contains(\"{7}\") ||");
-        w("         formattedMessage.contains(\"{7,number,0}\") ||");
-        w("         formattedMessage.contains(\"{8}\") ||");
-        w("         formattedMessage.contains(\"{8,number,0}\") ||");
-        w("         formattedMessage.contains(\"{9}\") ||");
-        w("         formattedMessage.contains(\"{9,number,0}\") ||");
-        w("         formattedMessage.contains(\"{10}\") ||");
-        w("         formattedMessage.contains(\"{10,number,0}\")))");
+        w("    if (IS_WITHIN_UNIT_TESTS)");
         w("    {");
-        w("         throw new IllegalArgumentException(");
-        w("              \"Message \" + getClass().getName() + '.' + name() +");
-        w("                   \" contains an un-replaced token:  \" +" +
-             " formattedMessage);");
+        w("      if (formattedMessage.contains(\"{0}\") ||");
+        w("          formattedMessage.contains(\"{0,number,0}\") ||");
+        w("          formattedMessage.contains(\"{1}\") ||");
+        w("          formattedMessage.contains(\"{1,number,0}\") ||");
+        w("          formattedMessage.contains(\"{2}\") ||");
+        w("          formattedMessage.contains(\"{2,number,0}\") ||");
+        w("          formattedMessage.contains(\"{3}\") ||");
+        w("          formattedMessage.contains(\"{3,number,0}\") ||");
+        w("          formattedMessage.contains(\"{4}\") ||");
+        w("          formattedMessage.contains(\"{4,number,0}\") ||");
+        w("          formattedMessage.contains(\"{5}\") ||");
+        w("          formattedMessage.contains(\"{5,number,0}\") ||");
+        w("          formattedMessage.contains(\"{6}\") ||");
+        w("          formattedMessage.contains(\"{6,number,0}\") ||");
+        w("          formattedMessage.contains(\"{7}\") ||");
+        w("          formattedMessage.contains(\"{7,number,0}\") ||");
+        w("          formattedMessage.contains(\"{8}\") ||");
+        w("          formattedMessage.contains(\"{8,number,0}\") ||");
+        w("          formattedMessage.contains(\"{9}\") ||");
+        w("          formattedMessage.contains(\"{9,number,0}\") ||");
+        w("          formattedMessage.contains(\"{10}\") ||");
+        w("          formattedMessage.contains(\"{10,number,0}\"))");
+        w("      {");
+        w("        throw new IllegalArgumentException(");
+        w("             \"Message \" + getClass().getName() + '.' + name() +");
+        w("                  \" contains an un-replaced token:  \" + " +
+             "formattedMessage);");
+        w("      }");
         w("    }");
         w();
-        w("    return f.format(args);");
+        w("    return formattedMessage;");
         w("  }");
 
 

@@ -1,9 +1,24 @@
 /*
- * Copyright 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2017-2019 Ping Identity Corporation
+ * Copyright 2017-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2017-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,8 @@ import java.util.List;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.Modification;
 import com.unboundid.ldap.sdk.ReadOnlyEntry;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -58,8 +75,8 @@ public final class ClearInMemoryPasswordEncoder
    *                          special formatting should be applied to the raw
    *                          bytes.
    */
-  public ClearInMemoryPasswordEncoder(final String prefix,
-              final PasswordEncoderOutputFormatter outputFormatter)
+  public ClearInMemoryPasswordEncoder(@NotNull final String prefix,
+              @Nullable final PasswordEncoderOutputFormatter outputFormatter)
   {
     super(prefix, outputFormatter);
   }
@@ -70,9 +87,10 @@ public final class ClearInMemoryPasswordEncoder
    * {@inheritDoc}
    */
   @Override()
-  protected byte[] encodePassword(final byte[] clearPassword,
-                                  final ReadOnlyEntry userEntry,
-                                  final List<Modification> modifications)
+  @NotNull()
+  protected byte[] encodePassword(@NotNull final byte[] clearPassword,
+                        @NotNull final ReadOnlyEntry userEntry,
+                        @NotNull final List<Modification> modifications)
             throws LDAPException
   {
     return clearPassword;
@@ -85,9 +103,9 @@ public final class ClearInMemoryPasswordEncoder
    */
   @Override()
   protected void ensurePreEncodedPasswordAppearsValid(
-                      final byte[] unPrefixedUnFormattedEncodedPasswordBytes,
-                      final ReadOnlyEntry userEntry,
-                      final List<Modification> modifications)
+       @NotNull final byte[] unPrefixedUnFormattedEncodedPasswordBytes,
+       @NotNull final ReadOnlyEntry userEntry,
+       @NotNull final List<Modification> modifications)
             throws LDAPException
   {
     // No validation is required.
@@ -99,9 +117,9 @@ public final class ClearInMemoryPasswordEncoder
    * {@inheritDoc}
    */
   @Override()
-  protected boolean passwordMatches(final byte[] clearPasswordBytes,
-                         final byte[] unPrefixedUnFormattedEncodedPasswordBytes,
-                         final ReadOnlyEntry userEntry)
+  protected boolean passwordMatches(@NotNull final byte[] clearPasswordBytes,
+       @NotNull final byte[] unPrefixedUnFormattedEncodedPasswordBytes,
+       @NotNull final ReadOnlyEntry userEntry)
             throws LDAPException
   {
     return Arrays.equals(clearPasswordBytes,
@@ -114,9 +132,10 @@ public final class ClearInMemoryPasswordEncoder
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected byte[] extractClearPassword(
-                 final byte[] unPrefixedUnFormattedEncodedPasswordBytes,
-                 final ReadOnlyEntry userEntry)
+       @NotNull final byte[] unPrefixedUnFormattedEncodedPasswordBytes,
+       @NotNull final ReadOnlyEntry userEntry)
             throws LDAPException
   {
     return unPrefixedUnFormattedEncodedPasswordBytes;
@@ -128,7 +147,7 @@ public final class ClearInMemoryPasswordEncoder
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ClearInMemoryPasswordEncoder(prefix='");
     buffer.append(getPrefix());

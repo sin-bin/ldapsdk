@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -45,6 +60,11 @@ import com.unboundid.util.ssl.TrustAllTrustManager;
 
 /**
  * This class provides test coverage for invoking tools in interactive mode.
+ * These tests use the version of {@link LDAPSearch} provided as a core LDAP
+ * SDK example rather than the full bells-and-whistles version in the
+ * {@code com.unboundid.ldap.sdk.unboundidds.tools} package because the minimal
+ * version is more simple and its arguments are much less likely to change in a
+ * way that would affect menu choices.
  */
 public final class InteractiveCommandLineToolTestCase
        extends LDAPSDKTestCase
@@ -97,13 +117,13 @@ public final class InteractiveCommandLineToolTestCase
     final InMemoryDirectoryServer ds = getTestDS();
 
     System.setIn(getInputStream(
-         "", // Default to no communication encryption
-         "", // Default to local host for the directory server address.
-         String.valueOf(ds.getListenPort()),
-         "", // Default to no authentication
-         "", // Base DN of the root DSE
-         "(objectClass=*)", // First trailing argument
-         "", // No more trailing arguments.
+         "", //  Default to localhost for the server address.
+         "5", // Do not attempt to communicate securely.
+         String.valueOf(ds.getListenPort()), // Server port
+         "3", // Do not attempt to authenticate.
+         "dc=example,dc=com", // Search base DN.
+         "(objectClass=*)", // First trailing argument.
+         "", // No more trailing arguments
          "q")); // Quit.
 
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -129,26 +149,22 @@ public final class InteractiveCommandLineToolTestCase
     final InMemoryDirectoryServer ds = getTestDS();
 
     System.setIn(getInputStream(
-         "1", // No communication encryption
-         "localhost", // Directory server address.
-         String.valueOf(ds.getListenPort()),
-         "2", // Use LDAP simple authentication
+         "localhost", // Server address
+         "5", // Do not attempt to communicate securely.
+         String.valueOf(ds.getListenPort()), // Server port
+         "", // Default to simple authentication.
          "cn=Directory Manager", // Bind DN
-         "", // Empty password -- this isn't valid
          "password", // Bind password
-         "", // Base DN
+         "", // Empty base DN
          "(objectClass=*)", // First trailing argument
-         "", // No more trailing arguments.
-         "2", // Change scope
-         "1", // BaseObject scope.
-         "t", // Specify trailing arguments again.
-         "(objectClass=*)", // First trailing argument -- the filter
-         "*", // Second trailing argument -- all user attributes
-         "+", // Third trailing argument -- all operational attributes
+         "*", // Second trailing argument
+         "+", // Third trailing argument
          "", // No more trailing arguments
-         "d", // Display the arguments.
-         "", // Return from displaying the arguments.
-         "r")); // Run the tool with the selected arguments.
+         "3", // Select the scope argument
+         "1", // Select a baseObject scope.
+         "d", // Display the command that will be run.
+         "", // Return from displaying the command.
+         "r")); // Run the tool.
 
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -174,12 +190,12 @@ public final class InteractiveCommandLineToolTestCase
     final InMemoryDirectoryServer ds = getTestDSWithSSL();
 
     System.setIn(getInputStream(
-         "2", // Use SSL
-         "1", // No client certificate
-         "4", // Blindly trust the server certificate
-         "localhost", // Directory server address.
-         String.valueOf(ds.getListenPort()),
-         "2", // Use LDAP simple authentication
+         "localhost", // Server address
+         "2", // Use SSL with non-default settings
+         "1", // Do not provide a client certificate
+         "4", // Blindly trust any server certificate
+         String.valueOf(ds.getListenPort()), // Server port
+         "1", //  Use simple authentication.
          "cn=Directory Manager", // Bind DN
          "password", // Bind password
          "", // Base DN
@@ -187,9 +203,9 @@ public final class InteractiveCommandLineToolTestCase
          "*", // Second trailing argument -- return all user attributes
          "+", // Second trailing argument -- return all operational attributes
          "", // No more trailing arguments.
-         "2", // Change scope
+         "3", // Change scope
          "1", // BaseObject scope.
-         "3", // Change follow referrals
+         "4", // Change follow referrals
          "1", // Yes to follow referrals
          "d", // Display the arguments.
          "", // Return from displaying the arguments.
@@ -235,7 +251,8 @@ public final class InteractiveCommandLineToolTestCase
     ds.startListening();
 
     System.setIn(getInputStream(
-         "3", // Use StartTLS
+         "localhost", // Server address
+         "4", // Use StartTLS with non-default settings
          "2", // Present a client certificate from a JKS keystore
          clientKeyStore.getAbsolutePath(),
          "password", // PIN for the client keystore
@@ -244,9 +261,8 @@ public final class InteractiveCommandLineToolTestCase
          "2", // Trust using a JKS truststore
          serverKeyStore.getAbsolutePath(),
          "", // No trust store PIN required
-         "localhost", // Directory server address.
-         String.valueOf(ds.getListenPort()),
-         "3", // Use SASL authentication
+         String.valueOf(ds.getListenPort()), // Server port
+         "2", // Use SASL authentication
          "3", // Use SASL PLAIN authentication
          "dn:cn=Directory Manager", // Authentication ID
          "", // No authorization ID
@@ -256,9 +272,9 @@ public final class InteractiveCommandLineToolTestCase
          "*", // Second trailing argument -- return all user attributes
          "+", // Second trailing argument -- return all operational attributes
          "", // No more trailing arguments.
-         "2", // Change scope
+         "3", // Change scope
          "1", // BaseObject scope.
-         "3", // Change follow referrals
+         "4", // Change follow referrals
          "1", // Yes to follow referrals
          "d", // Display the arguments.
          "", // Return from displaying the arguments.
@@ -297,17 +313,17 @@ public final class InteractiveCommandLineToolTestCase
               "PKCS12", "server-cert"), new TrustAllTrustManager());
 
     System.setIn(getInputStream(
-         "3", // Use StartTLS
-         "3", // Present a client certificate from a PKCS#12 keystore
+         "localhost", // Server address
+         "4", // Use StartTLS with non-default settings
+         "2", // Present a client certificate from a JKS keystore
          keyStore.getAbsolutePath(),
          "password", // PIN for the client keystore
-         "server-cert", // No certificate nickname
+         "server-cert", // Certificate nickname
          "2", // Don't authenticate via SASL external
-         "3", // Trust using a PKCS#12 truststore
+         "3", // Trust using a JKS truststore
          keyStore.getAbsolutePath(),
          "password", // Trust store PIN
-         "localhost", // Directory server address.
-         String.valueOf(ds.getListenPort()),
+         String.valueOf(ds.getListenPort()), // Server port
          "3", // Use SASL authentication
          "3", // Use SASL PLAIN authentication
          "dn:cn=Directory Manager", // Authentication ID
@@ -339,33 +355,35 @@ public final class InteractiveCommandLineToolTestCase
     final InMemoryDirectoryServer ds = getTestDS();
 
     System.setIn(getInputStream(
-         "1", // No communication encryption
-         "localhost", // Directory server address.
+         "localhost", // Server address
+         "5", // No communication encryption
          String.valueOf(ds.getListenPort()),
-         "3", // Use SASL authentication
+         "2", // Use SASL authentication
          "1", // Use CRAM-MD5
          "dn:cn=Directory Manager", // Authentication ID
          "password", // Password
          "1", // Re-try LDAP settings
-         "1", // No communication encryption
          "localhost", // Directory server address.
+         "5", // No communication encryption
          String.valueOf(ds.getListenPort()),
-         "3", // Use SASL authentication
+         "2", // Use SASL authentication
          "2", // Use DIGEST-MD5
          "dn:cn=Directory Manager", // Authentication ID
          "dn:cn=Directory Manager", // Authorization ID
          "EXAMPLE-REALM", // Example realm
          "password", // Password
          "1", // Re-try LDAP settings
-         "1", // No communication encryption
          "localhost", // Directory server address.
+         "5", // No communication encryption
          String.valueOf(ds.getListenPort()),
-         "2", // Use LDAP simple authentication
+         "1", // Use LDAP simple authentication
          "", // Bind DN is no DN -- there won't be a password prompt
-         "", // Base DN
+         "invalid", // Invalid base DN
+         "", // Empty base DN
+         "t", // Trailing arguments
          "(objectClass=*)", // First trailing argument
          "", // No more trailing arguments.
-         "2", // Change scope
+         "3", // Change scope
          "1", // BaseObject scope.
          "t", // Specify trailing arguments again.
          "(objectClass=*)", // First trailing argument -- the filter
@@ -402,10 +420,10 @@ public final class InteractiveCommandLineToolTestCase
     final File testFile = createTempFile();
 
     System.setIn(getInputStream(
-         "", // Default to no communication encryption
-         "", // Default to local host for the directory server address.
+         "", // Default directory server address
+         "5", // No communication encryption
          String.valueOf(ds.getListenPort()),
-         "", // Default to no authentication
+         "3", // No authentication
          "0", // The result code value
 
          "1", // Select the argument list argument

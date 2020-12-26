@@ -1,9 +1,24 @@
 /*
- * Copyright 2007-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2007-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2007-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,8 @@ package com.unboundid.ldap.sdk;
 import java.util.List;
 
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -55,7 +72,7 @@ public abstract class UpdatableLDAPRequest
    *
    * @param  controls  The set of controls to include in this LDAP request.
    */
-  protected UpdatableLDAPRequest(final Control[] controls)
+  protected UpdatableLDAPRequest(@Nullable final Control[] controls)
   {
     super(controls);
   }
@@ -67,7 +84,7 @@ public abstract class UpdatableLDAPRequest
    *
    * @param  controls  The set of controls for this request.
    */
-  public final void setControls(final Control... controls)
+  public final void setControls(@Nullable final Control... controls)
   {
     if (controls == null)
     {
@@ -86,7 +103,7 @@ public abstract class UpdatableLDAPRequest
    *
    * @param  controls  The set of controls for this request.
    */
-  public final void setControls(final List<Control> controls)
+  public final void setControls(@Nullable final List<Control> controls)
   {
     if ((controls == null) || controls.isEmpty())
     {
@@ -117,7 +134,7 @@ public abstract class UpdatableLDAPRequest
    * @param  control  The control to add to the set of controls for this
    *                  request.  It must not be {@code null}.
    */
-  public final void addControl(final Control control)
+  public final void addControl(@NotNull final Control control)
   {
     Validator.ensureNotNull(control);
 
@@ -138,7 +155,7 @@ public abstract class UpdatableLDAPRequest
    * @param  controls  The controls to add to the set of controls for this
    *                   request.
    */
-  public final void addControls(final Control... controls)
+  public final void addControls(@Nullable final Control... controls)
   {
     if ((controls == null) || (controls.length == 0))
     {
@@ -170,7 +187,8 @@ public abstract class UpdatableLDAPRequest
    * @return  The control that was removed, or {@code null} if this request does
    *          not have any control with the specified OID.
    */
-  public final Control removeControl(final String oid)
+  @Nullable()
+  public final Control removeControl(@NotNull final String oid)
   {
     Validator.ensureNotNull(oid);
 
@@ -226,7 +244,7 @@ public abstract class UpdatableLDAPRequest
    * @return  {@code true} if the control was found and removed, or
    *          {@code false} if not.
    */
-  public final boolean removeControl(final Control control)
+  public final boolean removeControl(@NotNull final Control control)
   {
     Validator.ensureNotNull(control);
 
@@ -282,7 +300,8 @@ public abstract class UpdatableLDAPRequest
    * @return  The control that was replaced, or {@code null} if there was no
    *          control with the same OID as the provided control.
    */
-  public final Control replaceControl(final Control control)
+  @Nullable()
+  public final Control replaceControl(@NotNull final Control control)
   {
     Validator.ensureNotNull(control);
 
@@ -307,7 +326,9 @@ public abstract class UpdatableLDAPRequest
    * @return  The control that was replaced, or {@code null} if there was no
    *          control with the specified OID.
    */
-  public final Control replaceControl(final String oid, final Control control)
+  @Nullable()
+  public final Control replaceControl(@NotNull final String oid,
+                                      @Nullable final Control control)
   {
     Validator.ensureNotNull(oid);
 

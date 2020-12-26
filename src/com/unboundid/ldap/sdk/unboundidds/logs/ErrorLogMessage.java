@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -24,6 +39,8 @@ package com.unboundid.ldap.sdk.unboundidds.logs;
 
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -56,33 +73,33 @@ public final class ErrorLogMessage
 
 
   // The name of the category for this error log message.
-  private final ErrorLogCategory category;
+  @Nullable private final ErrorLogCategory category;
 
   // The name of the severity for this error log message.
-  private final ErrorLogSeverity severity;
+  @Nullable private final ErrorLogSeverity severity;
 
   // The message ID for this error log message.
-  private final Long messageID;
+  @Nullable private final Long messageID;
 
   // The connection ID for the operation currently being processed by the thread
   // that generated this error log message.
-  private final Long triggeredByConnectionID;
+  @Nullable private final Long triggeredByConnectionID;
 
   // The operation ID for the operation currently being processed by the thread
   // that generated this error log message.
-  private final Long triggeredByOperationID;
+  @Nullable private final Long triggeredByOperationID;
 
   // The Directory Server instance name for this error log message.
-  private final String instanceName;
+  @Nullable private final String instanceName;
 
   // The message string for this error log message.
-  private final String message;
+  @Nullable private final String message;
 
   // The product name for this error log message.
-  private final String productName;
+  @Nullable private final String productName;
 
   // The startup ID for this error log message;
-  private final String startupID;
+  @Nullable private final String startupID;
 
 
 
@@ -94,7 +111,7 @@ public final class ErrorLogMessage
    * @throws  LogException  If the provided string cannot be parsed as a valid
    *                        log message.
    */
-  public ErrorLogMessage(final String s)
+  public ErrorLogMessage(@NotNull final String s)
          throws LogException
   {
     this(new LogMessage(s));
@@ -107,7 +124,7 @@ public final class ErrorLogMessage
    *
    * @param  m  The log message to be parsed as an error log message.
    */
-  public ErrorLogMessage(final LogMessage m)
+  public ErrorLogMessage(@NotNull final LogMessage m)
   {
     super(m);
 
@@ -150,6 +167,7 @@ public final class ErrorLogMessage
    * @return  The server product name for this error log message, or
    *          {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public String getProductName()
   {
     return productName;
@@ -163,6 +181,7 @@ public final class ErrorLogMessage
    * @return  The Directory Server instance name for this error log message, or
    *          {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public String getInstanceName()
   {
     return instanceName;
@@ -176,6 +195,7 @@ public final class ErrorLogMessage
    * @return  The Directory Server startup ID for this error log message, or
    *          {@code null} if it is not included in the log message.
    */
+  @Nullable()
   public String getStartupID()
   {
     return startupID;
@@ -189,6 +209,7 @@ public final class ErrorLogMessage
    * @return  The category for this error log message, or {@code null} if it is
    *          not included in the log message.
    */
+  @Nullable()
   public ErrorLogCategory getCategory()
   {
     return category;
@@ -202,6 +223,7 @@ public final class ErrorLogMessage
    * @return  The severity for this error log message, or {@code null} if it is
    *          not included in the log message.
    */
+  @Nullable()
   public ErrorLogSeverity getSeverity()
   {
     return severity;
@@ -215,6 +237,7 @@ public final class ErrorLogMessage
    * @return  The numeric identifier for this error log message, or {@code null}
    *          if it is not included in the log message.
    */
+  @Nullable()
   public Long getMessageID()
   {
     return messageID;
@@ -230,6 +253,7 @@ public final class ErrorLogMessage
    *          the thread that generated this error log message, or {@code null}
    *          if it is not included in the log message.
    */
+  @Nullable()
   public Long getTriggeredByConnectionID()
   {
     return triggeredByConnectionID;
@@ -245,6 +269,7 @@ public final class ErrorLogMessage
    *          the thread that generated this error log message, or {@code null}
    *          if it is not included in the log message.
    */
+  @Nullable()
   public Long getTriggeredByOperationID()
   {
     return triggeredByOperationID;
@@ -258,6 +283,7 @@ public final class ErrorLogMessage
    * @return  The message text for this error log message, or {@code null} if it
    *          is not included in the log message.
    */
+  @Nullable()
   public String getMessage()
   {
     return message;

@@ -1,9 +1,24 @@
 /*
- * Copyright 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2015-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2015-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,8 @@ import com.unboundid.ldap.matchingrules.MatchingRule;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.json.JSONException;
@@ -58,7 +75,7 @@ public final class JSONObjectExactMatchingRule
    * The singleton instance that will be returned from the {@link #getInstance}
    * method.
    */
-  private static final JSONObjectExactMatchingRule INSTANCE =
+  @NotNull private static final JSONObjectExactMatchingRule INSTANCE =
        new JSONObjectExactMatchingRule();
 
 
@@ -75,7 +92,7 @@ public final class JSONObjectExactMatchingRule
    *
    * @return A singleton instance of this matching rule.
    */
-  public static JSONObjectExactMatchingRule getInstance()
+  @NotNull public static JSONObjectExactMatchingRule getInstance()
   {
     return INSTANCE;
   }
@@ -96,6 +113,7 @@ public final class JSONObjectExactMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getEqualityMatchingRuleName()
   {
     return "jsonObjectExactMatch";
@@ -107,6 +125,7 @@ public final class JSONObjectExactMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getEqualityMatchingRuleOID()
   {
     return "1.3.6.1.4.1.30221.2.4.12";
@@ -118,6 +137,7 @@ public final class JSONObjectExactMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public String getOrderingMatchingRuleName()
   {
     // Ordering matching is not supported.
@@ -130,6 +150,7 @@ public final class JSONObjectExactMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public String getOrderingMatchingRuleOID()
   {
     // Ordering matching is not supported.
@@ -142,6 +163,7 @@ public final class JSONObjectExactMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public String getSubstringMatchingRuleName()
   {
     // Substring matching is not supported.
@@ -154,6 +176,7 @@ public final class JSONObjectExactMatchingRule
    * {@inheritDoc}
    */
   @Override()
+  @Nullable()
   public String getSubstringMatchingRuleOID()
   {
     // Substring matching is not supported.
@@ -166,8 +189,8 @@ public final class JSONObjectExactMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public boolean valuesMatch(final ASN1OctetString value1,
-                             final ASN1OctetString value2)
+  public boolean valuesMatch(@NotNull final ASN1OctetString value1,
+                             @NotNull final ASN1OctetString value2)
          throws LDAPException
   {
     final JSONObject o1;
@@ -203,10 +226,10 @@ public final class JSONObjectExactMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public boolean matchesSubstring(final ASN1OctetString value,
-                                  final ASN1OctetString subInitial,
-                                  final ASN1OctetString[] subAny,
-                                  final ASN1OctetString subFinal)
+  public boolean matchesSubstring(@NotNull final ASN1OctetString value,
+                                  @Nullable final ASN1OctetString subInitial,
+                                  @Nullable final ASN1OctetString[] subAny,
+                                  @Nullable final ASN1OctetString subFinal)
          throws LDAPException
   {
     // Substring matching is not supported for this matching rule.
@@ -220,8 +243,8 @@ public final class JSONObjectExactMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public int compareValues(final ASN1OctetString value1,
-                           final ASN1OctetString value2)
+  public int compareValues(@NotNull final ASN1OctetString value1,
+                           @NotNull final ASN1OctetString value2)
          throws LDAPException
   {
     // Ordering matching is not supported for this matching rule.
@@ -235,7 +258,8 @@ public final class JSONObjectExactMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public ASN1OctetString normalize(final ASN1OctetString value)
+  @NotNull()
+  public ASN1OctetString normalize(@NotNull final ASN1OctetString value)
          throws LDAPException
   {
     final JSONObject o;
@@ -259,8 +283,9 @@ public final class JSONObjectExactMatchingRule
    * {@inheritDoc}
    */
   @Override()
-  public ASN1OctetString normalizeSubstring(final ASN1OctetString value,
-                                            final byte substringType)
+  @NotNull()
+  public ASN1OctetString normalizeSubstring(
+              @NotNull final ASN1OctetString value, final byte substringType)
          throws LDAPException
   {
     // Substring matching is not supported for this matching rule.

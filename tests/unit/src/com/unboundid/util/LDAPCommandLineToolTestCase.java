@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -23,6 +38,7 @@ package com.unboundid.util;
 
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -39,6 +55,7 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.TestLDAPConnectionPoolHealthCheck;
 import com.unboundid.ldap.sdk.TestPostConnectProcessor;
 import com.unboundid.ldap.sdk.examples.LDAPSearch;
+import com.unboundid.ldap.sdk.unboundidds.MoveSubtree;
 import com.unboundid.util.args.ArgumentParser;
 
 
@@ -642,7 +659,7 @@ public class LDAPCommandLineToolTestCase
          "--trustAll=true",
          "",
          "# Use a one-dash identifier to specify the bind DN.",
-         "-D=cn=Directory Manager",
+         "-D=cn\\=Directory Manager",
          "",
          "# Use a one-dash tool-specific identifier to specify the password.",
          "ldapsearch.-w=password",
@@ -1116,6 +1133,29 @@ public class LDAPCommandLineToolTestCase
          "--scope", "base",
          "(objectClass=*)");
     assertFalse(rc == ResultCode.SUCCESS);
+  }
+
+
+
+  /**
+   * Tests the behavior of the command-line tool framework when setting a
+   * usage argument for the case in which the help argument is provided through
+   * a properties file and the usage would otherwise fail without that argument.
+   *
+   * @throws  Exception  If an unexpected problem occurs.
+   */
+  @Test()
+  public void testPropertiesFileSetsUsageArgument()
+         throws Exception
+  {
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    final MoveSubtree moveSubtree = new MoveSubtree(out, out);
+
+    final File propertiesFile = createTempFile("help=true");
+    final ResultCode rc = moveSubtree.runTool(
+         "--propertiesFilepath", propertiesFile.getAbsolutePath());
+    assertEquals(rc, ResultCode.SUCCESS);
+    assertTrue(out.toByteArray().length > 0);
   }
 
 

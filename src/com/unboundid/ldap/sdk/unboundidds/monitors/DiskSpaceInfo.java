@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -25,6 +40,8 @@ package com.unboundid.ldap.sdk.unboundidds.monitors;
 import java.io.Serializable;
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -57,19 +74,49 @@ public final class DiskSpaceInfo
 
 
   // The number of total bytes at the specified path.
-  private final Long totalBytes;
+  @Nullable private final Long totalBytes;
 
   // The number of usable bytes at the specified path.
-  private final Long usableBytes;
+  @Nullable private final Long usableBytes;
 
   // The percentage of the total space that is usable.
-  private final Long usablePercent;
+  @Nullable private final Long usablePercent;
 
   // The name of the associated disk space consumer.
-  private final String consumerName;
+  @Nullable private final String consumerName;
 
   // The path in which the disk space is being consumed.
-  private final String path;
+  @Nullable private final String path;
+
+
+
+  /**
+   * Creates a new disk space info object with the provided information.
+   *
+   * @param  consumerName   The name of the server component which may consume
+   *                        disk space.
+   * @param  path           The path in which the server component may consume
+   *                        disk space.
+   * @param  totalBytes     The total amount of space in bytes on the volume
+   *                        that holds the specified path.
+   * @param  usableBytes    The amount of usable space in bytes on the volume
+   *                        that holds the specified path.
+   * @param  usablePercent  The percentage of the total space that is usable on
+   *                        the volume that holds the specified path.
+   *
+   * @deprecated  Use the constructor that takes a {@code Long} object for the
+   *              {@code usableBytes} parameter.
+   */
+  @Deprecated()
+  public DiskSpaceInfo(@Nullable final String consumerName,
+                       @Nullable final String path,
+                       @Nullable final Long totalBytes,
+                       @Nullable final Long usableBytes,
+                       final long usablePercent)
+  {
+    this(consumerName, path, totalBytes, usableBytes,
+         Long.valueOf(usablePercent));
+  }
 
 
 
@@ -87,9 +134,11 @@ public final class DiskSpaceInfo
    * @param  usablePercent  The percentage of the total space that is usable on
    *                        the volume that holds the specified path.
    */
-  public DiskSpaceInfo(final String consumerName, final String path,
-                       final Long totalBytes, final Long usableBytes,
-                       final long usablePercent)
+  public DiskSpaceInfo(@Nullable final String consumerName,
+                       @Nullable final String path,
+                       @Nullable final Long totalBytes,
+                       @Nullable final Long usableBytes,
+                       @Nullable final Long usablePercent)
   {
     this.consumerName  = consumerName;
     this.path          = path;
@@ -106,6 +155,7 @@ public final class DiskSpaceInfo
    * @return  The name of the server component which may consume disk space, or
    *          {@code null} if that is not available.
    */
+  @Nullable()
   public String getConsumerName()
   {
     return consumerName;
@@ -119,6 +169,7 @@ public final class DiskSpaceInfo
    * @return  The path in which the server component may consume disk space, or
    *          {@code null} if that is not available.
    */
+  @Nullable()
   public String getPath()
   {
     return path;
@@ -133,6 +184,7 @@ public final class DiskSpaceInfo
    * @return  The total amount of space in bytes on the volume that holds the
    *          specified path, or {@code null} if that is not available.
    */
+  @Nullable()
   public Long getTotalBytes()
   {
     return totalBytes;
@@ -148,6 +200,7 @@ public final class DiskSpaceInfo
    *          holds the specified path, or {@code null} if that is not
    *          available.
    */
+  @Nullable()
   public Long getUsableBytes()
   {
     return usableBytes;
@@ -162,6 +215,7 @@ public final class DiskSpaceInfo
    * @return  The percentage of the total space on the volume that holds the
    *          specified path which is free and usable by the Directory Server.
    */
+  @Nullable()
   public Long getUsablePercent()
   {
     return usablePercent;
@@ -175,6 +229,7 @@ public final class DiskSpaceInfo
    * @return  A string representation of this disk space info object.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -190,7 +245,7 @@ public final class DiskSpaceInfo
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("DiskSpaceInfo(consumerName='");
     buffer.append(consumerName);

@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -37,6 +52,8 @@ import com.unboundid.ldap.sdk.ReadOnlyEntry;
 import com.unboundid.util.Debug;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.NotExtensible;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -75,14 +92,14 @@ public class MonitorEntry
    * The object class used for all monitor entries.  Specific monitor entries
    * will have a subclass of this class.
    */
-  static final String GENERIC_MONITOR_OC = "ds-monitor-entry";
+  @NotNull static final String GENERIC_MONITOR_OC = "ds-monitor-entry";
 
 
 
   /**
    * The base DN for all monitor entries.
    */
-  static final String MONITOR_BASE_DN = "cn=monitor";
+  @NotNull static final String MONITOR_BASE_DN = "cn=monitor";
 
 
 
@@ -90,7 +107,7 @@ public class MonitorEntry
    * The name of the attribute used to hold the name assigned to the monitor
    * entry.
    */
-  private static final String ATTR_MONITOR_NAME = "cn";
+  @NotNull private static final String ATTR_MONITOR_NAME = "cn";
 
 
 
@@ -102,13 +119,13 @@ public class MonitorEntry
 
 
   // The entry containing the information used by this monitor entry object.
-  private final ReadOnlyEntry entry;
+  @NotNull private final ReadOnlyEntry entry;
 
   // The monitor object class for the associated monitor entry, if available.
-  private final String monitorClass;
+  @NotNull private final String monitorClass;
 
   // The monitor name for this monitor entry.
-  private final String monitorName;
+  @Nullable private final String monitorName;
 
 
 
@@ -119,7 +136,7 @@ public class MonitorEntry
    * @param  entry  The entry providing information to use for this monitor
    *                entry.  It must not be {@code null}.
    */
-  public MonitorEntry(final Entry entry)
+  public MonitorEntry(@NotNull final Entry entry)
   {
     Validator.ensureNotNull(entry);
 
@@ -136,6 +153,7 @@ public class MonitorEntry
    *
    * @return  The DN for this monitor entry.
    */
+  @NotNull()
   public final String getDN()
   {
     return entry.getDN();
@@ -148,6 +166,7 @@ public class MonitorEntry
    *
    * @return  The {@code Entry} used to create this monitor entry.
    */
+  @NotNull()
   public final ReadOnlyEntry getEntry()
   {
     return entry;
@@ -162,6 +181,7 @@ public class MonitorEntry
    *          the generic monitor object class if no appropriate subclass could
    *          be identified.
    */
+  @NotNull()
   public final String getMonitorClass()
   {
     return monitorClass;
@@ -175,6 +195,7 @@ public class MonitorEntry
    * @return  The monitor name for this monitor entry, or {@code null} if it was
    *          not included in the monitor entry.
    */
+  @Nullable()
   public final String getMonitorName()
   {
     return monitorName;
@@ -187,6 +208,7 @@ public class MonitorEntry
    *
    * @return  A human-readable display name for this monitor entry.
    */
+  @NotNull()
   public String getMonitorDisplayName()
   {
     return INFO_GENERIC_MONITOR_DISPNAME.get();
@@ -199,6 +221,7 @@ public class MonitorEntry
    *
    * @return  A human-readable description name for this monitor entry.
    */
+  @NotNull()
   public String getMonitorDescription()
   {
     return INFO_GENERIC_MONITOR_DESC.get();
@@ -213,6 +236,7 @@ public class MonitorEntry
    *
    * @return  The set of parsed monitor attributes for this monitor entry.
    */
+  @NotNull()
   public Map<String,MonitorAttribute> getMonitorAttributes()
   {
     // Retrieve a map of all attributes in the entry except cn and objectClass.
@@ -247,7 +271,8 @@ public class MonitorEntry
    * @return  The decoded monitor entry of the appropriate subtype, or a generic
    *          monitor entry if no appropriate subclass could be identified.
    */
-  public static MonitorEntry decode(final Entry entry)
+  @NotNull()
+  public static MonitorEntry decode(@NotNull final Entry entry)
   {
     final String monitorClass = getMonitorClass(entry);
 
@@ -423,7 +448,8 @@ public class MonitorEntry
    *          generic monitor object class if no appropriate subclass could be
    *          identified.
    */
-  private static String getMonitorClass(final Entry entry)
+  @NotNull()
+  private static String getMonitorClass(@NotNull final Entry entry)
   {
     String monitorOC = null;
     final String[] ocNames = entry.getObjectClassValues();
@@ -501,7 +527,8 @@ public class MonitorEntry
    *          {@code null} if the attribute does not exist in the entry or it
    *          cannot be parsed as a {@code Boolean} value.
    */
-  protected final Boolean getBoolean(final String attributeName)
+  @Nullable()
+  protected final Boolean getBoolean(@NotNull final String attributeName)
   {
     final String valueStr = entry.getAttributeValue(attributeName);
     if (valueStr == null)
@@ -546,7 +573,8 @@ public class MonitorEntry
    *          {@code null} if the attribute does not exist in the entry or it
    *          cannot be parsed as a {@code Date} value.
    */
-  protected final Date getDate(final String attributeName)
+  @Nullable()
+  protected final Date getDate(@NotNull final String attributeName)
   {
     final String valueStr = entry.getAttributeValue(attributeName);
     if (valueStr == null)
@@ -592,7 +620,8 @@ public class MonitorEntry
    *          {@code null} if the attribute does not exist in the entry or it
    *          cannot be parsed as a {@code Double} value.
    */
-  protected final Double getDouble(final String attributeName)
+  @Nullable()
+  protected final Double getDouble(@NotNull final String attributeName)
   {
     final String valueStr = entry.getAttributeValue(attributeName);
     if (valueStr == null)
@@ -639,7 +668,8 @@ public class MonitorEntry
    *          {@code null} if the attribute does not exist in the entry or it
    *          cannot be parsed as an {@code Integer} value.
    */
-  protected final Integer getInteger(final String attributeName)
+  @Nullable()
+  protected final Integer getInteger(@NotNull final String attributeName)
   {
     final String valueStr = entry.getAttributeValue(attributeName);
     if (valueStr == null)
@@ -685,7 +715,8 @@ public class MonitorEntry
    *          {@code null} if the attribute does not exist in the entry or it
    *          cannot be parsed as a {@code Long} value.
    */
-  protected final Long getLong(final String attributeName)
+  @Nullable()
+  protected final Long getLong(@NotNull final String attributeName)
   {
     final String valueStr = entry.getAttributeValue(attributeName);
     if (valueStr == null)
@@ -730,7 +761,8 @@ public class MonitorEntry
    * @return  The string value of the specified attribute, or {@code null} if it
    *          does not exist in the entry.
    */
-  protected final String getString(final String attributeName)
+  @Nullable()
+  protected final String getString(@NotNull final String attributeName)
   {
     final String valueStr = entry.getAttributeValue(attributeName);
     if ((valueStr == null) && Debug.debugEnabled(DebugType.MONITOR))
@@ -752,7 +784,8 @@ public class MonitorEntry
    * @return  The string values of the specified attribute, or an empty list if
    *          the specified attribute does not exist in the entry.
    */
-  protected final List<String> getStrings(final String attributeName)
+  @NotNull()
+  protected final List<String> getStrings(@NotNull final String attributeName)
   {
     final String[] valueStrs = entry.getAttributeValues(attributeName);
     if (valueStrs == null)
@@ -787,9 +820,11 @@ public class MonitorEntry
    * @param  value        The value for the monitor attribute.
    */
   protected static void addMonitorAttribute(
-                             final Map<String,MonitorAttribute> attrs,
-                             final String name, final String displayName,
-                             final String description, final Boolean value)
+                 @NotNull final Map<String,MonitorAttribute> attrs,
+                 @NotNull final String name,
+                 @NotNull final String displayName,
+                 @Nullable final String description,
+                 @NotNull final Boolean value)
   {
     final String lowerName = StaticUtils.toLowerCase(name);
 
@@ -816,9 +851,11 @@ public class MonitorEntry
    * @param  value        The value for the monitor attribute.
    */
   protected static void addMonitorAttribute(
-                             final Map<String,MonitorAttribute> attrs,
-                             final String name, final String displayName,
-                             final String description, final Date value)
+                 @NotNull final Map<String,MonitorAttribute> attrs,
+                 @NotNull final String name,
+                 @NotNull final String displayName,
+                 @Nullable final String description,
+                 @NotNull final Date value)
   {
     final String lowerName = StaticUtils.toLowerCase(name);
 
@@ -845,9 +882,11 @@ public class MonitorEntry
    * @param  value        The value for the monitor attribute.
    */
   protected static void addMonitorAttribute(
-                             final Map<String,MonitorAttribute> attrs,
-                             final String name, final String displayName,
-                             final String description, final Double value)
+                 @NotNull final Map<String,MonitorAttribute> attrs,
+                 @NotNull final String name,
+                 @NotNull final String displayName,
+                 @Nullable final String description,
+                 @NotNull final Double value)
   {
     final String lowerName = StaticUtils.toLowerCase(name);
 
@@ -874,9 +913,11 @@ public class MonitorEntry
    * @param  value        The value for the monitor attribute.
    */
   protected static void addMonitorAttribute(
-                             final Map<String,MonitorAttribute> attrs,
-                             final String name, final String displayName,
-                             final String description, final Integer value)
+                 @NotNull final Map<String,MonitorAttribute> attrs,
+                 @NotNull final String name,
+                 @NotNull final String displayName,
+                 @Nullable final String description,
+                 @NotNull final Integer value)
   {
     final String lowerName = StaticUtils.toLowerCase(name);
 
@@ -903,9 +944,11 @@ public class MonitorEntry
    * @param  value        The value for the monitor attribute.
    */
   protected static void addMonitorAttribute(
-                             final Map<String,MonitorAttribute> attrs,
-                             final String name, final String displayName,
-                             final String description, final Long value)
+                 @NotNull final Map<String,MonitorAttribute> attrs,
+                 @NotNull final String name,
+                 @NotNull final String displayName,
+                 @Nullable final String description,
+                 @NotNull final Long value)
   {
     final String lowerName = StaticUtils.toLowerCase(name);
 
@@ -932,9 +975,11 @@ public class MonitorEntry
    * @param  value        The value for the monitor attribute.
    */
   protected static void addMonitorAttribute(
-                             final Map<String,MonitorAttribute> attrs,
-                             final String name, final String displayName,
-                             final String description, final String value)
+                 @NotNull final Map<String,MonitorAttribute> attrs,
+                 @NotNull final String name,
+                 @NotNull final String displayName,
+                 @Nullable final String description,
+                 @NotNull final String value)
   {
     final String lowerName = StaticUtils.toLowerCase(name);
 
@@ -961,10 +1006,11 @@ public class MonitorEntry
    * @param  values       The set of values for the monitor attribute.
    */
   protected static void addMonitorAttribute(
-                             final Map<String,MonitorAttribute> attrs,
-                             final String name, final String displayName,
-                             final String description,
-                             final List<String> values)
+                 @NotNull final Map<String,MonitorAttribute> attrs,
+                 @NotNull final String name,
+                 @NotNull final String displayName,
+                 @Nullable final String description,
+                 @NotNull final List<String> values)
   {
     final String lowerName = StaticUtils.toLowerCase(name);
 
@@ -982,6 +1028,7 @@ public class MonitorEntry
    * @return  A string representation of this monitor entry.
    */
   @Override()
+  @NotNull()
   public final String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -997,7 +1044,7 @@ public class MonitorEntry
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public final void toString(final StringBuilder buffer)
+  public final void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("MonitorEntry(dn='");
     buffer.append(entry.getDN());

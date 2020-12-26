@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -27,6 +42,8 @@ import java.io.Serializable;
 import com.unboundid.ldap.protocol.LDAPResponse;
 import com.unboundid.util.InternalUseOnly;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 
@@ -51,10 +68,10 @@ final class ConnectionClosedResponse
 
 
   // The result code that should be used for the closure.
-  private final ResultCode resultCode;
+  @NotNull private final ResultCode resultCode;
 
   // A message providing additional information about the closure.
-  private final String message;
+  @Nullable private final String message;
 
 
 
@@ -67,8 +84,8 @@ final class ConnectionClosedResponse
    *                     the reason for the closure, or {@code null} if no
    *                     reason is available.
    */
-  ConnectionClosedResponse(final ResultCode resultCode,
-                           final String message)
+  ConnectionClosedResponse(@NotNull final ResultCode resultCode,
+                           @Nullable final String message)
   {
     this.resultCode = resultCode;
     this.message    = message;
@@ -93,6 +110,7 @@ final class ConnectionClosedResponse
    * @return  A message with additional information about the closure, or
    *          {@code null} if no such information is available.
    */
+  @Nullable()
   String getMessage()
   {
     return message;
@@ -105,6 +123,7 @@ final class ConnectionClosedResponse
    *
    * @return  The result code that should be used for the closure.
    */
+  @NotNull()
   ResultCode getResultCode()
   {
     return resultCode;
@@ -118,6 +137,7 @@ final class ConnectionClosedResponse
    * @return  A string representation of this connection closed response.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -134,7 +154,7 @@ final class ConnectionClosedResponse
    * @param  buffer  The buffer to which the information should be appended.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ConnectionClosedResponse(resultCode='");
     buffer.append(resultCode);

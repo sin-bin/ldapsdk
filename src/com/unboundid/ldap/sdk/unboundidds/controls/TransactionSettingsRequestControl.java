@@ -1,9 +1,24 @@
 /*
- * Copyright 2014-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2014-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2014-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -36,6 +51,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -99,7 +116,7 @@ public final class TransactionSettingsRequestControl
   /**
    * The OID (1.3.6.1.4.1.30221.2.5.38) for the undelete request control.
    */
-  public static final String TRANSACTION_SETTINGS_REQUEST_OID =
+  @NotNull public static final String TRANSACTION_SETTINGS_REQUEST_OID =
        "1.3.6.1.4.1.30221.2.5.38";
 
 
@@ -172,25 +189,26 @@ public final class TransactionSettingsRequestControl
   private final boolean returnResponseControl;
 
   // The number of times to retry if a lock conflict exception is encountered.
-  private final Integer retryAttempts;
+  @Nullable private final Integer retryAttempts;
 
   // The backend lock timeout, in milliseconds.
-  private final Long backendLockTimeoutMillis;
+  @Nullable private final Long backendLockTimeoutMillis;
 
   // The maximum transaction lock timeout, in milliseconds.
-  private final Long maxTxnLockTimeoutMillis;
+  @Nullable private final Long maxTxnLockTimeoutMillis;
 
   // The minimum transaction lock timeout, in milliseconds.
-  private final Long minTxnLockTimeoutMillis;
+  @Nullable private final Long minTxnLockTimeoutMillis;
 
   // The requested transaction name.
-  private final String transactionName;
+  @Nullable private final String transactionName;
 
   // The requested commit durability setting.
-  private final TransactionSettingsBackendLockBehavior backendLockBehavior;
+  @Nullable private final TransactionSettingsBackendLockBehavior
+       backendLockBehavior;
 
   // The requested commit durability setting.
-  private final TransactionSettingsCommitDurability commitDurability;
+  @Nullable private final TransactionSettingsCommitDurability commitDurability;
 
 
 
@@ -258,12 +276,14 @@ public final class TransactionSettingsRequestControl
    *                                   lock timeout settings to use.
    */
   public TransactionSettingsRequestControl(final boolean isCritical,
-              final String transactionName,
-              final TransactionSettingsCommitDurability commitDurability,
-              final TransactionSettingsBackendLockBehavior backendLockBehavior,
-              final Long backendLockTimeoutMillis, final Integer retryAttempts,
-              final Long minTxnLockTimeoutMillis,
-              final Long maxTxnLockTimeoutMillis)
+       @Nullable final String transactionName,
+       @Nullable final TransactionSettingsCommitDurability commitDurability,
+       @Nullable final TransactionSettingsBackendLockBehavior
+                                                backendLockBehavior,
+       @Nullable final Long backendLockTimeoutMillis,
+       @Nullable final Integer retryAttempts,
+       @Nullable final Long minTxnLockTimeoutMillis,
+       @Nullable final Long maxTxnLockTimeoutMillis)
   {
     this(isCritical, transactionName, commitDurability, backendLockBehavior,
          backendLockTimeoutMillis, retryAttempts, minTxnLockTimeoutMillis,
@@ -340,13 +360,15 @@ public final class TransactionSettingsRequestControl
    *                                   processing the associated operation.
    */
   public TransactionSettingsRequestControl(final boolean isCritical,
-              final String transactionName,
-              final TransactionSettingsCommitDurability commitDurability,
-              final TransactionSettingsBackendLockBehavior backendLockBehavior,
-              final Long backendLockTimeoutMillis, final Integer retryAttempts,
-              final Long minTxnLockTimeoutMillis,
-              final Long maxTxnLockTimeoutMillis,
-              final boolean returnResponseControl)
+       @Nullable final String transactionName,
+       @Nullable final TransactionSettingsCommitDurability commitDurability,
+       @Nullable final TransactionSettingsBackendLockBehavior
+            backendLockBehavior,
+       @Nullable final Long backendLockTimeoutMillis,
+       @Nullable final Integer retryAttempts,
+       @Nullable final Long minTxnLockTimeoutMillis,
+       @Nullable final Long maxTxnLockTimeoutMillis,
+       final boolean returnResponseControl)
   {
     super(TRANSACTION_SETTINGS_REQUEST_OID, isCritical,
          encodeValue(transactionName, commitDurability, backendLockBehavior,
@@ -376,7 +398,7 @@ public final class TransactionSettingsRequestControl
    *                         decode the provided control as a transaction
    *                         settings request control.
    */
-  public TransactionSettingsRequestControl(final Control c)
+  public TransactionSettingsRequestControl(@NotNull final Control c)
          throws LDAPException
   {
     super(c);
@@ -575,14 +597,17 @@ public final class TransactionSettingsRequestControl
    *
    * @return  The encoded value to use for the control.
    */
+  @NotNull()
   private static ASN1OctetString encodeValue(
-               final String transactionName,
-               final TransactionSettingsCommitDurability commitDurability,
-               final TransactionSettingsBackendLockBehavior backendLockBehavior,
-               final Long backendLockTimeoutMillis, final Integer retryAttempts,
-               final Long minTxnLockTimeoutMillis,
-               final Long maxTxnLockTimeoutMillis,
-               final boolean returnResponseControl)
+       @Nullable final String transactionName,
+       @Nullable final TransactionSettingsCommitDurability commitDurability,
+       @Nullable final TransactionSettingsBackendLockBehavior
+            backendLockBehavior,
+       @Nullable final Long backendLockTimeoutMillis,
+       @Nullable final Integer retryAttempts,
+       @Nullable final Long minTxnLockTimeoutMillis,
+       @Nullable final Long maxTxnLockTimeoutMillis,
+       final boolean returnResponseControl)
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(7);
 
@@ -660,6 +685,7 @@ public final class TransactionSettingsRequestControl
    * @return  The name to assign to the associated transaction, or {@code null}
    *          if none has been specified.
    */
+  @Nullable()
   public String getTransactionName()
   {
     return transactionName;
@@ -675,6 +701,7 @@ public final class TransactionSettingsRequestControl
    *          transaction, or {@code null} if none has been specified and the
    *          server should determine the commit durability.
    */
+  @Nullable()
   public TransactionSettingsCommitDurability getCommitDurability()
   {
     return commitDurability;
@@ -690,6 +717,7 @@ public final class TransactionSettingsRequestControl
    *          transaction, or {@code null} if none has been specified and the
    *          server should determine the backend lock behavior.
    */
+  @Nullable()
   public TransactionSettingsBackendLockBehavior getBackendLockBehavior()
   {
     return backendLockBehavior;
@@ -706,6 +734,7 @@ public final class TransactionSettingsRequestControl
    *          specified and the server should determine the backend lock
    *          timeout.
    */
+  @Nullable()
   public Long getBackendLockTimeoutMillis()
   {
     return backendLockTimeoutMillis;
@@ -722,6 +751,7 @@ public final class TransactionSettingsRequestControl
    *          if none has been specified and the server should determine the
    *          number of retry attempts.
    */
+  @Nullable()
   public Integer getRetryAttempts()
   {
     return retryAttempts;
@@ -741,6 +771,7 @@ public final class TransactionSettingsRequestControl
    *          has been specified and the server should determine the minimum
    *          transaction lock timeout.
    */
+  @Nullable()
   public Long getMinTxnLockTimeoutMillis()
   {
     return minTxnLockTimeoutMillis;
@@ -759,6 +790,7 @@ public final class TransactionSettingsRequestControl
    *          has been specified and the server should determine the maximum
    *          transaction lock timeout.
    */
+  @Nullable()
   public Long getMaxTxnLockTimeoutMillis()
   {
     return maxTxnLockTimeoutMillis;
@@ -785,6 +817,7 @@ public final class TransactionSettingsRequestControl
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getControlName()
   {
     return INFO_CONTROL_NAME_TXN_SETTINGS_REQUEST.get();
@@ -796,7 +829,7 @@ public final class TransactionSettingsRequestControl
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("TransactionSettingsRequestControl(isCritical=");
     buffer.append(isCritical());

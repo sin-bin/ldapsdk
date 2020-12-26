@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,7 +49,12 @@ import java.io.Serializable;
 @ThreadSafety(level = ThreadSafetyLevel.COMPLETELY_THREADSAFE)
 final class QuotingRequirements implements Serializable
 {
+  /**
+   * The serial version UID for this serializable class.
+   */
   private static final long serialVersionUID = -1430038162579028168L;
+
+
 
   // true if and only if the argument needs to be single-quoted on Unix
   private final boolean requiresSingleQuotesOnUnix;
@@ -51,7 +71,7 @@ final class QuotingRequirements implements Serializable
 
 
   /**
-   * Constructor.
+   * Creates a new instance of the requirements with the provided settings.
    *
    * @param  requiresSingleQuotesOnUnix  {@code true} if the argument requires
    *                                     single-quoting on Unix.

@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -224,36 +239,105 @@ public class FormattableColumnTestCase
 
 
   /**
-   * Tests the {@code format} method using strings that require special CSV
+   * Tests the {@code format} method using strings that require special
    * formatting.
    */
   @Test()
-  public void testFormatCSVQuotedStrings()
+  public void testFormatSpecialcharacters()
   {
-    FormattableColumn c = new FormattableColumn(5, HorizontalAlignment.LEFT);
-    StringBuilder buffer = new StringBuilder();
+    final FormattableColumn c =
+         new FormattableColumn(5, HorizontalAlignment.LEFT);
+    final StringBuilder buffer = new StringBuilder();
 
-    c.format(buffer, ",", OutputFormat.TAB_DELIMITED_TEXT);
-    buffer.append('\t');
-    c.format(buffer, "\"", OutputFormat.TAB_DELIMITED_TEXT);
-    buffer.append('\t');
-    c.format(buffer, "\",\"", OutputFormat.TAB_DELIMITED_TEXT);
-    assertEquals(buffer.toString(), ",\t\"\t\",\"");
+    final String comma = ",";
+    final String quote = "\"";
+    final String backslash = "\\";
+    final String tab = "\t";
+    final String cr = "\r";
+    final String lf = "\n";
 
-    buffer = new StringBuilder();
-    c.format(buffer, ",", OutputFormat.CSV);
-    buffer.append(',');
-    c.format(buffer, "\"", OutputFormat.CSV);
-    buffer.append(',');
-    c.format(buffer, "\",\"", OutputFormat.CSV);
-    assertEquals(buffer.toString(), "\",\",\"\"\"\",\"\"\",\"\"\"");
 
-    buffer = new StringBuilder();
-    c.format(buffer, ",", OutputFormat.COLUMNS);
+    OutputFormat outputFormat = OutputFormat.TAB_DELIMITED_TEXT;
+    c.format(buffer, comma, outputFormat);
+    buffer.append(tab);
+    c.format(buffer, quote, outputFormat);
+    buffer.append(tab);
+    c.format(buffer, quote + comma + quote, outputFormat);
+    buffer.append(tab);
+    c.format(buffer, backslash, outputFormat);
+    buffer.append(tab);
+    c.format(buffer, tab, outputFormat);
+    buffer.append(tab);
+    c.format(buffer, "a" + cr + lf + "b", outputFormat);
+    assertEquals(buffer.toString(),
+         comma + tab +
+              quote + tab +
+              quote + comma + quote + tab +
+              backslash + backslash + tab +
+              backslash + 't' + tab +
+              'a' + backslash + 'r' + backslash + "nb");
+
+
+    buffer.setLength(0);
+    outputFormat = OutputFormat.CSV;
+    c.format(buffer, comma, outputFormat);
+    buffer.append(comma);
+    c.format(buffer, quote, outputFormat);
+    buffer.append(comma);
+    c.format(buffer, quote + comma + quote, outputFormat);
+    buffer.append(comma);
+    c.format(buffer, backslash, outputFormat);
+    buffer.append(comma);
+    c.format(buffer, tab, outputFormat);
+    buffer.append(comma);
+    c.format(buffer, "a" + cr + lf + "b", outputFormat);
+    assertEquals(buffer.toString(),
+         quote + comma + quote + comma +
+              quote + quote + quote + quote + comma +
+              quote + quote + quote + comma + quote + quote + quote + comma +
+              quote + backslash + quote + comma +
+              quote + tab + quote + comma +
+              quote + 'a' + cr + lf + 'b' + quote);
+
+
+    try
+    {
+      FormattableColumn.setCSVQuoteEscapeCharacter('\\');
+      buffer.setLength(0);
+      outputFormat = OutputFormat.CSV;
+      c.format(buffer, comma, outputFormat);
+      buffer.append(comma);
+      c.format(buffer, quote, outputFormat);
+      buffer.append(comma);
+      c.format(buffer, quote + comma + quote, outputFormat);
+      buffer.append(comma);
+      c.format(buffer, backslash, outputFormat);
+      buffer.append(comma);
+      c.format(buffer, tab, outputFormat);
+      buffer.append(comma);
+      c.format(buffer, "a" + cr + lf + "b", outputFormat);
+      assertEquals(buffer.toString(),
+           quote + comma + quote + comma +
+                quote + backslash + quote + quote + comma +
+                quote + backslash + quote + comma + backslash + quote + quote +
+                     comma +
+                quote + backslash + backslash + quote + comma +
+                quote + tab + quote + comma +
+                quote + 'a' + cr + lf + 'b' + quote);
+    }
+    finally
+    {
+      FormattableColumn.setCSVQuoteEscapeCharacter('"');
+    }
+
+
+    buffer.setLength(0);
+      outputFormat = OutputFormat.COLUMNS;
+    c.format(buffer, ",", outputFormat);
     buffer.append('-');
-    c.format(buffer, "\"", OutputFormat.COLUMNS);
+    c.format(buffer, "\"", outputFormat);
     buffer.append('-');
-    c.format(buffer, "\",\"", OutputFormat.COLUMNS);
+    c.format(buffer, "\",\"", outputFormat);
     assertEquals(buffer.toString(), ",    -\"    -\",\"  ");
   }
 }

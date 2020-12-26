@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -87,19 +104,19 @@ public final class TaskProperty
   private final boolean required;
 
   // The data type for this task property.
-  private final Class<?> dataType;
+  @NotNull private final Class<?> dataType;
 
   // The set of allowed values for this task property.
-  private final Object[] allowedValues;
+  @Nullable private final Object[] allowedValues;
 
   // The name of the LDAP attribute associated with this task property.
-  private final String attributeName;
+  @NotNull private final String attributeName;
 
   // The human-readable description for this task property.
-  private final String description;
+  @NotNull private final String description;
 
   // The human-readable display name for this task property.
-  private final String displayName;
+  @NotNull private final String displayName;
 
 
 
@@ -125,8 +142,10 @@ public final class TaskProperty
    *                        presented to the user.  Advanced properties must not
    *                        be required.
    */
-  public TaskProperty(final String attributeName, final String displayName,
-                      final String description, final Class<?> dataType,
+  public TaskProperty(@NotNull final String attributeName,
+                      @NotNull final String displayName,
+                      @NotNull final String description,
+                      @NotNull final Class<?> dataType,
                       final boolean required, final boolean multiValued,
                       final boolean advanced)
   {
@@ -163,10 +182,13 @@ public final class TaskProperty
    *                        all values must be objects of the class specified as
    *                        the data type.
    */
-  public TaskProperty(final String attributeName, final String displayName,
-                      final String description, final Class<?> dataType,
+  public TaskProperty(@NotNull final String attributeName,
+                      @NotNull final String displayName,
+                      @NotNull final String description,
+                      @NotNull final Class<?> dataType,
                       final boolean required, final boolean multiValued,
-                      final boolean advanced, final Object[] allowedValues)
+                      final boolean advanced,
+                      @Nullable final Object[] allowedValues)
   {
     Validator.ensureNotNull(attributeName, displayName, description, dataType);
     Validator.ensureTrue(
@@ -206,6 +228,7 @@ public final class TaskProperty
    *
    * @return  The name of the LDAP attribute associated with this task property.
    */
+  @NotNull()
   public String getAttributeName()
   {
     return attributeName;
@@ -218,6 +241,7 @@ public final class TaskProperty
    *
    * @return  The human-readable display name for this task property.
    */
+  @NotNull()
   public String getDisplayName()
   {
     return displayName;
@@ -230,6 +254,7 @@ public final class TaskProperty
    *
    * @return  The human-readable description for this task property.
    */
+  @NotNull()
   public String getDescription()
   {
     return description;
@@ -244,6 +269,7 @@ public final class TaskProperty
    *
    * @return  The data type for this task property.
    */
+  @NotNull()
   public Class<?> getDataType()
   {
     return dataType;
@@ -299,6 +325,7 @@ public final class TaskProperty
    * @return  The set of values that may be used for this task property, or
    *          {@code null} if there is not a predefined set of allowed values.
    */
+  @Nullable()
   public Object[] getAllowedValues()
   {
     return allowedValues;
@@ -312,6 +339,7 @@ public final class TaskProperty
    * @return  A string representation of this task property.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -328,7 +356,7 @@ public final class TaskProperty
    * @param  buffer  The buffer to which the string representation should be
    *                 appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("TaskProperty(attrName='");
     buffer.append(attributeName);

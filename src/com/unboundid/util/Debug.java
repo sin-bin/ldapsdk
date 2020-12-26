@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -23,6 +38,8 @@ package com.unboundid.util;
 
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.Properties;
 import java.util.Set;
@@ -33,6 +50,7 @@ import java.util.logging.Logger;
 import com.unboundid.asn1.ASN1Buffer;
 import com.unboundid.asn1.ASN1Element;
 import com.unboundid.ldap.protocol.LDAPResponse;
+import com.unboundid.ldap.sdk.AbstractConnectionPool;
 import com.unboundid.ldap.sdk.DisconnectType;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.ldap.sdk.InternalSDKHelper;
@@ -40,6 +58,7 @@ import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPRequest;
 import com.unboundid.ldap.sdk.Version;
 import com.unboundid.ldif.LDIFRecord;
+import com.unboundid.util.json.JSONBuffer;
 
 
 
@@ -83,7 +102,7 @@ public final class Debug
    * property is "{@code com.unboundid.ldap.sdk.debug.enabled}".  If it is set,
    * then it should have a value of either "true" or "false".
    */
-  public static final String PROPERTY_DEBUG_ENABLED =
+  @NotNull public static final String PROPERTY_DEBUG_ENABLED =
        "com.unboundid.ldap.sdk.debug.enabled";
 
 
@@ -95,7 +114,7 @@ public final class Debug
    * is "{@code com.unboundid.ldap.sdk.debug.includeStackTrace}".  If it is set,
    * then it should have a value of either "true" or "false".
    */
-  public static final String PROPERTY_INCLUDE_STACK_TRACE =
+  @NotNull public static final String PROPERTY_INCLUDE_STACK_TRACE =
        "com.unboundid.ldap.sdk.debug.includeStackTrace";
 
 
@@ -107,7 +126,7 @@ public final class Debug
    * be one of the strings "{@code SEVERE}", "{@code WARNING}", "{@code INFO}",
    * "{@code CONFIG}", "{@code FINE}", "{@code FINER}", or "{@code FINEST}".
    */
-  public static final String PROPERTY_DEBUG_LEVEL =
+  @NotNull public static final String PROPERTY_DEBUG_LEVEL =
        "com.unboundid.ldap.sdk.debug.level";
 
 
@@ -120,7 +139,7 @@ public final class Debug
    * be a comma-delimited list of the names of the desired debug types.  See the
    * {@link DebugType} enum for the available debug types.
    */
-  public static final String PROPERTY_DEBUG_TYPE =
+  @NotNull public static final String PROPERTY_DEBUG_TYPE =
        "com.unboundid.ldap.sdk.debug.type";
 
 
@@ -132,8 +151,9 @@ public final class Debug
    * {@link StaticUtils#getExceptionMessage(Throwable)} method.  By default,
    * the cause will not be included in most messages.
    */
-  public static final String PROPERTY_INCLUDE_CAUSE_IN_EXCEPTION_MESSAGES =
-       "com.unboundid.ldap.sdk.debug.includeCauseInExceptionMessages";
+  @NotNull public static final String
+       PROPERTY_INCLUDE_CAUSE_IN_EXCEPTION_MESSAGES =
+            "com.unboundid.ldap.sdk.debug.includeCauseInExceptionMessages";
 
 
 
@@ -144,7 +164,7 @@ public final class Debug
    * {@link StaticUtils#getExceptionMessage(Throwable)} method.  By default,
    * stack traces will not be included in most messages.
    */
-  public static final String
+  @NotNull public static final String
        PROPERTY_INCLUDE_STACK_TRACE_IN_EXCEPTION_MESSAGES =
             "com.unboundid.ldap.sdk.debug.includeStackTraceInExceptionMessages";
 
@@ -154,7 +174,7 @@ public final class Debug
    * The name that will be used for the Java logger that will actually handle
    * the debug messages if debugging is enabled.
    */
-  public static final String LOGGER_NAME = "com.unboundid.ldap.sdk";
+  @NotNull public static final String LOGGER_NAME = "com.unboundid.ldap.sdk";
 
 
 
@@ -162,7 +182,15 @@ public final class Debug
    * The logger that will be used to handle the debug messages if debugging is
    * enabled.
    */
-  private static final Logger logger = Logger.getLogger(LOGGER_NAME);
+  @NotNull private static final Logger logger = Logger.getLogger(LOGGER_NAME);
+
+
+
+  /**
+   * A set of thread-local formatters that may be used to generate timestamps.
+   */
+  @NotNull private static final ThreadLocal<SimpleDateFormat>
+       TIMESTAMP_FORMATTERS = new ThreadLocal<>();
 
 
 
@@ -181,7 +209,8 @@ public final class Debug
   private static boolean includeStackTrace;
 
   // The set of debug types for which debugging is enabled.
-  private static EnumSet<DebugType> debugTypes;
+  @NotNull private static EnumSet<DebugType> debugTypes=
+       EnumSet.allOf(DebugType.class);
 
 
 
@@ -215,7 +244,7 @@ public final class Debug
     debugEnabled      = false;
     debugTypes        = EnumSet.allOf(DebugType.class);
 
-    logger.setLevel(Level.ALL);
+    StaticUtils.setLoggerLevel(logger, Level.ALL);
   }
 
 
@@ -228,7 +257,7 @@ public final class Debug
    * @param  properties  The set of properties to use to initialize this
    *                     debugger.
    */
-  public static void initialize(final Properties properties)
+  public static void initialize(@Nullable final Properties properties)
   {
     // First, apply the default values for the properties.
     initialize();
@@ -309,7 +338,7 @@ public final class Debug
     final String levelProp = properties.getProperty(PROPERTY_DEBUG_LEVEL);
     if ((levelProp != null) && (! levelProp.isEmpty()))
     {
-      logger.setLevel(Level.parse(levelProp));
+      StaticUtils.setLoggerLevel(logger, Level.parse(levelProp));
     }
   }
 
@@ -320,6 +349,7 @@ public final class Debug
    *
    * @return  The logger that will be used to write the debug messages.
    */
+  @NotNull()
   public static Logger getLogger()
   {
     return logger;
@@ -348,7 +378,7 @@ public final class Debug
    * @return  {@code true} if debugging is enabled for messages of the specified
    *          debug type, or {@code false} if not.
    */
-  public static boolean debugEnabled(final DebugType debugType)
+  public static boolean debugEnabled(@NotNull final DebugType debugType)
   {
     return (debugEnabled && debugTypes.contains(debugType));
   }
@@ -379,7 +409,7 @@ public final class Debug
    *                  all debug types.
    */
   public static void setEnabled(final boolean enabled,
-                                final Set<DebugType> types)
+                                @Nullable final Set<DebugType> types)
   {
     if ((types == null) || types.isEmpty())
     {
@@ -429,6 +459,7 @@ public final class Debug
    *
    * @return  The set of debug types that will be used if debugging is enabled.
    */
+  @NotNull()
   public static EnumSet<DebugType> getDebugTypes()
   {
     return debugTypes;
@@ -443,7 +474,7 @@ public final class Debug
    *
    * @param  t  The exception for which debug information should be written.
    */
-  public static void debugException(final Throwable t)
+  public static void debugException(@NotNull final Throwable t)
   {
     if (debugEnabled && debugTypes.contains(DebugType.EXCEPTION))
     {
@@ -459,17 +490,17 @@ public final class Debug
    * @param  l  The log level that should be used for the debug information.
    * @param  t  The exception for which debug information should be written.
    */
-  public static void debugException(final Level l, final Throwable t)
+  public static void debugException(@NotNull final Level l,
+                                    @NotNull final Throwable t)
   {
     if (debugEnabled && debugTypes.contains(DebugType.EXCEPTION))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
-      buffer.append("caughtException=\"");
-      StaticUtils.getStackTrace(t, buffer);
-      buffer.append('"');
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, DebugType.EXCEPTION);
+      addCaughtException(buffer, "caught-exception", t);
+      addCommonFooter(buffer);
 
-      logger.log(l, buffer.toString(), t);
+      log(l, buffer, t);
     }
   }
 
@@ -484,7 +515,7 @@ public final class Debug
    *            established.
    * @param  p  The port of the server to which the connection was established.
    */
-  public static void debugConnect(final String h, final int p)
+  public static void debugConnect(@NotNull final String h, final int p)
   {
     if (debugEnabled && debugTypes.contains(DebugType.CONNECT))
     {
@@ -503,7 +534,8 @@ public final class Debug
    *            established.
    * @param  p  The port of the server to which the connection was established.
    */
-  public static void debugConnect(final Level l, final String h, final int p)
+  public static void debugConnect(@NotNull final Level l,
+                                  @NotNull final String h, final int p)
   {
     if (debugEnabled && debugTypes.contains(DebugType.CONNECT))
     {
@@ -525,8 +557,8 @@ public final class Debug
    *            established.  It may be {@code null} for historic reasons, but
    *            should be non-{@code null} in new uses.
    */
-  public static void debugConnect(final String h, final int p,
-                                  final LDAPConnection c)
+  public static void debugConnect(@NotNull final String h, final int p,
+                                  @Nullable final LDAPConnection c)
   {
     if (debugEnabled && debugTypes.contains(DebugType.CONNECT))
     {
@@ -548,42 +580,36 @@ public final class Debug
    *            established.  It may be {@code null} for historic reasons, but
    *            should be non-{@code null} in new uses.
    */
-  public static void debugConnect(final Level l, final String h, final int p,
-                                  final LDAPConnection c)
+  public static void debugConnect(@NotNull final Level l,
+                                  @NotNull final String h, final int p,
+                                  @Nullable final LDAPConnection c)
   {
     if (debugEnabled && debugTypes.contains(DebugType.CONNECT))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
-      buffer.append("connectedTo=\"");
-      buffer.append(h);
-      buffer.append(':');
-      buffer.append(p);
-      buffer.append('"');
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, DebugType.CONNECT);
+      buffer.appendString("connected-to-address", h);
+      buffer.appendNumber("connected-to-port", p);
 
       if (c != null)
       {
-        buffer.append(" connectionID=");
-        buffer.append(c.getConnectionID());
+        buffer.appendNumber("connection-id", c.getConnectionID());
 
         final String connectionName = c.getConnectionName();
         if (connectionName != null)
         {
-          buffer.append(" connectionName=\"");
-          buffer.append(connectionName);
-          buffer.append('"');
+          buffer.appendString("connection-name", connectionName);
         }
 
         final String connectionPoolName = c.getConnectionPoolName();
         if (connectionPoolName != null)
         {
-          buffer.append(" connectionPoolName=\"");
-          buffer.append(connectionPoolName);
-          buffer.append('"');
+          buffer.appendString("connection-pool-name", connectionPoolName);
         }
       }
 
-      logger.log(l, buffer.toString());
+      addCommonFooter(buffer);
+      log(l, buffer);
     }
   }
 
@@ -601,9 +627,11 @@ public final class Debug
    * @param  m  The disconnect message, if available.
    * @param  e  The disconnect cause, if available.
    */
-  public static void debugDisconnect(final String h, final int p,
-                                     final DisconnectType t, final String m,
-                                     final Throwable e)
+  public static void debugDisconnect(@NotNull final String h,
+                                     final int p,
+                                     @NotNull final DisconnectType t,
+                                     @Nullable final String m,
+                                     @Nullable final Throwable e)
   {
     if (debugEnabled && debugTypes.contains(DebugType.CONNECT))
     {
@@ -625,9 +653,11 @@ public final class Debug
    * @param  m  The disconnect message, if available.
    * @param  e  The disconnect cause, if available.
    */
-  public static void debugDisconnect(final Level l, final String h, final int p,
-                                     final DisconnectType t, final String m,
-                                     final Throwable e)
+  public static void debugDisconnect(@NotNull final Level l,
+                                     @NotNull final String h, final int p,
+                                     @NotNull final DisconnectType t,
+                                     @Nullable final String m,
+                                     @Nullable final Throwable e)
   {
     if (debugEnabled && debugTypes.contains(DebugType.CONNECT))
     {
@@ -652,10 +682,11 @@ public final class Debug
    * @param  m  The disconnect message, if available.
    * @param  e  The disconnect cause, if available.
    */
-  public static void debugDisconnect(final String h, final int p,
-                                     final LDAPConnection c,
-                                     final DisconnectType t, final String m,
-                                     final Throwable e)
+  public static void debugDisconnect(@NotNull final String h, final int p,
+                                     @Nullable final LDAPConnection c,
+                                     @NotNull final DisconnectType t,
+                                     @Nullable final String m,
+                                     @Nullable final Throwable e)
   {
     if (debugEnabled && debugTypes.contains(DebugType.CONNECT))
     {
@@ -680,63 +711,52 @@ public final class Debug
    * @param  m  The disconnect message, if available.
    * @param  e  The disconnect cause, if available.
    */
-  public static void debugDisconnect(final Level l, final String h, final int p,
-                                     final LDAPConnection c,
-                                     final DisconnectType t, final String m,
-                                     final Throwable e)
+  public static void debugDisconnect(@NotNull final Level l,
+                                     @NotNull final String h, final int p,
+                                     @Nullable final LDAPConnection c,
+                                     @NotNull final DisconnectType t,
+                                     @Nullable final String m,
+                                     @Nullable final Throwable e)
   {
     if (debugEnabled && debugTypes.contains(DebugType.CONNECT))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, DebugType.CONNECT);
 
       if (c != null)
       {
-        buffer.append("connectionID=");
-        buffer.append(c.getConnectionID());
+        buffer.appendNumber("connection-id", c.getConnectionID());
 
         final String connectionName = c.getConnectionName();
         if (connectionName != null)
         {
-          buffer.append(" connectionName=\"");
-          buffer.append(connectionName);
-          buffer.append('"');
+          buffer.appendString("connection-name", connectionName);
         }
 
         final String connectionPoolName = c.getConnectionPoolName();
         if (connectionPoolName != null)
         {
-          buffer.append(" connectionPoolName=\"");
-          buffer.append(connectionPoolName);
-          buffer.append('"');
+          buffer.appendString("connection-pool-name", connectionPoolName);
         }
 
-        buffer.append(' ');
-      }
+        buffer.appendString("disconnected-from-address", h);
+        buffer.appendNumber("disconnected-from-port", p);
+        buffer.appendString("disconnect-type", t.name());
 
-      buffer.append("disconnectedFrom=\"");
-      buffer.append(h);
-      buffer.append(':');
-      buffer.append(p);
-      buffer.append("\" disconnectType=\"");
-      buffer.append(t.name());
-      buffer.append('"');
+        if (m != null)
+        {
+          buffer.appendString("disconnect-message", m);
+        }
 
-      if (m != null)
-      {
-        buffer.append("\" disconnectMessage=\"");
-        buffer.append(m);
-        buffer.append('"');
       }
 
       if (e != null)
       {
-        buffer.append("\" disconnectCause=\"");
-        StaticUtils.getStackTrace(e, buffer);
-        buffer.append('"');
+        addCaughtException(buffer, "disconnect-cause", e);
       }
 
-      logger.log(l, buffer.toString(), c);
+      addCommonFooter(buffer);
+      log(l, buffer, e);
     }
   }
 
@@ -749,7 +769,7 @@ public final class Debug
    *
    * @param  r  The LDAP request for which debug information should be written.
    */
-  public static void debugLDAPRequest(final LDAPRequest r)
+  public static void debugLDAPRequest(@NotNull final LDAPRequest r)
   {
     if (debugEnabled && debugTypes.contains(DebugType.LDAP))
     {
@@ -765,7 +785,8 @@ public final class Debug
    * @param  l  The log level that should be used for the debug information.
    * @param  r  The LDAP request for which debug information should be written.
    */
-  public static void debugLDAPRequest(final Level l, final LDAPRequest r)
+  public static void debugLDAPRequest(@NotNull final Level l,
+                                      @NotNull final LDAPRequest r)
   {
     if (debugEnabled && debugTypes.contains(DebugType.LDAP))
     {
@@ -787,8 +808,8 @@ public final class Debug
    *            {@code null} for historic reasons, but should be
    *            non-{@code null} in new uses.
    */
-  public static void debugLDAPRequest(final LDAPRequest r, final int i,
-                                      final LDAPConnection c)
+  public static void debugLDAPRequest(@NotNull final LDAPRequest r, final int i,
+                                      @Nullable final LDAPConnection c)
   {
     if (debugEnabled && debugTypes.contains(DebugType.LDAP))
     {
@@ -809,12 +830,14 @@ public final class Debug
    *            {@code null} for historic reasons, but should be
    *            non-{@code null} in new uses.
    */
-  public static void debugLDAPRequest(final Level l, final LDAPRequest r,
-                                      final int i, final LDAPConnection c)
+  public static void debugLDAPRequest(@NotNull final Level l,
+                                      @NotNull final LDAPRequest r,
+                                      final int i,
+                                      @Nullable final LDAPConnection c)
   {
     if (debugEnabled && debugTypes.contains(DebugType.LDAP))
     {
-      debugLDAPRequest(Level.INFO, String.valueOf(r), i, c);
+      debugLDAPRequest(l, String.valueOf(r), i, c);
     }
   }
 
@@ -832,62 +855,55 @@ public final class Debug
    *            {@code null} for historic reasons, but should be
    *            non-{@code null} in new uses.
    */
-  public static void debugLDAPRequest(final Level l, final String s,
-                                      final int i, final LDAPConnection c)
+  public static void debugLDAPRequest(@NotNull final Level l,
+                                      @NotNull final String s,
+                                      final int i,
+                                      @Nullable final LDAPConnection c)
   {
     if (debugEnabled && debugTypes.contains(DebugType.LDAP))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, DebugType.LDAP);
 
       if (c != null)
       {
-        buffer.append("connectionID=");
-        buffer.append(c.getConnectionID());
+        buffer.appendNumber("connection-id", c.getConnectionID());
 
         final String connectionName = c.getConnectionName();
         if (connectionName != null)
         {
-          buffer.append(" connectionName=\"");
-          buffer.append(connectionName);
-          buffer.append('"');
+          buffer.appendString("connection-name", connectionName);
         }
 
         final String connectionPoolName = c.getConnectionPoolName();
         if (connectionPoolName != null)
         {
-          buffer.append(" connectionPoolName=\"");
-          buffer.append(connectionPoolName);
-          buffer.append('"');
+          buffer.appendString("connection-pool-name", connectionPoolName);
         }
 
-        buffer.append(" connectedTo=\"");
-        buffer.append(c.getConnectedAddress());
-        buffer.append(':');
-        buffer.append(c.getConnectedPort());
-        buffer.append("\" ");
+        final String connectedAddress = c.getConnectedAddress();
+        if (connectedAddress != null)
+        {
+          buffer.appendString("connected-to-address", connectedAddress);
+          buffer.appendNumber("connected-to-port", c.getConnectedPort());
+        }
 
         try
         {
           final int soTimeout = InternalSDKHelper.getSoTimeout(c);
-          buffer.append("socketTimeoutMillis=");
-          buffer.append(soTimeout);
-          buffer.append(' ');
+          buffer.appendNumber("socket-timeout-millis", soTimeout);
         } catch (final Exception e) {}
       }
 
       if (i >= 0)
       {
-        buffer.append("messageID=");
-        buffer.append(i);
-        buffer.append(' ');
+        buffer.appendNumber("message-id", i);
       }
 
-      buffer.append("sendingLDAPRequest=\"");
-      buffer.append(s);
-      buffer.append('"');
+      buffer.appendString("sending-ldap-request", s);
 
-      logger.log(l,  buffer.toString());
+      addCommonFooter(buffer);
+      log(l,  buffer);
     }
   }
 
@@ -900,7 +916,7 @@ public final class Debug
    *
    * @param  r  The result for which debug information should be written.
    */
-  public static void debugLDAPResult(final LDAPResponse r)
+  public static void debugLDAPResult(@NotNull final LDAPResponse r)
   {
     if (debugEnabled && debugTypes.contains(DebugType.LDAP))
     {
@@ -916,7 +932,8 @@ public final class Debug
    * @param  l  The log level that should be used for the debug information.
    * @param  r  The result for which debug information should be written.
    */
-  public static void debugLDAPResult(final Level l, final LDAPResponse r)
+  public static void debugLDAPResult(@NotNull final Level l,
+                                     @NotNull final LDAPResponse r)
   {
     if (debugEnabled && debugTypes.contains(DebugType.LDAP))
     {
@@ -936,8 +953,8 @@ public final class Debug
    *            {@code null} for historic reasons, but should be
    *            non-{@code null} in new uses.
    */
-  public static void debugLDAPResult(final LDAPResponse r,
-                                     final LDAPConnection c)
+  public static void debugLDAPResult(@NotNull final LDAPResponse r,
+                                     @Nullable final LDAPConnection c)
   {
     if (debugEnabled && debugTypes.contains(DebugType.LDAP))
     {
@@ -956,47 +973,43 @@ public final class Debug
    *            {@code null} for historic reasons, but should be
    *            non-{@code null} in new uses.
    */
-  public static void debugLDAPResult(final Level l, final LDAPResponse r,
-                                     final LDAPConnection c)
+  public static void debugLDAPResult(@NotNull final Level l,
+                                     @NotNull final LDAPResponse r,
+                                     @Nullable final LDAPConnection c)
   {
     if (debugEnabled && debugTypes.contains(DebugType.LDAP))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, DebugType.LDAP);
 
       if (c != null)
       {
-        buffer.append("connectionID=");
-        buffer.append(c.getConnectionID());
+        buffer.appendNumber("connection-id", c.getConnectionID());
 
         final String connectionName = c.getConnectionName();
         if (connectionName != null)
         {
-          buffer.append(" connectionName=\"");
-          buffer.append(connectionName);
-          buffer.append('"');
+          buffer.appendString("connection-name", connectionName);
         }
 
         final String connectionPoolName = c.getConnectionPoolName();
         if (connectionPoolName != null)
         {
-          buffer.append(" connectionPoolName=\"");
-          buffer.append(connectionPoolName);
-          buffer.append('"');
+          buffer.appendString("connection-pool-name", connectionPoolName);
         }
 
-        buffer.append(" connectedTo=\"");
-        buffer.append(c.getConnectedAddress());
-        buffer.append(':');
-        buffer.append(c.getConnectedPort());
-        buffer.append("\" ");
+        final String connectedAddress = c.getConnectedAddress();
+        if (connectedAddress != null)
+        {
+          buffer.appendString("connected-to-address", connectedAddress);
+          buffer.appendNumber("connected-to-port", c.getConnectedPort());
+        }
       }
 
-      buffer.append("readLDAPResult=\"");
-      r.toString(buffer);
-      buffer.append('"');
+      buffer.appendString("read-ldap-result", r.toString());
 
-      logger.log(l,  buffer.toString());
+      addCommonFooter(buffer);
+      log(l, buffer);
     }
   }
 
@@ -1009,7 +1022,7 @@ public final class Debug
    *
    * @param  e  The ASN.1 element for which debug information should be written.
    */
-  public static void debugASN1Write(final ASN1Element e)
+  public static void debugASN1Write(@NotNull final ASN1Element e)
   {
     if (debugEnabled && debugTypes.contains(DebugType.ASN1))
     {
@@ -1026,17 +1039,17 @@ public final class Debug
    * @param  l  The log level that should be used for the debug information.
    * @param  e  The ASN.1 element for which debug information should be written.
    */
-  public static void debugASN1Write(final Level l, final ASN1Element e)
+  public static void debugASN1Write(@NotNull final Level l,
+                                    @NotNull final ASN1Element e)
   {
     if (debugEnabled && debugTypes.contains(DebugType.ASN1))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
-      buffer.append("writingASN1Element=\"");
-      e.toString(buffer);
-      buffer.append('"');
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, DebugType.ASN1);
+      buffer.appendString("writing-asn1-element", e.toString());
 
-      logger.log(l, buffer.toString());
+      addCommonFooter(buffer);
+      log(l, buffer);
     }
   }
 
@@ -1049,7 +1062,7 @@ public final class Debug
    *
    * @param  b  The ASN.1 buffer with the information to be written.
    */
-  public static void debugASN1Write(final ASN1Buffer b)
+  public static void debugASN1Write(@NotNull final ASN1Buffer b)
   {
     if (debugEnabled && debugTypes.contains(DebugType.ASN1))
     {
@@ -1066,17 +1079,18 @@ public final class Debug
    * @param  l  The log level that should be used for the debug information.
    * @param  b  The ASN1Buffer with the information to be written.
    */
-  public static void debugASN1Write(final Level l, final ASN1Buffer b)
+  public static void debugASN1Write(@NotNull final Level l,
+                                    @NotNull final ASN1Buffer b)
   {
     if (debugEnabled && debugTypes.contains(DebugType.ASN1))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
-      buffer.append("writingASN1Element=\"");
-      StaticUtils.toHex(b.toByteArray(), buffer);
-      buffer.append('"');
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, DebugType.ASN1);
+      buffer.appendString("writing-asn1-element",
+           StaticUtils.toHex(b.toByteArray()));
 
-      logger.log(l, buffer.toString());
+      addCommonFooter(buffer);
+      log(l, buffer);
     }
   }
 
@@ -1089,7 +1103,7 @@ public final class Debug
    *
    * @param  e  The ASN.1 element for which debug information should be written.
    */
-  public static void debugASN1Read(final ASN1Element e)
+  public static void debugASN1Read(@NotNull final ASN1Element e)
   {
     if (debugEnabled && debugTypes.contains(DebugType.ASN1))
     {
@@ -1106,17 +1120,17 @@ public final class Debug
    * @param  l  The log level that should be used for the debug information.
    * @param  e  The ASN.1 element for which debug information should be written.
    */
-  public static void debugASN1Read(final Level l, final ASN1Element e)
+  public static void debugASN1Read(@NotNull final Level l,
+                                   @NotNull final ASN1Element e)
   {
     if (debugEnabled && debugTypes.contains(DebugType.ASN1))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
-      buffer.append("readASN1Element=\"");
-      e.toString(buffer);
-      buffer.append('"');
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, DebugType.ASN1);
+      buffer.appendString("read-asn1-element", e.toString());
 
-      logger.log(l, buffer.toString());
+      addCommonFooter(buffer);
+      log(l, buffer);
     }
   }
 
@@ -1139,38 +1153,109 @@ public final class Debug
    *                   be a hex representation of the bytes that it contains.
    *                   It may be {@code null} for an ASN.1 null element.
    */
-  public static void debugASN1Read(final Level l, final String dataType,
+  public static void debugASN1Read(@NotNull final Level l,
+                                   @NotNull final String dataType,
                                    final int berType, final int length,
-                                   final Object value)
+                                   @Nullable final Object value)
   {
     if (debugEnabled && debugTypes.contains(DebugType.ASN1))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
-      buffer.append("readASN1Element=\"dataType='");
-      buffer.append(dataType);
-      buffer.append("' berType='");
-      buffer.append(StaticUtils.toHex((byte) (berType & 0xFF)));
-      buffer.append('\'');
-      buffer.append("' valueLength=");
-      buffer.append(length);
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, DebugType.ASN1);
+
+      buffer.beginObject("read-asn1-element");
+      buffer.appendString("data-type", dataType);
+      buffer.appendString("ber-type",
+           StaticUtils.toHex((byte) (berType & 0xFF)));
+      buffer.appendNumber("value-length", length);
 
       if (value != null)
       {
-        buffer.append(" value='");
         if (value instanceof byte[])
         {
-          StaticUtils.toHex((byte[]) value, buffer);
+          buffer.appendString("value-bytes",
+               StaticUtils.toHex((byte[]) value));
         }
         else
         {
-          buffer.append(value);
+          buffer.appendString("value-string", value.toString());
         }
-        buffer.append('\'');
       }
-      buffer.append('"');
 
-      logger.log(l, buffer.toString());
+      buffer.endObject();
+
+      addCommonFooter(buffer);
+      log(l, buffer);
+    }
+  }
+
+
+
+  /**
+   * Writes debug information about interaction with a connection pool.
+   *
+   * @param  l  The log level that should be used for the debug information.
+   * @param  p  The associated connection pool.
+   * @param  c  The associated LDAP connection, if appropriate.
+   * @param  m  A message with information about the pool interaction.
+   * @param  e  An exception to include with the log message, if appropriate.
+   */
+  public static void debugConnectionPool(@NotNull final Level l,
+                          @NotNull final AbstractConnectionPool p,
+                          @Nullable final LDAPConnection c,
+                          @Nullable final String m, @Nullable final Throwable e)
+  {
+    if (debugEnabled && debugTypes.contains(DebugType.CONNECTION_POOL))
+    {
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, DebugType.CONNECTION_POOL);
+
+      final String poolName = p.getConnectionPoolName();
+      if (poolName == null)
+      {
+        buffer.appendNull("connection-pool-name");
+      }
+      else
+      {
+        buffer.appendString("connection-pool-name", poolName);
+      }
+
+      if (c != null)
+      {
+        buffer.appendNumber("connection-id", c.getConnectionID());
+
+        final String connectedAddress = c.getConnectedAddress();
+        if (connectedAddress != null)
+        {
+          buffer.appendString("connected-to-address", connectedAddress);
+          buffer.appendNumber("connected-to-port", c.getConnectedPort());
+        }
+      }
+
+      final long currentAvailable = p.getCurrentAvailableConnections();
+      if (currentAvailable >= 0)
+      {
+        buffer.appendNumber("current-available-connections", currentAvailable);
+      }
+
+      final long maxAvailable = p.getMaximumAvailableConnections();
+      if (maxAvailable >= 0)
+      {
+        buffer.appendNumber("maximum-available-connections", maxAvailable);
+      }
+
+      if (m != null)
+      {
+        buffer.appendString("message", m);
+      }
+
+      if (e != null)
+      {
+        addCaughtException(buffer, "caught-exception", e);
+      }
+
+      addCommonFooter(buffer);
+      log(l, buffer, e);
     }
   }
 
@@ -1183,7 +1268,7 @@ public final class Debug
    *
    * @param  r  The LDIF record for which debug information should be written.
    */
-  public static void debugLDIFWrite(final LDIFRecord r)
+  public static void debugLDIFWrite(@NotNull final LDIFRecord r)
   {
     if (debugEnabled && debugTypes.contains(DebugType.LDIF))
     {
@@ -1200,17 +1285,17 @@ public final class Debug
    * @param  l  The log level that should be used for the debug information.
    * @param  r  The LDIF record for which debug information should be written.
    */
-  public static void debugLDIFWrite(final Level l, final LDIFRecord r)
+  public static void debugLDIFWrite(@NotNull final Level l,
+                                    @NotNull final LDIFRecord r)
   {
     if (debugEnabled && debugTypes.contains(DebugType.LDIF))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
-      buffer.append("writingLDIFRecord=\"");
-      r.toString(buffer);
-      buffer.append('"');
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, DebugType.LDIF);
+      buffer.appendString("writing-ldif-record", r.toString());
 
-      logger.log(l, buffer.toString());
+      addCommonFooter(buffer);
+      log(l, buffer);
     }
   }
 
@@ -1223,7 +1308,7 @@ public final class Debug
    *
    * @param  r  The LDIF record for which debug information should be written.
    */
-  public static void debugLDIFRead(final LDIFRecord r)
+  public static void debugLDIFRead(@NotNull final LDIFRecord r)
   {
     if (debugEnabled && debugTypes.contains(DebugType.LDIF))
     {
@@ -1240,17 +1325,17 @@ public final class Debug
    * @param  l  The log level that should be used for the debug information.
    * @param  r  The LDIF record for which debug information should be written.
    */
-  public static void debugLDIFRead(final Level l, final LDIFRecord r)
+  public static void debugLDIFRead(@NotNull final Level l,
+                                   @NotNull final LDIFRecord r)
   {
     if (debugEnabled && debugTypes.contains(DebugType.LDIF))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
-      buffer.append("readLDIFRecord=\"");
-      r.toString(buffer);
-      buffer.append('"');
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, DebugType.LDIF);
+      buffer.appendString("read-ldif-record", r.toString());
 
-      logger.log(l, buffer.toString());
+      addCommonFooter(buffer);
+      log(l, buffer);
     }
   }
 
@@ -1264,7 +1349,8 @@ public final class Debug
    * @param  e  The entry containing the monitor information being parsed.
    * @param  m  The message to be written to the debug logger.
    */
-  public static void debugMonitor(final Entry e, final String m)
+  public static void debugMonitor(@Nullable final Entry e,
+                                  @Nullable final String m)
   {
     if (debugEnabled && debugTypes.contains(DebugType.MONITOR))
     {
@@ -1281,19 +1367,27 @@ public final class Debug
    * @param  e  The entry containing the monitor information being parsed.
    * @param  m  The message to be written to the debug logger.
    */
-  public static void debugMonitor(final Level l, final Entry e, final String m)
+  public static void debugMonitor(@NotNull final Level l,
+                                  @Nullable final Entry e,
+                                  @Nullable final String m)
   {
     if (debugEnabled && debugTypes.contains(DebugType.MONITOR))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
-      buffer.append("monitorEntryDN=\"");
-      buffer.append(e.getDN());
-      buffer.append("\" message=\"");
-      buffer.append(m);
-      buffer.append('"');
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, DebugType.MONITOR);
 
-      logger.log(l, buffer.toString());
+      if (e != null)
+      {
+        buffer.appendString("monitor-entry-dn", e.getDN());
+      }
+
+      if (m != null)
+      {
+        buffer.appendString("message", m);
+      }
+
+      addCommonFooter(buffer);
+      log(l, buffer);
     }
   }
 
@@ -1307,17 +1401,16 @@ public final class Debug
    * @param  t  The {@code Throwable} object that was created and will be thrown
    *            as a result of the coding error.
    */
-  public static void debugCodingError(final Throwable t)
+  public static void debugCodingError(@NotNull final Throwable t)
   {
     if (debugEnabled && debugTypes.contains(DebugType.CODING_ERROR))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, Level.SEVERE);
-      buffer.append("codingError=\"");
-      StaticUtils.getStackTrace(t, buffer);
-      buffer.append('"');
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, Level.SEVERE, DebugType.CODING_ERROR);
+      addCaughtException(buffer, "coding-error", t);
 
-      logger.log(Level.SEVERE, buffer.toString());
+      addCommonFooter(buffer);
+      log(Level.SEVERE, buffer, t);
     }
   }
 
@@ -1330,17 +1423,21 @@ public final class Debug
    * @param  t  The debug type to use to determine whether to write the message.
    * @param  m  The message to be written.
    */
-  public static void debug(final Level l, final DebugType t, final String m)
+  public static void debug(@NotNull final Level l,
+                           @NotNull final DebugType t, @Nullable final String m)
   {
     if (debugEnabled && debugTypes.contains(t))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
-      buffer.append("message=\"");
-      buffer.append(m);
-      buffer.append('"');
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, t);
 
-      logger.log(l, buffer.toString());
+      if (m != null)
+      {
+        buffer.appendString("message", m);
+      }
+
+      addCommonFooter(buffer);
+      log(l, buffer);
     }
   }
 
@@ -1354,49 +1451,172 @@ public final class Debug
    * @param  m  The message to be written.
    * @param  e  An exception to include with the log message.
    */
-  public static void debug(final Level l, final DebugType t, final String m,
-                           final Throwable e)
+  public static void debug(@NotNull final Level l, @NotNull final DebugType t,
+                           @Nullable final String m,
+                           @Nullable final Throwable e)
   {
     if (debugEnabled && debugTypes.contains(t))
     {
-      final StringBuilder buffer = new StringBuilder();
-      addCommonHeader(buffer, l);
-      buffer.append("message=\"");
-      buffer.append(m);
-      buffer.append('"');
-      buffer.append(" exception=\"");
-      StaticUtils.getStackTrace(e, buffer);
-      buffer.append('"');
+      final JSONBuffer buffer = new JSONBuffer();
+      addCommonHeader(buffer, l, t);
 
-      logger.log(l, buffer.toString(), e);
+      if (m != null)
+      {
+        buffer.appendString("message", m);
+      }
+
+      if (e != null)
+      {
+        addCaughtException(buffer, "caught-exception", e);
+      }
+
+      addCommonFooter(buffer);
+      log(l, buffer, e);
     }
   }
 
 
 
   /**
-   * Writes common header information to the provided buffer.  It will include
-   * the thread ID, name, and caller stack trace (optional), and it will be
-   * followed by a trailing space.
+   * Adds common header information to the provided JSON buffer.  It will begin
+   * a JSON object for the log message, then add a timestamp, debug type, log
+   * level, thread ID, and thread name.
    *
-   * @param  buffer  The buffer to which the information should be appended.
+   * @param  buffer  The JSON buffer to which the content should be added.
    * @param  level   The log level for the message that will be written.
+   * @param  type    The debug type for the message that will be written.
    */
-  private static void addCommonHeader(final StringBuilder buffer,
-                                      final Level level)
+  private static void addCommonHeader(@NotNull final JSONBuffer buffer,
+                                      @NotNull final Level level,
+                                      @NotNull final DebugType type)
   {
-    buffer.append("level=\"");
-    buffer.append(level.getName());
-    buffer.append("\" threadID=");
-    buffer.append(Thread.currentThread().getId());
-    buffer.append(" threadName=\"");
-    buffer.append(Thread.currentThread().getName());
+    buffer.beginObject();
+    buffer.appendString("timestamp", getTimestamp());
+    buffer.appendString("debug-type", type.getName());
+    buffer.appendString("level", level.getName());
 
+    final Thread t = Thread.currentThread();
+    buffer.appendNumber("thread-id", t.getId());
+    buffer.appendString("thread-name", t.getName());
+  }
+
+
+
+  /**
+   * Retrieves a timestamp that represents the current time.
+   *
+   * @return  A timestamp that represents the current time.
+   */
+  @NotNull()
+  private static String getTimestamp()
+  {
+    SimpleDateFormat timestampFormatter = TIMESTAMP_FORMATTERS.get();
+    if (timestampFormatter == null)
+    {
+      timestampFormatter =
+           new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss.SSS'Z'");
+      timestampFormatter.setTimeZone(StaticUtils.getUTCTimeZone());
+      TIMESTAMP_FORMATTERS.set(timestampFormatter);
+    }
+
+    return timestampFormatter.format(new Date());
+  }
+
+
+
+  /**
+   * Creates a formatted string representation of the provided stack trace
+   * frame.
+   *
+   * @param  e  The stack trace element to be formatted.
+   *
+   * @return  The formatted string representation of the provided stack trace
+   *          frame.
+   */
+  @NotNull()
+  private static String formatStackTraceFrame(
+                             @NotNull final StackTraceElement e)
+  {
+    final StringBuilder buffer = new StringBuilder();
+    buffer.append(e.getMethodName());
+    buffer.append('(');
+    buffer.append(e.getFileName());
+
+    final int lineNumber = e.getLineNumber();
+    if (lineNumber > 0)
+    {
+      buffer.append(':');
+      buffer.append(lineNumber);
+    }
+    else if (e.isNativeMethod())
+    {
+      buffer.append(":native");
+    }
+
+    buffer.append(')');
+    return buffer.toString();
+  }
+
+
+
+  /**
+   * Adds information about a caught exception to the provided JSON buffer.
+   *
+   * @param  buffer     The JSON buffer to which the information should be
+   *                    appended.
+   * @param  fieldName  The name to use for the new field to be added with the
+   *                    exception information.
+   * @param  t          The exception to be included.
+   */
+  private static void addCaughtException(@NotNull final JSONBuffer buffer,
+                                         @NotNull final String fieldName,
+                                         @Nullable final Throwable t)
+  {
+    if (t == null)
+    {
+      return;
+    }
+
+    buffer.beginObject(fieldName);
+
+    final String message = t.getMessage();
+    if (message != null)
+    {
+      buffer.appendString("message", message);
+    }
+
+    buffer.beginArray("stack-trace");
+    for (final StackTraceElement e : t.getStackTrace())
+    {
+      buffer.appendString(formatStackTraceFrame(e));
+    }
+    buffer.endArray();
+
+    final Throwable cause = t.getCause();
+    if (cause != null)
+    {
+      addCaughtException(buffer, "cause", cause);
+    }
+
+    buffer.endObject();
+  }
+
+
+
+  /**
+   * Adds common footer information to the provided JSON buffer.  It will
+   * include an optional caller stack trace, along with the LDAP SDK version
+   * and revision.  It will also end the object that encapsulates the log
+   * message.
+   *
+   * @param  buffer  The JSON buffer to which the content should be added.
+   */
+  private static void addCommonFooter(@NotNull final JSONBuffer buffer)
+  {
     if (includeStackTrace)
     {
-      buffer.append("\" calledFrom=\"");
+      buffer.beginArray("caller-stack-trace");
 
-      boolean appended   = false;
       boolean foundDebug = false;
       for (final StackTraceElement e : Thread.currentThread().getStackTrace())
       {
@@ -1407,36 +1627,45 @@ public final class Debug
         }
         else if (foundDebug)
         {
-          if (appended)
-          {
-            buffer.append(" / ");
-          }
-          appended = true;
-
-          buffer.append(e.getMethodName());
-          buffer.append('(');
-          buffer.append(e.getFileName());
-
-          final int lineNumber = e.getLineNumber();
-          if (lineNumber > 0)
-          {
-            buffer.append(':');
-            buffer.append(lineNumber);
-          }
-          else if (e.isNativeMethod())
-          {
-            buffer.append(":native");
-          }
-
-          buffer.append(')');
+          buffer.appendString(formatStackTraceFrame(e));
         }
       }
+
+      buffer.endArray();
     }
 
-    buffer.append("\" ldapSDKVersion=\"");
-    buffer.append(Version.NUMERIC_VERSION_STRING);
-    buffer.append("\" revision=\"");
-    buffer.append(Version.REVISION_ID);
-    buffer.append("\" ");
+    buffer.appendString("ldap-sdk-version", Version.NUMERIC_VERSION_STRING);
+    buffer.appendString("ldap-sdk-revision", Version.REVISION_ID);
+    buffer.endObject();
+  }
+
+
+
+  /**
+   * Logs a JSON-formatted debug message with the given level and fields.
+   *
+   * @param  level   The log level to use for the message.
+   * @param  buffer  The JSON buffer containing the message to be written.
+   */
+  private static void log(@NotNull final Level level,
+                          @NotNull final JSONBuffer buffer)
+  {
+    logger.log(level, buffer.toString());
+  }
+
+
+
+  /**
+   * Logs a JSON-formatted debug message with the given level and fields.
+   *
+   * @param  level   The log level to use for the message.
+   * @param  buffer  The JSON buffer containing the message to be written.
+   * @param  thrown  An exception to be included with the debug message.
+   */
+  private static void log(@NotNull final Level level,
+                          @NotNull final JSONBuffer buffer,
+                          @Nullable final Throwable thrown)
+  {
+    logger.log(level, buffer.toString(), thrown);
   }
 }

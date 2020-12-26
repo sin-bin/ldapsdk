@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -30,6 +45,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.util.Mutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -59,7 +76,7 @@ public final class ScopeArgument
   /**
    * A map of value strings to the corresponding search scopes.
    */
-  private static final Map<String,SearchScope> SCOPE_STRINGS;
+  @NotNull private static final Map<String,SearchScope> SCOPE_STRINGS;
 
   static
   {
@@ -104,10 +121,10 @@ public final class ScopeArgument
 
 
   // The value assigned to this argument.
-  private final AtomicReference<SearchScope> value;
+  @NotNull private final AtomicReference<SearchScope> value;
 
   // The default value for this argument.
-  private final SearchScope defaultValue;
+  @Nullable private final SearchScope defaultValue;
 
 
 
@@ -128,8 +145,9 @@ public final class ScopeArgument
    * @throws  ArgumentException  If there is a problem with the definition of
    *                             this argument.
    */
-  public ScopeArgument(final Character shortIdentifier,
-                       final String longIdentifier, final String description)
+  public ScopeArgument(@Nullable final Character shortIdentifier,
+                       @Nullable final String longIdentifier,
+                       @NotNull final String description)
          throws ArgumentException
   {
     this(shortIdentifier, longIdentifier, false, null, description);
@@ -159,9 +177,11 @@ public final class ScopeArgument
    * @throws  ArgumentException  If there is a problem with the definition of
    *                             this argument.
    */
-  public ScopeArgument(final Character shortIdentifier,
-                       final String longIdentifier, final boolean isRequired,
-                       final String valuePlaceholder, final String description)
+  public ScopeArgument(@Nullable final Character shortIdentifier,
+                       @Nullable final String longIdentifier,
+                       final boolean isRequired,
+                       @Nullable final String valuePlaceholder,
+                       @NotNull final String description)
          throws ArgumentException
   {
     this(shortIdentifier, longIdentifier, isRequired,  valuePlaceholder,
@@ -194,10 +214,12 @@ public final class ScopeArgument
    * @throws  ArgumentException  If there is a problem with the definition of
    *                             this argument.
    */
-  public ScopeArgument(final Character shortIdentifier,
-                       final String longIdentifier, final boolean isRequired,
-                       final String valuePlaceholder, final String description,
-                       final SearchScope defaultValue)
+  public ScopeArgument(@Nullable final Character shortIdentifier,
+                       @Nullable final String longIdentifier,
+                       final boolean isRequired,
+                       @Nullable final String valuePlaceholder,
+                       @NotNull final String description,
+                       @Nullable final SearchScope defaultValue)
          throws ArgumentException
   {
     super(shortIdentifier, longIdentifier, isRequired,  1,
@@ -219,7 +241,7 @@ public final class ScopeArgument
    *
    * @param  source  The source argument to use for this argument.
    */
-  private ScopeArgument(final ScopeArgument source)
+  private ScopeArgument(@NotNull final ScopeArgument source)
   {
     super(source);
 
@@ -236,6 +258,7 @@ public final class ScopeArgument
    * @return  The default value for this argument, or {@code null} if there is
    *          no default value.
    */
+  @Nullable()
   public SearchScope getDefaultValue()
   {
     return defaultValue;
@@ -247,7 +270,7 @@ public final class ScopeArgument
    * {@inheritDoc}
    */
   @Override()
-  protected void addValue(final String valueString)
+  protected void addValue(@NotNull final String valueString)
             throws ArgumentException
   {
     final SearchScope scope =
@@ -275,6 +298,7 @@ public final class ScopeArgument
    *          provided, or {@code null} if there is no value and no default
    *          value.
    */
+  @Nullable()
   public SearchScope getValue()
   {
     final SearchScope s = value.get();
@@ -294,6 +318,7 @@ public final class ScopeArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<String> getValueStringRepresentations(final boolean useDefault)
   {
     SearchScope s = value.get();
@@ -347,6 +372,7 @@ public final class ScopeArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getDataTypeName()
   {
     return INFO_SCOPE_TYPE_NAME.get();
@@ -358,6 +384,7 @@ public final class ScopeArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getValueConstraints()
   {
     return INFO_SCOPE_CONSTRAINTS.get();
@@ -381,6 +408,7 @@ public final class ScopeArgument
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public ScopeArgument getCleanCopy()
   {
     return new ScopeArgument(this);
@@ -392,7 +420,7 @@ public final class ScopeArgument
    * {@inheritDoc}
    */
   @Override()
-  protected void addToCommandLine(final List<String> argStrings)
+  protected void addToCommandLine(@NotNull final List<String> argStrings)
   {
     final SearchScope s = value.get();
     if (s != null)
@@ -432,7 +460,7 @@ public final class ScopeArgument
    * {@inheritDoc}
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("ScopeArgument(");
     appendBasicToStringInfo(buffer);

@@ -1,9 +1,24 @@
 /*
- * Copyright 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2010-2019 Ping Identity Corporation
+ * Copyright 2010-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2010-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -28,6 +43,8 @@ import com.unboundid.ldap.sdk.ExtendedResult;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
 import com.unboundid.util.Validator;
@@ -51,7 +68,8 @@ public final class AbortedTransactionExtendedResult
   /**
    * The OID (1.3.6.1.1.21.4) for the aborted transaction extended result.
    */
-  public static final String ABORTED_TRANSACTION_RESULT_OID = "1.3.6.1.1.21.4";
+  @NotNull public static final String ABORTED_TRANSACTION_RESULT_OID =
+       "1.3.6.1.1.21.4";
 
 
 
@@ -63,7 +81,7 @@ public final class AbortedTransactionExtendedResult
 
 
   // The transaction ID for the transaction that has been aborted.
-  private final ASN1OctetString transactionID;
+  @NotNull private final ASN1OctetString transactionID;
 
 
 
@@ -88,12 +106,13 @@ public final class AbortedTransactionExtendedResult
    *                            result.  It may be {@code null} or empty if
    *                            there are no controls.
    */
-  public AbortedTransactionExtendedResult(final ASN1OctetString transactionID,
-                                          final ResultCode resultCode,
-                                          final String diagnosticMessage,
-                                          final String matchedDN,
-                                          final String[] referralURLs,
-                                          final Control[] controls)
+  public AbortedTransactionExtendedResult(
+              @NotNull final ASN1OctetString transactionID,
+              @NotNull final ResultCode resultCode,
+              @Nullable final String diagnosticMessage,
+              @Nullable final String matchedDN,
+              @Nullable final String[] referralURLs,
+              @Nullable final Control[] controls)
   {
     super(0, resultCode, diagnosticMessage, matchedDN, referralURLs,
          ABORTED_TRANSACTION_RESULT_OID, transactionID, controls);
@@ -115,7 +134,8 @@ public final class AbortedTransactionExtendedResult
    * @throws  LDAPException  If the provided extended result cannot be decoded
    *                         as an aborted transaction extended result.
    */
-  public AbortedTransactionExtendedResult(final ExtendedResult extendedResult)
+  public AbortedTransactionExtendedResult(
+              @NotNull final ExtendedResult extendedResult)
          throws LDAPException
   {
     super(extendedResult);
@@ -135,6 +155,7 @@ public final class AbortedTransactionExtendedResult
    *
    * @return  The transaction ID of the transaction that has been aborted.
    */
+  @NotNull()
   public ASN1OctetString getTransactionID()
   {
     return transactionID;
@@ -146,6 +167,7 @@ public final class AbortedTransactionExtendedResult
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getExtendedResultName()
   {
     return INFO_EXTENDED_RESULT_NAME_ABORTED_TXN.get();
@@ -161,7 +183,7 @@ public final class AbortedTransactionExtendedResult
    *                 extended result will be appended.
    */
   @Override()
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("AbortedTransactionExtendedResult(transactionID='");
     buffer.append(transactionID.stringValue());

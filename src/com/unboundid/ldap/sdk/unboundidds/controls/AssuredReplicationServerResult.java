@@ -1,9 +1,24 @@
 /*
- * Copyright 2013-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2013-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2013-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -33,6 +48,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -89,13 +106,13 @@ public final class AssuredReplicationServerResult
 
 
   // The result code for this server result.
-  private final AssuredReplicationServerResultCode resultCode;
+  @NotNull private final AssuredReplicationServerResultCode resultCode;
 
   // The replica ID of the associated directory server.
-  private final Short replicaID;
+  @Nullable private final Short replicaID;
 
   // The server ID of the associated replication server.
-  private final Short replicationServerID;
+  @Nullable private final Short replicationServerID;
 
 
 
@@ -117,9 +134,9 @@ public final class AssuredReplicationServerResult
    *                              for this result.
    */
   public AssuredReplicationServerResult(
-       final AssuredReplicationServerResultCode resultCode,
-       final Short replicationServerID,
-       final Short replicaID)
+       @NotNull final AssuredReplicationServerResultCode resultCode,
+       @Nullable final Short replicationServerID,
+       @Nullable final Short replicaID)
   {
     this.resultCode = resultCode;
     this.replicationServerID = replicationServerID;
@@ -134,6 +151,7 @@ public final class AssuredReplicationServerResult
    *
    * @return  The result code for this server result.
    */
+  @NotNull()
   public AssuredReplicationServerResultCode getResultCode()
   {
     return resultCode;
@@ -149,6 +167,7 @@ public final class AssuredReplicationServerResult
    *          result was obtained, or {@code null} if no replication server ID
    *          is available.
    */
+  @Nullable()
   public Short getReplicationServerID()
   {
     return replicationServerID;
@@ -164,6 +183,7 @@ public final class AssuredReplicationServerResult
    *          result is associated, or {@code null} if there is no associated
    *          directory server.
    */
+  @Nullable()
   public Short getReplicaID()
   {
     return replicaID;
@@ -178,6 +198,7 @@ public final class AssuredReplicationServerResult
    * @return  The encoded representation of this assured replication server
    *          result.
    */
+  @NotNull()
   ASN1Element encode()
   {
     final ArrayList<ASN1Element> elements = new ArrayList<>(3);
@@ -212,7 +233,9 @@ public final class AssuredReplicationServerResult
    *                         decode the provided ASN.1 element as an assured
    *                         replication server result.
    */
-  static AssuredReplicationServerResult decode(final ASN1Element element)
+  @NotNull()
+  static AssuredReplicationServerResult decode(
+              @NotNull final ASN1Element element)
          throws LDAPException
   {
     AssuredReplicationServerResultCode resultCode = null;
@@ -285,6 +308,7 @@ public final class AssuredReplicationServerResult
    *          result.
    */
   @Override()
+  @NotNull()
   public String toString()
   {
     final StringBuilder buffer = new StringBuilder();
@@ -300,7 +324,7 @@ public final class AssuredReplicationServerResult
    *
    * @param  buffer  The buffer to which the information should be appended.
    */
-  public void toString(final StringBuilder buffer)
+  public void toString(@NotNull final StringBuilder buffer)
   {
     buffer.append("AssuredReplicationServerResult(resultCode=");
     buffer.append(resultCode.name());

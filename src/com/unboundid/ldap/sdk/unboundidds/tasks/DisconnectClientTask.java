@@ -1,9 +1,24 @@
 /*
- * Copyright 2008-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2015-2019 Ping Identity Corporation
+ * Copyright 2008-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2008-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -34,6 +49,8 @@ import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.util.Debug;
 import com.unboundid.util.NotMutable;
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 import com.unboundid.util.StaticUtils;
 import com.unboundid.util.ThreadSafety;
 import com.unboundid.util.ThreadSafetyLevel;
@@ -79,7 +96,7 @@ public final class DisconnectClientTask
    * The fully-qualified name of the Java class that is used for the disconnect
    * client task.
    */
-  static final String DISCONNECT_CLIENT_TASK_CLASS =
+  @NotNull static final String DISCONNECT_CLIENT_TASK_CLASS =
        "com.unboundid.directory.server.tasks.DisconnectClientTask";
 
 
@@ -88,7 +105,7 @@ public final class DisconnectClientTask
    * The name of the attribute used to specify the connection ID of the client
    * connection to terminate.
    */
-  private static final String ATTR_CONNECTION_ID =
+  @NotNull private static final String ATTR_CONNECTION_ID =
        "ds-task-disconnect-connection-id";
 
 
@@ -97,7 +114,7 @@ public final class DisconnectClientTask
    * The name of the attribute used to specify the disconnect message to provide
    * to the server.
    */
-  private static final String ATTR_DISCONNECT_MESSAGE =
+  @NotNull private static final String ATTR_DISCONNECT_MESSAGE =
        "ds-task-disconnect-message";
 
 
@@ -106,7 +123,7 @@ public final class DisconnectClientTask
    * The name of the attribute used to indicate whether to send a notice of
    * disconnection message to the client before closing the connection.
    */
-  private static final String ATTR_NOTIFY_CLIENT =
+  @NotNull private static final String ATTR_NOTIFY_CLIENT =
        "ds-task-disconnect-notify-client";
 
 
@@ -114,14 +131,15 @@ public final class DisconnectClientTask
   /**
    * The name of the object class used in disconnect client task entries.
    */
-  private static final String OC_DISCONNECT_CLIENT_TASK = "ds-task-disconnect";
+  @NotNull private static final String OC_DISCONNECT_CLIENT_TASK =
+       "ds-task-disconnect";
 
 
 
   /**
    * The task property for the connection ID.
    */
-  private static final TaskProperty PROPERTY_CONNECTION_ID =
+  @NotNull private static final TaskProperty PROPERTY_CONNECTION_ID =
        new TaskProperty(ATTR_CONNECTION_ID,
                         INFO_DISPLAY_NAME_DISCONNECT_CONN_ID.get(),
                         INFO_DESCRIPTION_DISCONNECT_CONN_ID.get(), Long.class,
@@ -132,7 +150,7 @@ public final class DisconnectClientTask
   /**
    * The task property for the disconnect message.
    */
-  private static final TaskProperty PROPERTY_DISCONNECT_MESSAGE =
+  @NotNull private static final TaskProperty PROPERTY_DISCONNECT_MESSAGE =
        new TaskProperty(ATTR_DISCONNECT_MESSAGE,
                         INFO_DISPLAY_NAME_DISCONNECT_MESSAGE.get(),
                         INFO_DESCRIPTION_DISCONNECT_MESSAGE.get(), String.class,
@@ -143,7 +161,7 @@ public final class DisconnectClientTask
   /**
    * The task property for the notify client flag.
    */
-  private static final TaskProperty PROPERTY_NOTIFY_CLIENT =
+  @NotNull private static final TaskProperty PROPERTY_NOTIFY_CLIENT =
        new TaskProperty(ATTR_NOTIFY_CLIENT,
                         INFO_DISPLAY_NAME_DISCONNECT_NOTIFY.get(),
                         INFO_DESCRIPTION_DISCONNECT_NOTIFY.get(), Boolean.class,
@@ -165,7 +183,7 @@ public final class DisconnectClientTask
   private final long connectionID;
 
   // A disconnect message to provide to the server.
-  private final String disconnectMessage;
+  @Nullable private final String disconnectMessage;
 
 
 
@@ -202,8 +220,9 @@ public final class DisconnectClientTask
    *                            disconnection message to the client before
    *                            terminating the connection.
    */
-  public DisconnectClientTask(final String taskID, final long connectionID,
-                              final String disconnectMessage,
+  public DisconnectClientTask(@Nullable final String taskID,
+                              final long connectionID,
+                              @Nullable final String disconnectMessage,
                               final boolean notifyClient)
   {
     this(taskID, connectionID, disconnectMessage, notifyClient, null, null,
@@ -245,12 +264,15 @@ public final class DisconnectClientTask
    *                                 that should be notified if this task does
    *                                 not complete successfully.
    */
-  public DisconnectClientTask(final String taskID, final long connectionID,
-              final String disconnectMessage, final boolean notifyClient,
-              final Date scheduledStartTime, final List<String> dependencyIDs,
-              final FailedDependencyAction failedDependencyAction,
-              final List<String> notifyOnCompletion,
-              final List<String> notifyOnError)
+  public DisconnectClientTask(@Nullable final String taskID,
+              final long connectionID,
+              @Nullable final String disconnectMessage,
+              final boolean notifyClient,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnError)
   {
     this(taskID, connectionID, disconnectMessage, notifyClient,
          scheduledStartTime, dependencyIDs, failedDependencyAction, null,
@@ -306,15 +328,20 @@ public final class DisconnectClientTask
    *                                 alert notification if this task fails to
    *                                 complete successfully.
    */
-  public DisconnectClientTask(final String taskID, final long connectionID,
-              final String disconnectMessage, final boolean notifyClient,
-              final Date scheduledStartTime, final List<String> dependencyIDs,
-              final FailedDependencyAction failedDependencyAction,
-              final List<String> notifyOnStart,
-              final List<String> notifyOnCompletion,
-              final List<String> notifyOnSuccess,
-              final List<String> notifyOnError, final Boolean alertOnStart,
-              final Boolean alertOnSuccess, final Boolean alertOnError)
+  public DisconnectClientTask(@Nullable final String taskID,
+              final long connectionID,
+              @Nullable final String disconnectMessage,
+              final boolean notifyClient,
+              @Nullable final Date scheduledStartTime,
+              @Nullable final List<String> dependencyIDs,
+              @Nullable final FailedDependencyAction failedDependencyAction,
+              @Nullable final List<String> notifyOnStart,
+              @Nullable final List<String> notifyOnCompletion,
+              @Nullable final List<String> notifyOnSuccess,
+              @Nullable final List<String> notifyOnError,
+              @Nullable final Boolean alertOnStart,
+              @Nullable final Boolean alertOnSuccess,
+              @Nullable final Boolean alertOnError)
   {
     super(taskID, DISCONNECT_CLIENT_TASK_CLASS, scheduledStartTime,
           dependencyIDs, failedDependencyAction, notifyOnStart,
@@ -336,7 +363,7 @@ public final class DisconnectClientTask
    * @throws  TaskException  If the provided entry cannot be parsed as a
    *                         disconnect client task entry.
    */
-  public DisconnectClientTask(final Entry entry)
+  public DisconnectClientTask(@NotNull final Entry entry)
          throws TaskException
   {
     super(entry);
@@ -386,7 +413,8 @@ public final class DisconnectClientTask
    * @throws  TaskException  If the provided set of properties cannot be used to
    *                         create a valid disconnect client task.
    */
-  public DisconnectClientTask(final Map<TaskProperty,List<Object>> properties)
+  public DisconnectClientTask(
+              @NotNull final Map<TaskProperty,List<Object>> properties)
          throws TaskException
   {
     super(DISCONNECT_CLIENT_TASK_CLASS, properties);
@@ -434,6 +462,7 @@ public final class DisconnectClientTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskName()
   {
     return INFO_TASK_NAME_DISCONNECT_CLIENT.get();
@@ -445,6 +474,7 @@ public final class DisconnectClientTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public String getTaskDescription()
   {
     return INFO_TASK_DESCRIPTION_DISCONNECT_CLIENT.get();
@@ -471,6 +501,7 @@ public final class DisconnectClientTask
    * @return  The disconnect message, or {@code null} if no message is to be
    *          provided.
    */
+  @Nullable()
   public String getDisconnectMessage()
   {
     return disconnectMessage;
@@ -497,6 +528,7 @@ public final class DisconnectClientTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<String> getAdditionalObjectClasses()
   {
     return Collections.singletonList(OC_DISCONNECT_CLIENT_TASK);
@@ -508,6 +540,7 @@ public final class DisconnectClientTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   protected List<Attribute> getAdditionalAttributes()
   {
     final ArrayList<Attribute> attrs = new ArrayList<>(3);
@@ -529,6 +562,7 @@ public final class DisconnectClientTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public List<TaskProperty> getTaskSpecificProperties()
   {
     final List<TaskProperty> propList = Arrays.asList(
@@ -545,6 +579,7 @@ public final class DisconnectClientTask
    * {@inheritDoc}
    */
   @Override()
+  @NotNull()
   public Map<TaskProperty,List<Object>> getTaskPropertyValues()
   {
     final LinkedHashMap<TaskProperty,List<Object>> props =

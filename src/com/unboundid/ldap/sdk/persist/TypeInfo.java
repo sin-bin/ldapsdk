@@ -1,9 +1,24 @@
 /*
- * Copyright 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
  * All Rights Reserved.
  */
 /*
- * Copyright (C) 2009-2019 Ping Identity Corporation
+ * Copyright 2009-2020 Ping Identity Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/*
+ * Copyright (C) 2009-2020 Ping Identity Corporation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License (GPLv2 only)
@@ -26,6 +41,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
+
+import com.unboundid.util.NotNull;
+import com.unboundid.util.Nullable;
 
 
 
@@ -58,15 +76,15 @@ final class TypeInfo
   // The base class for the associated type.  For a Class object, it will simply
   // be the associated class.  For a parameterized type object, it will be the
   // raw type class.
-  private final Class<?> baseClass;
+  @Nullable private final Class<?> baseClass;
 
   // The component type for the associated type.  This will only be set for
   // array, list, and set objects, and it will specify the type of object that
   // can be held in that array, list, or set.
-  private final Class<?> componentType;
+  @Nullable private final Class<?> componentType;
 
   // The type used to create this object.
-  private final Type type;
+  @NotNull private final Type type;
 
 
 
@@ -76,7 +94,7 @@ final class TypeInfo
    * @param  type  The type to use to create this object.  It must not be
    *               {@code null}.
    */
-  TypeInfo(final Type type)
+  TypeInfo(@NotNull final Type type)
   {
     this.type = type;
 
@@ -178,6 +196,7 @@ final class TypeInfo
    *
    * @return  The type used to create this object.
    */
+  @NotNull()
   public Type getType()
   {
     return type;
@@ -201,8 +220,10 @@ final class TypeInfo
   /**
    * Retrieves the base class for the associated type.
    *
-   * @return  The base class for the associated type.
+   * @return  The base class for the associated type, or {@code null} if the
+   *          type is not supported.
    */
+  @Nullable()
   public Class<?> getBaseClass()
   {
     return baseClass;
@@ -216,6 +237,7 @@ final class TypeInfo
    * @return  The component type for the associated type, or {@code null} if
    *          there is none.
    */
+  @Nullable()
   public Class<?> getComponentType()
   {
     return componentType;
