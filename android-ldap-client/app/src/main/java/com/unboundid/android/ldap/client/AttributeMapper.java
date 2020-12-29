@@ -69,6 +69,13 @@ final class AttributeMapper
 
 
   /**
+   * The name of the attribute that holds the user's fax number.
+   */
+  public static final String ATTR_FACSIMILE = "facsimileTelephoneNumber";
+
+
+
+  /**
    * The name of the attribute that holds the user's first name.
    */
   public static final String ATTR_FIRST_NAME = "givenName";
@@ -85,7 +92,7 @@ final class AttributeMapper
   /**
    * The name of the attribute that holds the user's home postal address.
    */
-  public static final String ATTR_HOME_ADDRESS= "homeAddress";
+  public static final String ATTR_HOME_ADDRESS = "homeAddress";
 
 
 
@@ -118,37 +125,86 @@ final class AttributeMapper
 
 
   /**
+   * The name of the attribute that holds the user's organizational unit.
+   */
+  public static final String ATTR_ORGANIZATIONAL_UNIT = "ou";
+
+
+
+  /**
    * The name of the attribute that holds the user's pager number.
    */
-  public static final String ATTR_PAGER= "pager";
+  public static final String ATTR_PAGER = "pager";
+
+
+
+  /**
+   * The name of the attribute that holds the user's street address.
+   */
+  public static final String ATTR_STREET_ADDRESS = "street";
 
 
 
   /**
    * The name of the attribute that holds the user's primary postal address.
    */
-  public static final String ATTR_PRIMARY_ADDRESS= "postalAddress";
+  public static final String ATTR_PRIMARY_ADDRESS = "postalAddress";
+
+
+
+  /**
+   * The name of the attribute that holds the user's city.
+   */
+  public static final String ATTR_CITY = "l";
+
+
+
+  /**
+   * The name of the attribute that holds the user's state.
+   */
+  public static final String ATTR_STATE = "st";
+
+
+
+  /**
+   * The name of the attribute that holds the user's postal code.
+   */
+  public static final String ATTR_POSTAL_CODE = "postalCode";
 
 
 
   /**
    * The name of the attribute that holds the user's primary e-mail address.
    */
-  public static final String ATTR_PRIMARY_MAIL= "mail";
+  public static final String ATTR_PRIMARY_MAIL = "mail";
 
 
 
   /**
    * The name of the attribute that holds the user's primary phone number.
    */
-  public static final String ATTR_PRIMARY_PHONE= "telephoneNumber";
+  public static final String ATTR_PRIMARY_PHONE = "telephoneNumber";
 
 
 
   /**
    * The name of the attribute that holds the user's title.
    */
-  public static final String ATTR_TITLE= "title";
+  public static final String ATTR_TITLE = "title";
+
+
+
+  /**
+   * The name of the attribute that holds the user's website URI.
+   */
+  public static final String ATTR_URI = "labeledURI";
+
+
+
+  /**
+   * The name of the attribute that holds the user's note.
+   */
+  public static final String ATTR_NOTE = "description";
 
 
 
@@ -285,8 +341,11 @@ final class AttributeMapper
     tSet.add(toLowerCase("homePhone"));
     tSet.add(toLowerCase("facsimileTelephoneNumber"));
 
+    aSet.add(toLowerCase("street"));
     aSet.add(toLowerCase("postalAddress"));
     aSet.add(toLowerCase("homePostalAddress"));
+    aSet.add(toLowerCase("l"));
+    aSet.add(toLowerCase("st"));
     aSet.add(toLowerCase("postalCode"));
 
     hSet.add(toLowerCase("jpegPhoto"));
