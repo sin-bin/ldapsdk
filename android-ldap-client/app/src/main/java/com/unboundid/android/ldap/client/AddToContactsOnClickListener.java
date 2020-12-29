@@ -139,31 +139,29 @@ final class AddToContactsOnClickListener
   {
     logEnter(LOG_TAG, "onClick", view);
 
-    Intent insertIntent = new Intent(ContactsContract.Intents.Insert.ACTION);
-    insertIntent.setType(ContactsContract.RawContacts.CONTENT_TYPE);
+    Intent insertEditIntent = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+    insertEditIntent.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
 
-    insertIntent.putExtra("finishActivityOnSaveCompleted", true);
+    insertEditIntent.putExtra("finishActivityOnSaveCompleted", true);
 
-    addName(insertIntent, fullName, firstName, lastName);
-    addAddress(insertIntent, address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK);
+    addName(insertEditIntent, fullName, firstName, lastName);
+    addAddress(insertEditIntent, address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK);
 
     if (isNotEmpty(title)) {
-      insertIntent.putExtra(ContactsContract.Intents.Insert.JOB_TITLE, title);
+      insertEditIntent.putExtra(ContactsContract.Intents.Insert.JOB_TITLE, title);
     }
     if (isNotEmpty(organization)) {
-      insertIntent.putExtra(ContactsContract.Intents.Insert.COMPANY, organization);
+      insertEditIntent.putExtra(ContactsContract.Intents.Insert.COMPANY, organization);
     }
     if (isNotEmpty(note)) {
-      insertIntent.putExtra(ContactsContract.Intents.Insert.NOTES, note);
+      insertEditIntent.putExtra(ContactsContract.Intents.Insert.NOTES, note);
     }
 
     if (isNotEmpty(email)) {
-      addEmail(insertIntent, email, ContactsContract.CommonDataKinds.Email.TYPE_WORK);
+      addEmail(insertEditIntent, email, ContactsContract.CommonDataKinds.Email.TYPE_WORK);
     }
 
     ArrayList<ContentValues> contactData = new ArrayList<>();
-
-//    contactData.add(addAddress(address, city, state, postalCode, ContactsContract.CommonDataKinds.StructuredPostal.TYPE_WORK));
 
     if (isNotEmpty(workNumber)) {
       contactData.add(addPhoneNumber(workNumber, ContactsContract.CommonDataKinds.Phone.TYPE_WORK));
@@ -193,10 +191,10 @@ final class AddToContactsOnClickListener
     }
 
     if (!contactData.isEmpty()) {
-      insertIntent.putParcelableArrayListExtra(ContactsContract.Intents.Insert.DATA, contactData);
+      insertEditIntent.putParcelableArrayListExtra(ContactsContract.Intents.Insert.DATA, contactData);
     }
 
-    activity.startActivity(insertIntent);
+    activity.startActivity(insertEditIntent);
   }
 
   @org.jetbrains.annotations.Contract(value = "null -> false", pure = true)
